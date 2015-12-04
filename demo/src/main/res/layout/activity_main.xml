@@ -19,7 +19,7 @@ limitations under the License.
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.google.googlemediaframeworkdemo.demo.MainActivity">
+    tools:context="com.sambatech.player.MainActivity">
 
     <FrameLayout
         android:id="@+id/video_frame"

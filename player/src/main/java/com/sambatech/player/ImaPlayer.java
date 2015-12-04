@@ -14,7 +14,7 @@
  limitations under the License.
  */
 
-package com.google.googlemediaframeworkdemo.demo.adplayer;
+package com.sambatech.player;
 
 import android.app.Activity;
 import android.graphics.Color;
