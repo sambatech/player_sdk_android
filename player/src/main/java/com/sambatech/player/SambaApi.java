@@ -24,9 +24,11 @@ import java.util.Scanner;
 public class SambaApi {
 
 	private boolean inited = false;
+	private String accessToken;
 
 	public SambaApi(String accessToken) {
 		// TODO: validar "accessToken"
+		this.accessToken = accessToken;
 	}
 
 	/**

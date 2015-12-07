@@ -9,9 +9,9 @@ import com.sambatech.player.model.internal.PlayerConfig;
 public class SambaMedia {
 
     public String id;
-    public String title;
+    public String title = "";
     public String url;
-    public String type;
+    public String type = "";
     public Integer clientId;
     public Integer categoryId;
     public Project project;

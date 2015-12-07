@@ -211,7 +211,11 @@ public class ImaPlayer {
       }
     };
 
-  /**
+    public SimpleVideoPlayer getPlayer() {
+        return contentPlayer;
+    }
+
+    /**
    * Sets up ads manager, responds to ad errors, and handles ad state changes.
    */
   private class AdListener implements AdErrorEvent.AdErrorListener,
