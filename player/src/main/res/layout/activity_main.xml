@@ -13,8 +13,8 @@
 
     <com.sambatech.player.SambaPlayer
         android:id="@+id/samba_player"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:title="Afdfsijdo sdfji!"/>
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:title="Afdfsijdo sdfji!" />
 
 </RelativeLayout>

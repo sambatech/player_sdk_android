@@ -3,11 +3,7 @@ package com.sambatech.player;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.widget.FrameLayout;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
@@ -17,7 +13,7 @@ import com.sambatech.player.model.SambaMedia;
 /**
  * Controller for SambaPlayer view.
  *
- * @author Leandro Zanol
+ * @author Leandro Zanol - 07/12/15
  */
 public class SambaPlayer extends FrameLayout {
 
@@ -33,25 +29,27 @@ public class SambaPlayer extends FrameLayout {
 	/**
 	 * Defines/overwrites current media.
 	 *
-	 * @param media
+	 * @param media The media to be played.
 	 */
 	public void setMedia(SambaMedia media) {
 		this.media = media;
 	}
 
 	public void play() {
-		Log.i("asdf", media.url);
-		if (media.url == null)
+		if (media.url == null || media.url.isEmpty())
 			return;
 
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
 		switch (media.type.toLowerCase()) {
-			case "progressive":
-				videoType = Video.VideoType.OTHER;
-				break;
+			/*case "progressive":
+				videoType = Video.VideoType.MP4;
+				break;*/
 			case "hls":
 				videoType = Video.VideoType.HLS;
+				break;
+			case "dash":
+				videoType = Video.VideoType.DASH;
 				break;
 		}
 

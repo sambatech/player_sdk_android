@@ -2,15 +2,9 @@ package com.sambatech.player;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.FrameLayout;
-import android.widget.Toast;
 
-import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.sambatech.player.event.SambaApiListener;
 import com.sambatech.player.model.SambaMedia;
-
-import java.util.List;
 
 public class MainActivity extends Activity {
 
