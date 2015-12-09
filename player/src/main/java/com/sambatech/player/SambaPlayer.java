@@ -11,6 +11,7 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Exoplayer
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
+import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 
@@ -29,6 +30,9 @@ public class SambaPlayer extends FrameLayout {
 	public SambaPlayer(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayer, 0, 0));
+
+        if (media.url != null)
+            createPlayer();
 	}
 
 	/**
@@ -37,7 +41,13 @@ public class SambaPlayer extends FrameLayout {
 	 * @param media The media to be played.
 	 */
 	public void setMedia(SambaMedia media) {
+        if (this.media.title != null && media.title == null)
+            media.title = this.media.title;
+
 		this.media = media;
+
+        //Creating player
+        createPlayer();
 	}
 
 	public void setListener(SambaPlayerListener listener) {
@@ -45,8 +55,43 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	public void play() {
-		if (media.url == null || media.url.isEmpty())
-			return;
+
+		playerIma = new ImaPlayer((Activity)getContext(), this, this);
+	}
+
+	/**	Player API **/
+
+	public void pause() {
+		player.pause();
+	}
+
+	public void setFullscreen(boolean flag) {
+		player.setFullscreen(flag);
+	}
+
+	public boolean isFullscreen() {
+		return player.isFullscreen();
+	}
+
+	public void show() {
+		player.show();
+	}
+
+	public void hide() {
+		player.hide();
+	}
+
+	public float getCurrentTime() {
+		return player.getCurrentPosition()/1000f;
+	}
+
+	public float getDuration() {
+		return player.getDuration() / 1000f;
+	}
+
+	private void createPlayer() {
+        if (media.url == null || media.url.isEmpty())
+            return;
 
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
@@ -62,35 +107,42 @@ public class SambaPlayer extends FrameLayout {
 				break;
 		}
 
-		playerIma = new ImaPlayer((Activity)getContext(), this,
-				new Video(media.url, videoType),
-				media.title);
+        if(player != null)
+            player.release();
 
-		player = playerIma.getPlayer();
-
-		player.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
-			@Override
-			public void onPlay() {
-				Log.i("evt", "play");
-			}
-		});
+        player = new SimpleVideoPlayer((Activity)getContext(), this,
+                new Video(media.url, videoType),
+                media.title, false);
 
 		player.addPlaybackListener(new ExoplayerWrapper.PlaybackListener() {
-			@Override
-			public void onStateChanged(boolean playWhenReady, int playbackState) {
-				Log.i("evt", "state: " + playWhenReady + " " + playbackState);
-			}
+            @Override
+            public void onStateChanged(boolean playWhenReady, int playbackState) {
+                Log.i("evt", "state: " + playWhenReady + " " + playbackState);
+            }
 
-			@Override
-			public void onError(Exception e) {
-				Log.i("evt", "error", e);
-			}
+            @Override
+            public void onError(Exception e) {
+                Log.i("evt", "error", e);
+            }
 
-			@Override
-			public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-				Log.i("evt", "size: " + width + ' ' + height + ' ' + unappliedRotationDegrees + ' ' + pixelWidthHeightRatio);
-			}
-		});
+            @Override
+            public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
+                Log.i("evt", "size: " + width + ' ' + height + ' ' + unappliedRotationDegrees + ' ' + pixelWidthHeightRatio);
+            }
+        });
+
+		player.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
+            @Override
+            public void onPlay() {
+                Log.i("evt", "Play!!!!");
+
+                //handlePlay(); disparavel via eventbus
+            }
+        });
+
+		// Move the content player's surface layer to the background so that the ad player's surface
+		// layer can be overlaid on top of it during ad playback.
+		player.moveSurfaceToBackground();
 	}
 
 	private void applyAttributes(TypedArray attrs) {

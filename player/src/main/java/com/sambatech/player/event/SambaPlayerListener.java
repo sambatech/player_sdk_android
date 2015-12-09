@@ -7,13 +7,13 @@ package com.sambatech.player.event;
  */
 public abstract class SambaPlayerListener {
 
-	public void onLoad() {}
+	public void onLoad(SambaEvent event) {}
 
 	//public void onStart() {}
 
-	public void onPause() {}
+	public void onPause(SambaEvent event) {}
 
-	public void onPlay() {}
+	public void onPlay(SambaEvent event) {}
 
 	//public void onProgress() {}
 
@@ -21,5 +21,5 @@ public abstract class SambaPlayerListener {
 
 	//public void onFullscreenExit() {}
 
-	public void onFinish() {}
+	public void onFinish(SambaEvent event) {}
 }

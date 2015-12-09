@@ -69,12 +69,12 @@ public class ImaPlayer {
   /**
    * Plays the ad.
    */
-  private SimpleVideoPlayer adPlayer;
+    private SimpleVideoPlayer adPlayer;
 
-  /**
-   * The layout that contains the ad player.
-   */
-  private FrameLayout adPlayerContainer;
+    /**
+     * The layout that contains the ad player.
+     */
+    private FrameLayout adPlayerContainer;
 
   /**
    * Used by the IMA SDK to overlay controls (i.e. skip ad) over the ad player.
@@ -109,7 +109,7 @@ public class ImaPlayer {
   /**
    * Plays the content (i.e. the actual video).
    */
-  private SimpleVideoPlayer contentPlayer;
+  private SambaPlayer contentPlayer;
 
   /**
    * The callback that is triggered when fullscreen mode is entered or closed.
@@ -209,9 +209,6 @@ public class ImaPlayer {
       }
     };
 
-    public SimpleVideoPlayer getPlayer() {
-        return contentPlayer;
-    }
 
     /**
    * Sets up ads manager, responds to ad errors, and handles ad state changes.
@@ -322,10 +319,9 @@ public class ImaPlayer {
             adPlayer.getDuration());
       } else {
         // If the cotntent is playing, report the progress of the content player.
-        vpu = new VideoProgressUpdate(contentPlayer.getCurrentPosition(),
-            contentPlayer.getDuration());
+        vpu = new VideoProgressUpdate((long)(contentPlayer.getCurrentTime() * 1000),
+                (long)(contentPlayer.getDuration() * 1000));
       }
-
 
       if (oldVpu == null) {
         oldVpu = vpu;
@@ -347,8 +343,6 @@ public class ImaPlayer {
   /**
    * @param activity The activity that will contain the video player.
    * @param container The {@link FrameLayout} which will contain the video player.
-   * @param video The video that should be played.
-   * @param videoTitle The title of the video (displayed on the left of the top chrome).
    * @param sdkSettings The settings that should be used to configure the IMA SDK.
    * @param adTagUrl The URL containing the VAST document of the ad.
    * @param fullscreenCallback The callback that should be triggered when the player enters or
@@ -356,8 +350,6 @@ public class ImaPlayer {
    */
   public ImaPlayer(Activity activity,
                    FrameLayout container,
-                   Video video,
-                   String videoTitle,
                    ImaSdkSettings sdkSettings,
                    String adTagUrl,
                    PlaybackControlLayer.FullscreenCallback fullscreenCallback) {
@@ -377,26 +369,6 @@ public class ImaPlayer {
 
     callbacks = new ArrayList<VideoAdPlayer.VideoAdPlayerCallback>();
 
-    boolean autoplay = false;
-    contentPlayer = new SimpleVideoPlayer(activity,
-        container,
-        video,
-        videoTitle,
-        autoplay);
-
-    contentPlayer.addPlaybackListener(contentPlaybackListener);
-    contentPlayer.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
-      @Override
-      public void onPlay() {
-          Log.i("evt", "Play!!!!");
-        handlePlay();
-      }
-    });
-
-    // Move the content player's surface layer to the background so that the ad player's surface
-    // layer can be overlaid on top of it during ad playback.
-    contentPlayer.moveSurfaceToBackground();
-
     // Create the ad adDisplayContainer UI which will be used by the IMA SDK to overlay ad controls.
     adUiContainer = new FrameLayout(activity);
     container.addView(adUiContainer);
@@ -414,36 +386,26 @@ public class ImaPlayer {
   /**
    * @param activity The activity that will contain the video player.
    * @param container The {@link FrameLayout} which will contain the video player.
-   * @param video The video that should be played.
-   * @param videoTitle The title of the video (displayed on the left of the top chrome).
    * @param sdkSettings The settings that should be used to configure the IMA SDK.
    * @param adTagUrl The URL containing the VAST document of the ad.
    */
   public ImaPlayer(Activity activity,
                    FrameLayout container,
-                   Video video,
-                   String videoTitle,
                    ImaSdkSettings sdkSettings,
                    String adTagUrl) {
-    this(activity, container, video, videoTitle, sdkSettings, adTagUrl, null);
+    this(activity, container, sdkSettings, adTagUrl, null);
   }
 
   /**
    * @param activity The activity that will contain the video player.
    * @param container The {@link FrameLayout} which will contain the video player.
-   * @param video The video that should be played.
-   * @param videoTitle The title of the video (displayed on the left of the top chrome).
    * @param adTagUrl The URL containing the VAST document of the ad.
    */
   public ImaPlayer(Activity activity,
                    FrameLayout container,
-                   Video video,
-                   String videoTitle,
                    String adTagUrl) {
     this(activity,
             container,
-            video,
-            videoTitle,
             ImaSdkFactory.getInstance().createImaSdkSettings(),
             adTagUrl);
   }
@@ -451,35 +413,14 @@ public class ImaPlayer {
   /**
    * @param activity The activity that will contain the video player.
    * @param container The {@link FrameLayout} which will contain the video player.
-   * @param video The video that should be played.
-   * @param videoTitle The title of the video (displayed on the left of the top chrome).
    */
   public ImaPlayer(Activity activity,
                    FrameLayout container,
-                   Video video,
-                   String videoTitle) {
-    this(activity,
+                   SambaPlayer contentPlayer) {
+      this(activity,
         container,
-        video,
-        videoTitle,
         ImaSdkFactory.getInstance().createImaSdkSettings(),
         null);
-  }
-
-  /**
-   * @param activity The activity that will contain the video player.
-   * @param container The {@link FrameLayout} which will contain the video player.
-   * @param video The video that should be played.
-   */
-  public ImaPlayer(Activity activity,
-                   FrameLayout container,
-                   Video video) {
-    this(activity,
-            container,
-            video,
-            "",
-            ImaSdkFactory.getInstance().createImaSdkSettings(),
-            null);
   }
 
   /**
@@ -532,7 +473,7 @@ public class ImaPlayer {
     if (adPlayer != null) {
       adPlayer.setFullscreenCallback(fullscreenCallback);
     } else {
-      contentPlayer.setFullscreenCallback(fullscreenCallback);
+      //contentPlayer.setFullscreenCallback(fullscreenCallback); TODO: EVENT BUS
     }
   }
 
@@ -549,7 +490,7 @@ public class ImaPlayer {
       adsManager = null;
     }
     adsLoader.contentComplete();
-    contentPlayer.release();
+    //contentPlayer.release(); TODO: tirar
     adsLoader.removeAdsLoadedListener(adListener);
   }
 
