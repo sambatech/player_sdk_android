@@ -15,7 +15,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		SambaApi api = new SambaApi("token");
+		SambaApi api = new SambaApi(this, "token");
 
 		api.requestMedia("34f07cf52fd85ccfc41a39bcf499e83b", "0632f26a442ba9ba3bb9067a45e239e2", new SambaApiListener() {
 			@Override

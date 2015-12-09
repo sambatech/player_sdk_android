@@ -27,4 +27,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-ads:8.3.0'
     compile project(':googlemediaframework')
     compile 'org.bitbucket.b_c:jose4j:0.4.4'
+    compile 'net.engio:mbassador:1.2.4'
 }
