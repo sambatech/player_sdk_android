@@ -18,10 +18,8 @@ package com.sambatech.player;
 
 import android.app.Activity;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -390,7 +388,7 @@ public class ImaPlayer {
     contentPlayer.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
       @Override
       public void onPlay() {
-          Log.e("ONPLAY", "BLA");
+          Log.i("evt", "Play!!!!");
         handlePlay();
       }
     });
@@ -443,11 +441,11 @@ public class ImaPlayer {
                    String videoTitle,
                    String adTagUrl) {
     this(activity,
-        container,
-        video,
-        videoTitle,
-        ImaSdkFactory.getInstance().createImaSdkSettings(),
-        adTagUrl);
+            container,
+            video,
+            videoTitle,
+            ImaSdkFactory.getInstance().createImaSdkSettings(),
+            adTagUrl);
   }
 
   /**
@@ -477,11 +475,11 @@ public class ImaPlayer {
                    FrameLayout container,
                    Video video) {
     this(activity,
-        container,
-        video,
-        "",
-        ImaSdkFactory.getInstance().createImaSdkSettings(),
-        null);
+            container,
+            video,
+            "",
+            ImaSdkFactory.getInstance().createImaSdkSettings(),
+            null);
   }
 
   /**
@@ -503,48 +501,6 @@ public class ImaPlayer {
     } else {
       contentPlayer.play();
     }
-  }
-
-  /**
-   * Set the logo with appears in the left of the top chrome.
-   * @param logo The drawable which will be the logo.
-   */
-  public void setLogoImage(Drawable logo) {
-    contentPlayer.setLogoImage(logo);
-  }
-
-  /**
-   * Sets the color of the top chrome, bottom chrome, and background.
-   * @param color a color derived from the @{link Color} class
-   *              (ex. {@link android.graphics.Color#RED}).
-   */
-  public void setChromeColor(int color) {
-    contentPlayer.setChromeColor(color);
-  }
-
-  /**
-   * Sets the color of the buttons and seek bar.
-   * @param color a color derived from the @{link Color} class
-   *              (ex. {@link android.graphics.Color#RED}).
-   */
-  public void setPlaybackControlColor(int color) {
-    contentPlayer.setPlaybackControlColor(color);
-  }
-
-  /**
-   * Creates a button to put in the top right of the video player.
-   *
-   * @param icon The image of the action (ex. trash can).
-   * @param contentDescription The text description this action. This is used in case the
-   *                           action buttons do not fit in the video player. If so, an overflow
-   *                           button will appear and, when clicked, it will display a list of the
-   *                           content descriptions for each action.
-   * @param onClickListener The handler for when the action is triggered.
-   */
-  public void addActionButton(Drawable icon,
-                              String contentDescription,
-                              View.OnClickListener onClickListener) {
-    contentPlayer.addActionButton(icon, contentDescription, onClickListener);
   }
 
   /**

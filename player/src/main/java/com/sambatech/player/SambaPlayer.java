@@ -40,6 +40,10 @@ public class SambaPlayer extends FrameLayout {
 		this.media = media;
 	}
 
+	public void setListener(SambaPlayerListener listener) {
+		this.listener = listener;
+	}
+
 	public void play() {
 		if (media.url == null || media.url.isEmpty())
 			return;
@@ -93,9 +97,5 @@ public class SambaPlayer extends FrameLayout {
 		media.url = attrs.getString(R.styleable.SambaPlayer_url);
 		media.title = attrs.getString(R.styleable.SambaPlayer_title);
 		attrs.recycle();
-	}
-
-	public void setListener(SambaPlayerListener listener) {
-		this.listener = listener;
 	}
 }
