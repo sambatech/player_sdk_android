@@ -386,6 +386,7 @@ public class ImaPlayer {
     contentPlayer.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
       @Override
       public void onPlay() {
+          Log.e("ONPLAY", "BLA");
         handlePlay();
       }
     });

@@ -1,5 +1,6 @@
 package com.sambatech.player;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 /**
  * Created by tmiranda on 02/12/15.
@@ -23,10 +25,12 @@ import java.util.Scanner;
  */
 public class SambaApi {
 
+	private Activity activity;
 	private boolean inited = false;
 
-	public SambaApi(String accessToken) {
+	public SambaApi(Activity activity, String accessToken) {
 		// TODO: validar "accessToken"
+		this.activity = activity;
 	}
 
 	/**
@@ -37,7 +41,7 @@ public class SambaApi {
 	 * @param mediaId -
 	 */
 	public void requestMedia(String projectId, String mediaId, SambaApiListener listener) {
-		new RequestMediaTask(listener).execute("http://playerapitest2.liquidplatform.com:7091/embed/" + projectId + "/" + mediaId);
+		new RequestMediaTask(listener).execute(activity.getString(R.string.player_endpoint) + projectId + "/" + mediaId);
 	}
 
 	public void requestLive(String projectId, String streamName, SambaApiListener listener) {
