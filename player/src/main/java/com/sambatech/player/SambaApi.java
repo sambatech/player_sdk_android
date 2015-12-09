@@ -19,18 +19,20 @@ import java.util.Scanner;
 import java.util.logging.Logger;
 
 /**
- * Created by tmiranda on 02/12/15.
+ * Requests media data from server.
  *
- * view-source:http://playerapitest2.liquidplatform.com:7091/embed/2835573d6ea8b213efe1ff1ab3354da8/593da65e3f9f4c866a0c4a9685414c7d
+ * @author tmiranda - 02/12/15
  */
 public class SambaApi {
 
 	private Activity activity;
 	private boolean inited = false;
+	private String accessToken;
 
 	public SambaApi(Activity activity, String accessToken) {
 		// TODO: validar "accessToken"
 		this.activity = activity;
+		this.accessToken = accessToken;
 	}
 
 	/**
@@ -45,58 +47,16 @@ public class SambaApi {
 	}
 
 	public void requestLive(String projectId, String streamName, SambaApiListener listener) {
-
+		requestLive(projectId, streamName, null, listener);
 	}
 
-	public void requestLive(String projectId, String streamName, String alternateLive, SambaApiListener listener) {
-
+	public void requestLive(String projectId, String streamName, String streamUrl, SambaApiListener listener) {
+		new RequestMediaTask(listener).execute(activity.getString(R.string.player_endpoint) + projectId + "?" +
+				(streamName != null ? "streamName=" + streamName : "alternateLive=" + streamUrl));
 	}
 
 	public void requestMediaList(String projectId, String mediaId, SambaApiListener listener) {
 
-	}
-
-	private SambaMedia parseMedia(JSONObject json) {
-		try {
-			if (!json.getString("qualifier").equalsIgnoreCase("video"))
-				return null;
-
-			SambaMedia media = new SambaMedia();
-			String thumbUrl = null;
-			JSONArray rules = json.getJSONArray("deliveryRules");
-			JSONArray thumbs = json.getJSONArray("thumbnails");
-
-			media.title = json.getString("title");
-
-			for (int i = 0; i < rules.length(); ++i) {
-				JSONObject rule = rules.getJSONObject(i);
-
-				switch (media.type = rule.getString("urlType").toLowerCase()) {
-					//case "progressive":
-					case "hls":
-						JSONArray outputs = rule.getJSONArray("outputs");
-
-						for (int j = outputs.length(); j-- > 0;) {
-							JSONObject output = outputs.getJSONObject(j);
-
-							if (!output.getString("outputName").equalsIgnoreCase("_raw") ||
-									outputs.length() < 2)
-								media.url = output.getString("url");
-						}
-						break;
-				}
-			}
-
-			if (thumbs.length() > 0)
-				thumbUrl = thumbs.getJSONObject(0).getString("url");
-
-			return media;
-		}
-		catch (JSONException e) {
-			Log.e(getClass().getName(), "Failed to search media", e);
-		}
-
-		return null;
 	}
 
 	private class RequestMediaTask extends AsyncTask<String, Void, SambaMedia> {
@@ -168,6 +128,58 @@ public class SambaApi {
 				return;
 
 			this.listener.onMediaResponse(media);
+		}
+
+		private SambaMedia parseMedia(JSONObject json) {
+			try {
+				if (!json.getString("qualifier").equalsIgnoreCase("video"))
+					return null;
+
+				SambaMedia media = new SambaMedia();
+				JSONArray rules = json.getJSONArray("deliveryRules");
+				JSONArray thumbs = json.getJSONArray("thumbnails");
+				String defaultOutput = json.getJSONObject("project").getString("defaultOutput");
+				JSONObject rule = null;
+				JSONArray outputs;
+				JSONObject output;
+				int i;
+
+				media.title = json.getString("title");
+
+				// looks for HLS delivery or the last taken
+				for (i = rules.length(); i-- > 0;) {
+					rule = rules.getJSONObject(i);
+					media.type = rule.getString("urlType").toLowerCase();
+
+					if (media.type.equals("hls")) {
+						break;
+					}
+				}
+
+				if (media.type.equals("hls"))
+					defaultOutput = "abr_hls";
+
+				if (rule != null) {
+					outputs = rule.getJSONArray("outputs");
+
+					for (int j = outputs.length(); j-- > 0; ) {
+						output = outputs.getJSONObject(j);
+
+						if (!output.getString("outputName").equalsIgnoreCase(defaultOutput))
+							media.url = output.getString("url");
+					}
+				}
+
+				if (thumbs.length() > 0)
+					media.thumbUrl = thumbs.getJSONObject(0).getString("url");
+
+				return media;
+			}
+			catch (JSONException e) {
+				Log.e(getClass().getName(), "Failed to search media", e);
+			}
+
+			return null;
 		}
 	}
 }

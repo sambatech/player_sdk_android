@@ -2,6 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -10,9 +11,10 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.sambatech.player.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/player_view"
+    <com.sambatech.player.SambaPlayer
+        android:id="@+id/samba_player"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:title="Afdfsijdo sdfji!" />
 
 </RelativeLayout>

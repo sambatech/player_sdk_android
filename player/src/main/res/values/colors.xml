@@ -18,4 +18,5 @@ limitations under the License.
 <resources>
     <color name="sample_chrome_color">#C83B5998</color>
     <color name="sample_playback_control_color">#C800F000</color>
+    <color name="background">#FF000000</color>
 </resources>
