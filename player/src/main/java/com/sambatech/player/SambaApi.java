@@ -19,7 +19,7 @@ import java.util.Scanner;
 /**
  * Requests media data from server.
  *
- * @author tmiranda - 02/12/15
+ * @author tmiranda - 2/12/15
  */
 public class SambaApi {
 

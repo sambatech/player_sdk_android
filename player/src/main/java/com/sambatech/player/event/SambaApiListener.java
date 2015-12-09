@@ -5,9 +5,9 @@ import com.sambatech.player.model.SambaMedia;
 import java.util.List;
 
 /**
- * Created by zanol on 12/4/15.
+ * Listeners representing server responses.
  *
- * Carries listeners representing server responses.
+ * @author zanol - 4/12/15
  */
 public abstract class SambaApiListener {
 
