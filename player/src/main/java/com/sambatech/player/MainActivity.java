@@ -10,8 +10,6 @@ import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 
-import net.engio.mbassy.listener.Handler;
-
 public class MainActivity extends Activity {
 
 	@Override
@@ -26,29 +24,26 @@ public class MainActivity extends Activity {
 			public void onMediaResponse(SambaMedia media) {
 				SambaPlayer p = (SambaPlayer)findViewById(R.id.samba_player);
 
-				SambaEventBus.getEventBus().subscribe(new SambaPlayerListener() {
+				//p.setListener(new SambaPlayerListener() {...});
+				SambaEventBus.subscribe(new SambaPlayerListener() {
 					@Override
-					@Handler(condition = "e.getType() == SambaEventType.LOAD")
 					public void onLoad(SambaEvent e) {
-						Log.i("evt", e.getData().toString());
+						Log.i("evt", e.getType() + " " + e.getData());
 					}
 
 					@Override
-					@Handler(condition = "e.getType() == SambaEventType.PLAY")
 					public void onPlay(SambaEvent e) {
-						Log.i("evt", e.getData().toString());
+						Log.i("evt", e.getType() + " " + e.getData());
 					}
 
 					@Override
-					@Handler(condition = "e.getType() == SambaEventType.PAUSED")
-					public void onPause(SambaEvent event) {
-						Log.i("evt", "Paused!");
+					public void onPause(SambaEvent e) {
+						Log.i("evt", e.getType() + " " + e.getData());
 					}
 
 					@Override
-					@Handler(condition = "e.getType() == SambaEventType.FINISHED")
-					public void onFinish(SambaEvent event) {
-						Log.i("evt", "Finished!");
+					public void onFinish(SambaEvent e) {
+						Log.i("evt", e.getType() + " " + e.getData());
 					}
 				});
 

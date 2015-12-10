@@ -9,9 +9,10 @@ import android.widget.FrameLayout;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
-import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
+import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
+import com.sambatech.player.event.SambaEventType;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 
@@ -41,9 +42,6 @@ public class SambaPlayer extends FrameLayout {
 	 * @param media The media to be played.
 	 */
 	public void setMedia(SambaMedia media) {
-        if (this.media.title != null && media.title == null)
-            media.title = this.media.title;
-
 		this.media = media;
 
         //Creating player
@@ -56,7 +54,6 @@ public class SambaPlayer extends FrameLayout {
 
 	public void play() {
 
-		playerIma = new ImaPlayer((Activity)getContext(), this, this);
 	}
 
 	/**	Player API **/
@@ -118,6 +115,16 @@ public class SambaPlayer extends FrameLayout {
             @Override
             public void onStateChanged(boolean playWhenReady, int playbackState) {
                 Log.i("evt", "state: " + playWhenReady + " " + playbackState);
+
+				switch (playbackState) {
+					case 4:
+						if (playWhenReady)
+							SambaEventBus.post(new SambaEvent(SambaEventType.PLAY, "Play!"));
+					case 3:
+						if (!playWhenReady)
+							SambaEventBus.post(new SambaEvent(SambaEventType.PAUSE, "Pause..."));
+						break;
+				}
             }
 
             @Override
@@ -131,18 +138,11 @@ public class SambaPlayer extends FrameLayout {
             }
         });
 
-		player.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
-            @Override
-            public void onPlay() {
-                Log.i("evt", "Play!!!!");
-
-                //handlePlay(); disparavel via eventbus
-            }
-        });
-
 		// Move the content player's surface layer to the background so that the ad player's surface
 		// layer can be overlaid on top of it during ad playback.
 		player.moveSurfaceToBackground();
+
+		playerIma = new ImaPlayer((Activity)getContext(), this, this);
 	}
 
 	private void applyAttributes(TypedArray attrs) {

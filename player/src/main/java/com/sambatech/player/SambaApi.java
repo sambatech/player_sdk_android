@@ -101,7 +101,7 @@ public class SambaApi {
 				}
 			}
 			catch (Exception e) {
-				Log.e(getClass().getName(), "Error opening JSON guys", e);
+				Log.e(getClass().getName(), "Error opening JSON guys: " + e.getMessage() + "\n" + e.getCause(), e);
 			}
 			finally {
 				try {
@@ -115,7 +115,7 @@ public class SambaApi {
 						scannerDelimited.close();
 				}
 				catch (IOException e) {
-					Log.e(getClass().getName(), "Error closing JSON guys", e);
+					Log.e(getClass().getName(), "Error closing JSON guys: " + e.getMessage() + "\n" + e.getCause(), e);
 				}
 			}
 

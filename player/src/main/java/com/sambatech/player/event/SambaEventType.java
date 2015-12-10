@@ -6,7 +6,7 @@ package com.sambatech.player.event;
 public enum SambaEventType {
     LOAD,
     PLAY,
-    PAUSED,
-    FINISHED,
+    PAUSE,
+    FINISH,
 
 }

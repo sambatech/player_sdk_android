@@ -9,17 +9,17 @@ public abstract class SambaPlayerListener {
 
 	public void onLoad(SambaEvent event) {}
 
-	//public void onStart() {}
+	public void onStart() {}
 
 	public void onPause(SambaEvent event) {}
 
 	public void onPlay(SambaEvent event) {}
 
-	//public void onProgress() {}
+	public void onProgress() {}
 
-	//public void onFullscreen() {}
+	public void onFullscreen() {}
 
-	//public void onFullscreenExit() {}
+	public void onFullscreenExit() {}
 
 	public void onFinish(SambaEvent event) {}
 }
