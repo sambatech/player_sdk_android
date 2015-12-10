@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
+import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -23,7 +25,6 @@ import com.sambatech.player.model.SambaMedia;
  */
 public class SambaPlayer extends FrameLayout {
 
-	private ImaPlayer playerIma;
 	private SimpleVideoPlayer player;
 	private SambaMedia media = new SambaMedia();
 	private SambaPlayerListener listener;
@@ -86,6 +87,10 @@ public class SambaPlayer extends FrameLayout {
 		return player.getDuration() / 1000f;
 	}
 
+	public View getView() {
+		return this;
+	}
+
 	private void createPlayer() {
         if (media.url == null || media.url.isEmpty())
             return;
@@ -118,11 +123,12 @@ public class SambaPlayer extends FrameLayout {
 
 				switch (playbackState) {
 					case 4:
-						if (playWhenReady)
-							SambaEventBus.post(new SambaEvent(SambaEventType.PLAY, "Play!"));
-					case 3:
 						if (!playWhenReady)
 							SambaEventBus.post(new SambaEvent(SambaEventType.PAUSE, "Pause..."));
+						break;
+					case 3:
+						/*if (!playWhenReady)
+							SambaEventBus.post(new SambaEvent(SambaEventType.PAUSE, "Pause..."));*/
 						break;
 				}
             }
@@ -130,19 +136,40 @@ public class SambaPlayer extends FrameLayout {
             @Override
             public void onError(Exception e) {
                 Log.i("evt", "error", e);
+				SambaEventBus.post(new SambaEvent(SambaEventType.ERROR, e));
             }
 
             @Override
             public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
                 Log.i("evt", "size: " + width + ' ' + height + ' ' + unappliedRotationDegrees + ' ' + pixelWidthHeightRatio);
+				SambaEventBus.post(new SambaEvent(SambaEventType.ERROR, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
             }
         });
+
+		player.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
+			@Override
+			public void onPlay() {
+				SambaEventBus.post(new SambaEvent(SambaEventType.PLAY, "Play!"));
+			}
+		});
+		player.setFullscreenCallback(new PlaybackControlLayer.FullscreenCallback() {
+			@Override
+			public void onGoToFullscreen() {
+				SambaEventBus.post(new SambaEvent(SambaEventType.FULLSCREEN, "Fullscreen"));
+			}
+
+			@Override
+			public void onReturnFromFullscreen() {
+				SambaEventBus.post(new SambaEvent(SambaEventType.FULLSCREEN_EXIT, "Fullscreen exit"));
+			}
+		});
 
 		// Move the content player's surface layer to the background so that the ad player's surface
 		// layer can be overlaid on top of it during ad playback.
 		player.moveSurfaceToBackground();
 
-		playerIma = new ImaPlayer((Activity)getContext(), this, this);
+		new ImaPlayer((Activity)getContext(), this,
+				"http://pubads.g.doubleclick.net/gampad/ads?sz=400x300&iu=%2F6062%2Fiab_vast_samples&ciu_szs=300x250%2C728x90&impl=s&gdfp_req=1&env=vp&output=xml_vast2&unviewed_position_start=1&url=[referrer_url]&correlator=[timestamp]&cust_params=iab_vast_samples%3Dlinear");
 	}
 
 	private void applyAttributes(TypedArray attrs) {

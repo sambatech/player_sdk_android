@@ -8,5 +8,7 @@ public enum SambaEventType {
     PLAY,
     PAUSE,
     FINISH,
-
+    FULLSCREEN,
+	FULLSCREEN_EXIT,
+	ERROR
 }

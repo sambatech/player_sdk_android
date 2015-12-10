@@ -1,5 +1,7 @@
 package com.sambatech.player.event;
 
+import android.util.Log;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -41,11 +43,13 @@ public class SambaEventBus {
 						listeners.put(k, new ArrayList<>());
 
 					listeners.get(k).add(listener);
+					Log.i("evt", k + " " + listeners.get(k).size());
 				}
 			}
 		}
 
 		public void unsubscribe(Object listener) {
+			// TODO
 			/*for (Method m : listener.getClass().getDeclaredMethods()) {
 				k = m.getName().substring(2).toUpperCase();
 
@@ -57,15 +61,23 @@ public class SambaEventBus {
 		public void post(SambaEvent e) {
 			String k = e.getType().toString().toLowerCase();
 
+			// TODO
+			/*KvPair kvPair = listeners.get(k);
+
+			for (Method m : kvPair.getValue())
+				m.invoke(kvPair.getKey(), e);*/
+
 			if (!listeners.containsKey(k))
 				return;
 
 			try {
-				for (Object listener : listeners.get(k))
+				for (Object listener : listeners.get(k)) {
+					Log.i("player", "on" + k.substring(0, 1).toUpperCase() + k.substring(1));
 					listener.getClass().getDeclaredMethod("on" + k.substring(0, 1).toUpperCase() + k.substring(1), SambaEvent.class).invoke(listener, e);
+				}
 			}
 			catch (Exception exp) {
-				exp.printStackTrace();
+				//exp.printStackTrace();
 			}
 		}
 	}

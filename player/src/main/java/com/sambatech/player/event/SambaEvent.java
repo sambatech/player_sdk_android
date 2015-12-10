@@ -5,20 +5,30 @@ package com.sambatech.player.event;
  */
 public class SambaEvent {
 
-    private SambaEventType type;
-    private Object data;
+	private final SambaEventType type;
+	private final Object data;
+	private final Object[] dataAll;
 
-    public SambaEvent(SambaEventType type, Object data) {
-        this.type = type;
-        this.data = data;
-    }
+	public SambaEvent(SambaEventType type) {
+		this(type, new Object[]{});
+	}
 
-    public SambaEventType getType() {
-        return type;
-    }
+	public SambaEvent(SambaEventType type, Object ... data) {
+		this.type = type;
+		this.data = data.length > 0 ? data[0] : null;
+		this.dataAll = data;
+	}
 
-    public Object getData() {
-        return data;
-    }
+	public SambaEventType getType() {
+		return type;
+	}
+
+	public Object getData() {
+		return data;
+	}
+
+	public Object[] getDataAll() {
+		return dataAll;
+	}
 }
 
