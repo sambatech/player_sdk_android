@@ -4,8 +4,9 @@ import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.sambatech.player.event.SambaApiListener;
+import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaMediaRequest;
 
 import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
@@ -16,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
-import java.util.logging.Logger;
 
 /**
  * Requests media data from server.
@@ -36,34 +36,40 @@ public class SambaApi {
 	}
 
 	/**
+	 * Requests a media from server.
 	 *
-	 * Requests a specific media from server.
-	 *
-	 * @param projectId - (player hash)
-	 * @param mediaId -
+	 * @param request - Request data
+	 * @param callback - Listener for server media response
 	 */
-	public void requestMedia(String projectId, String mediaId, SambaApiListener listener) {
-		new RequestMediaTask(listener).execute(activity.getString(R.string.player_endpoint) + projectId + "/" + mediaId);
+	public void requestMedia(SambaMediaRequest request, SambaApiCallback callback) {
+		new RequestMediaTask(callback).execute(activity.getString(R.string.player_endpoint) + request.projectId +
+				(request.mediaId != null ? "/" + request.mediaId :
+						request.streamName != null ? "?streamName=" + request.streamName : "alternateLive=" + request.streamUrl));
 	}
 
-	public void requestLive(String projectId, String streamName, SambaApiListener listener) {
-		requestLive(projectId, streamName, null, listener);
-	}
+	public void requestMedia(final SambaMediaRequest[] requests, final SambaApiCallback callback) {
+		SambaApiCallback callbackReq = new SambaApiCallback() {
+			private int counter = requests.length;
+			private SambaMedia[] mediaList = new SambaMedia[counter];
 
-	public void requestLive(String projectId, String streamName, String streamUrl, SambaApiListener listener) {
-		new RequestMediaTask(listener).execute(activity.getString(R.string.player_endpoint) + projectId + "?" +
-				(streamName != null ? "streamName=" + streamName : "alternateLive=" + streamUrl));
-	}
+			@Override
+			public void onMediaResponse(SambaMedia media) {
+				callback.onMediaResponse(mediaList[--counter] = media);
 
-	public void requestMediaList(String projectId, String mediaId, SambaApiListener listener) {
+				if (counter == 0)
+					callback.onMediaListResponse(mediaList);
+			}
+		};
 
+		for (SambaMediaRequest req : requests)
+			requestMedia(req, callbackReq);
 	}
 
 	private class RequestMediaTask extends AsyncTask<String, Void, SambaMedia> {
 
-		private SambaApiListener listener;
+		private SambaApiCallback listener;
 
-		public RequestMediaTask(SambaApiListener listener) {
+		public RequestMediaTask(SambaApiCallback listener) {
 			this.listener = listener;
 		}
 

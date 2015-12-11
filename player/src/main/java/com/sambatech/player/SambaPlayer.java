@@ -7,6 +7,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
@@ -26,6 +27,7 @@ import com.sambatech.player.model.SambaMedia;
 public class SambaPlayer extends FrameLayout {
 
 	private SimpleVideoPlayer player;
+	private ImaPlayer imaPlayer;
 	private SambaMedia media = new SambaMedia();
 	private SambaPlayerListener listener;
 
@@ -33,8 +35,8 @@ public class SambaPlayer extends FrameLayout {
 		super(context, attrs);
 		applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayer, 0, 0));
 
-        if (media.url != null)
-            createPlayer();
+        /*if (!isInEditMode() && media.url != null)
+            createPlayer();*/
 	}
 
 	/**
@@ -62,6 +64,14 @@ public class SambaPlayer extends FrameLayout {
 	public void pause() {
 		player.pause();
 	}
+
+	public void stop() {
+		player.pause();
+		// TODO: seekTo(0)
+		SambaEventBus.post(new SambaEvent(SambaEventType.STOP));
+	}
+
+	// TODO: seek(float secs)
 
 	public void setFullscreen(boolean flag) {
 		player.setFullscreen(flag);
@@ -92,8 +102,10 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void createPlayer() {
-        if (media.url == null || media.url.isEmpty())
-            return;
+        if (media.url == null || media.url.isEmpty()) {
+			Toast.makeText(getContext(), "The requested media has no URL!", Toast.LENGTH_LONG).show();
+			return;
+		}
 
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
@@ -109,8 +121,16 @@ public class SambaPlayer extends FrameLayout {
 				break;
 		}
 
-        if(player != null)
-            player.release();
+        if (player != null) {
+			stop();
+			player.release();
+		}
+
+		if (imaPlayer != null) {
+			imaPlayer.pause();
+			imaPlayer.release();
+			imaPlayer = null;
+		}
 
         player = new SimpleVideoPlayer((Activity)getContext(), this,
                 new Video(media.url, videoType),
@@ -124,12 +144,14 @@ public class SambaPlayer extends FrameLayout {
 				switch (playbackState) {
 					case 4:
 						if (!playWhenReady)
+							SambaEventBus.post(new SambaEvent(SambaEventType.PAUSE));
+						break;
+					/*case 3:
+						if (!playWhenReady)
 							SambaEventBus.post(new SambaEvent(SambaEventType.PAUSE, "Pause..."));
-						break;
-					case 3:
-						/*if (!playWhenReady)
-							SambaEventBus.post(new SambaEvent(SambaEventType.PAUSE, "Pause..."));*/
-						break;
+						break;*/
+					case 5:
+						SambaEventBus.post(new SambaEvent(SambaEventType.FINISH));
 				}
             }
 
@@ -149,7 +171,7 @@ public class SambaPlayer extends FrameLayout {
 		player.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
 			@Override
 			public void onPlay() {
-				SambaEventBus.post(new SambaEvent(SambaEventType.PLAY, "Play!"));
+				SambaEventBus.post(new SambaEvent(SambaEventType.PLAY));
 			}
 		});
 		player.setFullscreenCallback(new PlaybackControlLayer.FullscreenCallback() {
@@ -168,8 +190,8 @@ public class SambaPlayer extends FrameLayout {
 		// layer can be overlaid on top of it during ad playback.
 		player.moveSurfaceToBackground();
 
-		new ImaPlayer((Activity)getContext(), this,
-				"http://pubads.g.doubleclick.net/gampad/ads?sz=400x300&iu=%2F6062%2Fiab_vast_samples&ciu_szs=300x250%2C728x90&impl=s&gdfp_req=1&env=vp&output=xml_vast2&unviewed_position_start=1&url=[referrer_url]&correlator=[timestamp]&cust_params=iab_vast_samples%3Dlinear");
+		if (media.adUrl != null && !media.adUrl.isEmpty())
+			imaPlayer = new ImaPlayer((Activity)getContext(), this, media.adUrl);
 	}
 
 	private void applyAttributes(TypedArray attrs) {

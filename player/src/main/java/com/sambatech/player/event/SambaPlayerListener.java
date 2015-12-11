@@ -11,9 +11,11 @@ public abstract class SambaPlayerListener {
 
 	public void onStart(SambaEvent event) {}
 
+	public void onPlay(SambaEvent event) {}
+
 	public void onPause(SambaEvent event) {}
 
-	public void onPlay(SambaEvent event) {}
+	public void onStop(SambaEvent event) {}
 
 	public void onProgress(SambaEvent event) {}
 

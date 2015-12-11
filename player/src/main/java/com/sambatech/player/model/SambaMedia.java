@@ -15,6 +15,7 @@ public class SambaMedia {
 	public Integer clientId;
 	public Integer categoryId;
 	public Project project;
+	public String adUrl;
 
 	@Override
 	public String toString() {
