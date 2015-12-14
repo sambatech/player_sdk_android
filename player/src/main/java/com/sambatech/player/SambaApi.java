@@ -43,20 +43,30 @@ public class SambaApi {
 	 */
 	public void requestMedia(SambaMediaRequest request, SambaApiCallback callback) {
 		new RequestMediaTask(callback).execute(activity.getString(R.string.player_endpoint) + request.projectId +
-				(request.mediaId != null ? "/" + request.mediaId :
-						request.streamName != null ? "?streamName=" + request.streamName : "alternateLive=" + request.streamUrl));
+				(request.mediaId != null ? "/" + request.mediaId : "?" +
+						(request.streamName != null ? "streamName=" + request.streamName : "alternateLive=" + request.streamUrl)));
 	}
 
 	public void requestMedia(final SambaMediaRequest[] requests, final SambaApiCallback callback) {
 		SambaApiCallback callbackReq = new SambaApiCallback() {
-			private int counter = requests.length;
-			private SambaMedia[] mediaList = new SambaMedia[counter];
+			private int counter = 0;
+			private SambaMedia[] mediaList = new SambaMedia[requests.length];
 
 			@Override
 			public void onMediaResponse(SambaMedia media) {
-				callback.onMediaResponse(mediaList[--counter] = media);
+				addAndDispatchCallback(media);
+			}
 
-				if (counter == 0)
+			@Override
+			public void onMediaResponseError(Exception e) {
+				callback.onMediaResponseError(e);
+				addAndDispatchCallback(new SambaMedia());
+			}
+
+			private void addAndDispatchCallback(SambaMedia media) {
+				callback.onMediaResponse(mediaList[counter++] = media);
+
+				if (counter == requests.length)
 					callback.onMediaListResponse(mediaList);
 			}
 		};
@@ -66,7 +76,6 @@ public class SambaApi {
 	}
 
 	private class RequestMediaTask extends AsyncTask<String, Void, SambaMedia> {
-
 		private SambaApiCallback listener;
 
 		public RequestMediaTask(SambaApiCallback listener) {
@@ -130,20 +139,24 @@ public class SambaApi {
 
 		@Override
 		protected void onPostExecute(SambaMedia media) {
-			if (media == null || this.listener == null)
+			if (media == null) {
+				listener.onMediaResponseError(new Exception("Media loaded returned null."));
 				return;
+			}
 
-			this.listener.onMediaResponse(media);
+			listener.onMediaResponse(media);
 		}
 
 		private SambaMedia parseMedia(JSONObject json) {
 			try {
-				if (!json.getString("qualifier").equalsIgnoreCase("video"))
+				String qualifier = json.getString("qualifier").toLowerCase();
+
+				if (!qualifier.equals("video"))//json.has("deliveryRules") ? )
 					return null;
 
 				SambaMedia media = new SambaMedia();
-				JSONArray rules = json.getJSONArray("deliveryRules");
-				JSONArray thumbs = json.getJSONArray("thumbnails");
+				JSONArray rules = json.has("deliveryRules") ? json.getJSONArray("deliveryRules") : null;
+				JSONArray thumbs = json.has("thumbnails") ? json.getJSONArray("thumbnails") : null;
 				String defaultOutput = json.getJSONObject("project").getString("defaultOutput");
 				JSONObject rule = null;
 				JSONArray outputs;
@@ -152,30 +165,34 @@ public class SambaApi {
 
 				media.title = json.getString("title");
 
-				// looks for HLS delivery or the last taken
-				for (i = rules.length(); i-- > 0;) {
-					rule = rules.getJSONObject(i);
-					media.type = rule.getString("urlType").toLowerCase();
+				if (rules != null) {
+					// looks for HLS delivery or the last taken
+					for (i = rules.length(); i-- > 0; ) {
+						rule = rules.getJSONObject(i);
+						media.type = rule.getString("urlType").toLowerCase();
 
-					if (media.type.equals("hls")) {
-						break;
+						if (media.type.equals("hls")) {
+							break;
+						}
+					}
+
+					if (media.type.equals("hls"))
+						defaultOutput = "abr_hls";
+
+					if (rule != null) {
+						outputs = rule.getJSONArray("outputs");
+
+						for (int j = outputs.length(); j-- > 0; ) {
+							output = outputs.getJSONObject(j);
+
+							if (!output.getString("outputName").equalsIgnoreCase(defaultOutput))
+								media.url = output.getString("url");
+						}
 					}
 				}
-
-				if (media.type.equals("hls"))
-					defaultOutput = "abr_hls";
-
-				if (rule != null) {
-					outputs = rule.getJSONArray("outputs");
-
-					for (int j = outputs.length(); j-- > 0; ) {
-						output = outputs.getJSONObject(j);
-
-						if (!output.getString("outputName").equalsIgnoreCase(defaultOutput))
-							media.url = output.getString("url");
-					}
-				}
-
+				else if (json.getJSONObject("liveOutput") != null)
+					media.url = json.getJSONObject("liveOutput").getString("baseUrl");
+//Log.i("req", json.getJSONObject("liveOutput") + " " + media.url);
 				if (thumbs.length() > 0)
 					media.thumbUrl = thumbs.getJSONObject(0).getString("url");
 

@@ -12,4 +12,6 @@ public abstract class SambaApiCallback {
 	public void onMediaResponse(SambaMedia media) {}
 
 	public void onMediaListResponse(SambaMedia[] mediaList) {}
+
+	public void onMediaResponseError(Exception e) {}
 }

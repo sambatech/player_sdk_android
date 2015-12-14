@@ -56,7 +56,8 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	public void play() {
-
+		Log.i("player", "play!");
+		player.play();
 	}
 
 	/**	Player API **/
@@ -134,7 +135,7 @@ public class SambaPlayer extends FrameLayout {
 
         player = new SimpleVideoPlayer((Activity)getContext(), this,
                 new Video(media.url, videoType),
-                media.title, false);
+                media.title, media.adUrl == null || media.adUrl.isEmpty());
 
 		player.addPlaybackListener(new ExoplayerWrapper.PlaybackListener() {
             @Override
