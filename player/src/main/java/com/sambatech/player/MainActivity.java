@@ -75,6 +75,11 @@ public class MainActivity extends Activity {
 			public void onFullscreenExit(SambaEvent e) {
 				status.setText("Status: " + e.getType());
 			}
+
+			@Override
+			public void onError(SambaEvent e) {
+				status.setText("Status: " + e.getType());
+			}
 		});
 	}
 
@@ -94,20 +99,25 @@ public class MainActivity extends Activity {
 				new SambaMediaRequest("2835573d6ea8b213efe1ff1ab3354da8", "593da65e3f9f4c866a0c4a9685414c7d"),
 				new SambaMediaRequest("30183adb2092f87e5e6440f52b43662b", "a6f4795d02e6476618774561837b0cf7"),
 				new SambaMediaRequest("34f07cf52fd85ccfc41a39bcf499e83b", "0632f26a442ba9ba3bb9067a45e239e2"),
-				new SambaMediaRequest("2835573d6ea8b213efe1ff1ab3354da8", null, null, "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8")
+				//new SambaMediaRequest("2835573d6ea8b213efe1ff1ab3354da8", null, null, "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8")
+				new SambaMediaRequest("2835573d6ea8b213efe1ff1ab3354da8", null, null, "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/playlist.m3u8")
 		}, new SambaApiCallback() {
 			@Override
 			public void onMediaResponse(SambaMedia media) {
-				Log.i("req", media.title);
+				Log.i("req", media != null ? media.title : "");
 			}
 
 			@Override
 			public void onMediaListResponse(SambaMedia[] mediaList) {
+				for (SambaMedia m : mediaList)
+					if (m == null)
+						return;
+
 				mediaList[1].title += " (Ad)";
 				//mediaList[1].adUrl = "http://pubads.g.doubleclick.net/gampad/ads?sz=640x360&iu=/6062/iab_vast_samples/skippable&ciu_szs=300x250,728x90&impl=s&gdfp_req=1&env=vp&output=xml_vast2&unviewed_position_start=1&url=[referrer_url]&correlator=[timestamp]]";
 				mediaList[1].adUrl = "http://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=sample_ct%3Dlinear&correlator=";
 				mediaList[2].title += " (HLS)";
-				mediaList[3].title = "Vevo (HLS Live)";
+				mediaList[3].title = "Conteúdo ao vivo (HLS Live)";
 
 				status.setText("Loaded!");
 				createListAdapter(mediaList);
@@ -115,8 +125,8 @@ public class MainActivity extends Activity {
 			}
 
 			@Override
-			public void onMediaResponseError(Exception e) {
-				Log.e("main", "Media load error", e);
+			public void onMediaResponseError(String msg, SambaMediaRequest request) {
+				Log.e("main", msg + " " + request);
 			}
 		});
 	}
@@ -135,8 +145,8 @@ public class MainActivity extends Activity {
 		});
 	}
 
-	private void loadMedia(SambaMedia item) {
-		player.setMedia(item);
+	private void loadMedia(SambaMedia media) {
+		player.setMedia(media);
 		player.play();
 	}
 }

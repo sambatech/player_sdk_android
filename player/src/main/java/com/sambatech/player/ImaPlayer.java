@@ -376,13 +376,17 @@ public class ImaPlayer {
 			@Override
 			public void onFullscreen(SambaEvent e) {
 				if (adPlayer == null)
-					configFullscreen();
+					container.setLayoutParams(Util.getLayoutParamsBasedOnParent(
+							container,
+							ViewGroup.LayoutParams.MATCH_PARENT,
+							ViewGroup.LayoutParams.MATCH_PARENT
+					));
 			}
 
 			@Override
 			public void onFullscreenExit(SambaEvent e) {
 				if (adPlayer == null)
-					configFullscreenExit();
+					container.setLayoutParams(originalContainerLayoutParams);
 			}
 
 			@Override
@@ -430,18 +434,6 @@ public class ImaPlayer {
 		} else {
 			contentPlayer.play();
 		}
-	}
-
-	private void configFullscreen() {
-		container.setLayoutParams(Util.getLayoutParamsBasedOnParent(
-				container,
-				ViewGroup.LayoutParams.MATCH_PARENT,
-				ViewGroup.LayoutParams.MATCH_PARENT
-		));
-	}
-
-	private void configFullscreenExit() {
-		container.setLayoutParams(originalContainerLayoutParams);
 	}
 
 	/**

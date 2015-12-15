@@ -42,11 +42,15 @@ public class SambaApi {
 	 * @param callback - Listener for server media response
 	 */
 	public void requestMedia(SambaMediaRequest request, SambaApiCallback callback) {
-		new RequestMediaTask(callback).execute(activity.getString(R.string.player_endpoint) + request.projectId +
-				(request.mediaId != null ? "/" + request.mediaId : "?" +
-						(request.streamName != null ? "streamName=" + request.streamName : "alternateLive=" + request.streamUrl)));
+		new RequestMediaTask(callback).execute(request);
 	}
 
+	/**
+	 * Requests several medias from server.
+	 *
+	 * @param requests - Several request data
+	 * @param callback - Listener for server media response
+	 */
 	public void requestMedia(final SambaMediaRequest[] requests, final SambaApiCallback callback) {
 		SambaApiCallback callbackReq = new SambaApiCallback() {
 			private int counter = 0;
@@ -54,20 +58,15 @@ public class SambaApi {
 
 			@Override
 			public void onMediaResponse(SambaMedia media) {
-				addAndDispatchCallback(media);
-			}
-
-			@Override
-			public void onMediaResponseError(Exception e) {
-				callback.onMediaResponseError(e);
-				addAndDispatchCallback(new SambaMedia());
-			}
-
-			private void addAndDispatchCallback(SambaMedia media) {
 				callback.onMediaResponse(mediaList[counter++] = media);
 
 				if (counter == requests.length)
 					callback.onMediaListResponse(mediaList);
+			}
+
+			@Override
+			public void onMediaResponseError(String msg, SambaMediaRequest request) {
+				callback.onMediaResponseError(msg, request);
 			}
 		};
 
@@ -75,7 +74,7 @@ public class SambaApi {
 			requestMedia(req, callbackReq);
 	}
 
-	private class RequestMediaTask extends AsyncTask<String, Void, SambaMedia> {
+	private class RequestMediaTask extends AsyncTask<SambaMediaRequest, Void, SambaMedia> {
 		private SambaApiCallback listener;
 
 		public RequestMediaTask(SambaApiCallback listener) {
@@ -83,13 +82,18 @@ public class SambaApi {
 		}
 
 		@Override
-		protected SambaMedia doInBackground(String... params) {
+		protected SambaMedia doInBackground(SambaMediaRequest... params) {
+			SambaMediaRequest request = params[0];
+			String url = activity.getString(R.string.player_endpoint) + request.projectId +
+					(request.mediaId != null ? "/" + request.mediaId : "?" +
+							(request.streamUrls.length > 0 ? "alternateLive=" + request.streamUrls[0] : "streamName=" + request.streamName));
 			InputStream inputStream = null;
 			Scanner scanner = null;
 			Scanner scannerDelimited = null;
+			String errorMsg = "Failed to load media data.";
 
 			try {
-				inputStream = new URL(params[0]).openStream();
+				inputStream = new URL(url).openStream();
 				scanner = new Scanner(inputStream);
 				scannerDelimited = scanner.useDelimiter("\\A");
 
@@ -116,7 +120,7 @@ public class SambaApi {
 				}
 			}
 			catch (Exception e) {
-				Log.e(getClass().getName(), "Error opening JSON guys: " + e.getMessage() + "\n" + e.getCause(), e);
+				errorMsg = "Error opening server request: " + e.getMessage() + "\n" + e.getCause();
 			}
 			finally {
 				try {
@@ -130,19 +134,19 @@ public class SambaApi {
 						scannerDelimited.close();
 				}
 				catch (IOException e) {
-					Log.e(getClass().getName(), "Error closing JSON guys: " + e.getMessage() + "\n" + e.getCause(), e);
+					errorMsg = "Error closing server request: " + e.getMessage() + "\n" + e.getCause();
 				}
 			}
+
+			listener.onMediaResponseError(errorMsg, request);
 
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(SambaMedia media) {
-			if (media == null) {
-				listener.onMediaResponseError(new Exception("Media loaded returned null."));
+			if (media == null)
 				return;
-			}
 
 			listener.onMediaResponse(media);
 		}
@@ -151,29 +155,27 @@ public class SambaApi {
 			try {
 				String qualifier = json.getString("qualifier").toLowerCase();
 
-				if (!qualifier.equals("video"))//json.has("deliveryRules") ? )
+				if (!qualifier.equals("video") && !qualifier.equals("live"))
 					return null;
 
 				SambaMedia media = new SambaMedia();
-				JSONArray rules = json.has("deliveryRules") ? json.getJSONArray("deliveryRules") : null;
-				JSONArray thumbs = json.has("thumbnails") ? json.getJSONArray("thumbnails") : null;
-				String defaultOutput = json.getJSONObject("project").getString("defaultOutput");
-				JSONObject rule = null;
-				JSONArray outputs;
-				JSONObject output;
-				int i;
 
 				media.title = json.getString("title");
 
-				if (rules != null) {
+				if (json.has("deliveryRules")) {
+					JSONArray rules = json.getJSONArray("deliveryRules");
+					String defaultOutput = json.getJSONObject("project").getString("defaultOutput");
+					JSONObject rule = null;
+					JSONArray outputs;
+					JSONObject output;
+
 					// looks for HLS delivery or the last taken
-					for (i = rules.length(); i-- > 0; ) {
+					for (int i = rules.length(); i-- > 0; ) {
 						rule = rules.getJSONObject(i);
 						media.type = rule.getString("urlType").toLowerCase();
 
-						if (media.type.equals("hls")) {
+						if (media.type.equals("hls"))
 							break;
-						}
 					}
 
 					if (media.type.equals("hls"))
@@ -190,11 +192,20 @@ public class SambaApi {
 						}
 					}
 				}
-				else if (json.getJSONObject("liveOutput") != null)
+				else if (json.has("liveOutput")) {
 					media.url = json.getJSONObject("liveOutput").getString("baseUrl");
-//Log.i("req", json.getJSONObject("liveOutput") + " " + media.url);
-				if (thumbs.length() > 0)
-					media.thumbUrl = thumbs.getJSONObject(0).getString("url");
+
+					// media type relies on URL
+					if (media.url.contains(".m3u8"))
+						media.type = "hls";
+				}
+
+				if (json.has("thumbnails")) {
+					JSONArray thumbs = json.getJSONArray("thumbnails");
+
+					if (thumbs.length() > 0)
+						media.thumbUrl = thumbs.getJSONObject(0).getString("url");
+				}
 
 				return media;
 			}

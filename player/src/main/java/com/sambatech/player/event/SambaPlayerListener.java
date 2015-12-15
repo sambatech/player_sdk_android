@@ -24,4 +24,6 @@ public abstract class SambaPlayerListener {
 	public void onFullscreenExit(SambaEvent event) {}
 
 	public void onFinish(SambaEvent event) {}
+
+	public void onError(SambaEvent event) {}
 }

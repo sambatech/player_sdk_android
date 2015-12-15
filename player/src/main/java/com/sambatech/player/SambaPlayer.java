@@ -45,6 +45,11 @@ public class SambaPlayer extends FrameLayout {
 	 * @param media The media to be played.
 	 */
 	public void setMedia(SambaMedia media) {
+		if (media == null) {
+			//SambaEventBus.post(new SambaEvent(SambaEventType.ERROR, ));
+			throw new IllegalArgumentException("Media data is null.");
+		}
+
 		this.media = media;
 
         //Creating player
@@ -140,7 +145,7 @@ public class SambaPlayer extends FrameLayout {
 		player.addPlaybackListener(new ExoplayerWrapper.PlaybackListener() {
             @Override
             public void onStateChanged(boolean playWhenReady, int playbackState) {
-                Log.i("evt", "state: " + playWhenReady + " " + playbackState);
+                Log.i("player", "state: " + playWhenReady + " " + playbackState);
 
 				switch (playbackState) {
 					case 4:
@@ -158,14 +163,14 @@ public class SambaPlayer extends FrameLayout {
 
             @Override
             public void onError(Exception e) {
-                Log.i("evt", "error", e);
+                Log.i("player", "error", e);
 				SambaEventBus.post(new SambaEvent(SambaEventType.ERROR, e));
             }
 
             @Override
             public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-                Log.i("evt", "size: " + width + ' ' + height + ' ' + unappliedRotationDegrees + ' ' + pixelWidthHeightRatio);
-				SambaEventBus.post(new SambaEvent(SambaEventType.ERROR, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
+                Log.i("player", "size: " + width + ' ' + height + ' ' + unappliedRotationDegrees + ' ' + pixelWidthHeightRatio);
+				SambaEventBus.post(new SambaEvent(SambaEventType.RESIZE, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
             }
         });
 

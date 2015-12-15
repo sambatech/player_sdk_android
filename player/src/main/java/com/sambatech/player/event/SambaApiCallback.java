@@ -1,11 +1,12 @@
 package com.sambatech.player.event;
 
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaMediaRequest;
 
 /**
  * Listeners representing server responses.
  *
- * @author zanol - 4/12/15
+ * @author Leandro Zanol - 4/12/15
  */
 public abstract class SambaApiCallback {
 
@@ -13,5 +14,5 @@ public abstract class SambaApiCallback {
 
 	public void onMediaListResponse(SambaMedia[] mediaList) {}
 
-	public void onMediaResponseError(Exception e) {}
+	public void onMediaResponseError(String msg, SambaMediaRequest request) {}
 }

@@ -43,7 +43,7 @@ public class SambaEventBus {
 						listeners.put(k, new ArrayList<>());
 
 					listeners.get(k).add(listener);
-					Log.i("evt", k + " " + listeners.get(k).size());
+					Log.i("evt", "add: " + k + " " + listeners.get(k).size());
 				}
 			}
 		}
@@ -72,7 +72,7 @@ public class SambaEventBus {
 
 			try {
 				for (Object listener : listeners.get(k)) {
-					Log.i("player", "on" + k.substring(0, 1).toUpperCase() + k.substring(1));
+					Log.i("evt", "on" + k.substring(0, 1).toUpperCase() + k.substring(1));
 					listener.getClass().getDeclaredMethod("on" + k.substring(0, 1).toUpperCase() + k.substring(1), SambaEvent.class).invoke(listener, e);
 				}
 			}

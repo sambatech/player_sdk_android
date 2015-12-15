@@ -11,5 +11,6 @@ public enum SambaEventType {
 	FINISH,
 	FULLSCREEN,
 	FULLSCREEN_EXIT,
+	RESIZE,
 	ERROR
 }
