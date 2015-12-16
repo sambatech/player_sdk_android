@@ -33,51 +33,57 @@ public class SambaEventBus {
 		private HashMap<String, List<Object>> listeners = new HashMap<>();
 
 		public void subscribe(Object listener) {
+			String type = listener.getClass().getSuperclass().getSimpleName();
 			String k;
 
 			for (Method m : listener.getClass().getDeclaredMethods()) {
-				if (Modifier.isPublic(m.getModifiers())) {
-					k = m.getName().substring(2).toLowerCase();
+				if (!Modifier.isPublic(m.getModifiers()))
+					continue;
 
-					if (!listeners.containsKey(k))
-						listeners.put(k, new ArrayList<>());
+				k = String.format("%s:%s", type, m.getName().substring(2).toLowerCase());
 
-					listeners.get(k).add(listener);
-					Log.i("evt", "add: " + k + " " + listeners.get(k).size());
-				}
+				if (!listeners.containsKey(k))
+					listeners.put(k, new ArrayList<>());
+
+				listeners.get(k).add(listener);
 			}
 		}
 
 		public void unsubscribe(Object listener) {
-			// TODO
-			/*for (Method m : listener.getClass().getDeclaredMethods()) {
-				k = m.getName().substring(2).toUpperCase();
+			String type = listener.getClass().getSuperclass().getSimpleName();
+			String k;
+			List<Object> ltnList;
 
-				if (listeners.containsKey(k))
-					listeners.remove(k);
-			}*/
+			for (Method m : listener.getClass().getDeclaredMethods()) {
+				k = String.format("%s:%s", type, m.getName().substring(2).toLowerCase());
+
+				if (listeners.containsKey(k)) {
+					ltnList = listeners.get(k);
+
+					if (ltnList.contains(listener))
+						ltnList.remove(listener);
+
+					if (ltnList.size() == 0)
+						listeners.remove(k);
+				}
+			}
 		}
 
 		public void post(SambaEvent e) {
-			String k = e.getType().toString().toLowerCase();
+			String t = e.getType().toString().toLowerCase();
+			String k = String.format("%s:%s", e.getType().getClass().getEnclosingClass().getSimpleName(), t);
 
-			// TODO
-			/*KvPair kvPair = listeners.get(k);
-
-			for (Method m : kvPair.getValue())
-				m.invoke(kvPair.getKey(), e);*/
+			t = t.substring(0, 1).toUpperCase() + t.substring(1);
 
 			if (!listeners.containsKey(k))
 				return;
 
 			try {
-				for (Object listener : listeners.get(k)) {
-					Log.i("evt", "on" + k.substring(0, 1).toUpperCase() + k.substring(1));
-					listener.getClass().getDeclaredMethod("on" + k.substring(0, 1).toUpperCase() + k.substring(1), SambaEvent.class).invoke(listener, e);
-				}
+				for (Object listener : listeners.get(k))
+					listener.getClass().getDeclaredMethod("on" + t, SambaEvent.class).invoke(listener, e);
 			}
 			catch (Exception exp) {
-				//exp.printStackTrace();
+				Log.e("evt", "Error trying to lookup or invoke method.", exp);
 			}
 		}
 	}

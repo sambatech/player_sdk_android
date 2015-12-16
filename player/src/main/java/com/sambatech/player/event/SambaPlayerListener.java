@@ -7,6 +7,18 @@ package com.sambatech.player.event;
  */
 public abstract class SambaPlayerListener {
 
+	public enum EventType implements SambaEventType {
+		LOAD,
+		PLAY,
+		PAUSE,
+		STOP,
+		FINISH,
+		FULLSCREEN,
+		FULLSCREEN_EXIT,
+		RESIZE,
+		ERROR
+	}
+
 	public void onLoad(SambaEvent event) {}
 
 	public void onStart(SambaEvent event) {}

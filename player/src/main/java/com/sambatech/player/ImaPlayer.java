@@ -225,6 +225,9 @@ public class ImaPlayer {
 				case CONTENT_RESUME_REQUESTED:
 					resumeContent();
 					break;
+				case CLICKED:
+					Log.i("ima", "click!");
+					break;
 				default:
 					break;
 			}

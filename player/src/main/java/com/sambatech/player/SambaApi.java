@@ -1,7 +1,9 @@
 package com.sambatech.player;
 
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.sambatech.player.event.SambaApiCallback;
@@ -10,7 +12,6 @@ import com.sambatech.player.model.SambaMediaRequest;
 
 import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -26,7 +27,6 @@ import java.util.Scanner;
 public class SambaApi {
 
 	private Activity activity;
-	private boolean inited = false;
 	private String accessToken;
 
 	public SambaApi(Activity activity, String accessToken) {
@@ -159,6 +159,7 @@ public class SambaApi {
 					return null;
 
 				SambaMedia media = new SambaMedia();
+				JSONObject playerConfig = json.getJSONObject("playerConfig");
 
 				media.title = json.getString("title");
 
@@ -203,13 +204,23 @@ public class SambaApi {
 				if (json.has("thumbnails")) {
 					JSONArray thumbs = json.getJSONArray("thumbnails");
 
-					if (thumbs.length() > 0)
-						media.thumbUrl = thumbs.getJSONObject(0).getString("url");
+					if (thumbs.length() > 0 && !thumbs.getJSONObject(0).isNull("url")) {
+						/*Bitmap bmp = BitmapFactory.decodeStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream());
+						bmp.setDensity(Bitmap.DENSITY_NONE);
+						media.thumb = new BitmapDrawable(activity.getResources(), bmp);*/
+						media.thumb = Drawable.createFromStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream(), "Thumbnail");
+					}
 				}
+
+				if (playerConfig.has("theme"))
+					media.themeColor = (int)Long.parseLong("FF" + playerConfig.getString("theme").replaceAll("^#?", ""), 16);
+
+				if (media.thumb == null)
+					media.thumb = ContextCompat.getDrawable(activity, R.drawable.ic_action_play);
 
 				return media;
 			}
-			catch (JSONException e) {
+			catch (Exception e) {
 				Log.e(getClass().getName(), "Failed to search media", e);
 			}
 

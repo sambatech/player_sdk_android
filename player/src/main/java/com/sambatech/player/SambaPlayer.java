@@ -3,6 +3,7 @@ package com.sambatech.player;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -15,7 +16,6 @@ import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlL
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
-import com.sambatech.player.event.SambaEventType;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 
@@ -46,7 +46,7 @@ public class SambaPlayer extends FrameLayout {
 	 */
 	public void setMedia(SambaMedia media) {
 		if (media == null) {
-			//SambaEventBus.post(new SambaEvent(SambaEventType.ERROR, ));
+			//SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, ));
 			throw new IllegalArgumentException("Media data is null.");
 		}
 
@@ -74,7 +74,7 @@ public class SambaPlayer extends FrameLayout {
 	public void stop() {
 		player.pause();
 		// TODO: seekTo(0)
-		SambaEventBus.post(new SambaEvent(SambaEventType.STOP));
+		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.STOP));
 	}
 
 	// TODO: seek(float secs)
@@ -142,6 +142,16 @@ public class SambaPlayer extends FrameLayout {
                 new Video(media.url, videoType),
                 media.title, media.adUrl == null || media.adUrl.isEmpty());
 
+		player.setLogoImage(media.thumb);
+		player.setSeekbarColor(media.themeColor);
+
+		player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.ic_action_share), getContext().getString(R.string.share_facebook), new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(getContext(), "Share Facebook!", Toast.LENGTH_LONG).show();
+			}
+		});
+
 		player.addPlaybackListener(new ExoplayerWrapper.PlaybackListener() {
             @Override
             public void onStateChanged(boolean playWhenReady, int playbackState) {
@@ -150,45 +160,45 @@ public class SambaPlayer extends FrameLayout {
 				switch (playbackState) {
 					case 4:
 						if (!playWhenReady)
-							SambaEventBus.post(new SambaEvent(SambaEventType.PAUSE));
+							SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
 						break;
 					/*case 3:
 						if (!playWhenReady)
-							SambaEventBus.post(new SambaEvent(SambaEventType.PAUSE, "Pause..."));
+							SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE, "Pause..."));
 						break;*/
 					case 5:
-						SambaEventBus.post(new SambaEvent(SambaEventType.FINISH));
+						SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
 				}
             }
 
             @Override
             public void onError(Exception e) {
                 Log.i("player", "error", e);
-				SambaEventBus.post(new SambaEvent(SambaEventType.ERROR, e));
+				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, e));
             }
 
             @Override
             public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
                 Log.i("player", "size: " + width + ' ' + height + ' ' + unappliedRotationDegrees + ' ' + pixelWidthHeightRatio);
-				SambaEventBus.post(new SambaEvent(SambaEventType.RESIZE, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
+				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.RESIZE, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
             }
         });
 
 		player.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
 			@Override
 			public void onPlay() {
-				SambaEventBus.post(new SambaEvent(SambaEventType.PLAY));
+				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
 			}
 		});
 		player.setFullscreenCallback(new PlaybackControlLayer.FullscreenCallback() {
 			@Override
 			public void onGoToFullscreen() {
-				SambaEventBus.post(new SambaEvent(SambaEventType.FULLSCREEN, "Fullscreen"));
+				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN, "Fullscreen"));
 			}
 
 			@Override
 			public void onReturnFromFullscreen() {
-				SambaEventBus.post(new SambaEvent(SambaEventType.FULLSCREEN_EXIT, "Fullscreen exit"));
+				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN_EXIT, "Fullscreen exit"));
 			}
 		});
 

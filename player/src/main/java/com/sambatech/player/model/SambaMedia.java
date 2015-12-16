@@ -1,5 +1,7 @@
 package com.sambatech.player.model;
 
+import android.graphics.drawable.Drawable;
+
 import java.lang.reflect.Field;
 
 /**
@@ -10,12 +12,13 @@ public class SambaMedia {
 	public String id;
 	public String title = "";
 	public String url;
-	public String thumbUrl;
 	public String type = "";
 	public Integer clientId;
 	public Integer categoryId;
 	public Project project;
 	public String adUrl;
+	public Drawable thumb;
+	public int themeColor = 0xFF72BE44;
 
 	@Override
 	public String toString() {
