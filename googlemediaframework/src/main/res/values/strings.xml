@@ -24,4 +24,6 @@ limitations under the License.
     <string name="time_current">Current time</string>
     <string name="pause">Pause</string>
     <string name="logo_image">Logo image</string>
+    <string name="time_separator">/</string>
+    <string name="time">00:00</string>
 </resources>

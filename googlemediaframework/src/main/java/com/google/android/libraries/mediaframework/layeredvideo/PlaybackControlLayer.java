@@ -1016,12 +1016,12 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
    * Ensure that the chrome, control, and text colors displayed on the screen are correct.
    */
   public void updateColors() {
-    currentTime.setTextColor(textColor);
+    /*currentTime.setTextColor(textColor);
     endTime.setTextColor(textColor);
     videoTitleView.setTextColor(textColor);
 
     fullscreenButton.setColorFilter(controlColor);
-    pausePlayButton.setColorFilter(controlColor);
+    pausePlayButton.setColorFilter(controlColor);*/
     seekBar.getProgressDrawable().setColorFilter(seekbarColor, PorterDuff.Mode.SRC_ATOP);
     seekBar.getThumb().setColorFilter(seekbarColor, PorterDuff.Mode.SRC_ATOP);
 
@@ -1032,12 +1032,12 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
       seekBar.getThumb().mutate().setAlpha(0);
     }
 
-    for (ImageButton imageButton : actionButtons) {
+    /*for (ImageButton imageButton : actionButtons) {
       imageButton.setColorFilter(controlColor);
     }
 
     topChrome.setBackgroundColor(chromeColor);
-    bottomChrome.setBackgroundColor(chromeColor);
+    bottomChrome.setBackgroundColor(chromeColor);*/
   }
 
   /**
