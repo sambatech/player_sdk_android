@@ -39,6 +39,22 @@ public class MainActivity extends Activity {
 		requestMediaList();
 	}
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+
+		if (player != null && player.isReady())
+			player.pause();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		if (player != null && player.isReady())
+			player.play();
+	}
+
 	private void initPlayer() {
 		//p.setListener(new SambaPlayerListener() {...});
 		SambaEventBus.subscribe(new SambaPlayerListener() {

@@ -30,6 +30,7 @@ public class SambaPlayer extends FrameLayout {
 	private ImaPlayer imaPlayer;
 	private SambaMedia media = new SambaMedia();
 	private SambaPlayerListener listener;
+	private boolean _isReady;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -107,6 +108,10 @@ public class SambaPlayer extends FrameLayout {
 		return this;
 	}
 
+	public boolean isReady() {
+		return _isReady;
+	}
+
 	private void createPlayer() {
         if (media.url == null || media.url.isEmpty()) {
 			Toast.makeText(getContext(), "The requested media has no URL!", Toast.LENGTH_LONG).show();
@@ -142,7 +147,6 @@ public class SambaPlayer extends FrameLayout {
                 new Video(media.url, videoType),
                 media.title, media.adUrl == null || media.adUrl.isEmpty());
 
-		player.setLogoImage(media.thumb);
 		player.setSeekbarColor(media.themeColor);
 
 		player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.ic_action_share), getContext().getString(R.string.share_facebook), new OnClickListener() {
@@ -208,6 +212,8 @@ public class SambaPlayer extends FrameLayout {
 
 		if (media.adUrl != null && !media.adUrl.isEmpty())
 			imaPlayer = new ImaPlayer((Activity)getContext(), this, media.adUrl);
+
+		_isReady = true;
 	}
 
 	private void applyAttributes(TypedArray attrs) {

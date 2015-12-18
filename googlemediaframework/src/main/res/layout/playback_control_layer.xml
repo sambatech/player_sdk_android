@@ -40,6 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
+            android:layout_marginLeft="3dp"
             android:layout_toLeftOf="@+id/actions_container"
             android:layout_toRightOf="@id/logo_image"
             android:ellipsize="end"
@@ -126,7 +127,7 @@
             android:layout_weight="0"
             android:layout_gravity="bottom"
             android:background="@android:color/transparent"
-            android:src="@drawable/ic_action_full_screen"
+            android:src="@drawable/fullscreen"
             tools:ignore="RtlHardcoded" />
     </LinearLayout>
 </FrameLayout>
