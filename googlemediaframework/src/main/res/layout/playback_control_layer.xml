@@ -54,7 +54,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="8dp"
             android:orientation="horizontal"
             tools:ignore="RtlHardcoded" />
 
@@ -71,63 +71,56 @@
 
     <LinearLayout
         android:id="@+id/bottom_chrome"
+        android:background="@drawable/controls_bottom_background"
         android:layout_width="match_parent"
         android:layout_height="100dp"
+        android:orientation="horizontal"
         android:layout_gravity="bottom"
-        android:background="@drawable/controls_bottom_background"
-        android:orientation="horizontal">
+        android:layout_margin="0dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp">
 
-        <TextView
-            android:contentDescription="@string/time_current"
-            android:id="@+id/time_current"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:layout_gravity="bottom"
-            android:paddingBottom="5dp"
-            android:textColor="@android:color/white"
-            android:text="@string/time"
-            tools:ignore="RtlHardcoded" />
+        <LinearLayout
+            style="@style/control_bottom">
 
-        <TextView
-            android:id="@+id/time_separator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:padding="5dp"
-            android:text="@string/time_separator"
-            android:textColor="@color/text_gray" />
+            <TextView
+                android:contentDescription="@string/time_current"
+                android:id="@+id/time_current"
+                tools:ignore="RtlHardcoded"
+                android:layout_marginLeft="15dp"
+                style="@style/time" />
 
-        <TextView
-            android:contentDescription="@string/time_duration"
-            android:id="@+id/time_duration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_gravity="bottom"
-            android:paddingBottom="5dp"
-            android:text="@string/time"
-            android:textColor="@color/text_gray" />
+            <TextView
+                android:id="@+id/time_separator"
+                android:padding="5dp"
+                android:text="@string/time_separator"
+                android:textColor="@color/text_gray"
+                style="@style/time" />
+
+            <TextView
+                android:contentDescription="@string/time_duration"
+                android:id="@+id/time_duration"
+                android:layout_marginRight="10dp"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/text_gray"
+                style="@style/time" />
+        </LinearLayout>
 
         <SeekBar
             android:contentDescription="@string/seekbar"
             android:id="@+id/mediacontroller_progress"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            style="@style/control_bottom" />
 
         <ImageButton
             android:contentDescription="@string/fullscreen_button"
             android:id="@+id/fullscreen"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="4dp"
-            android:layout_weight="0"
-            android:layout_gravity="bottom"
-            android:background="@android:color/transparent"
             android:src="@drawable/fullscreen"
-            tools:ignore="RtlHardcoded" />
+            android:background="@android:color/transparent"
+            android:paddingBottom="6dp"
+            style="@style/control_bottom" />
     </LinearLayout>
 </FrameLayout>

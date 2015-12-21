@@ -958,11 +958,11 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
   public void updateActionButtons() {
     actionButtonsContainer.removeAllViews();
 
-    if (isFullscreen) {
+    //if (isFullscreen) {
       for (ImageButton imageButton : actionButtons) {
         actionButtonsContainer.addView(imageButton);
       }
-    } else {
+    /*} else {
       ImageButton overflowButton = new ImageButton(getLayerManager().getActivity());
       overflowButton.setContentDescription(getLayerManager()
           .getActivity()
@@ -1009,7 +1009,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
       overflowButton.setLayoutParams(layoutParams);
       overflowButton.setColorFilter(controlColor);
       actionButtonsContainer.addView(overflowButton);
-    }
+    }*/
   }
 
   /**
