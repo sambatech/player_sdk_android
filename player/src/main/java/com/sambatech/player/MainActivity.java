@@ -47,14 +47,6 @@ public class MainActivity extends Activity {
 			player.pause();
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-
-		if (player != null && player.isReady())
-			player.play();
-	}
-
 	private void initPlayer() {
 		//p.setListener(new SambaPlayerListener() {...});
 		SambaEventBus.subscribe(new SambaPlayerListener() {
@@ -113,7 +105,7 @@ public class MainActivity extends Activity {
 		SambaApi api = new SambaApi(this, "token");
 
 		api.requestMedia(new SambaMediaRequest[]{
-				new SambaMediaRequest("30183adb2092f87e5e6440f52b43662b", "a6f4795d02e6476618774561837b0cf7"),
+				new SambaMediaRequest("2835573d6ea8b213efe1ff1ab3354da8", "593da65e3f9f4c866a0c4a9685414c7d"),
 				new SambaMediaRequest("2835573d6ea8b213efe1ff1ab3354da8", "593da65e3f9f4c866a0c4a9685414c7d"),
 				new SambaMediaRequest("34f07cf52fd85ccfc41a39bcf499e83b", "0632f26a442ba9ba3bb9067a45e239e2"),
 				//new SambaMediaRequest("2835573d6ea8b213efe1ff1ab3354da8", null, null, "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8")

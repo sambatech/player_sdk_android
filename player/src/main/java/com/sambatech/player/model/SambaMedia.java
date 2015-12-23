@@ -19,6 +19,7 @@ public class SambaMedia {
 	public String adUrl;
 	public Drawable thumb;
 	public int themeColor = 0xFF72BE44;
+	public boolean isLive;
 
 	@Override
 	public String toString() {

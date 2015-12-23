@@ -19,6 +19,7 @@ package com.google.android.libraries.mediaframework.layeredvideo;
 import android.animation.Animator;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
@@ -356,7 +357,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
    * Contains the logo, video title, and other actions button. It can be tinted with a color for
    * branding.
    */
-  private RelativeLayout topChrome;
+  private LinearLayout topChrome;
 
   /**
    * This is the root view which contains all other views that make up the playback control layer.
@@ -526,7 +527,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
       container.setLayoutParams(originalContainerLayoutParams);
 
-      fullscreenButton.setImageResource(R.drawable.ic_action_full_screen);
+      fullscreenButton.setImageResource(R.drawable.fullscreen);
 
       isFullscreen = false;
     } else {
@@ -557,7 +558,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
           ViewGroup.LayoutParams.MATCH_PARENT,
           ViewGroup.LayoutParams.MATCH_PARENT));
 
-      fullscreenButton.setImageResource(R.drawable.ic_action_return_from_full_screen);
+      fullscreenButton.setImageResource(R.drawable.fullscreen_exit);
 
       isFullscreen = true;
     }
@@ -842,7 +843,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
     currentTime = (TextView) view.findViewById(R.id.time_current);
     logoImageView = (ImageView) view.findViewById(R.id.logo_image);
     playbackControlRootView = (FrameLayout) view.findViewById(R.id.middle_section);
-    topChrome = (RelativeLayout) view.findViewById(R.id.top_chrome);
+    topChrome = (LinearLayout) view.findViewById(R.id.top_chrome);
     bottomChrome = (LinearLayout) view.findViewById(R.id.bottom_chrome);
     actionButtonsContainer = (LinearLayout) view.findViewById(R.id.actions_container);
 
@@ -1022,8 +1023,8 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
     fullscreenButton.setColorFilter(controlColor);
     pausePlayButton.setColorFilter(controlColor);*/
-    seekBar.getProgressDrawable().setColorFilter(seekbarColor, PorterDuff.Mode.SRC_ATOP);
-    seekBar.getThumb().setColorFilter(seekbarColor, PorterDuff.Mode.SRC_ATOP);
+    //seekBar.getProgressDrawable().setColorFilter(seekbarColor, PorterDuff.Mode.SRC_ATOP);
+    //seekBar.getThumb().setColorFilter(seekbarColor, PorterDuff.Mode.SRC_ATOP);
 
     // Hide the thumb drawable if the SeekBar is disabled
     if (canSeek) {
@@ -1095,4 +1096,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
   public void setPlayCallback(PlayCallback playCallback) {
     this.playCallback = playCallback;
   }
+
+	public void hideSeek() {
+		seekBar.setVisibility(View.INVISIBLE);
+		//timeContainer.setVisibility(View.INVISIBLE);
+	}
 }

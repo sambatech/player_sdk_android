@@ -226,7 +226,7 @@ public class ImaPlayer {
 					resumeContent();
 					break;
 				case CLICKED:
-					Log.i("ima", "click!");
+					Log.i("ima", "click");
 					break;
 				default:
 					break;
@@ -372,7 +372,6 @@ public class ImaPlayer {
 		SambaEventBus.subscribe(new SambaPlayerListener() {
 			@Override
 			public void onPlay(SambaEvent e) {
-				Log.i("ima", e.getType() + " " + e.getData());
 				handlePlay();
 			}
 
@@ -394,12 +393,7 @@ public class ImaPlayer {
 
 			@Override
 			public void onPause(SambaEvent e) {
-				Log.i("ima", e.getType() + " " + e.getData());
-			}
-
-			@Override
-			public void onFinish(SambaEvent e) {
-				Log.i("ima", e.getType() + " " + e.getData());
+				pause();
 			}
 		});
 	}
@@ -587,7 +581,6 @@ public class ImaPlayer {
 	 */
 	private void handlePlay() {
 		if (!adsShown && adTagUrl != null) {
-			Log.i("player", contentPlayer+"");
 			contentPlayer.pause();
 			requestAd();
 			adsShown = true;

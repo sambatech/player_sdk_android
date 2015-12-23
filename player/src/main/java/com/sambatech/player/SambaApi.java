@@ -195,6 +195,7 @@ public class SambaApi {
 				}
 				else if (json.has("liveOutput")) {
 					media.url = json.getJSONObject("liveOutput").getString("baseUrl");
+					media.isLive = true;
 
 					// media type relies on URL
 					if (media.url.contains(".m3u8"))

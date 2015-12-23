@@ -149,7 +149,10 @@ public class SambaPlayer extends FrameLayout {
 
 		player.setSeekbarColor(media.themeColor);
 
-		player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.ic_action_share), getContext().getString(R.string.share_facebook), new OnClickListener() {
+		if (media.isLive)
+			player.setControlsVisible(false);
+
+		player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.share), getContext().getString(R.string.share_facebook), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Toast.makeText(getContext(), "Share Facebook!", Toast.LENGTH_LONG).show();

@@ -36,17 +36,19 @@ limitations under the License.
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginLeft">8dp</item>
         <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
     </style>
 
-    <style name="control_bottom" parent="control">
-        <item name="android:layout_gravity">bottom</item>
-    </style>
-
-    <style name="time" parent="control_bottom">
+    <style name="time" parent="control">
         <item name="android:text">@string/time_default</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textSize">13sp</item>
         <item name="android:layout_margin">0dp</item>
+    </style>
+
+    <style name="seekbar" parent="control">
+        <item name="android:thumb">@drawable/thumb</item>
+        <item name="android:progressDrawable">@drawable/seekbar_background</item>
     </style>
 
 </resources>

@@ -185,6 +185,11 @@ public class SimpleVideoPlayer {
     subtitleLayer.setVisibility(View.GONE);
   }
 
+  public void setControlsVisible(boolean value) {
+    if (!value)
+      playbackControlLayer.hideSeek();
+  }
+
   /**
    * Hides the top chrome (which displays the logo, title, and action buttons).
    */
