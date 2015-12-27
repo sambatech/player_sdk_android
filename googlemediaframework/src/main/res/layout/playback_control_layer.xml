@@ -120,14 +120,15 @@
                 android:id="@+id/mediacontroller_progress"
                 android:layout_width="0dp"
                 android:layout_weight="1"
-                style="@style/seekbar" />
+                android:thumb="@drawable/thumb"
+                android:progressDrawable="@drawable/seekbar_progress"
+                style="@style/control" />
 
             <ImageButton
                 android:contentDescription="@string/fullscreen_button"
                 android:id="@+id/fullscreen"
                 android:src="@drawable/fullscreen"
                 android:background="@android:color/transparent"
-                android:paddingBottom="6dp"
                 style="@style/control" />
         </LinearLayout>
     </LinearLayout>

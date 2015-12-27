@@ -16,6 +16,7 @@ public abstract class SambaPlayerListener {
 		FULLSCREEN,
 		FULLSCREEN_EXIT,
 		RESIZE,
+		CLICK,
 		ERROR
 	}
 
@@ -37,5 +38,8 @@ public abstract class SambaPlayerListener {
 
 	public void onFinish(SambaEvent event) {}
 
+	public void onClick(SambaEvent event) {}
+
 	public void onError(SambaEvent event) {}
+
 }

@@ -298,7 +298,7 @@ public class SimpleVideoPlayer {
   }
 
   /**
-   * Sets the color of the seekbar.
+   * Sets the color of the seekbar_progress.
    * @param color a color derived from the @{link Color} class
    *              (ex. {@link android.graphics.Color#RED}).
    */

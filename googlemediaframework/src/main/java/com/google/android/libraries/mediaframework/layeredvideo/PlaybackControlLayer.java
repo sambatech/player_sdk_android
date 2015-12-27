@@ -25,6 +25,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.os.Message;
 import android.view.Gravity;
@@ -253,7 +254,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
   private int textColor;
 
   /**
-   * Derived from the {@link Color} class (ex {@link Color#RED}), this is the color of the seekbar
+   * Derived from the {@link Color} class (ex {@link Color#RED}), this is the color of the seekbar_progress
    * track and thumb.
    */
   private int seekbarColor;
@@ -292,7 +293,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
   private boolean isFullscreen;
 
   /**
-   * Whether the seekbar is currently being dragged.
+   * Whether the seekbar_progress is currently being dragged.
    */
   private boolean isSeekbarDragging;
 
@@ -753,7 +754,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
   }
 
   /**
-   * Sets the color of the seekbar.
+   * Sets the color of the seekbar_progress.
    * @param color a color derived from the @{link Color} class (ex. {@link Color#RED}).
    */
   public void setSeekbarColor(int color) {
@@ -1023,7 +1024,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
     fullscreenButton.setColorFilter(controlColor);
     pausePlayButton.setColorFilter(controlColor);*/
-    //seekBar.getProgressDrawable().setColorFilter(seekbarColor, PorterDuff.Mode.SRC_ATOP);
+    ((LayerDrawable)seekBar.getProgressDrawable()).findDrawableByLayerId(android.R.id.progress).setColorFilter(seekbarColor, PorterDuff.Mode.ADD);
     //seekBar.getThumb().setColorFilter(seekbarColor, PorterDuff.Mode.SRC_ATOP);
 
     // Hide the thumb drawable if the SeekBar is disabled

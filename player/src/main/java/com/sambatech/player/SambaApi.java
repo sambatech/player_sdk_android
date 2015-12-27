@@ -213,7 +213,7 @@ public class SambaApi {
 					}
 				}
 
-				if (playerConfig.has("theme"))
+				if (playerConfig.has("theme") && !playerConfig.getString("theme").toLowerCase().equals("default"))
 					media.themeColor = (int)Long.parseLong("FF" + playerConfig.getString("theme").replaceAll("^#?", ""), 16);
 
 				if (media.thumb == null)

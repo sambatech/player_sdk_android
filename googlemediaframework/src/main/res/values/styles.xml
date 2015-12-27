@@ -46,9 +46,4 @@ limitations under the License.
         <item name="android:layout_margin">0dp</item>
     </style>
 
-    <style name="seekbar" parent="control">
-        <item name="android:thumb">@drawable/thumb</item>
-        <item name="android:progressDrawable">@drawable/seekbar_background</item>
-    </style>
-
 </resources>

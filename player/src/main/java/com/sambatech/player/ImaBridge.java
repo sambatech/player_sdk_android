@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -17,6 +18,7 @@ import com.google.ads.interactivemedia.v3.api.AdsManagerLoadedEvent;
 import com.google.ads.interactivemedia.v3.api.AdsRequest;
 import com.google.ads.interactivemedia.v3.api.ImaSdkFactory;
 import com.google.ads.interactivemedia.v3.api.ImaSdkSettings;
+import com.google.ads.interactivemedia.v3.api.player.ContentProgressProvider;
 import com.google.ads.interactivemedia.v3.api.player.VideoAdPlayer;
 import com.google.ads.interactivemedia.v3.api.player.VideoProgressUpdate;
 import com.google.android.exoplayer.ExoPlayer;
@@ -33,12 +35,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The ImaPlayer is responsible for displaying both videos and ads. This is accomplished using two
+ * The ImaBridge is responsible for displaying both videos and ads. This is accomplished using two
  * video players. The content player displays the user's video. When an ad is requested, the ad
  * video player is overlaid on the content video player. When the ad is complete, the ad video
  * player is destroyed and the content video player is displayed again.
  */
-public class ImaPlayer {
+public class ImaBridge {
 
 	private static String PLAYER_TYPE = "google/gmf-android";
 	private static String PLAYER_VERSION = "0.2.0";
@@ -117,6 +119,8 @@ public class ImaPlayer {
 	 */
 	private ViewGroup.LayoutParams originalContainerLayoutParams;
 
+	private ContentProgressProvider contentProgressProvider;
+
 	/**
 	 * A flag to indicate whether the ads has been shown.
 	 */
@@ -157,45 +161,6 @@ public class ImaPlayer {
 		}
 	};
 
-	/**
-	 * Listener for the content player
-	 */
-	private final ExoplayerWrapper.PlaybackListener contentPlaybackListener
-			= new ExoplayerWrapper.PlaybackListener() {
-
-		/**
-		 * We don't respond to errors.
-		 * @param e The error.
-		 */
-		@Override
-		public void onError(Exception e) {
-
-		}
-
-		/**
-		 * We notify the adLoader when the content has ended so it knows to play postroll ads.
-		 * @param playWhenReady Whether the video should play as soon as it is loaded.
-		 * @param playbackState The state of the Exoplayer instance.
-		 */
-		@Override
-		public void onStateChanged(boolean playWhenReady, int playbackState) {
-			if (playbackState == ExoPlayer.STATE_ENDED) {
-				adsLoader.contentComplete();
-			}
-		}
-
-		/**
-		 * We don't respond to size changes.
-		 * @param width The new width of the player.
-		 * @param height The new height of the player.
-		 * @param unappliedRotationDegrees The new rotation angle of the player thats not applied.
-		 */
-		@Override
-		public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-
-		}
-	};
-
 
 	/**
 	 * Sets up ads manager, responds to ad errors, and handles ad state changes.
@@ -226,8 +191,19 @@ public class ImaPlayer {
 					resumeContent();
 					break;
 				case CLICKED:
-					Log.i("ima", "click");
+					adPlayerContainer.setClickable(true);
+					adPlayerContainer.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							Log.i("ima", "click!!");
+						}
+					});
 					break;
+				case ALL_ADS_COMPLETED:
+					if (adsManager != null) {
+						adsManager.destroy();
+						adsManager = null;
+					}
 				default:
 					break;
 			}
@@ -272,7 +248,7 @@ public class ImaPlayer {
 
 		@Override
 		public void resumeAd() {
-			if(adPlayer != null) {
+			if (adPlayer != null) {
 				adPlayer.play();
 			}
 		}
@@ -298,20 +274,9 @@ public class ImaPlayer {
 		 */
 		@Override
 		public VideoProgressUpdate getAdProgress() {
-			VideoProgressUpdate vpu;
-
-			if (adPlayer == null && contentPlayer == null) {
-				// If neither player is available, indicate that the time is not ready.
-				vpu = VideoProgressUpdate.VIDEO_TIME_NOT_READY;
-			} else if (adPlayer != null) {
-				// If an ad is playing, report the progress of the ad player.
-				vpu = new VideoProgressUpdate(adPlayer.getCurrentPosition(),
-						adPlayer.getDuration());
-			} else {
-				// If the cotntent is playing, report the progress of the content player.
-				vpu = new VideoProgressUpdate((long)(contentPlayer.getCurrentTime() * 1000),
-						(long)(contentPlayer.getDuration() * 1000));
-			}
+			VideoProgressUpdate vpu = adPlayer != null && adPlayer.getDuration() > 0 ?
+					new VideoProgressUpdate(adPlayer.getCurrentPosition(), adPlayer.getDuration()) :
+					VideoProgressUpdate.VIDEO_TIME_NOT_READY;
 
 			if (oldVpu == null) {
 				oldVpu = vpu;
@@ -336,13 +301,13 @@ public class ImaPlayer {
 	 * @param sdkSettings The settings that should be used to configure the IMA SDK.
 	 * @param adTagUrl The URL containing the VAST document of the ad.
 	 */
-	public ImaPlayer(Activity activity,
+	public ImaBridge(Activity activity,
 					 SambaPlayer player,
 					 ImaSdkSettings sdkSettings,
 					 String adTagUrl) {
 		this.activity = activity;
-		this.contentPlayer = player;
-		this.container = (FrameLayout)player.getView();
+		contentPlayer = player;
+		container = (FrameLayout)player.getView();
 
 		if (adTagUrl != null) {
 			this.adTagUrl = Uri.parse(adTagUrl);
@@ -365,14 +330,26 @@ public class ImaPlayer {
 				ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.MATCH_PARENT));
 
-		this.originalContainerLayoutParams = container.getLayoutParams();
+		originalContainerLayoutParams = container.getLayoutParams();
+		contentProgressProvider = new ContentProgressProvider() {
+			@Override
+			public VideoProgressUpdate getContentProgress() {
+				return contentPlayer != null && contentPlayer.getDuration() > 0 ?
+						new VideoProgressUpdate((long)(contentPlayer.getCurrentTime()*1000), (long)contentPlayer.getDuration()) :
+						VideoProgressUpdate.VIDEO_TIME_NOT_READY;
+			}
+		};
 
 		// Listeners
 
 		SambaEventBus.subscribe(new SambaPlayerListener() {
 			@Override
 			public void onPlay(SambaEvent e) {
-				handlePlay();
+				if (!adsShown && ImaBridge.this.adTagUrl != null) {
+					contentPlayer.pause();
+					requestAd();
+					adsShown = true;
+				}
 			}
 
 			@Override
@@ -395,6 +372,12 @@ public class ImaPlayer {
 			public void onPause(SambaEvent e) {
 				pause();
 			}
+
+			@Override
+			public void onFinish(SambaEvent event) {
+				if (adsLoader != null)
+					adsLoader.contentComplete();
+			}
 		});
 	}
 
@@ -403,7 +386,7 @@ public class ImaPlayer {
 	 * @param player Video content player.
 	 * @param adTagUrl The URL containing the VAST document of the ad.
 	 */
-	public ImaPlayer(Activity activity,
+	public ImaBridge(Activity activity,
 					 SambaPlayer player,
 					 String adTagUrl) {
 		this(activity,
@@ -434,7 +417,7 @@ public class ImaPlayer {
 	}
 
 	/**
-	 * When you are finished using this {@link ImaPlayer}, make sure to call this method.
+	 * When you are finished using this {@link ImaBridge}, make sure to call this method.
 	 */
 	public void release() {
 		if (adPlayer != null) {
@@ -446,7 +429,6 @@ public class ImaPlayer {
 			adsManager = null;
 		}
 		adsLoader.contentComplete();
-		//contentPlayer.release(); TODO: tirar
 		adsLoader.removeAdsLoadedListener(adListener);
 	}
 
@@ -561,29 +543,20 @@ public class ImaPlayer {
 		AdDisplayContainer adDisplayContainer = ImaSdkFactory.getInstance().createAdDisplayContainer();
 		adDisplayContainer.setPlayer(videoAdPlayer);
 		adDisplayContainer.setAdContainer(adUiContainer);
+
 		AdsRequest request = ImaSdkFactory.getInstance().createAdsRequest();
 		request.setAdTagUrl(tagUrl);
-
+		request.setContentProgressProvider(contentProgressProvider);
 		request.setAdDisplayContainer(adDisplayContainer);
+
 		return request;
 	}
 
 	/**
-	 * Make the ads loader request an ad with the ad tag URL which this {@link ImaPlayer} was
+	 * Make the ads loader request an ad with the ad tag URL which this {@link ImaBridge} was
 	 * created with
 	 */
 	private void requestAd() {
 		adsLoader.requestAds(buildAdsRequest(adTagUrl.toString()));
-	}
-
-	/**
-	 * handle play callback, to request IMA ads
-	 */
-	private void handlePlay() {
-		if (!adsShown && adTagUrl != null) {
-			contentPlayer.pause();
-			requestAd();
-			adsShown = true;
-		}
 	}
 }
