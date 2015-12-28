@@ -126,7 +126,7 @@ public class SambaPlayer extends FrameLayout {
 
 		if (imaBridge != null) {
 			imaBridge.pause();
-			imaBridge.release();
+			imaBridge.destroy();
 			imaBridge = null;
 		}
 

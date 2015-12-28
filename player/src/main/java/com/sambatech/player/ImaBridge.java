@@ -138,7 +138,7 @@ public class ImaBridge {
 		 */
 		@Override
 		public void onError(Exception e) {
-
+			Log.i("ima", "ad player error: " + e.getMessage());
 		}
 
 		/**
@@ -180,6 +180,7 @@ public class ImaBridge {
 
 		@Override
 		public void onAdEvent(AdEvent event) {
+			Log.i("ima", event.getType() + "");
 			switch (event.getType()) {
 				case LOADED:
 					adsManager.start();
@@ -190,7 +191,7 @@ public class ImaBridge {
 				case CONTENT_RESUME_REQUESTED:
 					resumeContent();
 					break;
-				case CLICKED:
+				/*case CLICKED:
 					adPlayerContainer.setClickable(true);
 					adPlayerContainer.setOnClickListener(new View.OnClickListener() {
 						@Override
@@ -198,6 +199,10 @@ public class ImaBridge {
 							Log.i("ima", "click!!");
 						}
 					});
+					break;*/
+				case TAPPED:
+					if (adPlayer != null)
+						adPlayer.play();
 					break;
 				case ALL_ADS_COMPLETED:
 					if (adsManager != null) {
@@ -225,6 +230,11 @@ public class ImaBridge {
 		@Override
 		public void playAd() {
 			hideContentPlayer();
+			adPlayer.play();
+
+			// Notify the callbacks that the ad has begun playing.
+			for (VideoAdPlayer.VideoAdPlayerCallback callback : callbacks)
+				callback.onPlay();
 		}
 
 		@Override
@@ -467,16 +477,14 @@ public class ImaBridge {
 		// Move the ad player's surface layer to the foreground so that it is overlaid on the content
 		// player's surface layer (which is in the background).
 		adPlayer.moveSurfaceToForeground();
-		adPlayer.play();
 		adPlayer.disableSeeking();
 		adPlayer.setSeekbarColor(Color.YELLOW);
 		adPlayer.hideTopChrome();
 		adPlayer.setFullscreen(contentPlayer.isFullscreen());
+	}
 
-		// Notify the callbacks that the ad has begun playing.
-		for (VideoAdPlayer.VideoAdPlayerCallback callback : callbacks) {
-			callback.onPlay();
-		}
+	public void destroy() {
+		destroyAdPlayer();
 	}
 
 	/**
