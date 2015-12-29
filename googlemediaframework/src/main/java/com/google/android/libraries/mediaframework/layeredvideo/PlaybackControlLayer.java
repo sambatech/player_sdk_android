@@ -39,6 +39,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.exoplayer.util.PlayerControl;
 import com.google.android.libraries.mediaframework.R;
@@ -274,6 +275,11 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
    * {@link FullscreenCallback} associated with this object.
    */
   private ImageButton fullscreenButton;
+
+  /**
+   * Shows a menu for changing media quality.
+   */
+  private ImageButton outputButton;
 
   /**
    * This callback is triggered when going to fullscreen and returning from fullscreen.
@@ -838,6 +844,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
     // Bind fields to UI elements.
     pausePlayButton = (ImageButton) view.findViewById(R.id.pause);
     fullscreenButton = (ImageButton) view.findViewById((R.id.fullscreen));
+    outputButton = (ImageButton) view.findViewById((R.id.output));
     seekBar = (SeekBar) view.findViewById(R.id.mediacontroller_progress);
     videoTitleView = (TextView) view.findViewById(R.id.video_title);
     endTime = (TextView) view.findViewById(R.id.time_duration);
@@ -870,6 +877,13 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
         updateColors();
       }
     });
+
+	outputButton.setOnClickListener(new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			Toast.makeText(outputButton.getContext(), "Menu de qualidade", Toast.LENGTH_SHORT).show();
+		}
+	});
 
     seekBar.setMax(1000);
 

@@ -101,9 +101,10 @@
 
                 <TextView
                     android:id="@+id/time_separator"
-                    android:padding="5dp"
                     android:text="@string/time_separator"
                     android:textColor="@color/text_gray"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
                     style="@style/time" />
 
                 <TextView
@@ -125,7 +126,14 @@
                 style="@style/control" />
 
             <ImageButton
-                android:contentDescription="@string/fullscreen_button"
+                android:contentDescription="@string/output"
+                android:id="@+id/output"
+                android:src="@drawable/output"
+                android:background="@android:color/transparent"
+                style="@style/control" />
+
+            <ImageButton
+                android:contentDescription="@string/fullscreen"
                 android:id="@+id/fullscreen"
                 android:src="@drawable/fullscreen"
                 android:background="@android:color/transparent"

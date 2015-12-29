@@ -120,9 +120,6 @@ public class MainActivity extends Activity {
 			@Override
 			public void onMediaListResponse(SambaMedia[] mediaList) {
 				for (SambaMedia m : mediaList) {
-					if (m == null)
-						return;
-
 					if (m.title.isEmpty())
 						m.title = "Sem título";
 

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context="com.sambatech.player.MainActivity">
 
-    <com.sambatech.player.SambaPlayer
+    <com.sambatech.player.SambaPlayerView
         android:id="@+id/samba_player"
         android:layout_width="match_parent"
         android:layout_height="200dp" />

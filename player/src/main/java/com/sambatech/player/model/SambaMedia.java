@@ -5,7 +5,9 @@ import android.graphics.drawable.Drawable;
 import java.lang.reflect.Field;
 
 /**
- * @author tmiranda - 02/12/15
+ * Data entity representing a media.
+ *
+ * @author Thiago Miranda, Leandro Zanol - 02/12/15
  */
 public class SambaMedia {
 
@@ -13,12 +15,8 @@ public class SambaMedia {
 	public String title = "";
 	public String url;
 	public String type = "";
-	public Integer clientId;
-	public Integer categoryId;
-	public Project project;
 	public String adUrl;
 	public Drawable thumb;
-	public int themeColor = 0xFF72BE44;
 	public boolean isLive;
 
 	@Override

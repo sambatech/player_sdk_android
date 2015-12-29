@@ -9,6 +9,7 @@ public abstract class SambaPlayerListener {
 
 	public enum EventType implements SambaEventType {
 		LOAD,
+		UNLOAD,
 		PLAY,
 		PAUSE,
 		STOP,
@@ -21,6 +22,8 @@ public abstract class SambaPlayerListener {
 	}
 
 	public void onLoad(SambaEvent event) {}
+
+	public void onUnload(SambaEvent event) {}
 
 	public void onStart(SambaEvent event) {}
 

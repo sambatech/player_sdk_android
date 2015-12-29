@@ -1,10 +1,9 @@
-package com.sambatech.player;
+package com.sambatech.player.plugins;
 
 import android.app.Activity;
 import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -27,6 +26,7 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.google.android.libraries.mediaframework.layeredvideo.Util;
+import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
@@ -35,12 +35,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The ImaBridge is responsible for displaying both videos and ads. This is accomplished using two
+ * The ImaWrapper is responsible for displaying both videos and ads. This is accomplished using two
  * video players. The content player displays the user's video. When an ad is requested, the ad
  * video player is overlaid on the content video player. When the ad is complete, the ad video
  * player is destroyed and the content video player is displayed again.
  */
-public class ImaBridge {
+public class ImaWrapper {
 
 	private static String PLAYER_TYPE = "google/gmf-android";
 	private static String PLAYER_VERSION = "0.2.0";
@@ -311,10 +311,10 @@ public class ImaBridge {
 	 * @param sdkSettings The settings that should be used to configure the IMA SDK.
 	 * @param adTagUrl The URL containing the VAST document of the ad.
 	 */
-	public ImaBridge(Activity activity,
-					 SambaPlayer player,
-					 ImaSdkSettings sdkSettings,
-					 String adTagUrl) {
+	public ImaWrapper(Activity activity,
+					  SambaPlayer player,
+					  ImaSdkSettings sdkSettings,
+					  String adTagUrl) {
 		this.activity = activity;
 		contentPlayer = player;
 		container = (FrameLayout)player.getView();
@@ -350,12 +350,23 @@ public class ImaBridge {
 			}
 		};
 
-		// Listeners
-
 		SambaEventBus.subscribe(new SambaPlayerListener() {
 			@Override
+			public void onLoad(SambaEvent event) {
+				// TODO: inicializar indiretamente
+			}
+
+			@Override
+			public void onUnload(SambaEvent event) {
+				pause();
+				destroy();
+				release();
+				SambaEventBus.unsubscribe(this);
+			}
+
+			@Override
 			public void onPlay(SambaEvent e) {
-				if (!adsShown && ImaBridge.this.adTagUrl != null) {
+				if (!adsShown && ImaWrapper.this.adTagUrl != null) {
 					contentPlayer.pause();
 					requestAd();
 					adsShown = true;
@@ -396,9 +407,9 @@ public class ImaBridge {
 	 * @param player Video content player.
 	 * @param adTagUrl The URL containing the VAST document of the ad.
 	 */
-	public ImaBridge(Activity activity,
-					 SambaPlayer player,
-					 String adTagUrl) {
+	public ImaWrapper(Activity activity,
+					  SambaPlayer player,
+					  String adTagUrl) {
 		this(activity,
 				player,
 				ImaSdkFactory.getInstance().createImaSdkSettings(),
@@ -427,7 +438,7 @@ public class ImaBridge {
 	}
 
 	/**
-	 * When you are finished using this {@link ImaBridge}, make sure to call this method.
+	 * When you are finished using this {@link ImaWrapper}, make sure to call this method.
 	 */
 	public void release() {
 		if (adPlayer != null) {
@@ -561,7 +572,7 @@ public class ImaBridge {
 	}
 
 	/**
-	 * Make the ads loader request an ad with the ad tag URL which this {@link ImaBridge} was
+	 * Make the ads loader request an ad with the ad tag URL which this {@link ImaWrapper} was
 	 * created with
 	 */
 	private void requestAd() {

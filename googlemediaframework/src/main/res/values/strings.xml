@@ -18,7 +18,7 @@ limitations under the License.
 <resources>
     <string name="select_an_action">Select an action&#8230;</string>
     <string name="overflow">Overflow</string>
-    <string name="fullscreen_button">Fullscreen</string>
+    <string name="fullscreen">Fullscreen</string>
     <string name="time_duration">Duration</string>
     <string name="seekbar">Seekbar</string>
     <string name="time_current">Current time</string>
@@ -26,4 +26,5 @@ limitations under the License.
     <string name="logo_image">Logo image</string>
     <string name="time_separator">/</string>
     <string name="time_default">00:00</string>
+    <string name="output">Qualidade</string>
 </resources>

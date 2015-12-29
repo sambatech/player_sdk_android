@@ -9,6 +9,7 @@ import android.util.Log;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaRequest;
+import com.sambatech.player.model.SambaMediaConfig;
 
 import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
@@ -17,18 +18,24 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
  * Requests media data from server.
  *
- * @author tmiranda - 2/12/15
+ * @author Thiago Miranda, Leandro Zanol - 2/12/15
  */
 public class SambaApi {
 
 	private Activity activity;
 	private String accessToken;
 
+	/**
+	 * @param activity Reference to the current Activity
+	 * @param accessToken Configured SambaTech access token (ignored for now, pass an empty string or null)
+	 */
 	public SambaApi(Activity activity, String accessToken) {
 		// TODO: validar "accessToken"
 		this.activity = activity;
@@ -38,8 +45,8 @@ public class SambaApi {
 	/**
 	 * Requests a media from server.
 	 *
-	 * @param request - Request data
-	 * @param callback - Listener for server media response
+	 * @param request Request data
+	 * @param callback Listener for server media response
 	 */
 	public void requestMedia(SambaMediaRequest request, SambaApiCallback callback) {
 		new RequestMediaTask(callback).execute(request);
@@ -48,24 +55,26 @@ public class SambaApi {
 	/**
 	 * Requests several medias from server.
 	 *
-	 * @param requests - Several request data
-	 * @param callback - Listener for server media response
+	 * @param requests Several request data
+	 * @param callback Listener for server media response
 	 */
 	public void requestMedia(final SambaMediaRequest[] requests, final SambaApiCallback callback) {
 		SambaApiCallback callbackReq = new SambaApiCallback() {
 			private int counter = 0;
-			private SambaMedia[] mediaList = new SambaMedia[requests.length];
+			private List<SambaMedia> mediaList = new ArrayList<>();
 
 			@Override
 			public void onMediaResponse(SambaMedia media) {
-				callback.onMediaResponse(mediaList[counter++] = media);
+				callback.onMediaResponse(media);
+				mediaList.add(media);
 
-				if (counter == requests.length)
-					callback.onMediaListResponse(mediaList);
+				if (++counter == requests.length)
+					callback.onMediaListResponse(mediaList.toArray(new SambaMedia[mediaList.size()]));
 			}
 
 			@Override
 			public void onMediaResponseError(String msg, SambaMediaRequest request) {
+				++counter;
 				callback.onMediaResponseError(msg, request);
 			}
 		};
@@ -158,8 +167,9 @@ public class SambaApi {
 				if (!qualifier.equals("video") && !qualifier.equals("live"))
 					return null;
 
-				SambaMedia media = new SambaMedia();
+				SambaMediaConfig media = new SambaMediaConfig();
 				JSONObject playerConfig = json.getJSONObject("playerConfig");
+				JSONObject apiConfig = json.getJSONObject("apiConfig");
 
 				media.title = json.getString("title");
 
@@ -202,22 +212,26 @@ public class SambaApi {
 						media.type = "hls";
 				}
 
-				if (json.has("thumbnails")) {
-					JSONArray thumbs = json.getJSONArray("thumbnails");
+				JSONArray thumbs = json.optJSONArray("thumbnails");
 
-					if (thumbs.length() > 0 && !thumbs.getJSONObject(0).isNull("url")) {
-						/*Bitmap bmp = BitmapFactory.decodeStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream());
-						bmp.setDensity(Bitmap.DENSITY_NONE);
-						media.thumb = new BitmapDrawable(activity.getResources(), bmp);*/
-						media.thumb = Drawable.createFromStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream(), "Thumbnail");
-					}
+				if (thumbs.length() > 0 && !thumbs.getJSONObject(0).isNull("url")) {
+					/*Bitmap bmp = BitmapFactory.decodeStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream());
+					bmp.setDensity(Bitmap.DENSITY_NONE);
+					media.thumb = new BitmapDrawable(activity.getResources(), bmp);*/
+					media.thumb = Drawable.createFromStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream(), "Thumbnail");
 				}
+
+				if (media.thumb == null)
+					media.thumb = ContextCompat.getDrawable(activity, R.drawable.ic_action_play);
 
 				if (playerConfig.has("theme") && !playerConfig.getString("theme").toLowerCase().equals("default"))
 					media.themeColor = (int)Long.parseLong("FF" + playerConfig.getString("theme").replaceAll("^#?", ""), 16);
 
-				if (media.thumb == null)
-					media.thumb = ContextCompat.getDrawable(activity, R.drawable.ic_action_play);
+				if (apiConfig.has("sttm")) {
+					JSONObject sttm = apiConfig.getJSONObject("sttm");
+					media.sttmUrl = sttm.optString("url", "");
+					media.sttmKey = sttm.optString("key", "");
+				}
 
 				return media;
 			}
