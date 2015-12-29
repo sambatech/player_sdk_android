@@ -643,6 +643,10 @@ public class ExoplayerWrapper implements ExoPlayer.Listener, ChunkSampleSource.E
     player.seekTo(positionMs);
   }
 
+  public void stop() {
+    player.stop();
+  }
+
   /**
    * When you are finished using this object, make sure to call this method.
    */

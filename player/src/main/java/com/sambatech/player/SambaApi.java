@@ -67,15 +67,18 @@ public class SambaApi {
 			public void onMediaResponse(SambaMedia media) {
 				callback.onMediaResponse(media);
 				mediaList.add(media);
-
-				if (++counter == requests.length)
-					callback.onMediaListResponse(mediaList.toArray(new SambaMedia[mediaList.size()]));
+				checkLast();
 			}
 
 			@Override
 			public void onMediaResponseError(String msg, SambaMediaRequest request) {
-				++counter;
 				callback.onMediaResponseError(msg, request);
+				checkLast();
+			}
+
+			private void checkLast() {
+				if (++counter == requests.length)
+					callback.onMediaListResponse(mediaList.toArray(new SambaMedia[mediaList.size()]));
 			}
 		};
 
@@ -85,6 +88,8 @@ public class SambaApi {
 
 	private class RequestMediaTask extends AsyncTask<SambaMediaRequest, Void, SambaMedia> {
 		private SambaApiCallback listener;
+		private SambaMediaRequest request;
+		private String errorMsg;
 
 		public RequestMediaTask(SambaApiCallback listener) {
 			this.listener = listener;
@@ -92,14 +97,16 @@ public class SambaApi {
 
 		@Override
 		protected SambaMedia doInBackground(SambaMediaRequest... params) {
-			SambaMediaRequest request = params[0];
+			request = params[0];
+
 			String url = activity.getString(R.string.player_endpoint) + request.projectId +
 					(request.mediaId != null ? "/" + request.mediaId : "?" +
 							(request.streamUrls.length > 0 ? "alternateLive=" + request.streamUrls[0] : "streamName=" + request.streamName));
 			InputStream inputStream = null;
 			Scanner scanner = null;
 			Scanner scannerDelimited = null;
-			String errorMsg = "Failed to load media data.";
+
+			errorMsg = "Failed to load media data";
 
 			try {
 				inputStream = new URL(url).openStream();
@@ -129,7 +136,8 @@ public class SambaApi {
 				}
 			}
 			catch (Exception e) {
-				errorMsg = "Error opening server request: " + e.getMessage() + "\n" + e.getCause();
+				errorMsg = "Error opening server request";
+				Log.w(getClass().getSimpleName(), errorMsg, e);
 			}
 			finally {
 				try {
@@ -143,19 +151,20 @@ public class SambaApi {
 						scannerDelimited.close();
 				}
 				catch (IOException e) {
-					errorMsg = "Error closing server request: " + e.getMessage() + "\n" + e.getCause();
+					errorMsg = "Error closing server request";
+					Log.w(getClass().getSimpleName(), errorMsg, e);
 				}
 			}
-
-			listener.onMediaResponseError(errorMsg, request);
 
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(SambaMedia media) {
-			if (media == null)
+			if (media == null) {
+				listener.onMediaResponseError(errorMsg, request);
 				return;
+			}
 
 			listener.onMediaResponse(media);
 		}
@@ -222,7 +231,7 @@ public class SambaApi {
 				}
 
 				if (media.thumb == null)
-					media.thumb = ContextCompat.getDrawable(activity, R.drawable.ic_action_play);
+					media.thumb = ContextCompat.getDrawable(activity, R.mipmap.ic_launcher);
 
 				if (playerConfig.has("theme") && !playerConfig.getString("theme").toLowerCase().equals("default"))
 					media.themeColor = (int)Long.parseLong("FF" + playerConfig.getString("theme").replaceAll("^#?", ""), 16);
@@ -236,7 +245,7 @@ public class SambaApi {
 				return media;
 			}
 			catch (Exception e) {
-				Log.e(getClass().getName(), "Failed to search media", e);
+				Log.e(getClass().getSimpleName(), "Failed to search media", e);
 			}
 
 			return null;

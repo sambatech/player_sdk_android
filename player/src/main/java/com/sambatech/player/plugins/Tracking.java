@@ -62,7 +62,7 @@ public class Tracking {
 	}
 
 	private void track(String url) {
-		new UrlTracker().execute(media.sttmUrl);
+		new UrlTracker().execute(url);
 	}
 
 	private class UrlTracker extends AsyncTask<String, Void, Void> {

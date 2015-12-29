@@ -11,7 +11,6 @@ public interface SambaPlayer {
 
 	/**
 	 * Defines/overwrites current media.
-	 *
 	 * @param media The media to be played.
 	 */
 	void setMedia(SambaMedia media);
@@ -32,6 +31,12 @@ public interface SambaPlayer {
 
 	void stop();
 
+	/**
+	 * Moves the media to a specific position.
+	 * @param position New position of the media in seconds
+	 */
+	void seek(float position);
+
 	void setFullscreen(boolean flag);
 
 	boolean isFullscreen();
@@ -48,14 +53,12 @@ public interface SambaPlayer {
 
 	/**
 	 * Returns the view layer associated with the player.
-	 *
 	 * @return Android View layer
 	 */
 	View getView();
 
 	/**
 	 * Tells if the player is ready to play the media.
-	 *
 	 * @return Ready to play
 	 */
 	boolean isReady();

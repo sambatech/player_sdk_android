@@ -65,7 +65,6 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	public void play() {
-		Log.i("player", "play!");
 		player.play();
 	}
 
@@ -74,12 +73,13 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	public void stop() {
-		player.pause();
-		// TODO: seekTo(0)
+		player.stop();
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.STOP));
 	}
 
-	// TODO: seek(float secs)
+	public void seek(float position) {
+		player.seek((int) (position * 1000f));
+	}
 
 	public void setFullscreen(boolean flag) {
 		player.setFullscreen(flag);
@@ -124,7 +124,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 	private void createPlayer() {
         if (media.url == null || media.url.isEmpty()) {
-			Toast.makeText(getContext(), "The requested media has no URL!", Toast.LENGTH_LONG).show();
+			Toast.makeText(getContext(), "The requested media has no URL!", Toast.LENGTH_SHORT).show();
 			return;
 		}
 
@@ -175,14 +175,17 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 							SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
 						break;
 					case ExoPlayer.STATE_ENDED:
+						pause();
 						SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
+						break;
 				}
 			}
 
 			@Override
 			public void onError(Exception e) {
 				Log.i("player", "error", e);
-				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, e));
+				destroy();
+				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, e.getMessage()));
 			}
 
 			@Override
@@ -195,6 +198,9 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		player.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
 			@Override
 			public void onPlay() {
+				if (player.getPlaybackState() == ExoPlayer.STATE_ENDED)
+					seek(0);
+
 				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
 			}
 		});
@@ -210,14 +216,6 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN_EXIT));
 			}
 		});
-
-		/*setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Log.i("player", "click!!");
-				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.CLICK));
-			}
-		});*/
 
 		// TODO: desacoplar
 		if (media.adUrl != null && !media.adUrl.isEmpty())

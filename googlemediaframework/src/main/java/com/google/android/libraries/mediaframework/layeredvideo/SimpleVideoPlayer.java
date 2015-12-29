@@ -116,9 +116,7 @@ public class SimpleVideoPlayer {
 
     layerManager.getExoplayerWrapper().setTextListener(subtitleLayer);
 
-    if (startPostitionMs > 0) {
-      layerManager.getExoplayerWrapper().seekTo(startPostitionMs);
-    }
+    seek(startPostitionMs);
   }
 
   /**
@@ -143,6 +141,10 @@ public class SimpleVideoPlayer {
    */
   public void addPlaybackListener(ExoplayerWrapper.PlaybackListener listener) {
     layerManager.getExoplayerWrapper().addListener(listener);
+  }
+
+  public int getPlaybackState() {
+    return layerManager.getExoplayerWrapper().getPlaybackState();
   }
 
   /**
@@ -251,6 +253,21 @@ public class SimpleVideoPlayer {
     videoSurfaceLayer.setAutoplay(autoplay);
 
     layerManager.getControl().start();
+  }
+
+  /**
+   * Moves media to a specific position.
+   * @param posMs The position in MS
+   */
+  public void seek(int posMs) {
+    if (posMs < 0)
+      return;
+
+    layerManager.getExoplayerWrapper().seekTo(posMs);
+  }
+
+  public void stop() {
+    layerManager.getExoplayerWrapper().stop();
   }
 
   /**
