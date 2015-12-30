@@ -651,6 +651,7 @@ public class ExoplayerWrapper implements ExoPlayer.Listener, ChunkSampleSource.E
    * When you are finished using this object, make sure to call this method.
    */
   public void release() {
+    playbackListeners.clear();
     rendererBuilder.cancel();
     rendererBuildingState = RENDERER_BUILDING_STATE_IDLE;
     surface = null;

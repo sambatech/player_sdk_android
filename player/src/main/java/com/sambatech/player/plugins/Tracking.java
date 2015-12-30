@@ -9,14 +9,15 @@ import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMediaConfig;
-import com.sambatech.player.utils.Helpers;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeSet;
 
 /**
  * Plugin responsible for sending different kinds of player media tracking data.
@@ -35,46 +36,36 @@ public class Tracking {
 			public void onLoad(SambaEvent event) {
 				player = (SambaPlayer) event.getData();
 				media = (SambaMediaConfig) player.getMedia();
-
-				init();
 			}
 
 			@Override
 			public void onStart(SambaEvent event) {
+				init();
 
-			}
-
-			@Override
-			public void onPlay(SambaEvent event) {
 				if (sttm != null)
-					sttm.track("play");
-			}
-
-			@Override
-			public void onPause(SambaEvent event) {
-			}
-
-			@Override
-			public void onStop(SambaEvent event) {
+					sttm.trackStart();
 			}
 
 			@Override
 			public void onProgress(SambaEvent event) {
 				if (sttm != null)
-					sttm.track("r00,r01,r02,r03,r04");
+					sttm.trackProgress((float)event.getDataAll()[0], (float)event.getDataAll()[1]);
 			}
 
 			@Override
 			public void onFinish(SambaEvent event) {
-
+				if (sttm != null)
+					sttm.trackComplete();
 			}
 
 			@Override
 			public void onUnload(SambaEvent event) {
 				SambaEventBus.unsubscribe(this);
 
-				if (sttm != null)
+				if (sttm != null) {
 					sttm.destroy();
+					sttm = null;
+				}
 			}
 		});
 	}
@@ -89,6 +80,8 @@ public class Tracking {
 		@Override
 		protected Void doInBackground(String... params) {
 			try {
+				Log.i(getClass().getSimpleName(), params[0]);
+
 				for (String url : params)
 					new URL(url).openConnection().connect();
 			}
@@ -104,6 +97,8 @@ public class Tracking {
 
 		private List<String> targets = new ArrayList<>();
 		private Timer sttmTimer;
+		private TreeSet<String> progresses = new TreeSet<>();
+		private HashSet<Integer> trackedRetentions = new HashSet<>();
 
 		public Sttm() {
 			sttmTimer = new Timer();
@@ -112,6 +107,9 @@ public class Tracking {
 
 		@Override
 		public void run() {
+			if (targets.size() == 0)
+				return;
+
 			new UrlTracker().execute(String.format("%s?sttmm=%s&sttmk=%s&sttms=%s&sttmu=123&sttmw=%s",
 					media.sttmUrl, TextUtils.join(",", targets), media.sttmKey, media.sessionId,
 					String.format("pid:%s/cat:%s/mid:%s", media.projectId, media.categoryId, media.hash)));
@@ -119,8 +117,26 @@ public class Tracking {
 			targets.clear();
 		}
 
-		public void track(String target) {
-			targets.add(target);
+		public void trackStart() {
+			targets.add("play");
+		}
+
+		public void trackComplete() {
+			collectProgress();
+			targets.add("complete");
+		}
+
+		public void trackProgress(float time, float duration) {
+			int p = (int)(100*time/duration);
+
+			if (p > 99)
+				p = 99;
+
+			progresses.add(trackedRetentions.contains(p) ? String.format("p%02d", p) : String.format("p%02d,r%02d", p, p));
+			trackedRetentions.add(p);
+
+			if (progresses.size() >= 5)
+				collectProgress();
 		}
 
 		public void destroy() {
@@ -129,6 +145,14 @@ public class Tracking {
 				sttmTimer.purge();
 				sttmTimer = null;
 			}
+		}
+
+		private void collectProgress() {
+			if (progresses.size() == 0)
+				return;
+
+			targets.add(TextUtils.join(",", progresses));
+			progresses.clear();
 		}
 	}
 }

@@ -23,6 +23,9 @@ import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.plugins.ImaWrapper;
 import com.sambatech.player.plugins.Tracking;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Controller for SambaPlayer view.
  *
@@ -32,13 +35,76 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 	private SimpleVideoPlayer player;
 	private SambaMediaConfig media = new SambaMediaConfig();
-	private SambaPlayerListener listener;
 	private boolean isReady;
 	private boolean hasStarted;
+	private Timer progressTimer;
+
+	private ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
+		@Override
+		public void onStateChanged(boolean playWhenReady, int playbackState) {
+			Log.i("player", "state: " + playWhenReady + " " + playbackState);
+
+			switch (playbackState) {
+				case ExoPlayer.STATE_READY:
+					if (!playWhenReady) {
+						stopProgressTimer();
+						SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
+					}
+					break;
+				case ExoPlayer.STATE_ENDED:
+					stopProgressTimer();
+					pause();
+
+					if (playWhenReady)
+						SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
+					break;
+			}
+		}
+
+		@Override
+		public void onError(Exception e) {
+			Log.i("player", "Error: " + media.url, e);
+			destroy();
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, e.getMessage()));
+		}
+
+		@Override
+		public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.RESIZE, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
+		}
+	};
+
+	private PlaybackControlLayer.PlayCallback playListener = new PlaybackControlLayer.PlayCallback() {
+		@Override
+		public void onPlay() {
+			if (player.getPlaybackState() == ExoPlayer.STATE_ENDED)
+				seek(0);
+
+			if (!hasStarted) {
+				hasStarted = true;
+				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
+			}
+
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
+			startProgressTimer();
+		}
+	};
+
+	private PlaybackControlLayer.FullscreenCallback fullscreenListener = new PlaybackControlLayer.FullscreenCallback() {
+		@Override
+		public void onGoToFullscreen() {
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN));
+		}
+
+		@Override
+		public void onReturnFromFullscreen() {
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN_EXIT));
+		}
+	};
 
 	public SambaPlayerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayerView, 0, 0));
+		//applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayerView, 0, 0));
 
         /*if (!isInEditMode() && media.url != null)
             createPlayer();*/
@@ -49,7 +115,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	public void setMedia(SambaMedia media) {
 		if (media == null) {
 			//SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, ));
-			throw new IllegalArgumentException("Media data is null.");
+			throw new IllegalArgumentException("Media data is null");
 		}
 
 		this.media = (SambaMediaConfig)media;
@@ -60,10 +126,6 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 	public SambaMedia getMedia() {
 		return media;
-	}
-
-	public void setListener(SambaPlayerListener listener) {
-		this.listener = listener;
 	}
 
 	public void play() {
@@ -114,6 +176,12 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 		stop();
 		player.release();
+		stopProgressTimer();
+		player.setPlayCallback(null);
+		player.setFullscreenCallback(null);
+
+		hasStarted = false;
+
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
 	}
 
@@ -132,9 +200,6 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
 		switch (media.type.toLowerCase()) {
-			/*case "progressive":
-				videoType = Video.VideoType.MP4;
-				break;*/
 			case "hls":
 				videoType = Video.VideoType.HLS;
 				break;
@@ -163,63 +228,9 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 			}
 		});
 
-		player.addPlaybackListener(new ExoplayerWrapper.PlaybackListener() {
-			@Override
-			public void onStateChanged(boolean playWhenReady, int playbackState) {
-				Log.i("player", "state: " + playWhenReady + " " + playbackState);
-
-				switch (playbackState) {
-					case ExoPlayer.STATE_READY:
-						if (!playWhenReady)
-							SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
-						break;
-					case ExoPlayer.STATE_ENDED:
-						pause();
-						SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
-						break;
-				}
-			}
-
-			@Override
-			public void onError(Exception e) {
-				Log.i("player", "Error: " + media.url, e);
-				destroy();
-				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, e.getMessage()));
-			}
-
-			@Override
-			public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-				Log.i("player", "size: " + width + ' ' + height + ' ' + unappliedRotationDegrees + ' ' + pixelWidthHeightRatio);
-				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.RESIZE, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
-			}
-		});
-
-		player.setPlayCallback(new PlaybackControlLayer.PlayCallback() {
-			@Override
-			public void onPlay() {
-				if (player.getPlaybackState() == ExoPlayer.STATE_ENDED)
-					seek(0);
-
-				if (!hasStarted) {
-					hasStarted = true;
-					SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
-				}
-
-				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
-			}
-		});
-
-		player.setFullscreenCallback(new PlaybackControlLayer.FullscreenCallback() {
-			@Override
-			public void onGoToFullscreen() {
-				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN));
-			}
-
-			@Override
-			public void onReturnFromFullscreen() {
-				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN_EXIT));
-			}
-		});
+		player.addPlaybackListener(playbackListener);
+		player.setPlayCallback(playListener);
+		player.setFullscreenCallback(fullscreenListener);
 
 		// Plugins
 
@@ -228,16 +239,38 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		if (media.adUrl != null && !media.adUrl.isEmpty())
 			new ImaWrapper((Activity)getContext(), this, media.adUrl);
 
-		//new Tracking();
+		new Tracking();
 
 		isReady = true;
 
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 	}
 
+	private void startProgressTimer() {
+		if (progressTimer != null)
+			return;
+
+		progressTimer = new Timer();
+		progressTimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PROGRESS, getCurrentTime(), getDuration()));
+			}
+		}, 0, 250);
+	}
+
+	private void stopProgressTimer() {
+		if (progressTimer == null)
+			return;
+
+		progressTimer.cancel();
+		progressTimer.purge();
+		progressTimer = null;
+	}
+
 	private void applyAttributes(TypedArray attrs) {
-		media.url = attrs.getString(R.styleable.SambaPlayerView_url);
+		/*media.url = attrs.getString(R.styleable.SambaPlayerView_url);
 		media.title = attrs.getString(R.styleable.SambaPlayerView_title);
-		attrs.recycle();
+		attrs.recycle();*/
 	}
 }

@@ -267,7 +267,8 @@ public class SimpleVideoPlayer {
   }
 
   public void stop() {
-    layerManager.getExoplayerWrapper().stop();
+    if (layerManager.getExoplayerWrapper() != null)
+      layerManager.getExoplayerWrapper().stop();
   }
 
   /**

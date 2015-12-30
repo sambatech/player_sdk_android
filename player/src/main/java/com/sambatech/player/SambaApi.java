@@ -192,25 +192,26 @@ public class SambaApi {
 					media.categoryId = json.getInt("categoryId");
 
 				if (json.has("deliveryRules")) {
-					JSONArray rules = json.getJSONArray("deliveryRules");
 					String defaultOutput = json.getJSONObject("project").getString("defaultOutput");
+					JSONArray rules = json.getJSONArray("deliveryRules");
+					int totalRules = rules.length();
 					JSONObject rule = null;
 					JSONArray outputs;
 					JSONObject output;
 
 					// looks for HLS delivery or the last taken
-					for (int i = rules.length(); i-- > 0; ) {
+					for (int i = 0; i < totalRules; ++i) {
 						rule = rules.getJSONObject(i);
 						media.type = rule.getString("urlType").toLowerCase();
 
 						if (media.type.equals("hls")) {
 							defaultOutput = "abr_hls";
-							i = 0; // set to exit loop
+							i = totalRules; // set to exit loop
 						}
 
 						outputs = rule.getJSONArray("outputs");
 
-						for (int j = outputs.length(); j-- > 0; ) {
+						for (int j = outputs.length(); j-- > 0;) {
 							output = outputs.getJSONObject(j);
 
 							if (!output.getString("outputName").equalsIgnoreCase("_raw") &&

@@ -14,9 +14,10 @@ public abstract class SambaPlayerListener {
 		PLAY,
 		PAUSE,
 		STOP,
-		FINISH,
+		PROGRESS,
 		FULLSCREEN,
 		FULLSCREEN_EXIT,
+		FINISH,
 		RESIZE,
 		CLICK,
 		ERROR
@@ -41,6 +42,8 @@ public abstract class SambaPlayerListener {
 	public void onFullscreenExit(SambaEvent event) {}
 
 	public void onFinish(SambaEvent event) {}
+
+	public void onResize(SambaEvent event) {}
 
 	public void onClick(SambaEvent event) {}
 

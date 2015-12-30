@@ -31,6 +31,7 @@ public class SambaEventBus {
 
 	private static class EventBus {
 		private HashMap<String, List<Object>> listeners = new HashMap<>();
+		private List<Object> postponedUnsubscribes;
 
 		public void subscribe(Object listener) {
 			String type = listener.getClass().getSuperclass().getSimpleName();
@@ -50,6 +51,11 @@ public class SambaEventBus {
 		}
 
 		public void unsubscribe(Object listener) {
+			if (postponedUnsubscribes != null) {
+				postponedUnsubscribes.add(listener);
+				return;
+			}
+
 			String type = listener.getClass().getSuperclass().getSimpleName();
 			String k;
 			List<Object> ltnList;
@@ -79,8 +85,20 @@ public class SambaEventBus {
 				return;
 
 			try {
+				// postpone call for lock purposes
+				postponedUnsubscribes = new ArrayList<>();
+
 				for (Object listener : listeners.get(k))
 					listener.getClass().getDeclaredMethod("on" + t, SambaEvent.class).invoke(listener, e);
+
+				if (postponedUnsubscribes.size() > 0) {
+					for (Object listener : postponedUnsubscribes)
+						unsubscribe(listener);
+
+					postponedUnsubscribes.clear();
+				}
+
+				postponedUnsubscribes = null;
 			}
 			catch (Exception exp) {
 				Log.e("evt", "Error trying to lookup or invoke method.", exp);
