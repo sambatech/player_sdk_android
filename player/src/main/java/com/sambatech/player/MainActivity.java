@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
 	protected void onPause() {
 		super.onPause();
 
-		if (player != null && player.isReady())
+		if (player != null)
 			player.pause();
 	}
 

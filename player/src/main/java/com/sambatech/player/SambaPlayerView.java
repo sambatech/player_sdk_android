@@ -21,6 +21,7 @@ import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.plugins.ImaWrapper;
+import com.sambatech.player.plugins.Tracking;
 
 /**
  * Controller for SambaPlayer view.
@@ -32,7 +33,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	private SimpleVideoPlayer player;
 	private SambaMediaConfig media = new SambaMediaConfig();
 	private SambaPlayerListener listener;
-	private boolean _isReady;
+	private boolean isReady;
+	private boolean hasStarted;
 
 	public SambaPlayerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -69,7 +71,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	public void pause() {
-		player.pause();
+		if (isReady)
+			player.pause();
 	}
 
 	public void stop() {
@@ -97,6 +100,14 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		player.hide();
 	}
 
+	public float getCurrentTime() {
+		return player.getCurrentPosition()/1000f;
+	}
+
+	public float getDuration() {
+		return player.getDuration()/1000f;
+	}
+
 	public void destroy() {
 		if (player == null)
 			return;
@@ -106,20 +117,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
 	}
 
-	public float getCurrentTime() {
-		return player.getCurrentPosition()/1000f;
-	}
-
-	public float getDuration() {
-		return player.getDuration()/1000f;
-	}
-
 	public View getView() {
 		return this;
-	}
-
-	public boolean isReady() {
-		return _isReady;
 	}
 
 	private void createPlayer() {
@@ -183,7 +182,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 			@Override
 			public void onError(Exception e) {
-				Log.i("player", "error", e);
+				Log.i("player", "Error: " + media.url, e);
 				destroy();
 				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, e.getMessage()));
 			}
@@ -201,6 +200,11 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 				if (player.getPlaybackState() == ExoPlayer.STATE_ENDED)
 					seek(0);
 
+				if (!hasStarted) {
+					hasStarted = true;
+					SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
+				}
+
 				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
 			}
 		});
@@ -217,11 +221,16 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 			}
 		});
 
-		// TODO: desacoplar
+		// Plugins
+
+		// TODO: desacoplar... (PluginsManager...onLoad: new plgs[i]()...onUnload: plgs[i].destroy())
+
 		if (media.adUrl != null && !media.adUrl.isEmpty())
 			new ImaWrapper((Activity)getContext(), this, media.adUrl);
 
-		_isReady = true;
+		//new Tracking();
+
+		isReady = true;
 
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 	}

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * Requests media data from server.
+ * Manages media data request from server.
  *
  * @author Thiago Miranda, Leandro Zanol - 2/12/15
  */
@@ -99,8 +99,8 @@ public class SambaApi {
 		protected SambaMedia doInBackground(SambaMediaRequest... params) {
 			request = params[0];
 
-			String url = activity.getString(R.string.player_endpoint) + request.projectId +
-					(request.mediaId != null ? "/" + request.mediaId : "?" +
+			String url = activity.getString(R.string.player_endpoint) + request.projectHash +
+					(request.mediaHash != null ? "/" + request.mediaHash : "?" +
 							(request.streamUrls.length > 0 ? "alternateLive=" + request.streamUrls[0] : "streamName=" + request.streamName));
 			InputStream inputStream = null;
 			Scanner scanner = null;
@@ -179,8 +179,17 @@ public class SambaApi {
 				SambaMediaConfig media = new SambaMediaConfig();
 				JSONObject playerConfig = json.getJSONObject("playerConfig");
 				JSONObject apiConfig = json.getJSONObject("apiConfig");
+				JSONObject projectConfig = json.getJSONObject("project");
 
+				media.projectHash = projectConfig.getString("playerHash");
+				media.projectId = projectConfig.getInt("id");
 				media.title = json.getString("title");
+
+				if (json.has("id"))
+					media.hash = json.getString("id");
+
+				if (json.has("categoryId"))
+					media.categoryId = json.getInt("categoryId");
 
 				if (json.has("deliveryRules")) {
 					JSONArray rules = json.getJSONArray("deliveryRules");
@@ -194,21 +203,21 @@ public class SambaApi {
 						rule = rules.getJSONObject(i);
 						media.type = rule.getString("urlType").toLowerCase();
 
-						if (media.type.equals("hls"))
-							break;
-					}
+						if (media.type.equals("hls")) {
+							defaultOutput = "abr_hls";
+							i = 0; // set to exit loop
+						}
 
-					if (media.type.equals("hls"))
-						defaultOutput = "abr_hls";
-
-					if (rule != null) {
 						outputs = rule.getJSONArray("outputs");
 
 						for (int j = outputs.length(); j-- > 0; ) {
 							output = outputs.getJSONObject(j);
 
-							if (!output.getString("outputName").equalsIgnoreCase(defaultOutput))
+							if (!output.getString("outputName").equalsIgnoreCase("_raw") &&
+									(!media.type.equals("hls") || output.getString("outputName").equalsIgnoreCase(defaultOutput))) {
 								media.url = output.getString("url");
+								break;
+							}
 						}
 					}
 				}
@@ -229,17 +238,15 @@ public class SambaApi {
 					media.thumb = new BitmapDrawable(activity.getResources(), bmp);*/
 					media.thumb = Drawable.createFromStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream(), "Thumbnail");
 				}
-
-				if (media.thumb == null)
-					media.thumb = ContextCompat.getDrawable(activity, R.mipmap.ic_launcher);
+				else media.thumb = ContextCompat.getDrawable(activity, R.mipmap.ic_launcher);
 
 				if (playerConfig.has("theme") && !playerConfig.getString("theme").toLowerCase().equals("default"))
 					media.themeColor = (int)Long.parseLong("FF" + playerConfig.getString("theme").replaceAll("^#?", ""), 16);
 
 				if (apiConfig.has("sttm")) {
 					JSONObject sttm = apiConfig.getJSONObject("sttm");
-					media.sttmUrl = sttm.optString("url", "");
-					media.sttmKey = sttm.optString("key", "");
+					media.sttmUrl = sttm.optString("url", "http://sttm.sambatech.com.br/collector/__sttm.gif");
+					media.sttmKey = sttm.optString("key", "ae810ebc7f0654c4fadc50935adcf5ec");
 				}
 
 				return media;

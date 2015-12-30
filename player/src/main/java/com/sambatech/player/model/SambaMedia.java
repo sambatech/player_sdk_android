@@ -11,7 +11,6 @@ import java.lang.reflect.Field;
  */
 public class SambaMedia {
 
-	public String id;
 	public String title = "";
 	public String url;
 	public String type = "";

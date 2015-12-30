@@ -5,6 +5,8 @@ import android.view.View;
 import com.sambatech.player.model.SambaMedia;
 
 /**
+ * Represents the player.
+ *
  * @author Leandro Zanol - 28/12/15
  */
 public interface SambaPlayer {
@@ -45,23 +47,15 @@ public interface SambaPlayer {
 
 	void hide();
 
-	void destroy();
-
 	float getCurrentTime();
 
 	float getDuration();
+
+	void destroy();
 
 	/**
 	 * Returns the view layer associated with the player.
 	 * @return Android View layer
 	 */
 	View getView();
-
-	/**
-	 * Tells if the player is ready to play the media.
-	 * @return Ready to play
-	 */
-	boolean isReady();
-
-	// TODO: seek(float secs)
 }

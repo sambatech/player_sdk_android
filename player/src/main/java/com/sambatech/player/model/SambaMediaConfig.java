@@ -1,5 +1,7 @@
 package com.sambatech.player.model;
 
+import com.sambatech.player.utils.Helpers;
+
 /**
  * Internal extension of the media entity for player/plugins config purposes.
  *
@@ -7,6 +9,11 @@ package com.sambatech.player.model;
  */
 public class SambaMediaConfig extends SambaMedia {
 
+	public String hash;
+	public String projectHash;
+	public int projectId;
+	public int categoryId;
+	public String sessionId = Helpers.getSessionId();
 	public int themeColor = 0xFF72BE44;
 	public String sttmUrl;
 	public String sttmKey;

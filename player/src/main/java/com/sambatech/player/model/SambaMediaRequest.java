@@ -7,61 +7,61 @@ package com.sambatech.player.model;
  */
 public class SambaMediaRequest {
 
-	public String projectId;
-	public String mediaId;
+	public String projectHash;
+	public String mediaHash;
 	public String streamName;
 	public String[] streamUrls;
 
 	/**
 	 * Represents a VOD media request.
 	 *
-	 * @param projectId ID of the project (player hash)
-	 * @param mediaId ID of the media
+	 * @param projectHash Hash code of the project
+	 * @param mediaHash Hash code of the media
 	 */
-	public SambaMediaRequest(String projectId, String mediaId) {
-		this(projectId, mediaId, null, (String)null);
+	public SambaMediaRequest(String projectHash, String mediaHash) {
+		this(projectHash, mediaHash, null, (String)null);
 	}
 
 	/**
-	 * Represents a live request (with stream name).
+	 * Represents a live stream request (with stream name).
 	 *
-	 * @param projectId ID of the project (player hash)
-	 * @param mediaId ID of the media
+	 * @param projectHash Hash code of the project
+	 * @param mediaHash Hash code of the media
 	 * @param streamName Name of the stream (live only)
 	 */
-	public SambaMediaRequest(String projectId, String mediaId, String streamName) {
-		this(projectId, mediaId, streamName, (String)null);
+	public SambaMediaRequest(String projectHash, String mediaHash, String streamName) {
+		this(projectHash, mediaHash, streamName, (String)null);
 	}
 
 	/**
-	 * Represents a direct live request (via URL).
+	 * Represents a direct live stream request (via URL).
 	 *
-	 * @param projectId ID of the project (player hash)
-	 * @param mediaId ID of the media
+	 * @param projectHash Hash code of the project
+	 * @param mediaHash Hash code of the media
 	 * @param streamName Name of the stream (live only)
 	 * @param streamUrl URL for stream (`streamName` will be ignored)
 	 */
-	public SambaMediaRequest(String projectId, String mediaId, String streamName, String streamUrl) {
-		this(projectId, mediaId, streamName, streamUrl != null ? new String[]{streamUrl} : null);
+	public SambaMediaRequest(String projectHash, String mediaHash, String streamName, String streamUrl) {
+		this(projectHash, mediaHash, streamName, streamUrl != null ? new String[]{streamUrl} : null);
 	}
 
 	/**
-	 * Represents a direct live request (via URL) with other backup URLs.
+	 * Represents a direct live stream request (via URL) with other backup URLs.
 	 *
-	 * @param projectId ID of the project (player hash)
-	 * @param mediaId ID of the media
+	 * @param projectHash Hash code of the project
+	 * @param mediaHash Hash code of the media
 	 * @param streamName Name of the stream (live only)
 	 * @param streamUrls Alternative URLs for stream (`streamName` will be ignored)
 	 */
-	public SambaMediaRequest(String projectId, String mediaId, String streamName, String[] streamUrls) {
-		this.projectId = projectId;
-		this.mediaId = mediaId;
+	public SambaMediaRequest(String projectHash, String mediaHash, String streamName, String[] streamUrls) {
+		this.projectHash = projectHash;
+		this.mediaHash = mediaHash;
 		this.streamName = streamName;
 		this.streamUrls = streamUrls != null ? streamUrls : new String[]{};
 	}
 
 	@Override
 	public String toString() {
-		return String.format("projectId: %s, mediaId: %s, streamName: %s, streamUrls: %s", projectId, mediaId, streamName, streamUrls.length > 0 ? streamUrls[0] : null);
+		return String.format("projectHash: %s, hash: %s, streamName: %s, streamUrls: %s", projectHash, mediaHash, streamName, streamUrls.length > 0 ? streamUrls[0] : null);
 	}
 }

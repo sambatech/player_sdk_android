@@ -358,10 +358,10 @@ public class ImaWrapper {
 
 			@Override
 			public void onUnload(SambaEvent event) {
+				SambaEventBus.unsubscribe(this);
 				pause();
 				destroy();
 				release();
-				SambaEventBus.unsubscribe(this);
 			}
 
 			@Override
