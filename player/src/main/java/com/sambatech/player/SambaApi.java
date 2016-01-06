@@ -8,8 +8,8 @@ import android.util.Log;
 
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
-import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.model.SambaMediaConfig;
+import com.sambatech.player.model.SambaMediaRequest;
 
 import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
@@ -98,10 +98,12 @@ public class SambaApi {
 		@Override
 		protected SambaMedia doInBackground(SambaMediaRequest... params) {
 			request = params[0];
+			int delimiter = request.mediaHash != null ? Integer.parseInt(request.mediaHash.split("(?=\\d[a-zA-Z]*$)")[1].substring(0, 1)) : 0;
 
 			String url = activity.getString(R.string.player_endpoint) + request.projectHash +
 					(request.mediaHash != null ? "/" + request.mediaHash : "?" +
 							(request.streamUrls.length > 0 ? "alternateLive=" + request.streamUrls[0] : "streamName=" + request.streamName));
+
 			InputStream inputStream = null;
 			Scanner scanner = null;
 			Scanner scannerDelimited = null;
@@ -114,11 +116,9 @@ public class SambaApi {
 				scannerDelimited = scanner.useDelimiter("\\A");
 
 				if (scannerDelimited.hasNext()) {
-					String result = scannerDelimited.next();
-					String token = result.split("mediaToken\\s*=\\s*'")[1].split("';")[0];
-					int x = (Integer.parseInt(result.split("caching[^\\d]+")[1].replaceAll("\".+$", "")) ^ 345) - 10000;
+					String token = scannerDelimited.next();
 
-					token = token.substring(x, token.length() - x).replaceAll("\\-", "+").replaceAll("_", "/");
+					token = token.substring(delimiter, token.length() - delimiter).replaceAll("\\-", "+").replaceAll("_", "/");
 
 					switch (token.length()%4) {
 						case 0:

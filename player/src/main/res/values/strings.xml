@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">SambaPlayer SDK</string>
-    <string name="player_endpoint">http://playerapitest2.liquidplatform.com:7091/embed/</string>
+    <string name="player_endpoint">http://playerapitest2.liquidplatform.com:7091/v1/</string>
     <string name="share_facebook">Facebook</string>
 </resources>
