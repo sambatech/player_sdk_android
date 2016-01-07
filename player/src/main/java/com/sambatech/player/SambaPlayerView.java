@@ -2,7 +2,6 @@ package com.sambatech.player;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -35,9 +34,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 	private SimpleVideoPlayer player;
 	private SambaMediaConfig media = new SambaMediaConfig();
-	private boolean isReady;
-	private boolean hasStarted;
 	private Timer progressTimer;
+	private boolean hasStarted;
 
 	private ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
@@ -83,6 +81,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 			if (!hasStarted) {
 				hasStarted = true;
 				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
+				loadPlugins();
 			}
 
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
@@ -104,9 +103,9 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 	public SambaPlayerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		//applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayerView, 0, 0));
+		/*applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayerView, 0, 0));
 
-        /*if (!isInEditMode() && media.url != null)
+        if (!isInEditMode() && media.url != null)
             createPlayer();*/
 	}
 
@@ -120,8 +119,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 		this.media = (SambaMediaConfig)media;
 
-        //Creating player
-        createPlayer();
+		destroy();
 	}
 
 	public SambaMedia getMedia() {
@@ -129,11 +127,13 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	public void play() {
-		player.play();
+		if (player != null)
+			player.play();
+		else createPlayer();
 	}
 
 	public void pause() {
-		if (isReady)
+		if (hasStarted)
 			player.pause();
 	}
 
@@ -175,11 +175,12 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 			return;
 
 		stop();
-		player.release();
 		stopProgressTimer();
 		player.setPlayCallback(null);
 		player.setFullscreenCallback(null);
+		player.release();
 
+		player = null;
 		hasStarted = false;
 
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
@@ -190,12 +191,15 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	private void createPlayer() {
+		if (player != null) {
+			Toast.makeText(getContext(), "Player already created", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
         if (media.url == null || media.url.isEmpty()) {
 			Toast.makeText(getContext(), "The requested media has no URL!", Toast.LENGTH_SHORT).show();
 			return;
 		}
-
-		destroy();
 
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
@@ -208,6 +212,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 				break;
 		}
 
+		// no autoplay if there's ad because ImaWrapper controls player through events
         player = new SimpleVideoPlayer((Activity)getContext(), this,
                 new Video(media.url, videoType),
                 media.title, media.adUrl == null || media.adUrl.isEmpty());
@@ -232,16 +237,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		player.setPlayCallback(playListener);
 		player.setFullscreenCallback(fullscreenListener);
 
-		// Plugins
-
-		// TODO: desacoplar... (PluginsManager...onLoad: new plgs[i]()...onUnload: plgs[i].destroy())
-
-		if (media.adUrl != null && !media.adUrl.isEmpty())
-			new ImaWrapper((Activity)getContext(), this, media.adUrl);
-
-		new Tracking();
-
-		isReady = true;
+		if (media.projectHash != null && media.id != null)
+			new Tracking();
 
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 	}
@@ -268,9 +265,15 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		progressTimer = null;
 	}
 
-	private void applyAttributes(TypedArray attrs) {
-		/*media.url = attrs.getString(R.styleable.SambaPlayerView_url);
-		media.title = attrs.getString(R.styleable.SambaPlayerView_title);
-		attrs.recycle();*/
+	private void loadPlugins() {
+		// TODO: desacoplar... (PluginsManager...onLoad: new plgs[i]()...onUnload: plgs[i].destroy())
+		if (media.adUrl != null && !media.adUrl.isEmpty())
+			new ImaWrapper((Activity)getContext(), this, media.adUrl);
 	}
+
+	/*private void applyAttributes(TypedArray attrs) {
+		media.url = attrs.getString(R.styleable.SambaPlayerView_url);
+		media.title = attrs.getString(R.styleable.SambaPlayerView_title);
+		attrs.recycle();
+	}*/
 }

@@ -153,7 +153,7 @@ public class MainActivity extends Activity {
 
 			@Override
 			public void onMediaResponseError(String msg, SambaMediaRequest request) {
-				Toast.makeText(MainActivity.this, msg + " " + request, Toast.LENGTH_SHORT).show();
+				Toast.makeText(MainActivity.this, msg + ": " + request.mediaId, Toast.LENGTH_SHORT).show();
 			}
 		});
 	}
