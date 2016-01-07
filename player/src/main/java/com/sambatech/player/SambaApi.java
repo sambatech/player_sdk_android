@@ -98,10 +98,10 @@ public class SambaApi {
 		@Override
 		protected SambaMedia doInBackground(SambaMediaRequest... params) {
 			request = params[0];
-			int delimiter = request.mediaHash != null ? Integer.parseInt(request.mediaHash.split("(?=\\d[a-zA-Z]*$)")[1].substring(0, 1)) : 0;
+			int delimiter = request.mediaId != null ? Integer.parseInt(request.mediaId.split("(?=\\d[a-zA-Z]*$)")[1].substring(0, 1)) : 0;
 
 			String url = activity.getString(R.string.player_endpoint) + request.projectHash +
-					(request.mediaHash != null ? "/" + request.mediaHash : "?" +
+					(request.mediaId != null ? "/" + request.mediaId : "?" +
 							(request.streamUrls.length > 0 ? "alternateLive=" + request.streamUrls[0] : "streamName=" + request.streamName));
 
 			InputStream inputStream = null;
@@ -186,7 +186,7 @@ public class SambaApi {
 				media.title = json.getString("title");
 
 				if (json.has("id"))
-					media.hash = json.getString("id");
+					media.id = json.getString("id");
 
 				if (json.has("categoryId"))
 					media.categoryId = json.getInt("categoryId");

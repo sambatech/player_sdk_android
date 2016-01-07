@@ -9,7 +9,7 @@ import com.sambatech.player.utils.Helpers;
  */
 public class SambaMediaConfig extends SambaMedia {
 
-	public String hash;
+	public String id;
 	public String projectHash;
 	public int projectId;
 	public int categoryId;

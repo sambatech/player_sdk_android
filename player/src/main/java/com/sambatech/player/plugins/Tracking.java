@@ -112,7 +112,7 @@ public class Tracking {
 
 			new UrlTracker().execute(String.format("%s?sttmm=%s&sttmk=%s&sttms=%s&sttmu=123&sttmw=%s",
 					media.sttmUrl, TextUtils.join(",", targets), media.sttmKey, media.sessionId,
-					String.format("pid:%s/cat:%s/mid:%s", media.projectId, media.categoryId, media.hash)));
+					String.format("pid:%s/cat:%s/mid:%s", media.projectId, media.categoryId, media.id)));
 
 			targets.clear();
 		}
