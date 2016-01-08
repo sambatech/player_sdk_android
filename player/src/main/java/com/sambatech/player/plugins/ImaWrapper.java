@@ -509,7 +509,7 @@ public class ImaWrapper {
 			container.removeView(adUiContainer);
 		}
 		if(adPlayer != null){
-			contentPlayer.setFullscreen(adPlayer.isFullscreen());
+			//contentPlayer.setFullscreen(adPlayer.isFullscreen());
 			adPlayer.release();
 		}
 		adPlayerContainer = null;

@@ -34,8 +34,9 @@ public class Tracking {
 		SambaEventBus.subscribe(new SambaPlayerListener() {
 			@Override
 			public void onLoad(SambaEvent event) {
-				player = (SambaPlayer) event.getData();
-				media = (SambaMediaConfig) player.getMedia();
+				Log.i("track", "sttm load!");
+				player = (SambaPlayer)event.getData();
+				media = (SambaMediaConfig)player.getMedia();
 			}
 
 			@Override
@@ -60,6 +61,7 @@ public class Tracking {
 
 			@Override
 			public void onUnload(SambaEvent event) {
+				Log.i("track", "sttm unload");
 				SambaEventBus.unsubscribe(this);
 
 				if (sttm != null) {
