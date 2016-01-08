@@ -44,7 +44,16 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 			switch (playbackState) {
 				case ExoPlayer.STATE_READY:
-					if (!playWhenReady) {
+					if (playWhenReady) {
+                        if (!hasStarted) {
+                            hasStarted = true;
+                            SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
+                        }
+                        Log.i("player", "PLAY!!!");
+                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
+                        startProgressTimer();
+                    }
+                    else {
 						stopProgressTimer();
 						SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
 					}
@@ -77,15 +86,6 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		public void onPlay() {
 			if (player.getPlaybackState() == ExoPlayer.STATE_ENDED)
 				seek(0);
-
-			if (!hasStarted) {
-				hasStarted = true;
-				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
-				loadPlugins();
-			}
-
-			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
-			startProgressTimer();
 		}
 	};
 
@@ -120,6 +120,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		this.media = (SambaMediaConfig)media;
 
 		destroy();
+		//createThumb();
 	}
 
 	public SambaMedia getMedia() {
@@ -174,8 +175,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		if (player == null)
 			return;
 
-		stop();
 		stopProgressTimer();
+		stop();
 		player.setPlayCallback(null);
 		player.setFullscreenCallback(null);
 		player.release();
@@ -227,23 +228,22 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		player.moveSurfaceToBackground();
 
 		player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.share), getContext().getString(R.string.share_facebook), new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Toast.makeText(getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
-			}
-		});
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
+            }
+        });
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
 		player.setFullscreenCallback(fullscreenListener);
 
-		if (media.projectHash != null && media.id != null)
-			new Tracking();
+        loadPlugins();
 
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 	}
 
-	private void startProgressTimer() {
+    private void startProgressTimer() {
 		if (progressTimer != null)
 			return;
 
@@ -269,6 +269,9 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		// TODO: desacoplar... (PluginsManager...onLoad: new plgs[i]()...onUnload: plgs[i].destroy())
 		if (media.adUrl != null && !media.adUrl.isEmpty())
 			new ImaWrapper((Activity)getContext(), this, media.adUrl);
+
+        if (media.projectHash != null && media.id != null)
+            new Tracking();
 	}
 
 	/*private void applyAttributes(TypedArray attrs) {

@@ -7,6 +7,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * @author Leandro Zanol - 10/12/15
@@ -51,10 +52,10 @@ public class SambaEventBus {
 		}
 
 		public void unsubscribe(Object listener) {
-			if (postponedUnsubscribes != null) {
+			/*if (postponedUnsubscribes != null) {
 				postponedUnsubscribes.add(listener);
 				return;
-			}
+			}*/
 
 			String type = listener.getClass().getSuperclass().getSimpleName();
 			String k;
@@ -86,19 +87,23 @@ public class SambaEventBus {
 
 			try {
 				// postpone call for lock purposes
-				postponedUnsubscribes = new ArrayList<>();
+				//postponedUnsubscribes = new ArrayList<>();
 
-				for (Object listener : listeners.get(k))
-					listener.getClass().getDeclaredMethod("on" + t, SambaEvent.class).invoke(listener, e);
+                Object listener;
+Log.i("event", k + " " + listeners.get(k).size());
+				for (ListIterator<Object> iterator = listeners.get(k).listIterator(); iterator.hasNext();) {
+                    listener = iterator.next();
+                    listener.getClass().getDeclaredMethod("on" + t, SambaEvent.class).invoke(listener, e);
+                }
 
-				if (postponedUnsubscribes.size() > 0) {
+				/*if (postponedUnsubscribes.size() > 0) {
 					for (Object listener : postponedUnsubscribes)
 						unsubscribe(listener);
 
 					postponedUnsubscribes.clear();
 				}
 
-				postponedUnsubscribes = null;
+				postponedUnsubscribes = null;*/
 			}
 			catch (Exception exp) {
 				Log.e("evt", "Error trying to lookup or invoke method.", exp);
