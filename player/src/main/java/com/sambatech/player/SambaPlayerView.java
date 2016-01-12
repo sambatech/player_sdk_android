@@ -20,8 +20,10 @@ import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.plugins.ImaWrapper;
+import com.sambatech.player.plugins.PluginsManager;
 import com.sambatech.player.plugins.Tracking;
 
+import java.security.InvalidParameterException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,7 +51,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
                             hasStarted = true;
                             SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
                         }
-                        Log.i("player", "PLAY!!!");
+
                         SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
                         startProgressTimer();
                     }
@@ -107,20 +109,19 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
         if (!isInEditMode() && media.url != null)
             createPlayer();*/
+
+		PluginsManager.getInstance().initialize();
 	}
 
 	/**	Player API **/
 
 	public void setMedia(SambaMedia media) {
-		if (media == null) {
-			//SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, ));
+		if (media == null)
 			throw new IllegalArgumentException("Media data is null");
-		}
 
 		this.media = (SambaMediaConfig)media;
 
 		destroy();
-		//createThumb();
 	}
 
 	public SambaMedia getMedia() {
@@ -144,7 +145,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	public void seek(float position) {
-		player.seek((int) (position * 1000f));
+		player.seek((int)(position*1000f));
 	}
 
 	public void setFullscreen(boolean flag) {
@@ -175,6 +176,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		if (player == null)
 			return;
 
+		PluginsManager.getInstance().onDestroy();
 		stopProgressTimer();
 		stop();
 		player.setPlayCallback(null);
@@ -193,14 +195,12 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 	private void createPlayer() {
 		if (player != null) {
-			Toast.makeText(getContext(), "Player already created", Toast.LENGTH_SHORT).show();
+			Log.i("player", "Player already created!");
 			return;
 		}
 
-        if (media.url == null || media.url.isEmpty()) {
-			Toast.makeText(getContext(), "The requested media has no URL!", Toast.LENGTH_SHORT).show();
-			return;
-		}
+        if (media.url == null || media.url.isEmpty())
+			throw new InvalidParameterException("Media data is null");
 
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
@@ -228,18 +228,17 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		player.moveSurfaceToBackground();
 
 		player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.share), getContext().getString(R.string.share_facebook), new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
-            }
-        });
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
+			}
+		});
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
 		player.setFullscreenCallback(fullscreenListener);
 
-        loadPlugins();
-
+        PluginsManager.getInstance().onLoad(this);
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 	}
 
@@ -263,15 +262,6 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		progressTimer.cancel();
 		progressTimer.purge();
 		progressTimer = null;
-	}
-
-	private void loadPlugins() {
-		// TODO: desacoplar... (PluginsManager...onLoad: new plgs[i]()...onUnload: plgs[i].destroy())
-		if (media.adUrl != null && !media.adUrl.isEmpty())
-			new ImaWrapper((Activity)getContext(), this, media.adUrl);
-
-        if (media.projectHash != null && media.id != null)
-            new Tracking();
 	}
 
 	/*private void applyAttributes(TypedArray attrs) {

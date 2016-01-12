@@ -195,7 +195,7 @@ public class SambaApi {
 					String defaultOutput = json.getJSONObject("project").getString("defaultOutput");
 					JSONArray rules = json.getJSONArray("deliveryRules");
 					int totalRules = rules.length();
-					JSONObject rule = null;
+					JSONObject rule;
 					JSONArray outputs;
 					JSONObject output;
 
@@ -204,18 +204,19 @@ public class SambaApi {
 						rule = rules.getJSONObject(i);
 						media.type = rule.getString("urlType").toLowerCase();
 
-						if (media.type.equals("hls")) {
+						if (media.type.equals("hls"))
 							defaultOutput = "abr_hls";
-							i = totalRules; // set to exit loop
-						}
 
 						outputs = rule.getJSONArray("outputs");
 
 						for (int j = outputs.length(); j-- > 0;) {
 							output = outputs.getJSONObject(j);
 
-							if (!output.getString("outputName").equalsIgnoreCase("_raw") &&
-									(!media.type.equals("hls") || output.getString("outputName").equalsIgnoreCase(defaultOutput))) {
+							if (!output.getString("outputName").equalsIgnoreCase("_raw")) {
+								// if HLS (MBR), set to exit loop
+								if (media.type.equals("hls") && output.getString("outputName").equalsIgnoreCase(defaultOutput))
+									i = totalRules;
+
 								media.url = output.getString("url");
 								break;
 							}

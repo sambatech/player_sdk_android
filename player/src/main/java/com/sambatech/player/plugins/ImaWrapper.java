@@ -30,6 +30,7 @@ import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
+import com.sambatech.player.model.SambaMedia;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +41,7 @@ import java.util.List;
  * video player is overlaid on the content video player. When the ad is complete, the ad video
  * player is destroyed and the content video player is displayed again.
  */
-public class ImaWrapper {
+public class ImaWrapper implements Plugin {
 
 	private static String PLAYER_TYPE = "google/gmf-android";
 	private static String PLAYER_VERSION = "0.2.0";
@@ -305,32 +306,59 @@ public class ImaWrapper {
 		}
 	};
 
-	/**
-	 * @param activity The activity that will contain the video player.
-	 * @param player Video content player.
-	 * @param sdkSettings The settings that should be used to configure the IMA SDK.
-	 * @param adTagUrl The URL containing the VAST document of the ad.
-	 */
-	public ImaWrapper(Activity activity,
-					  SambaPlayer player,
-					  ImaSdkSettings sdkSettings,
-					  String adTagUrl) {
-		this.activity = activity;
-		contentPlayer = player;
-		container = (FrameLayout)player.getView();
-
-		if (adTagUrl != null) {
-			this.adTagUrl = Uri.parse(adTagUrl);
+	private SambaPlayerListener playerListener = new SambaPlayerListener() {
+		@Override
+		public void onLoad(SambaEvent event) {
+			if (!adsShown && ImaWrapper.this.adTagUrl != null) {
+				requestAd();
+				adsShown = true;
+			}
 		}
 
+		@Override
+		public void onFullscreen(SambaEvent e) {
+			if (adPlayer == null)
+				container.setLayoutParams(Util.getLayoutParamsBasedOnParent(
+						container,
+						ViewGroup.LayoutParams.MATCH_PARENT,
+						ViewGroup.LayoutParams.MATCH_PARENT
+				));
+		}
+
+		@Override
+		public void onFullscreenExit(SambaEvent e) {
+			if (adPlayer == null)
+				container.setLayoutParams(originalContainerLayoutParams);
+		}
+
+		@Override
+		public void onFinish(SambaEvent event) {
+			if (adsLoader != null)
+				adsLoader.contentComplete();
+		}
+	};
+
+	public void onLoad(SambaPlayer player) {
+		Log.i("ima", "load");
+		SambaMedia media = player.getMedia();
+
+		if (media.adUrl == null || media.adUrl.isEmpty())
+			return;
+
+		adTagUrl = Uri.parse(media.adUrl);
+		contentPlayer = player;
+		container = (FrameLayout)player.getView();
+		activity = (Activity)container.getContext();
+
+		ImaSdkSettings sdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
 		sdkSettings.setPlayerType(PLAYER_TYPE);
 		sdkSettings.setPlayerVersion(PLAYER_VERSION);
+
 		adsLoader = ImaSdkFactory.getInstance().createAdsLoader(activity, sdkSettings);
 		adListener = new AdListener();
 		adsLoader.addAdErrorListener(adListener);
 		adsLoader.addAdsLoadedListener(adListener);
-
-		callbacks = new ArrayList<VideoAdPlayer.VideoAdPlayerCallback>();
+		callbacks = new ArrayList<>();
 
 		// Create the ad adDisplayContainer UI which will be used by the IMA SDK to overlay ad controls.
 		adUiContainer = new FrameLayout(activity);
@@ -350,91 +378,34 @@ public class ImaWrapper {
 			}
 		};
 
-		SambaEventBus.subscribe(new SambaPlayerListener() {
-			@Override
-			public void onLoad(SambaEvent event) {
-				// TODO: inicializar indiretamente
-			}
-
-			@Override
-			public void onUnload(SambaEvent event) {
-				SambaEventBus.unsubscribe(this);
-				pause();
-				destroy();
-				release();
-			}
-
-			@Override
-			public void onPlay(SambaEvent e) {
-				if (!adsShown && ImaWrapper.this.adTagUrl != null) {
-					contentPlayer.pause();
-					requestAd();
-					adsShown = true;
-				}
-			}
-
-			@Override
-			public void onFullscreen(SambaEvent e) {
-				if (adPlayer == null)
-					container.setLayoutParams(Util.getLayoutParamsBasedOnParent(
-							container,
-							ViewGroup.LayoutParams.MATCH_PARENT,
-							ViewGroup.LayoutParams.MATCH_PARENT
-					));
-			}
-
-			@Override
-			public void onFullscreenExit(SambaEvent e) {
-				if (adPlayer == null)
-					container.setLayoutParams(originalContainerLayoutParams);
-			}
-
-			@Override
-			public void onPause(SambaEvent e) {
-				pause();
-			}
-
-			@Override
-			public void onFinish(SambaEvent event) {
-				if (adsLoader != null)
-					adsLoader.contentComplete();
-			}
-		});
+		SambaEventBus.subscribe(playerListener);
 	}
 
-	/**
-	 * @param activity The activity that will contain the video player.
-	 * @param player Video content player.
-	 * @param adTagUrl The URL containing the VAST document of the ad.
-	 */
-	public ImaWrapper(Activity activity,
-					  SambaPlayer player,
-					  String adTagUrl) {
-		this(activity,
-				player,
-				ImaSdkFactory.getInstance().createImaSdkSettings(),
-				adTagUrl);
+	public void onDestroy() {
+		Log.i("ima", "destroy");
+		if (adsLoader == null)
+			return;
+
+		SambaEventBus.unsubscribe(playerListener);
+		pause();
+		destroy();
+		release();
 	}
 
 	/**
 	 * Pause video playback.
 	 */
 	public void pause() {
-		if (adPlayer != null) {
+		if (adPlayer != null)
 			adPlayer.pause();
-		}
-		contentPlayer.pause();
 	}
 
 	/**
 	 * Resume video playback.
 	 */
 	public void play() {
-		if (adTagUrl != null) {
+		if (adTagUrl != null)
 			requestAd();
-		} else {
-			contentPlayer.play();
-		}
 	}
 
 	/**

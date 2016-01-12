@@ -24,52 +24,50 @@ import java.util.TreeSet;
  *
  * @author Leandro Zanol - 28/12/15
  */
-public class Tracking {
+public class Tracking implements Plugin {
 
 	private SambaPlayer player;
 	private SambaMediaConfig media;
 	private Sttm sttm;
 
-	public Tracking() {
-		SambaEventBus.subscribe(new SambaPlayerListener() {
-			@Override
-			public void onLoad(SambaEvent event) {
-				Log.i("track", "sttm load!");
-				player = (SambaPlayer)event.getData();
-				media = (SambaMediaConfig)player.getMedia();
-			}
+	private SambaPlayerListener playerListener = new SambaPlayerListener() {
+		@Override
+		public void onStart(SambaEvent event) {
+			init();
 
-			@Override
-			public void onStart(SambaEvent event) {
-				init();
+			if (sttm != null)
+				sttm.trackStart();
+		}
 
-				if (sttm != null)
-					sttm.trackStart();
-			}
+		@Override
+		public void onProgress(SambaEvent event) {
+			if (sttm != null)
+				sttm.trackProgress((float) event.getDataAll()[0], (float) event.getDataAll()[1]);
+		}
 
-			@Override
-			public void onProgress(SambaEvent event) {
-				if (sttm != null)
-					sttm.trackProgress((float)event.getDataAll()[0], (float)event.getDataAll()[1]);
-			}
+		@Override
+		public void onFinish(SambaEvent event) {
+			if (sttm != null)
+				sttm.trackComplete();
+		}
+	};
 
-			@Override
-			public void onFinish(SambaEvent event) {
-				if (sttm != null)
-					sttm.trackComplete();
-			}
+	public void onLoad(SambaPlayer player) {
+		Log.i("track", "load");
+		media = (SambaMediaConfig)player.getMedia();
 
-			@Override
-			public void onUnload(SambaEvent event) {
-				Log.i("track", "sttm unload");
-				SambaEventBus.unsubscribe(this);
+		if (media.projectHash != null && media.id != null)
+			SambaEventBus.subscribe(playerListener);
+	}
 
-				if (sttm != null) {
-					sttm.destroy();
-					sttm = null;
-				}
-			}
-		});
+	public void onDestroy() {
+		Log.i("track", "destroy");
+		SambaEventBus.unsubscribe(playerListener);
+
+		if (sttm != null) {
+			sttm.destroy();
+			sttm = null;
+		}
 	}
 
 	private void init() {

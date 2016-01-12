@@ -93,7 +93,7 @@ public class SambaEventBus {
 
 				for (ListIterator<Object> iterator = listeners.get(k).listIterator(); iterator.hasNext();) {
                     listener = iterator.next();
-                    listener.getClass().getDeclaredMethod("on" + t, SambaEvent.class).invoke(listener, e);
+					listener.getClass().getDeclaredMethod("on" + t, SambaEvent.class).invoke(listener, e);
                 }
 
 				List<Object> unsubs = postponedUnsubscribes;
