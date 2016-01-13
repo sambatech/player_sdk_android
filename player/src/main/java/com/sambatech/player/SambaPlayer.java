@@ -51,6 +51,14 @@ public interface SambaPlayer {
 
 	float getDuration();
 
+	/**
+	 * Indicates whether media has finished at least once.
+	 * Does not imply playing it thoroughly without seeking.
+	 *
+	 * @return True once media hits the end.
+	 */
+	boolean hasFinished();
+
 	void destroy();
 
 	/**

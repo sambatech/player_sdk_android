@@ -206,10 +206,7 @@ public class ImaWrapper implements Plugin {
 						adPlayer.play();
 					break;
 				case ALL_ADS_COMPLETED:
-					if (adsManager != null) {
-						adsManager.destroy();
-						adsManager = null;
-					}
+					onDestroy();
 				default:
 					break;
 			}
@@ -382,13 +379,11 @@ public class ImaWrapper implements Plugin {
 	}
 
 	public void onDestroy() {
-		Log.i("ima", "destroy");
 		if (adsLoader == null)
 			return;
 
 		SambaEventBus.unsubscribe(playerListener);
-		pause();
-		destroy();
+		destroyAdPlayer();
 		release();
 	}
 
@@ -416,12 +411,17 @@ public class ImaWrapper implements Plugin {
 			adPlayer.release();
 			adPlayer = null;
 		}
+
 		if (adsManager != null) {
 			adsManager.destroy();
 			adsManager = null;
 		}
-		adsLoader.contentComplete();
-		adsLoader.removeAdsLoadedListener(adListener);
+
+		if (adsLoader != null) {
+			adsLoader.removeAdsLoadedListener(adListener);
+			adsLoader.removeAdErrorListener(adListener);
+			adsLoader = null;
+		}
 	}
 
 	/**
@@ -465,10 +465,6 @@ public class ImaWrapper implements Plugin {
 		adPlayer.setFullscreen(contentPlayer.isFullscreen());
 	}
 
-	public void destroy() {
-		destroyAdPlayer();
-	}
-
 	/**
 	 * Destroy the {@link SimpleVideoPlayer} responsible for playing the ad and remove it.
 	 */
@@ -498,15 +494,17 @@ public class ImaWrapper implements Plugin {
 	/**
 	 * Show the content player and start playing again.
 	 */
-	private void showContentPlayer(){
+	private void showContentPlayer() {
 		contentPlayer.show();
-		contentPlayer.play();
+
+		if (!contentPlayer.hasFinished())
+			contentPlayer.play();
 	}
 
 	/**
 	 * Pause the content player and notify the ad callbacks that the content has paused.
 	 */
-	private void pauseContent(){
+	private void pauseContent() {
 		hideContentPlayer();
 		for (VideoAdPlayer.VideoAdPlayerCallback callback : callbacks) {
 			callback.onPause();
@@ -516,7 +514,10 @@ public class ImaWrapper implements Plugin {
 	/**
 	 * Resume the content and notify the ad callbacks that the content has resumed.
 	 */
-	private void resumeContent(){
+	private void resumeContent() {
+		if (contentPlayer.hasFinished())
+			return;
+
 		destroyAdPlayer();
 		showContentPlayer();
 		for (VideoAdPlayer.VideoAdPlayerCallback callback : callbacks) {

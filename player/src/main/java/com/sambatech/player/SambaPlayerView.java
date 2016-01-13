@@ -19,9 +19,7 @@ import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
-import com.sambatech.player.plugins.ImaWrapper;
 import com.sambatech.player.plugins.PluginsManager;
-import com.sambatech.player.plugins.Tracking;
 
 import java.security.InvalidParameterException;
 import java.util.Timer;
@@ -37,7 +35,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	private SimpleVideoPlayer player;
 	private SambaMediaConfig media = new SambaMediaConfig();
 	private Timer progressTimer;
-	private boolean hasStarted;
+	private boolean _hasStarted;
+	private boolean _hasFinished;
 
 	private ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
@@ -47,8 +46,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 			switch (playbackState) {
 				case ExoPlayer.STATE_READY:
 					if (playWhenReady) {
-                        if (!hasStarted) {
-                            hasStarted = true;
+                        if (!_hasStarted) {
+                            _hasStarted = true;
                             SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
                         }
 
@@ -61,11 +60,14 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 					}
 					break;
 				case ExoPlayer.STATE_ENDED:
+					if (!playWhenReady)
+						break;
+
 					stopProgressTimer();
 					pause();
-
-					if (playWhenReady)
-						SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
+					seek(0);
+					SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
+					_hasFinished = true;
 					break;
 			}
 		}
@@ -135,7 +137,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	public void pause() {
-		if (hasStarted)
+		if (_hasStarted)
 			player.pause();
 	}
 
@@ -172,6 +174,10 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		return player.getDuration()/1000f;
 	}
 
+	public boolean hasFinished() {
+		return _hasFinished;
+	}
+
 	public void destroy() {
 		if (player == null)
 			return;
@@ -184,7 +190,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		player.release();
 
 		player = null;
-		hasStarted = false;
+		_hasStarted = false;
+		_hasFinished = false;
 
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
 	}
