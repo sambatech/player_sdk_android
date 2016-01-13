@@ -1,4 +1,4 @@
-package com.sambatech.player;
+package com.sambatech.player.activitys;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,10 +6,12 @@ import android.app.Activity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.sambatech.player.R;
+import com.sambatech.player.SambaApi;
+import com.sambatech.player.SambaPlayer;
+import com.sambatech.player.activitys.MainActivity;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
