@@ -203,18 +203,15 @@ public class SambaApi {
 					for (int i = 0; i < totalRules; ++i) {
 						rule = rules.getJSONObject(i);
 						media.type = rule.getString("urlType").toLowerCase();
-
-						if (media.type.equals("hls"))
-							defaultOutput = "abr_hls";
-
 						outputs = rule.getJSONArray("outputs");
 
 						for (int j = outputs.length(); j-- > 0;) {
 							output = outputs.getJSONObject(j);
 
-							if (!output.getString("outputName").equalsIgnoreCase("_raw")) {
-								// if HLS (MBR), set to exit loop
-								if (media.type.equals("hls") && output.getString("outputName").equalsIgnoreCase(defaultOutput))
+							if (!output.getString("outputName").equalsIgnoreCase("_raw") && !output.isNull("url")) {
+								// if HLS (MBR) or default output found, set to exit loop
+								if (!media.type.equals("hls") && output.getString("outputName").equals(defaultOutput) ||
+										output.getString("outputName").equalsIgnoreCase("abr_hls"))
 									i = totalRules;
 
 								media.url = output.getString("url");

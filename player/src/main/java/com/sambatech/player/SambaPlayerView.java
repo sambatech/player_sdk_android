@@ -74,7 +74,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 		@Override
 		public void onError(Exception e) {
-			Log.i("player", "Error: " + media.url, e);
+			Log.i("player", "Error: " + media, e);
 			destroy();
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, e.getMessage()));
 		}
