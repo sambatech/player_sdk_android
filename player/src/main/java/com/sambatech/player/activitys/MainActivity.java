@@ -38,7 +38,8 @@ public class MainActivity extends Activity {
     }};
 
     //Adresses ( TODO: put them on an value.xml file )
-    private static String tag_endpoint = "http://192.168.0.179:3000/";
+    //private static String tag_endpoint = "http://192.168.0.179:3000/";
+    private static String tag_endpoint = "http://198.101.153.219:3000/";
     private static String api_endpoint = "http://198.101.153.219:8091/v1/";
 
 	@Bind(R.id.media_list) ListView list;
