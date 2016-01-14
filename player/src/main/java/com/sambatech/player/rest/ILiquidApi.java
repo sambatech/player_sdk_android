@@ -27,4 +27,7 @@ public interface ILiquidApi {
     @GET("media/{mediaId}")
     Call<SambaMedia> getMedia(@Path("mediaId") String mediaId);
 
+    @GET("tags")
+    Call<ArrayList<LiquidMedia.AdTag>> getTags();
+
 }

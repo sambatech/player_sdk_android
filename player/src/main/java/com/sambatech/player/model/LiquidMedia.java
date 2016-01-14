@@ -15,6 +15,11 @@ public class LiquidMedia {
     public ArrayList<File> files;
     public ArrayList<Thumb> thumbs;
 
+    //Non liquid api
+    public String ph;
+    public String ad_program;
+    public AdTag adTag;
+
 
     public static class File {
         public String qualifier;
@@ -27,6 +32,11 @@ public class LiquidMedia {
 
     public static class Thumb {
         public int size;
+        public String url;
+    }
+
+    public static class AdTag {
+        public String name;
         public String url;
     }
 }

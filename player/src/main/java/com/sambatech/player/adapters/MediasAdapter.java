@@ -62,10 +62,10 @@ public class MediasAdapter extends BaseAdapter {
 
             //Cores
             if(position % 2 == 0){
-                view.setBackgroundColor(Color.parseColor("#222222"));
+                view.setBackgroundColor(Color.parseColor("#50AEFF"));
             }
             else{
-                view.setBackgroundColor(Color.parseColor("#333333"));
+                view.setBackgroundColor(Color.parseColor("#018CFF"));
             }
 
             holder = new ViewHolder(view);

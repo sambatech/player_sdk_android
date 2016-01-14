@@ -1,33 +1,39 @@
 package com.sambatech.player.activitys;
 
-import android.content.Intent;
-import android.os.Bundle;
 import android.app.Activity;
+import android.content.res.Configuration;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.sambatech.player.R;
 import com.sambatech.player.SambaApi;
 import com.sambatech.player.SambaPlayer;
-import com.sambatech.player.activitys.MainActivity;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
-import com.sambatech.player.model.JSONMedia;
+import com.sambatech.player.model.LiquidMedia;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaRequest;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
 
 public class MediaItemActivity extends Activity {
 
-    private SambaPlayer player;
-    private TextView titleView;
-    private TextView descView;
-    private Button back;
+    private LiquidMedia activityMedia;
+
+    @Bind(R.id.title)
+    TextView titleView;
+
+    @Bind(R.id.description)
+    TextView descView;
+
+    @Bind(R.id.samba_player)
+    SambaPlayer player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,19 +41,18 @@ public class MediaItemActivity extends Activity {
 
         setContentView(R.layout.activity_media_item);
 
-        player = (SambaPlayer) findViewById(R.id.samba_player);
-        titleView = (TextView) findViewById(R.id.title);
-        descView = (TextView) findViewById(R.id.description);
-        back = (Button) findViewById(R.id.back);
-
+        ButterKnife.bind(this);
+        Log.e("player:", "oncreate");
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        JSONMedia media = (JSONMedia) EventBus.getDefault().removeStickyEvent(JSONMedia.class);
+        if(activityMedia == null) {
+            LiquidMedia media = (LiquidMedia) EventBus.getDefault().removeStickyEvent(LiquidMedia.class);
+            activityMedia = media;
+        }
 
-        Log.e("mediaitem:", "carregada título " + media.getTitle());
-
-        requestMedia(media.getProjectHash(), media.getMediaId());
+        Log.e("player:", activityMedia.title);
+        requestMedia(activityMedia);
     }
 
 
@@ -97,43 +102,46 @@ public class MediaItemActivity extends Activity {
         });
     }
 
-    private void requestMedia(String ph, String mediaId) {
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        Log.e("mediaitem:", String.valueOf((newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)));
+
+        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            player.setFullscreen(true);
+        }else if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            player.setFullscreen(false);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        player.destroy();
+        finish();
+    }
+
+    private void requestMedia(LiquidMedia media) {
 
         SambaApi api = new SambaApi(this, "token");
 
-        SambaMediaRequest sbRequest = new SambaMediaRequest(ph, mediaId);
+        SambaMediaRequest sbRequest = new SambaMediaRequest(media.ph, media.id);
 
         api.requestMedia(sbRequest, new SambaApiCallback() {
             @Override
             public void onMediaResponse(SambaMedia media) {
                 //status.setText(String.format("Loading...%s", media != null ? media.title : ""));
+                if(activityMedia.adTag != null) {
+                    media.adUrl = activityMedia.adTag.url;
+                    media.title = activityMedia.adTag.name;
+                }
+
                 loadMedia(media);
             }
 
             @Override
             public void onMediaListResponse(SambaMedia[] mediaList) {
-                /**for (SambaMedia m : mediaList) {
-                 if (m.title.isEmpty())
-                 m.title = "Sem título";
-
-                 m.title += " (" + m.type.toUpperCase() + (m.isLive ? " Live" : "") + ")";
-                 }
-
-                 //http://test.d.sambavideos.sambatech.com/account/100209/50/2014-10-06/video/9ba974f571a8bf28db3d48636a04baa1/30DIFERENCAS.2.mp4
-                 mediaList[2].title += ": preroll";
-                 mediaList[2].adUrl = "http://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=sample_ct%3Dredirecterror&correlator=";
-                 mediaList[3].title += ": Pre+mid+post+bumpers";
-                 mediaList[3].adUrl = "http://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=%2F3510761%2FadRulesSampleTags&ciu_szs=160x600%2C300x250%2C728x90&cust_params=adrule%3Dpremidpostpodandbumpers&impl=s&gdfp_req=1&env=vp&ad_rule=1&vid=12345&cmsid=3601&output=xml_vast2&unviewed_position_start=1&url=%5Breferrer_url%5D&correlator=%5Btimestamp%5D";
-                 mediaList[4].title += ": postroll";
-                 mediaList[4].adUrl = "http://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=%2F3510761%2FadRulesSampleTags&ciu_szs=160x600%2C300x250%2C728x90&cust_params=adrule%3Dpostrollonly&impl=s&gdfp_req=1&env=vp&ad_rule=1&vid=12345&cmsid=3601&output=xml_vast2&unviewed_position_start=1&url=%5Breferrer_url%5D&correlator=%5Btimestamp%5D";
-                 mediaList[5].title += ": skippable";
-                 mediaList[5].adUrl = "http://pubads.g.doubleclick.net/gampad/ads?sz=640x360&iu=/6062/iab_vast_samples/skippable&ciu_szs=300x250,728x90&impl=s&gdfp_req=1&env=vp&output=xml_vast2&unviewed_position_start=1&url=%5Breferrer_url%5D&correlator=%5Btimestamp%5D";
-                 mediaList[8].title += ": Ad";
-                 mediaList[8].adUrl = "http://pubads.g.doubleclick.net/gampad/ads?sz=640x360&iu=/6062/iab_vast_samples/skippable&ciu_szs=300x250,728x90&impl=s&gdfp_req=1&env=vp&output=xml_vast2&unviewed_position_start=1&url=%5Breferrer_url%5D&correlator=%5Btimestamp%5D";
-
-                 //status.setText("Loaded!");
-                 //createListAdapter(mediaList);
-                 //loadMedia(mediaList[0]);**/
             }
 
             @Override
@@ -149,17 +157,5 @@ public class MediaItemActivity extends Activity {
         player.setMedia(media);
         player.play();
     }
-
-    private void bindEvents() {
-        back.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                // Perform action on click
-                Intent intent = new Intent(v.getContext(), MainActivity.class);
-                //intent.putExtra(JSONMedia.class, (JSONMedia) parent.getAdapter().getItem(position));
-                startActivity(intent);
-            }
-        });
-    }
-
 
 }
