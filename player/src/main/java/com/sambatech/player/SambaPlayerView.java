@@ -202,12 +202,14 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 	private void createPlayer() {
 		if (player != null) {
-			Log.i("player", "Player already created!");
+			Log.e("player", "Player already created!");
 			return;
 		}
 
-        if (media.url == null || media.url.isEmpty())
-			throw new InvalidParameterException("Media data is null");
+        if (media.url == null || media.url.isEmpty()) {
+			//throw new InvalidParameterException("Media data is null");
+			Log.e("player", "Media data is null!");
+		}
 
 		Video.VideoType videoType = Video.VideoType.OTHER;
 

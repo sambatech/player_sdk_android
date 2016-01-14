@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.ads.interactivemedia.v3.api.AdDisplayContainer;
@@ -26,6 +28,7 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.google.android.libraries.mediaframework.layeredvideo.Util;
+import com.sambatech.player.R;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -168,6 +171,16 @@ public class ImaWrapper implements Plugin {
 	 */
 	private class AdListener implements AdErrorEvent.AdErrorListener,
 			AdsLoader.AdsLoadedListener, AdEvent.AdEventListener {
+
+		private ImageView img;
+		private FrameLayout.LayoutParams layoutParams;
+
+		public AdListener() {
+			// TODO: decouple dependency
+			img = new ImageView(activity);
+			img.setImageResource(R.drawable.play);
+		}
+
 		@Override
 		public void onAdError(AdErrorEvent adErrorEvent) {
 			// If there is an error in ad playback, log the error and resume the content.
@@ -192,22 +205,21 @@ public class ImaWrapper implements Plugin {
 				case CONTENT_RESUME_REQUESTED:
 					resumeContent();
 					break;
-				/*case CLICKED:
-					adPlayerContainer.setClickable(true);
-					adPlayerContainer.setOnClickListener(new View.OnClickListener() {
-						@Override
-						public void onClick(View v) {
-							Log.i("ima", "click!!");
-						}
-					});
-					break;*/
+				case CLICKED:
+					layoutParams = new FrameLayout.LayoutParams(adUiContainer.getLayoutParams());
+					layoutParams.width = 150;
+					layoutParams.height = 150;
+					layoutParams.gravity = Gravity.CENTER;
+					adUiContainer.addView(img, layoutParams);
+					break;
 				case TAPPED:
-					if (adPlayer != null)
+					if (adPlayer != null) {
+						adUiContainer.removeView(img);
 						adPlayer.play();
+					}
 					break;
 				case ALL_ADS_COMPLETED:
 					onDestroy();
-				default:
 					break;
 			}
 		}

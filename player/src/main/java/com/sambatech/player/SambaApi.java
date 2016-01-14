@@ -198,6 +198,7 @@ public class SambaApi {
 					JSONObject rule;
 					JSONArray outputs;
 					JSONObject output;
+					String defaultOutputCurrent;
 
 					// looks for HLS delivery or the last taken
 					for (int i = 0; i < totalRules; ++i) {
@@ -205,13 +206,16 @@ public class SambaApi {
 						media.type = rule.getString("urlType").toLowerCase();
 						outputs = rule.getJSONArray("outputs");
 
+						defaultOutputCurrent = media.type.equals("hls") ? "abr_hls" : defaultOutput;
+
 						for (int j = outputs.length(); j-- > 0;) {
 							output = outputs.getJSONObject(j);
 
-							if (!output.getString("outputName").equalsIgnoreCase("_raw") && !output.isNull("url")) {
-								// if HLS (MBR) or default output found, set to exit loop
-								if (!media.type.equals("hls") && output.getString("outputName").equals(defaultOutput) ||
-										output.getString("outputName").equalsIgnoreCase("abr_hls"))
+							if (!output.getString("outputName").equalsIgnoreCase("_raw") && !output.isNull("url") &&
+									(output.getString("outputName").equals(defaultOutputCurrent) || media.url == null)) {
+
+								// if HLS (MBR), set to exit loop
+								if (media.type.equals("hls"))
 									i = totalRules;
 
 								media.url = output.getString("url");
