@@ -174,6 +174,10 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		return player.getDuration()/1000f;
 	}
 
+	public boolean hasStarted() {
+		return _hasStarted;
+	}
+
 	public boolean hasFinished() {
 		return _hasFinished;
 	}

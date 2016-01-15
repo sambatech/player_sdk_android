@@ -59,6 +59,13 @@ public interface SambaPlayer {
 	 */
 	boolean hasFinished();
 
+	/**
+	 * Indicates whether media has already started playing.
+	 *
+	 * @return True if media has started playing.
+	 */
+	boolean hasStarted();
+
 	void destroy();
 
 	/**
