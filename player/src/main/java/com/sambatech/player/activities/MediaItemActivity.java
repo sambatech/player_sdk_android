@@ -122,7 +122,15 @@ public class MediaItemActivity extends Activity {
         finish();
     }
 
-	private void requestMedia(LiquidMedia media) {
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (player != null && player.hasStarted())
+            player.pause();
+    }
+
+    private void requestMedia(LiquidMedia media) {
 
         SambaApi api = new SambaApi(this, "token");
         SambaMediaRequest sbRequest = new SambaMediaRequest(media.ph, media.id);
