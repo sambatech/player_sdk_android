@@ -2,22 +2,20 @@ package com.sambatech.player.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.sambatech.player.R;
-import com.sambatech.player.model.JSONMedia;
 import com.sambatech.player.model.LiquidMedia;
 import com.sambatech.player.utils.VolleySingleton;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -55,7 +53,7 @@ public class MediasAdapter extends BaseAdapter {
         LayoutInflater inflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        ViewHolder holder;
+        MediaItem holder;
 
         if(view == null) {
             view = inflater.inflate(R.layout.media_list_item, viewGroup, false);
@@ -68,10 +66,10 @@ public class MediasAdapter extends BaseAdapter {
                 view.setBackgroundColor(Color.parseColor("#018CFF"));
             }
 
-            holder = new ViewHolder(view);
+            holder = new MediaItem(view);
             view.setTag(holder);
         }else {
-            holder = (ViewHolder) view.getTag();
+            holder = (MediaItem) view.getTag();
         }
 
         LiquidMedia media = (LiquidMedia) getItem(position);
@@ -98,15 +96,18 @@ public class MediasAdapter extends BaseAdapter {
         return thumbUrl;
     }
 
-    static class ViewHolder {
+    static class MediaItem {
         @Bind(R.id.thumbPreview)
         NetworkImageView thumb;
 
         @Bind(R.id.titlePreview)
         TextView title;
 
-        ViewHolder(View view) {
+        MediaItem(View view) {
             ButterKnife.bind(this, view);
         }
     }
+
+
 }
+
