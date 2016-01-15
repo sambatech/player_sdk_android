@@ -63,12 +63,7 @@ public class MainActivity extends Activity {
 
         ButterKnife.bind(this);
 
-        //Making the call to project 533
-        makeMediasCall("ecae833f-979e-4856-af7b-ab335d2d0e61", 533);
-
-        //Making the call to project 536
-        makeMediasCall("e7b11183-65d5-4a2c-a279-e9a2e933b897", 536);
-
+		callCommonList();
 	}
 
     @Override
@@ -84,6 +79,8 @@ public class MainActivity extends Activity {
         int id = item.getItemId();
         if(id == R.id.ad_program) {
             getTags();
+        }else if (id == R.id.common) {
+	        callCommonList();
         }
 
         return super.onOptionsItemSelected(item);
@@ -120,8 +117,14 @@ public class MainActivity extends Activity {
             @Override
             public void onResponse(retrofit.Response<ArrayList<LiquidMedia.AdTag>> response, Retrofit retrofit) {
                 ArrayList<LiquidMedia.AdTag> tags = (ArrayList<LiquidMedia.AdTag>) response.body();
-                ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
-                showMediasList(mediasModified);
+	            try {
+		            ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
+		            mediaList.clear();
+		            list.setAdapter(null);
+		            showMediasList(mediasModified);
+	            }catch(CloneNotSupportedException e) {
+					Log.e("tags", e.getMessage());
+	            }
             }
 
             @Override
@@ -131,13 +134,24 @@ public class MainActivity extends Activity {
         });
     }
 
+	private void callCommonList() {
+
+		if(mediaList != null ){
+			mediaList.clear();
+		}
+		//Making the call to project 533
+		makeMediasCall("ecae833f-979e-4856-af7b-ab335d2d0e61", 533);
+
+		//Making the call to project 536
+		makeMediasCall("e7b11183-65d5-4a2c-a279-e9a2e933b897", 536);
+	}
 
     /**
      * Populates the MediaItem with the given medias
      * @param medias
      */
 	private void showMediasList(ArrayList<LiquidMedia> medias) {
-
+		Log.e("tags:", String.valueOf(medias.size()));
         if(mediaList == null) {
             this.mediaList = medias;
         }else {
@@ -146,8 +160,8 @@ public class MainActivity extends Activity {
 
         if(mAdapter == null) {
             mAdapter = new MediasAdapter(this, this.mediaList);
-            list.setAdapter(mAdapter);
         }
+		list.setAdapter(mAdapter);
 
         mAdapter.notifyDataSetChanged();
 
@@ -162,23 +176,25 @@ public class MainActivity extends Activity {
         return medias;
     }
 
-    private ArrayList<LiquidMedia> mediasWithTags(ArrayList<LiquidMedia> medias, ArrayList<LiquidMedia.AdTag> tags) {
+    private ArrayList<LiquidMedia> mediasWithTags(ArrayList<LiquidMedia> medias, ArrayList<LiquidMedia.AdTag> tags) throws CloneNotSupportedException{
         int mIndex = 0;
-        ArrayList<LiquidMedia> newMedias = new ArrayList<>();
+        ArrayList<LiquidMedia> newMedias = new ArrayList<LiquidMedia>();
+
         for(int i = 0; i < tags.size(); i++) {
-            LiquidMedia m;
+            LiquidMedia m = new LiquidMedia();
             if(i < medias.size()) {
-                m = medias.get(i);
+                m = (LiquidMedia) medias.get(i).clone();
             }else {
-                m = medias.get(mIndex);
+                m = (LiquidMedia) newMedias.get(mIndex).clone();
                 mIndex = mIndex++;
             }
             m.adTag = new LiquidMedia.AdTag();
             m.adTag.name = tags.get(i).name;
             m.adTag.url = tags.get(i).url;
-            m.title = tags.get(i).name;
+            m.description = tags.get(i).name;
+	        newMedias.add(m);
         }
-
-        return medias;
+	    Log.e("tags:", String.valueOf(newMedias.size()));
+        return newMedias;
     }
 }

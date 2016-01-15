@@ -15,6 +15,8 @@ import com.sambatech.player.R;
 import com.sambatech.player.model.LiquidMedia;
 import com.sambatech.player.utils.VolleySingleton;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 
 import butterknife.Bind;
@@ -27,6 +29,7 @@ public class MediasAdapter extends BaseAdapter {
 
     private ArrayList<LiquidMedia> medias;
     private Context mContext;
+	private View globalView;
 
     public MediasAdapter(Context mContext, ArrayList<LiquidMedia> mList) {
         this.medias = mList;
@@ -48,6 +51,10 @@ public class MediasAdapter extends BaseAdapter {
         return 0;
     }
 
+	public void resetView() {
+
+	}
+
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
         LayoutInflater inflater = (LayoutInflater) mContext
@@ -58,31 +65,37 @@ public class MediasAdapter extends BaseAdapter {
         if(view == null) {
             view = inflater.inflate(R.layout.media_list_item, viewGroup, false);
 
-            //Cores
-            if(position % 2 == 0){
-                view.setBackgroundColor(Color.parseColor("#50AEFF"));
-            }
-            else{
-                view.setBackgroundColor(Color.parseColor("#018CFF"));
-            }
-
             holder = new MediaItem(view);
             view.setTag(holder);
         }else {
             holder = (MediaItem) view.getTag();
         }
 
+	    //Cores
+	    if(position % 2 == 0){
+		    view.setBackgroundColor(Color.parseColor("#EEEEEE"));
+	    }
+	    else{
+		    view.setBackgroundColor(Color.parseColor("#DDDDDD"));
+	    }
+
         LiquidMedia media = (LiquidMedia) getItem(position);
         ImageLoader mImageLoader = VolleySingleton.getInstance().getImageLoader();
 
 
         holder.thumb.setImageUrl(getIdealThumb(media.thumbs), mImageLoader);
-        holder.title.setText(media.title);
+        holder.title.setText(media.title.split("\\.", 2)[0]);
+
+	    if(media.description != null || media.shortDescription != null) {
+		    holder.description.setText((media.description != null ? media.description : "") + " " + (media.shortDescription != null ? media.shortDescription : ""));
+	    }
 
         return view;
     }
 
-    private String getIdealThumb(ArrayList<LiquidMedia.Thumb> thumbs) {
+
+
+	private String getIdealThumb(ArrayList<LiquidMedia.Thumb> thumbs) {
         int size = 0;
         String thumbUrl = "";
         for(LiquidMedia.Thumb thumb : thumbs) {
@@ -102,6 +115,9 @@ public class MediasAdapter extends BaseAdapter {
 
         @Bind(R.id.titlePreview)
         TextView title;
+
+	    @Bind(R.id.description)
+	    TextView description;
 
         MediaItem(View view) {
             ButterKnife.bind(this, view);

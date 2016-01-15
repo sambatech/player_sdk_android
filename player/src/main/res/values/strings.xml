@@ -5,7 +5,9 @@
     <string name="mock_endpoint">http://192.168.0.179:3000/medias</string>
     <string name="share_facebook">Facebook</string>
     <string name="ad_program">Ad Tags</string>
+    <string name="common">Comuns</string>
     <string name="about">Sobre</string>
     <string name="title_activity_media_item">Media Item</string>
     <string name="title_activity_main_menu">MainMenu</string>
+    <string name="title_activity_splash">SplashActivity</string>
 </resources>

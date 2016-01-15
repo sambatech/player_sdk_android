@@ -6,30 +6,30 @@
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/thumbPreview"
         android:layout_width="120dp"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:paddingLeft="@dimen/activity_vertical_margin"/>
 
     <LinearLayout android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="@dimen/activity_vertical_margin">
 
         <TextView
             android:id="@+id/titlePreview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/activity_vertical_margin"
             android:textSize="20sp"
             android:text="Testando o título"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/secondary_text_light"
             android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
 
         <TextView
             android:id="@+id/description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/activity_vertical_margin"
             android:textSize="15sp"
-            android:text="Testando a descrição"
-            android:textColor="@android:color/black"
+            android:text=""
+            android:textColor="@android:color/tertiary_text_light"
             android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
 
     </LinearLayout>

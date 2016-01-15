@@ -5,11 +5,11 @@ import java.util.ArrayList;
 /**
  * Created by tmiranda on 12/01/16.
  */
-public class LiquidMedia {
+public class LiquidMedia implements Cloneable {
     public String id;
     public String title;
-    public String description;
-    public String shortDescription;
+    public String description = "";
+    public String shortDescription = "";
     public Long publishDate;
     public Boolean highlighted;
     public ArrayList<File> files;
@@ -20,6 +20,9 @@ public class LiquidMedia {
     public String ad_program;
     public AdTag adTag;
 
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
 
     public static class File {
         public String qualifier;
