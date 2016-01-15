@@ -1,4 +1,4 @@
-package com.sambatech.player.activitys;
+package com.sambatech.player.activities;
 
 import android.app.Activity;
 import android.content.res.Configuration;
@@ -32,81 +32,81 @@ public class MediaItemActivity extends Activity {
     @Bind(R.id.description)
     TextView descView;
 
+    @Bind(R.id.status)
+    TextView status;
+
     @Bind(R.id.samba_player)
     SambaPlayer player;
+
+	private SambaPlayerListener playerListener = new SambaPlayerListener() {
+		@Override
+		public void onLoad(SambaEvent e) {
+			status.setText(String.format("Status: %s", e.getType()));
+		}
+
+		@Override
+		public void onPlay(SambaEvent e) {
+			status.setText(String.format("Status: %s", e.getType()));
+		}
+
+		@Override
+		public void onPause(SambaEvent e) {
+			status.setText(String.format("Status: %s", e.getType()));
+		}
+
+		@Override
+		public void onStop(SambaEvent e) {
+			status.setText(String.format("Status: %s", e.getType()));
+		}
+
+		@Override
+		public void onFinish(SambaEvent e) {
+			status.setText(String.format("Status: %s", e.getType()));
+		}
+
+		@Override
+		public void onFullscreen(SambaEvent e) {
+			status.setText(String.format("Status: %s", e.getType()));
+		}
+
+		@Override
+		public void onFullscreenExit(SambaEvent e) {
+			status.setText(String.format("Status: %s", e.getType()));
+		}
+
+		@Override
+		public void onError(SambaEvent e) {
+			status.setText(String.format("Status: %s", e.getType() + " " + e.getData()));
+		}
+	};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_media_item);
 
         ButterKnife.bind(this);
-        Log.e("player:", "oncreate");
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+		if (getActionBar() != null)
+      		getActionBar().setDisplayHomeAsUpEnabled(true);
 
-        if(activityMedia == null) {
-            LiquidMedia media = (LiquidMedia) EventBus.getDefault().removeStickyEvent(LiquidMedia.class);
-            activityMedia = media;
-        }
+	    if (activityMedia == null)
+			activityMedia = EventBus.getDefault().removeStickyEvent(LiquidMedia.class);
 
-        Log.e("player:", activityMedia.title);
-        requestMedia(activityMedia);
-    }
-
+	    initPlayer();
+		requestMedia(activityMedia);
+	}
 
     private void initPlayer() {
-        //p.setListener(new SambaPlayerListener() {...});
-        SambaEventBus.subscribe(new SambaPlayerListener() {
-            @Override
-            public void onLoad(SambaEvent e) {
-                //status.setText(String.format("Status: %s", e.getType()));
-            }
-
-            @Override
-            public void onPlay(SambaEvent e) {
-                //status.setText(String.format("Status: %s", e.getType()));
-            }
-
-            @Override
-            public void onPause(SambaEvent e) {
-                //status.setText(String.format("Status: %s", e.getType()));
-            }
-
-            @Override
-            public void onStop(SambaEvent e) {
-                //status.setText(String.format("Status: %s", e.getType()));
-            }
-
-            @Override
-            public void onFinish(SambaEvent e) {
-                //status.setText(String.format("Status: %s", e.getType()));
-            }
-
-            @Override
-            public void onFullscreen(SambaEvent e) {
-                //status.setText(String.format("Status: %s", e.getType()));
-            }
-
-            @Override
-            public void onFullscreenExit(SambaEvent e) {
-                //status.setText(String.format("Status: %s", e.getType()));
-            }
-
-            @Override
-            public void onError(SambaEvent e) {
-                //status.setText(String.format("Status: %s", e.getType()));
-                //Toast.makeText(MainActivity.this, (String) e.getData(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        SambaEventBus.unsubscribe(playerListener);
+        SambaEventBus.subscribe(playerListener);
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        Log.e("mediaitem:", String.valueOf((newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)));
+        Log.i("mediaitem:", String.valueOf((newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)));
 
         if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             player.setFullscreen(true);
@@ -115,17 +115,16 @@ public class MediaItemActivity extends Activity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
         player.destroy();
         finish();
     }
 
-    private void requestMedia(LiquidMedia media) {
+	private void requestMedia(LiquidMedia media) {
 
         SambaApi api = new SambaApi(this, "token");
-
         SambaMediaRequest sbRequest = new SambaMediaRequest(media.ph, media.id);
 
         api.requestMedia(sbRequest, new SambaApiCallback() {
@@ -157,5 +156,4 @@ public class MediaItemActivity extends Activity {
         player.setMedia(media);
         player.play();
     }
-
 }

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activitys.MediaItemActivity">
+    tools:context=".activities.MediaItemActivity">
 
     <com.sambatech.player.SambaPlayerView
         android:id="@+id/samba_player"
@@ -17,7 +17,6 @@
         android:visibility="invisible"
         android:layout_height="wrap_content"
         android:layout_below="@id/samba_player"
-        android:text="Midia Zanol"
         android:padding="@dimen/activity_vertical_margin"
         android:textSize="30sp"/>
 
@@ -30,5 +29,10 @@
         android:padding="@dimen/activity_vertical_margin"
         android:textSize="20sp"/>
 
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>

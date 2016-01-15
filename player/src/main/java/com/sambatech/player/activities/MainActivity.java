@@ -1,4 +1,4 @@
-package com.sambatech.player.activitys;
+package com.sambatech.player.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,14 +7,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.sambatech.player.R;
 import com.sambatech.player.adapters.MediasAdapter;
 import com.sambatech.player.model.LiquidMedia;
 import com.sambatech.player.rest.LiquidApi;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +24,6 @@ import butterknife.OnItemClick;
 import de.greenrobot.event.EventBus;
 import retrofit.Call;
 import retrofit.Callback;
-import retrofit.Response;
 import retrofit.Retrofit;
 
 public class MainActivity extends Activity {
