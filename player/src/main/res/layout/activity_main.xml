@@ -4,27 +4,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.sambatech.player.MainActivity">
+    tools:context=".activitys.MainActivity">
 
-    <com.sambatech.player.SambaPlayerView
+    <!--<com.sambatech.player.SambaPlayerView
         android:id="@+id/samba_player"
         android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_height="200dp" />-->
 
     <ListView
         android:id="@+id/media_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/samba_player"
-        android:layout_above="@+id/status"/>
+        android:background="@android:color/black"/>
 
-    <TextView
+    <!--<TextView
         android:id="@+id/status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:textSize="16sp"
         android:gravity="center_horizontal"
-        android:text="Loading..."/>
+        android:text="Loading..."/>-->
 
 </RelativeLayout>

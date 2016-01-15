@@ -3,18 +3,53 @@
           android:layout_width="match_parent"
           android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/image"
-        android:layout_width="0dp"
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/thumbPreview"
+        android:layout_width="200px"
         android:layout_height="match_parent"
-        android:layout_weight="0.2"/>
+        android:layout_centerHorizontal="true"/>
 
     <TextView
-        android:id="@+id/text"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:id="@+id/titlePreview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="0.8"
         android:padding="@dimen/activity_vertical_margin"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:text="Olas"
+        android:textColor="@android:color/black"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
+
+    <!--<TextView
+        android:id="@+id/subTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.8"
+        android:padding="@dimen/activity_vertical_margin"
+        android:textSize="20sp"
+        android:text="Teste"
+        android:layout_below="@+id/titlePreview"
+        android:layout_alignLeft="@+id/titlePreview"
+        android:layout_alignStart="@+id/titlePreview"
+        android:textColor="@android:color/black"
+        android:textAppearance="?android:attr/textAppearanceSmall"/>
+
+    <TextView android:id="@+id/titlePreview"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="8dip"
+              android:text="Teste asdsa"
+              android:textAppearance="?android:attr/textAppearanceListItemSmall"
+        />
+
+    <TextView android:id="@+id/subTitle"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_below="@android:id/text1"
+              android:layout_alignLeft="@android:id/text1"
+              android:layout_alignStart="@android:id/text1"
+              android:text="Teste2"
+              android:textAppearance="?android:attr/textAppearanceSmall"
+        />-->
 
 </LinearLayout>
