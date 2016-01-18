@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.sambatech.player.R;
@@ -37,6 +38,12 @@ public class MediaItemActivity extends Activity {
 
     @Bind(R.id.samba_player)
     SambaPlayer player;
+
+	@Bind(R.id.progressbar_view)
+	LinearLayout loading;
+
+	@Bind(R.id.loading_text)
+	TextView loading_text;
 
 	private SambaPlayerListener playerListener = new SambaPlayerListener() {
 		@Override
@@ -92,6 +99,8 @@ public class MediaItemActivity extends Activity {
 
 	    if (activityMedia == null)
 			activityMedia = EventBus.getDefault().removeStickyEvent(LiquidMedia.class);
+
+	    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
 
 	    initPlayer();
 		requestMedia(activityMedia);
@@ -159,6 +168,7 @@ public class MediaItemActivity extends Activity {
     }
 
     private void loadMedia(SambaMedia media) {
+	    loading.setVisibility(View.GONE);
         titleView.setVisibility(View.VISIBLE);
         titleView.setText(media.title);
         player.setMedia(media);

@@ -10,4 +10,7 @@
     <string name="title_activity_media_item">Media Item</string>
     <string name="title_activity_main_menu">MainMenu</string>
     <string name="title_activity_splash">SplashActivity</string>
+    <string name="title_activity_about">AboutActivity</string>
+    <string name="about_text">Sample App criada pelo time do Player da Sambatech - Leandro Zanol, Thiago Miranda e Priscila Magalhães</string>
+    <string name="loading">Carregando listagem...</string>
 </resources>

@@ -159,6 +159,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	public void show() {
+		if(player == null)
+			return;
 		player.show();
 	}
 

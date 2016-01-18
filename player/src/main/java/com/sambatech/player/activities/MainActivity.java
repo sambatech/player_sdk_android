@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.sambatech.player.R;
@@ -40,6 +42,8 @@ public class MainActivity extends Activity {
     private static String api_endpoint = "http://198.101.153.219:8091/v1/";
 
 	@Bind(R.id.media_list) ListView list;
+	@Bind(R.id.progressbar_view) LinearLayout loading;
+
     @BindString(R.string.player_endpoint) String player_endpoint;
 
     //Medias Adapter
@@ -53,7 +57,6 @@ public class MainActivity extends Activity {
         Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
         EventBus.getDefault().postSticky(media);
         startActivity(intent);
-
 	}
 
 	@Override
@@ -81,6 +84,9 @@ public class MainActivity extends Activity {
             getTags();
         }else if (id == R.id.common) {
 	        callCommonList();
+        }else if(id == R.id.about){
+			Intent about = new Intent(this, AboutActivity.class);
+	        startActivity(about);
         }
 
         return super.onOptionsItemSelected(item);
@@ -94,12 +100,16 @@ public class MainActivity extends Activity {
     private void makeMediasCall(String token, final int pid) {
         Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid);
 
+	    loading.setVisibility(View.VISIBLE);
+
         call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
             @Override
             public void onResponse(retrofit.Response<ArrayList<LiquidMedia>> response, Retrofit retrofit) {
                 ArrayList<LiquidMedia> medias = (ArrayList<LiquidMedia>) response.body();
                 medias = insertExternalData(medias, pid);
                 showMediasList(medias);
+
+	            loading.setVisibility(View.GONE);
             }
 
             @Override
@@ -113,6 +123,8 @@ public class MainActivity extends Activity {
         //Calling for our tags
         Call<ArrayList<LiquidMedia.AdTag>> tagCall = LiquidApi.getApi(tag_endpoint).getTags();
 
+	    loading.setVisibility(View.VISIBLE);
+
         tagCall.enqueue(new Callback<ArrayList<LiquidMedia.AdTag>>() {
             @Override
             public void onResponse(retrofit.Response<ArrayList<LiquidMedia.AdTag>> response, Retrofit retrofit) {
@@ -125,6 +137,7 @@ public class MainActivity extends Activity {
 	            }catch(CloneNotSupportedException e) {
 					Log.e("tags", e.getMessage());
 	            }
+	            loading.setVisibility(View.GONE);
             }
 
             @Override

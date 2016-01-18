@@ -391,6 +391,7 @@ public class ImaWrapper implements Plugin {
 	}
 
 	public void onDestroy() {
+		Log.e("ima:", String.valueOf(adsLoader == null));
 		if (adsLoader == null)
 			return;
 
@@ -507,6 +508,9 @@ public class ImaWrapper implements Plugin {
 	 * Show the content player and start playing again.
 	 */
 	private void showContentPlayer() {
+		if(contentPlayer == null)
+			return;
+
 		contentPlayer.show();
 
 		if (!contentPlayer.hasFinished())
