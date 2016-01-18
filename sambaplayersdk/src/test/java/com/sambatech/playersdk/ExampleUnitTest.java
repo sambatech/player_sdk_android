@@ -1,4 +1,4 @@
-package com.sambatech.playersdk;
+package com.sambatech.player;
 
 import org.junit.Test;
 
