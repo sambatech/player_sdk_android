@@ -3,7 +3,6 @@ package com.sambatech.sample.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -138,7 +137,7 @@ public class MainActivity extends Activity {
             @Override
             public void onResponse(retrofit.Response<ArrayList<LiquidMedia>> response, Retrofit retrofit) {
 	            if(response.code() == 200) {
-		            ArrayList<LiquidMedia> medias = (ArrayList<LiquidMedia>) response.body();
+		            ArrayList<LiquidMedia> medias = response.body();
 		            medias = insertExternalData(medias, pid);
 		            showMediasList(medias);
 	            }else {
@@ -209,6 +208,41 @@ public class MainActivity extends Activity {
             this.mediaList = medias;
         }else {
             this.mediaList.addAll(medias);
+
+	        // adding live streams
+
+	        /*LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+	        thumb.url = "http://www.impactmobile.com/files/2012/09/icon64-broadcasts.png";
+	        ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{ thumb }));
+
+	        LiquidMedia media = new LiquidMedia();
+	        media.ph = "bc6a17435f3f389f37a514c171039b75";
+	        media.streamUrl = "http://gbbrlive2.sambatech.com.br/liveevent/sbt3_8fcdc5f0f8df8d4de56b22a2c6660470/livestream/manifest.f4m";
+	        media.title = "Live SBT (HLS)";
+	        media.description = "Transmissão ao vivo do SBT.";
+	        media.thumbs = thumbs;
+	        mediaList.add(media);
+	        media = new LiquidMedia();
+	        media.ph = "bc6a17435f3f389f37a514c171039b75";
+	        media.streamUrl = "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8";
+	        media.title = "Live VEVO (HLS)";
+	        media.description = "Transmissão ao vivo do VEVO.";
+	        media.thumbs = thumbs;
+	        mediaList.add(media);
+	        media = new LiquidMedia();
+	        media.ph = "bc6a17435f3f389f37a514c171039b75";
+	        media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/playlist.m3u8";
+	        media.title = "Live Denmark channel (HLS)";
+	        media.description = "Transmissão ao vivo TV-DN.";
+	        media.thumbs = thumbs;
+	        mediaList.add(media);
+	        media = new LiquidMedia();
+	        media.ph = "bc6a17435f3f389f37a514c171039b75";
+	        media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/manifest.f4m";
+	        media.title = "Live Denmark channel (HDS: erro!)";
+	        media.description = "Transmissão ao vivo inválida.";
+	        media.thumbs = thumbs;
+	        mediaList.add(media);*/
         }
 
         if(mAdapter == null) {

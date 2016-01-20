@@ -142,7 +142,7 @@ public class MediaItemActivity extends Activity {
     private void requestMedia(LiquidMedia media) {
 
         SambaApi api = new SambaApi(this, "token");
-        SambaMediaRequest sbRequest = new SambaMediaRequest(media.ph, media.id);
+        SambaMediaRequest sbRequest = new SambaMediaRequest(media.ph, media.id, null, media.streamUrl);
 
 	    if(media.description != null || media.shortDescription != null) {
 		    descView.setText(((media.description != null) ? media.description : ""
