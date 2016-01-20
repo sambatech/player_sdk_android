@@ -82,7 +82,7 @@ public class MainActivity extends Activity {
 
 	    SearchView addTag = (SearchView) menu.findItem(R.id.addTag).getActionView();
 
-	    addTag.setQueryHint("Add tag id");
+	    addTag.setQueryHint("myjson id ( ex: 26dyf )");
 
 	    addTag.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
@@ -102,6 +102,7 @@ public class MainActivity extends Activity {
 	    int searchCloseButtonId = addTag.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
 	    ImageView magIcon = (ImageView) addTag.findViewById(searchCloseButtonId);
 	    magIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
+	    magIcon.setVisibility(View.INVISIBLE);
 
         return true;
     }

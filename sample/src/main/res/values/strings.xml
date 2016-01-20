@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Sample</string>
+    <string name="app_name">SambaPlayer Sample</string>
 
     <string name="mock_endpoint">http://192.168.0.179:3000/medias</string>
     <string name="ad_program">Ad Tags</string>
@@ -11,7 +11,7 @@
     <string name="title_activity_splash">SplashActivity</string>
     <string name="title_activity_about">AboutActivity</string>
     <string name="about_text">Sample App criada pelo time do Player da Sambatech - Leandro Zanol,
-        Thiago Miranda e Priscila Magalhães
+        Priscila Magalhães e Thiago Miranda
     </string>
     <string name="loading">Carregando listagem...</string>
     <string name="title_activity_menu">MenuActivity</string>
