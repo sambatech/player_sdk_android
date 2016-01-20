@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Sample</string>
-    <string name="player_endpoint">http://playerapitest2.liquidplatform.com:7091/v1/</string>
+
     <string name="mock_endpoint">http://192.168.0.179:3000/medias</string>
-    <string name="share_facebook">Facebook</string>
     <string name="ad_program">Ad Tags</string>
     <string name="common">Comuns</string>
     <string name="about">Sobre</string>
@@ -11,6 +10,9 @@
     <string name="title_activity_main_menu">MainMenu</string>
     <string name="title_activity_splash">SplashActivity</string>
     <string name="title_activity_about">AboutActivity</string>
-    <string name="about_text">Sample App criada pelo time do Player da Sambatech - Leandro Zanol, Thiago Miranda e Priscila Magalhães</string>
+    <string name="about_text">Sample App criada pelo time do Player da Sambatech - Leandro Zanol,
+        Thiago Miranda e Priscila Magalhães
+    </string>
     <string name="loading">Carregando listagem...</string>
+    <string name="title_activity_menu">MenuActivity</string>
 </resources>

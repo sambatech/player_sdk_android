@@ -395,6 +395,9 @@ public class ImaWrapper implements Plugin {
 		if (adsLoader == null)
 			return;
 
+		//Main player reference destruction
+		contentPlayer = null;
+
 		SambaEventBus.unsubscribe(playerListener);
 		destroyAdPlayer();
 		release();
@@ -531,6 +534,8 @@ public class ImaWrapper implements Plugin {
 	 * Resume the content and notify the ad callbacks that the content has resumed.
 	 */
 	private void resumeContent() {
+		if(contentPlayer == null) return;
+
 		if (contentPlayer.hasFinished())
 			return;
 

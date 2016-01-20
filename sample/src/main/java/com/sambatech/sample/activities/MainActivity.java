@@ -7,8 +7,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.Toast;
 
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasAdapter;
@@ -32,14 +35,14 @@ public class MainActivity extends Activity {
 
     //Simple map with player hashs and pids
     private static final Map<Integer, String> phMap = new HashMap<Integer, String>() {{
-        put(533, "986e07f70986265468eae1377424d171");
-        put(536, "ee9edb5cbca43b39708141df994b53d7");
+        put(4421, "bc6a17435f3f389f37a514c171039b75");
+        put(4460, "36098808ae444ca5de4acf231949e312");
     }};
 
     //Adresses ( TODO: put them on an value.xml file )
-    //private static String tag_endpoint = "http://192.168.0.179:3000/";
-    private static String tag_endpoint = "http://198.101.153.219:3000/";
-    private static String api_endpoint = "http://198.101.153.219:8091/v1/";
+    //private static String tag_endpoint = "http://198.101.153.219:3000/";
+	private static String tag_endpoint = "https://api.myjson.com/bins/";
+    private static String api_endpoint = "http://api.sambavideos.sambatech.com/v1/";
 
 	@Bind(R.id.media_list) ListView list;
 	@Bind(R.id.progressbar_view) LinearLayout loading;
@@ -52,6 +55,8 @@ public class MainActivity extends Activity {
     ArrayList<LiquidMedia> mediaList;
 
 	@OnItemClick(R.id.media_list) public void mediaItemClick(int position) {
+		if(loading.getVisibility() == View.VISIBLE) return;
+
 		LiquidMedia media = (LiquidMedia) mAdapter.getItem(position);
 
         Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
@@ -74,6 +79,30 @@ public class MainActivity extends Activity {
         super.onCreateOptionsMenu(menu);
 
         getMenuInflater().inflate(R.menu.main_menu, menu);
+
+	    SearchView addTag = (SearchView) menu.findItem(R.id.addTag).getActionView();
+
+	    addTag.setQueryHint("Add tag id");
+
+	    addTag.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+		    @Override
+		    public boolean onQueryTextSubmit(String query) {
+			    getTags(query);
+			    return false;
+		    }
+
+		    @Override
+		    public boolean onQueryTextChange(String newText) {
+			    return false;
+		    }
+	    });
+
+	    // Clean magnifier
+	    int searchCloseButtonId = addTag.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
+	    ImageView magIcon = (ImageView) addTag.findViewById(searchCloseButtonId);
+	    magIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
+
         return true;
     }
 
@@ -81,12 +110,14 @@ public class MainActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.ad_program) {
-            getTags();
+            getTags("4xtfj");
         }else if (id == R.id.common) {
 	        callCommonList();
         }else if(id == R.id.about){
 			Intent about = new Intent(this, AboutActivity.class);
 	        startActivity(about);
+        }else if(id == R.id.addTag) {
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -97,52 +128,60 @@ public class MainActivity extends Activity {
      * @param token
      * @param pid
      */
-    private void makeMediasCall(String token, final int pid) {
-        Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid);
+    private void makeMediasCall(final String token, final int pid) {
+        Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid, true, "VIDEO");
 
 	    loading.setVisibility(View.VISIBLE);
 
         call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
             @Override
             public void onResponse(retrofit.Response<ArrayList<LiquidMedia>> response, Retrofit retrofit) {
-                ArrayList<LiquidMedia> medias = (ArrayList<LiquidMedia>) response.body();
-                medias = insertExternalData(medias, pid);
-                showMediasList(medias);
+	            if(response.code() == 200) {
+		            ArrayList<LiquidMedia> medias = (ArrayList<LiquidMedia>) response.body();
+		            medias = insertExternalData(medias, pid);
+		            showMediasList(medias);
+	            }else {
 
-	            loading.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                Log.e("retrofit: ", "error");
-            }
-        });
-    }
-
-    private void getTags() {
-        //Calling for our tags
-        Call<ArrayList<LiquidMedia.AdTag>> tagCall = LiquidApi.getApi(tag_endpoint).getTags();
-
-	    loading.setVisibility(View.VISIBLE);
-
-        tagCall.enqueue(new Callback<ArrayList<LiquidMedia.AdTag>>() {
-            @Override
-            public void onResponse(retrofit.Response<ArrayList<LiquidMedia.AdTag>> response, Retrofit retrofit) {
-                ArrayList<LiquidMedia.AdTag> tags = (ArrayList<LiquidMedia.AdTag>) response.body();
-	            try {
-		            ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
-		            mediaList.clear();
-		            list.setAdapter(null);
-		            showMediasList(mediasModified);
-	            }catch(CloneNotSupportedException e) {
-					Log.e("tags", e.getMessage());
 	            }
 	            loading.setVisibility(View.GONE);
             }
 
             @Override
             public void onFailure(Throwable t) {
-                Log.e("retrofit: ", "error");
+	            makeMediasCall(token, pid);
+
+            }
+        });
+    }
+
+    private void getTags(final String jsonId) {
+        //Calling for our tags
+        Call<ArrayList<LiquidMedia.AdTag>> tagCall = LiquidApi.getApi(tag_endpoint).getTags(jsonId);
+
+	    loading.setVisibility(View.VISIBLE);
+
+        tagCall.enqueue(new Callback<ArrayList<LiquidMedia.AdTag>>() {
+            @Override
+            public void onResponse(retrofit.Response<ArrayList<LiquidMedia.AdTag>> response, Retrofit retrofit) {
+	            if(response.code() == 200) {
+		            ArrayList<LiquidMedia.AdTag> tags = (ArrayList<LiquidMedia.AdTag>) response.body();
+		            try {
+			            ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
+			            mediaList.clear();
+			            list.setAdapter(null);
+			            showMediasList(mediasModified);
+		            } catch (CloneNotSupportedException e) {
+		            }
+	            }else {
+		            Toast.makeText(MainActivity.this, "Tags não achadas no id: " + jsonId, Toast.LENGTH_SHORT).show();
+	            }
+	            loading.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+	            Toast.makeText(MainActivity.this, "erro requisição: " + jsonId, Toast.LENGTH_SHORT).show();
+	            loading.setVisibility(View.GONE);
             }
         });
     }
@@ -152,11 +191,12 @@ public class MainActivity extends Activity {
 		if(mediaList != null ){
 			mediaList.clear();
 		}
-		//Making the call to project 533
-		makeMediasCall("ecae833f-979e-4856-af7b-ab335d2d0e61", 533);
 
-		//Making the call to project 536
-		makeMediasCall("e7b11183-65d5-4a2c-a279-e9a2e933b897", 536);
+		//Making the call to project 4421
+		makeMediasCall("e88070d4-5b19-4a4f-a23f-6b9ca1bc5492", 4421);
+
+		//Making the call to project 4460
+		makeMediasCall("b7e616d0-39e2-4cde-a5f7-639257c1247f", 4460);
 	}
 
     /**
@@ -164,7 +204,6 @@ public class MainActivity extends Activity {
      * @param medias
      */
 	private void showMediasList(ArrayList<LiquidMedia> medias) {
-		Log.e("tags:", String.valueOf(medias.size()));
         if(mediaList == null) {
             this.mediaList = medias;
         }else {
@@ -181,10 +220,13 @@ public class MainActivity extends Activity {
 	}
 
     private ArrayList<LiquidMedia> insertExternalData(ArrayList<LiquidMedia> medias, int pid) {
+		if(medias != null) {
 
-        for(LiquidMedia media : medias) {
-            media.ph = phMap.get(pid);
-        }
+			for(LiquidMedia media : medias) {
+				media.ph = phMap.get(pid);
+			}
+
+		}
 
         return medias;
     }
@@ -207,7 +249,6 @@ public class MainActivity extends Activity {
             m.description = tags.get(i).name;
 	        newMedias.add(m);
         }
-	    Log.e("tags:", String.valueOf(newMedias.size()));
         return newMedias;
     }
 }

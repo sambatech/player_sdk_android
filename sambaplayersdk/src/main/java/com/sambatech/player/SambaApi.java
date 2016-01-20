@@ -204,6 +204,10 @@ public class SambaApi {
 					for (int i = 0; i < totalRules; ++i) {
 						rule = rules.getJSONObject(i);
 						media.type = rule.getString("urlType").toLowerCase();
+
+						if (!media.type.equals("hls") && !media.type.equals("progressive"))
+							continue;
+
 						outputs = rule.getJSONArray("outputs");
 
 						defaultOutputCurrent = media.type.equals("hls") ? "abr_hls" : defaultOutput;

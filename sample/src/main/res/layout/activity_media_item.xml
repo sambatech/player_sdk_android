@@ -14,7 +14,7 @@
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
-        android:visibility="invisible"
+        android:text="Titulo"
         android:layout_height="wrap_content"
         android:layout_below="@id/samba_player"
         android:padding="@dimen/activity_vertical_margin"
@@ -25,8 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/title"
-        android:visibility="invisible"
-        android:padding="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_vertical_margin"
         android:textSize="20sp"/>
 
     <TextView

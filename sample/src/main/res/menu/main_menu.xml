@@ -1,6 +1,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto"
     >
+
+    <item
+        android:id="@+id/addTag"
+        android:orderInCategory="100"
+        android:title="+"
+        android:showAsAction="collapseActionView|ifRoom"
+        android:icon="@drawable/ic_plus"
+        android:actionViewClass="android.widget.SearchView"/>
+
 
     <item
         android:id="@+id/common"

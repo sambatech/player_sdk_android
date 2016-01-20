@@ -10,6 +10,7 @@ import retrofit.http.GET;
 import retrofit.http.Headers;
 import retrofit.http.Path;
 import retrofit.http.Query;
+import retrofit.http.Url;
 
 
 /**
@@ -22,12 +23,12 @@ public interface ILiquidApi {
     })
 
     @GET("medias")
-    Call<ArrayList<LiquidMedia>> getMedias(@Query("access_token") String token, @Query("pid") int pid);
+    Call<ArrayList<LiquidMedia>> getMedias(@Query("access_token") String token, @Query("pid") int pid, @Query("published") Boolean published, @Query("types") String type);
 
     @GET("media/{mediaId}")
     Call<SambaMedia> getMedia(@Path("mediaId") String mediaId);
 
-    @GET("tags")
-    Call<ArrayList<LiquidMedia.AdTag>> getTags();
+    @GET("{url}")
+    Call<ArrayList<LiquidMedia.AdTag>> getTags(@Path("url") String url);
 
 }

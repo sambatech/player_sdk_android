@@ -144,6 +144,12 @@ public class MediaItemActivity extends Activity {
         SambaApi api = new SambaApi(this, "token");
         SambaMediaRequest sbRequest = new SambaMediaRequest(media.ph, media.id);
 
+	    if(media.description != null || media.shortDescription != null) {
+		    descView.setText(((media.description != null) ? media.description : ""
+		    ) + ((media.shortDescription != null) ? media.shortDescription : ""));
+	    }
+
+
         api.requestMedia(sbRequest, new SambaApiCallback() {
             @Override
             public void onMediaResponse(SambaMedia media) {
@@ -169,8 +175,9 @@ public class MediaItemActivity extends Activity {
 
     private void loadMedia(SambaMedia media) {
 	    loading.setVisibility(View.GONE);
-        titleView.setVisibility(View.VISIBLE);
+	    titleView.setVisibility(View.VISIBLE);
         titleView.setText(media.title);
+
         player.setMedia(media);
         player.play();
     }

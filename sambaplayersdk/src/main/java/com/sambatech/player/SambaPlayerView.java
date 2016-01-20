@@ -22,6 +22,7 @@ import com.sambatech.player.R;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaPlayerListener;
 
+import java.security.InvalidParameterException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -132,48 +133,47 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 	public void play() {
 		if (player != null)
-			player.play();
+			doAction("play", null, null);
 		else createPlayer();
 	}
 
 	public void pause() {
 		if (_hasStarted)
-			player.pause();
+			doAction("pause", null, null);
 	}
 
 	public void stop() {
-		player.stop();
+		doAction("stop", null, null);
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.STOP));
 	}
 
 	public void seek(float position) {
-		player.seek((int)(position*1000f));
+		doAction("seek", null, position * 1000f);
 	}
 
 	public void setFullscreen(boolean flag) {
-		player.setFullscreen(flag);
+		doAction("fullscreen", flag, null);
 	}
 
 	public boolean isFullscreen() {
-		return player.isFullscreen();
+		return (getAction("isFullscreen") != 0.0f);
 	}
 
 	public void show() {
-		if(player == null)
-			return;
-		player.show();
+
+		doAction("visibility", true, null);
 	}
 
 	public void hide() {
-		player.hide();
+		doAction("visibility", false, null);
 	}
 
 	public float getCurrentTime() {
-		return player.getCurrentPosition()/1000f;
+		return getAction("getCurrentTime");
 	}
 
 	public float getDuration() {
-		return player.getDuration()/1000f;
+		return getAction("getDuration");
 	}
 
 	public boolean hasStarted() {
@@ -185,21 +185,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	public void destroy() {
-		if (player == null)
-			return;
-
-		PluginsManager.getInstance().onDestroy();
-		stopProgressTimer();
-		stop();
-		player.setPlayCallback(null);
-		player.setFullscreenCallback(null);
-		player.release();
-
-		player = null;
-		_hasStarted = false;
-		_hasFinished = false;
-
-		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
+		doAction("destroy", null, null);
 	}
 
 	public View getView() {
@@ -216,6 +202,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 			//throw new InvalidParameterException("Media data is null");
 			Log.e("player", "Media data is null!");
 		}
+
+		try{throw new InvalidParameterException("Media data is null");}catch(Exception e){Log.i("asdf", "blah!", e);}
 
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
@@ -279,6 +267,78 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		progressTimer = null;
 	}
 
+	private void doAction(String action, Boolean enable, Float time) {
+		Log.e("player:", action);
+		try{throw new InvalidParameterException("Media data is null");}catch(Exception e){Log.i("asdf", "blah!", e);}
+		if(player == null) return;
+
+		switch (action) {
+			case "play":
+				player.play();
+				break;
+			case "pause":
+				player.pause();
+				break;
+			case "fullscreen":
+				player.setFullscreen(enable);
+				break;
+
+			case "stop":
+				player.stop();
+				break;
+
+			case "seek":
+				player.seek(Math.round(time));
+				break;
+
+			case "destroy":
+				PluginsManager.getInstance().onDestroy();
+				stopProgressTimer();
+				stop();
+				player.setPlayCallback(null);
+				player.setFullscreenCallback(null);
+				player.release();
+
+				player = null;
+				_hasStarted = false;
+				_hasFinished = false;
+
+				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
+				break;
+
+			case "visibility":
+				Log.e("player:", String.valueOf(enable));
+
+				if(enable) {
+					player.show();
+				}else {
+					player.hide();
+				}
+				break;
+			default:
+				break;
+		}
+
+	}
+
+	private Float getAction(String action) {
+		if(player == null) return 0.0f;
+
+		Float f = 0f;
+		switch (action) {
+			case "getCurrentTime":
+				f = player.getCurrentPosition()/1000f;
+				break;
+			case "getDuration":
+				f = player.getDuration()/1000f;
+				break;
+			case "isFullscreen":
+				Boolean fs = player.isFullscreen();
+				f = fs?1.0f:0.0f;
+				break;
+		}
+		return f;
+	}
 	/*private void applyAttributes(TypedArray attrs) {
 		media.url = attrs.getString(R.styleable.SambaPlayerView_url);
 		media.title = attrs.getString(R.styleable.SambaPlayerView_title);
