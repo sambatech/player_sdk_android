@@ -6,9 +6,14 @@
         android:orderInCategory="100"
         android:title="+"
         android:showAsAction="collapseActionView|ifRoom"
-        android:icon="@drawable/ic_plus"
+        android:icon="@drawable/ic_plus_white"
         android:actionViewClass="android.widget.SearchView"/>
 
+    <item
+        android:id="@+id/withTag"
+        android:orderInCategory="100"
+        android:showAsAction="collapseActionView|ifRoom"
+        android:icon="@drawable/ic_dbclick_disable"/>
 
     <item
         android:id="@+id/common"
@@ -17,8 +22,8 @@
         android:showAsAction="never" />
 
     <item
-        android:id="@+id/ad_program"
-        android:title="@string/ad_program"
+        android:id="@+id/live"
+        android:title="@string/live"
         android:orderInCategory="100"
         android:showAsAction="never" />
 

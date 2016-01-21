@@ -18,6 +18,7 @@ import com.sambatech.sample.model.LiquidMedia;
 import com.sambatech.sample.rest.LiquidApi;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,35 +33,38 @@ import retrofit.Retrofit;
 
 public class MainActivity extends Activity {
 
-    //Simple map with player hashs and pids
-    private static final Map<Integer, String> phMap = new HashMap<Integer, String>() {{
-        put(4421, "bc6a17435f3f389f37a514c171039b75");
-        put(4460, "36098808ae444ca5de4acf231949e312");
-    }};
+	//Simple map with player hashs and their pids
+	private static final Map<Integer, String> phMap = new HashMap<Integer, String>() {{
+		put(4421, "bc6a17435f3f389f37a514c171039b75");
+		put(4460, "36098808ae444ca5de4acf231949e312");
+	}};
 
-    //Adresses ( TODO: put them on an value.xml file )
-    //private static String tag_endpoint = "http://198.101.153.219:3000/";
-	private static String tag_endpoint = "https://api.myjson.com/bins/";
-    private static String api_endpoint = "http://api.sambavideos.sambatech.com/v1/";
 
 	@Bind(R.id.media_list) ListView list;
 	@Bind(R.id.progressbar_view) LinearLayout loading;
 
-    @BindString(R.string.player_endpoint) String player_endpoint;
+	//Samba api and Json Tag endpoints
+	@BindString(R.string.sambaapi_endpoint) String api_endpoint;
+	@BindString(R.string.mysjon_endpoint) String tag_endpoint;
 
-    //Medias Adapter
-    MediasAdapter mAdapter;
+	MediasAdapter mAdapter;
+	Menu menu;
 
-    ArrayList<LiquidMedia> mediaList;
+	Boolean adEnabled = false;
+
+	//Array to store requested medias
+	ArrayList<LiquidMedia> mediaList;
+	//Array to store medias with ad tags
+	ArrayList<LiquidMedia> adMediaList;
 
 	@OnItemClick(R.id.media_list) public void mediaItemClick(int position) {
 		if(loading.getVisibility() == View.VISIBLE) return;
 
 		LiquidMedia media = (LiquidMedia) mAdapter.getItem(position);
 
-        Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
-        EventBus.getDefault().postSticky(media);
-        startActivity(intent);
+		Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
+		EventBus.getDefault().postSticky(media);
+		startActivity(intent);
 	}
 
 	@Override
@@ -68,129 +72,148 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-        ButterKnife.bind(this);
-
+		ButterKnife.bind(this);
 		callCommonList();
 	}
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		getMenuInflater().inflate(R.menu.main_menu, menu);
+		this.menu = menu;
 
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+		SearchView addTag = (SearchView) menu.findItem(R.id.addTag).getActionView();
+		addTag.setQueryHint("myjson id ( ex: 26dyf )");
 
-	    SearchView addTag = (SearchView) menu.findItem(R.id.addTag).getActionView();
+		addTag.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
-	    addTag.setQueryHint("myjson id ( ex: 26dyf )");
+			@Override
+			public boolean onQueryTextSubmit(String query) {
+				getTags(query);
+				return false;
+			}
 
-	    addTag.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+			@Override
+			public boolean onQueryTextChange(String newText) {
+				return false;
+			}
+		});
 
-		    @Override
-		    public boolean onQueryTextSubmit(String query) {
-			    getTags(query);
-			    return false;
-		    }
+		// Clean magnifier
+		int searchCloseButtonId = addTag.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
+		ImageView magIcon = (ImageView) addTag.findViewById(searchCloseButtonId);
+		magIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
+		magIcon.setVisibility(View.INVISIBLE);
 
-		    @Override
-		    public boolean onQueryTextChange(String newText) {
-			    return false;
-		    }
-	    });
+		return true;
+	}
 
-	    // Clean magnifier
-	    int searchCloseButtonId = addTag.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
-	    ImageView magIcon = (ImageView) addTag.findViewById(searchCloseButtonId);
-	    magIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-	    magIcon.setVisibility(View.INVISIBLE);
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
 
-        return true;
-    }
+		if(adEnabled) {
+			MenuItem dbclick = (MenuItem) menu.findItem(R.id.withTag);
+			dbclick.setIcon(R.drawable.ic_dbclick_disable);
+			showMediasList(mediaList);
+		}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if(id == R.id.ad_program) {
-            getTags("4xtfj");
-        }else if (id == R.id.common) {
-	        callCommonList();
-        }else if(id == R.id.about){
+		if(id == R.id.withTag && !adEnabled) {
+			getTags("4xtfj");
+			item.setIcon(R.drawable.ic_dbclick);
+			adEnabled = true;
+		}
+		else if(id == R.id.withTag && adEnabled) {
+			adEnabled = false;
+		}else if (id == R.id.common) {
+			this.mediaList.clear();
+			callCommonList();
+			adEnabled = false;
+		}else if(id == R.id.about){
 			Intent about = new Intent(this, AboutActivity.class);
-	        startActivity(about);
-        }else if(id == R.id.addTag) {
+			startActivity(about);
+		}else if (id == R.id.live) {
+			this.mediaList.clear();
+			list.setAdapter(null);
+			this.mediaList = populateLiveMedias();
+			showMediasList(this.mediaList);
+			adEnabled = false;
+		}
 
-        }
+		return super.onOptionsItemSelected(item);
+	}
 
-        return super.onOptionsItemSelected(item);
-    }
+	/**
+	 * Make the request to the Samba Api ( see also http://dev.sambatech.com/documentation/sambavideos/index.html )
+	 * @param token - Api token
+	 * @param pid - Project ID
+	 */
+	private void makeMediasCall(final String token, final int pid) {
+		Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid, true, "VIDEO");
 
-    /**
-     * Make the request to the liquid api
-     * @param token
-     * @param pid
-     */
-    private void makeMediasCall(final String token, final int pid) {
-        Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid, true, "VIDEO");
+		call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
+			@Override
+			public void onResponse(retrofit.Response<ArrayList<LiquidMedia>> response, Retrofit retrofit) {
+				if(response.code() == 200) {
+					ArrayList<LiquidMedia> medias = response.body();
+					medias = insertExternalData(medias, pid);
+					showMediasList(medias);
+					mediaList = medias;
+				}else {
 
-	    loading.setVisibility(View.VISIBLE);
+				}
+				loading.setVisibility(View.GONE);
+			}
 
-        call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
-            @Override
-            public void onResponse(retrofit.Response<ArrayList<LiquidMedia>> response, Retrofit retrofit) {
-	            if(response.code() == 200) {
-		            ArrayList<LiquidMedia> medias = response.body();
-		            medias = insertExternalData(medias, pid);
-		            showMediasList(medias);
-	            }else {
+			@Override
+			public void onFailure(Throwable t) {
+				makeMediasCall(token, pid);
+			}
+		});
+	}
 
-	            }
-	            loading.setVisibility(View.GONE);
-            }
+	/**
+	 * Request the DFP tags ( tags that you would put on the "ad_program" param of our browser player )
+	 * @param jsonId - Id for the myjson.com service
+	 */
+	private void getTags(final String jsonId) {
+		//Calling for our tags
+		Call<ArrayList<LiquidMedia.AdTag>> tagCall = LiquidApi.getApi(tag_endpoint).getTags(jsonId);
 
-            @Override
-            public void onFailure(Throwable t) {
-	            makeMediasCall(token, pid);
+		loading.setVisibility(View.VISIBLE);
 
-            }
-        });
-    }
+		tagCall.enqueue(new Callback<ArrayList<LiquidMedia.AdTag>>() {
+			@Override
+			public void onResponse(retrofit.Response<ArrayList<LiquidMedia.AdTag>> response, Retrofit retrofit) {
+				if(response.code() == 200) {
+					ArrayList<LiquidMedia.AdTag> tags = (ArrayList<LiquidMedia.AdTag>) response.body();
+					try {
+						ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
+						adMediaList = mediasModified;
+						showMediasList(adMediaList);
+					} catch (CloneNotSupportedException e) {
+					}
+				}else {
+					Toast.makeText(MainActivity.this, "Tags não achadas no id: " + jsonId, Toast.LENGTH_SHORT).show();
+				}
+				loading.setVisibility(View.GONE);
+			}
 
-    private void getTags(final String jsonId) {
-        //Calling for our tags
-        Call<ArrayList<LiquidMedia.AdTag>> tagCall = LiquidApi.getApi(tag_endpoint).getTags(jsonId);
-
-	    loading.setVisibility(View.VISIBLE);
-
-        tagCall.enqueue(new Callback<ArrayList<LiquidMedia.AdTag>>() {
-            @Override
-            public void onResponse(retrofit.Response<ArrayList<LiquidMedia.AdTag>> response, Retrofit retrofit) {
-	            if(response.code() == 200) {
-		            ArrayList<LiquidMedia.AdTag> tags = (ArrayList<LiquidMedia.AdTag>) response.body();
-		            try {
-			            ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
-			            mediaList.clear();
-			            list.setAdapter(null);
-			            showMediasList(mediasModified);
-		            } catch (CloneNotSupportedException e) {
-		            }
-	            }else {
-		            Toast.makeText(MainActivity.this, "Tags não achadas no id: " + jsonId, Toast.LENGTH_SHORT).show();
-	            }
-	            loading.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-	            Toast.makeText(MainActivity.this, "erro requisição: " + jsonId, Toast.LENGTH_SHORT).show();
-	            loading.setVisibility(View.GONE);
-            }
-        });
-    }
+			@Override
+			public void onFailure(Throwable t) {
+				Toast.makeText(MainActivity.this, "erro requisição: " + jsonId, Toast.LENGTH_SHORT).show();
+				loading.setVisibility(View.GONE);
+			}
+		});
+	}
 
 	private void callCommonList() {
 
 		if(mediaList != null ){
 			mediaList.clear();
 		}
+
+		loading.setVisibility(View.VISIBLE);
 
 		//Making the call to project 4421
 		makeMediasCall("e88070d4-5b19-4a4f-a23f-6b9ca1bc5492", 4421);
@@ -199,62 +222,27 @@ public class MainActivity extends Activity {
 		makeMediasCall("b7e616d0-39e2-4cde-a5f7-639257c1247f", 4460);
 	}
 
-    /**
-     * Populates the MediaItem with the given medias
-     * @param medias
-     */
+	/**
+	 * Populates the MediaItem with the given medias
+	 * @param medias - Array of objects representing the medias requested
+	 */
 	private void showMediasList(ArrayList<LiquidMedia> medias) {
-        if(mediaList == null) {
-            this.mediaList = medias;
-        }else {
-            this.mediaList.addAll(medias);
-
-	        // adding live streams
-
-	        /*LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
-	        thumb.url = "http://www.impactmobile.com/files/2012/09/icon64-broadcasts.png";
-	        ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{ thumb }));
-
-	        LiquidMedia media = new LiquidMedia();
-	        media.ph = "bc6a17435f3f389f37a514c171039b75";
-	        media.streamUrl = "http://gbbrlive2.sambatech.com.br/liveevent/sbt3_8fcdc5f0f8df8d4de56b22a2c6660470/livestream/manifest.f4m";
-	        media.title = "Live SBT (HLS)";
-	        media.description = "Transmissão ao vivo do SBT.";
-	        media.thumbs = thumbs;
-	        mediaList.add(media);
-	        media = new LiquidMedia();
-	        media.ph = "bc6a17435f3f389f37a514c171039b75";
-	        media.streamUrl = "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8";
-	        media.title = "Live VEVO (HLS)";
-	        media.description = "Transmissão ao vivo do VEVO.";
-	        media.thumbs = thumbs;
-	        mediaList.add(media);
-	        media = new LiquidMedia();
-	        media.ph = "bc6a17435f3f389f37a514c171039b75";
-	        media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/playlist.m3u8";
-	        media.title = "Live Denmark channel (HLS)";
-	        media.description = "Transmissão ao vivo TV-DN.";
-	        media.thumbs = thumbs;
-	        mediaList.add(media);
-	        media = new LiquidMedia();
-	        media.ph = "bc6a17435f3f389f37a514c171039b75";
-	        media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/manifest.f4m";
-	        media.title = "Live Denmark channel (HDS: erro!)";
-	        media.description = "Transmissão ao vivo inválida.";
-	        media.thumbs = thumbs;
-	        mediaList.add(media);*/
-        }
-
-        if(mAdapter == null) {
-            mAdapter = new MediasAdapter(this, this.mediaList);
-        }
+		list.setAdapter(null);
+		mAdapter = new MediasAdapter(this, medias);
 		list.setAdapter(mAdapter);
 
-        mAdapter.notifyDataSetChanged();
+		mAdapter.notifyDataSetChanged();
 
 	}
 
-    private ArrayList<LiquidMedia> insertExternalData(ArrayList<LiquidMedia> medias, int pid) {
+	/**
+	 * Inserts the corresponded player hashs in each media object given its project id
+	 *
+	 * @param medias - Array of objects representing the medias requested
+	 * @param pid - Project ID
+	 * @return
+	 */
+	private ArrayList<LiquidMedia> insertExternalData(ArrayList<LiquidMedia> medias, int pid) {
 		if(medias != null) {
 
 			for(LiquidMedia media : medias) {
@@ -262,28 +250,81 @@ public class MainActivity extends Activity {
 			}
 
 		}
+		return medias;
+	}
 
-        return medias;
-    }
+	/**
+	 * Inserts ad tags for DFP Ads.
+	 * @param medias - Array of objects representing the medias requested
+	 * @param tags - List of DFP tags
+	 * @return
+	 * @throws CloneNotSupportedException
+	 */
+	private ArrayList<LiquidMedia> mediasWithTags(ArrayList<LiquidMedia> medias, ArrayList<LiquidMedia.AdTag> tags) throws CloneNotSupportedException{
+		int mIndex = 0;
+		ArrayList<LiquidMedia> newMedias = new ArrayList<LiquidMedia>();
 
-    private ArrayList<LiquidMedia> mediasWithTags(ArrayList<LiquidMedia> medias, ArrayList<LiquidMedia.AdTag> tags) throws CloneNotSupportedException{
-        int mIndex = 0;
-        ArrayList<LiquidMedia> newMedias = new ArrayList<LiquidMedia>();
+		for(int i = 0; i < tags.size(); i++) {
+			LiquidMedia m = new LiquidMedia();
+			if(i < medias.size()) {
+				m = (LiquidMedia) medias.get(i).clone();
+			}else {
+				m = (LiquidMedia) newMedias.get(mIndex).clone();
+				mIndex = mIndex++;
+			}
+			m.adTag = new LiquidMedia.AdTag();
+			m.adTag.name = tags.get(i).name;
+			m.adTag.url = tags.get(i).url;
+			m.description = tags.get(i).name;
+			newMedias.add(m);
+		}
+		return newMedias;
+	}
 
-        for(int i = 0; i < tags.size(); i++) {
-            LiquidMedia m = new LiquidMedia();
-            if(i < medias.size()) {
-                m = (LiquidMedia) medias.get(i).clone();
-            }else {
-                m = (LiquidMedia) newMedias.get(mIndex).clone();
-                mIndex = mIndex++;
-            }
-            m.adTag = new LiquidMedia.AdTag();
-            m.adTag.name = tags.get(i).name;
-            m.adTag.url = tags.get(i).url;
-            m.description = tags.get(i).name;
-	        newMedias.add(m);
-        }
-        return newMedias;
-    }
+	/**
+	 * Populate Live medias
+	 * @return
+	 */
+	private ArrayList<LiquidMedia> populateLiveMedias() {
+
+			ArrayList<LiquidMedia> medias = new ArrayList<>();
+
+			LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+			thumb.url = "http://www.impactmobile.com/files/2012/09/icon64-broadcasts.png";
+			ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
+
+			LiquidMedia media = new LiquidMedia();
+			media.ph = "bc6a17435f3f389f37a514c171039b75";
+			media.streamUrl = "http://gbbrlive2.sambatech.com.br/liveevent/sbt3_8fcdc5f0f8df8d4de56b22a2c6660470/livestream/manifest.f4m";
+			media.title = "Live SBT (HLS)";
+			media.description = "Transmissão ao vivo do SBT.";
+			media.thumbs = thumbs;
+			medias.add(media);
+
+			media = new LiquidMedia();
+			media.ph = "bc6a17435f3f389f37a514c171039b75";
+			media.streamUrl = "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8";
+			media.title = "Live VEVO (HLS)";
+			media.description = "Transmissão ao vivo do VEVO.";
+			media.thumbs = thumbs;
+			medias.add(media);
+
+			media = new LiquidMedia();
+			media.ph = "bc6a17435f3f389f37a514c171039b75";
+			media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/playlist.m3u8";
+			media.title = "Live Denmark channel (HLS)";
+			media.description = "Transmissão ao vivo TV-DN.";
+			media.thumbs = thumbs;
+			medias.add(media);
+
+			media = new LiquidMedia();
+			media.ph = "bc6a17435f3f389f37a514c171039b75";
+			media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/manifest.f4m";
+			media.title = "Live Denmark channel (HDS: erro!)";
+			media.description = "Transmissão ao vivo inválida.";
+			media.thumbs = thumbs;
+			medias.add(media);
+
+			return medias;
+	}
 }
