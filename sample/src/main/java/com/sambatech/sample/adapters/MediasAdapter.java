@@ -2,6 +2,7 @@ package com.sambatech.sample.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,12 +22,13 @@ import butterknife.ButterKnife;
 
 /**
  * Created by tmiranda on 11/01/16.
+ *
+ * Adapter class to list each media item
  */
 public class MediasAdapter extends BaseAdapter {
 
     private ArrayList<LiquidMedia> medias;
     private Context mContext;
-	private View globalView;
 
     public MediasAdapter(Context mContext, ArrayList<LiquidMedia> mList) {
         this.medias = mList;
@@ -47,10 +49,6 @@ public class MediasAdapter extends BaseAdapter {
     public long getItemId(int position) {
         return 0;
     }
-
-	public void resetView() {
-
-	}
 
     @Override
     public View getView(int position, View view, ViewGroup viewGroup) {
@@ -84,14 +82,18 @@ public class MediasAdapter extends BaseAdapter {
         holder.title.setText(media.title.split("\\.", 2)[0]);
 
 	    if(media.description != null || media.shortDescription != null) {
-		    holder.description.setText((media.description != null ? media.description : "") + " " + (media.shortDescription != null ? media.shortDescription : ""));
+		    String text = (media.description != null ? media.description : "") + "\n " + (media.shortDescription != null ? media.shortDescription : "");
+		    holder.description.setText(text);
 	    }
 
         return view;
     }
 
-
-
+	/**
+	 * Get the smallest thumb of the media ( for optimization purposes )
+	 * @param thumbs
+	 * @return
+	 */
 	private String getIdealThumb(ArrayList<LiquidMedia.Thumb> thumbs) {
         int size = 0;
         String thumbUrl = "";

@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
@@ -45,6 +46,19 @@ public class MediaItemActivity extends Activity {
 	@Bind(R.id.loading_text)
 	TextView loading_text;
 
+
+	/**
+	 * Player Events
+	 *
+	 * onLoad - triggered when the media is loaded
+	 * onPlay - triggered when the media is played
+	 * onPause - triggered when the media is paused
+	 * onStop - triggered when the player is destroyed
+	 * onFinish - triggered when the media is finished
+	 * onFullscreen - triggered when the fullscreen is enabled
+	 * onFullscreenExit - triggered when the user exit the fullscreen
+	 *
+	 */
 	private SambaPlayerListener playerListener = new SambaPlayerListener() {
 		@Override
 		public void onLoad(SambaEvent e) {
@@ -106,16 +120,21 @@ public class MediaItemActivity extends Activity {
 		requestMedia(activityMedia);
 	}
 
+	/**
+	 * Subscribe the listeners of the player
+	 */
     private void initPlayer() {
         SambaEventBus.unsubscribe(playerListener);
         SambaEventBus.subscribe(playerListener);
     }
 
+	/**
+	 * Detects an change on the screen's orientation
+	 * @param newConfig
+	 */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-
-        Log.i("mediaitem:", String.valueOf((newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)));
 
         if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             player.setFullscreen(true);
@@ -139,21 +158,29 @@ public class MediaItemActivity extends Activity {
             player.pause();
     }
 
+	/**
+	 * Request the given media
+	 * @param media - Liquid media object
+	 */
     private void requestMedia(LiquidMedia media) {
 
+	    //Instantiates the SambaApi class
         SambaApi api = new SambaApi(this, "token");
+
+	    //Instantiate a unique request. Params: playerHash, mediaId, streamName, streamUrl ( alternateLive on our browser version )
         SambaMediaRequest sbRequest = new SambaMediaRequest(media.ph, media.id, null, media.streamUrl);
 
 	    if(media.description != null || media.shortDescription != null) {
 		    descView.setText(((media.description != null) ? media.description : ""
-		    ) + ((media.shortDescription != null) ? media.shortDescription : ""));
+		    ) + "\n " + ((media.shortDescription != null) ? media.shortDescription : ""));
 	    }
 
-
+		//Make the media request
         api.requestMedia(sbRequest, new SambaApiCallback() {
+
+	        //Success response of one media only. Returns a SambaMedia object
             @Override
             public void onMediaResponse(SambaMedia media) {
-                //status.setText(String.format("Loading...%s", media != null ? media.title : ""));
                 if(activityMedia.adTag != null) {
                     media.adUrl = activityMedia.adTag.url;
                     media.title = activityMedia.adTag.name;
@@ -162,13 +189,10 @@ public class MediaItemActivity extends Activity {
                 loadMedia(media);
             }
 
-            @Override
-            public void onMediaListResponse(SambaMedia[] mediaList) {
-            }
-
+	        //Response error
             @Override
             public void onMediaResponseError(String msg, SambaMediaRequest request) {
-                //Toast.makeText(MainActivity.this, msg + " " + request, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MediaItemActivity.this, msg + " " + request, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -179,6 +203,8 @@ public class MediaItemActivity extends Activity {
         titleView.setText(media.title);
 
         player.setMedia(media);
+
+	    //Play the media programmatically on its load ( similar to autoPlay=true param )
         player.play();
     }
 }

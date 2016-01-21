@@ -5,14 +5,14 @@
         android:id="@+id/addTag"
         android:orderInCategory="100"
         android:title="+"
-        android:showAsAction="collapseActionView|ifRoom"
+        android:showAsAction="ifRoom"
         android:icon="@drawable/ic_plus_white"
         android:actionViewClass="android.widget.SearchView"/>
 
     <item
         android:id="@+id/withTag"
         android:orderInCategory="100"
-        android:showAsAction="collapseActionView|ifRoom"
+        android:showAsAction="ifRoom"
         android:icon="@drawable/ic_dbclick_disable"/>
 
     <item

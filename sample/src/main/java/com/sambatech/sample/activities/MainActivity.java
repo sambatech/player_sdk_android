@@ -157,8 +157,8 @@ public class MainActivity extends Activity {
 				if(response.code() == 200) {
 					ArrayList<LiquidMedia> medias = response.body();
 					medias = insertExternalData(medias, pid);
-					showMediasList(medias);
-					mediaList = medias;
+					mediaList.addAll(medias);
+					showMediasList(mediaList);
 				}else {
 
 				}
@@ -181,11 +181,12 @@ public class MainActivity extends Activity {
 		Call<ArrayList<LiquidMedia.AdTag>> tagCall = LiquidApi.getApi(tag_endpoint).getTags(jsonId);
 
 		loading.setVisibility(View.VISIBLE);
+		list.setAdapter(null);
 
 		tagCall.enqueue(new Callback<ArrayList<LiquidMedia.AdTag>>() {
 			@Override
 			public void onResponse(retrofit.Response<ArrayList<LiquidMedia.AdTag>> response, Retrofit retrofit) {
-				if(response.code() == 200) {
+				if (response.code() == 200) {
 					ArrayList<LiquidMedia.AdTag> tags = (ArrayList<LiquidMedia.AdTag>) response.body();
 					try {
 						ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
@@ -193,7 +194,7 @@ public class MainActivity extends Activity {
 						showMediasList(adMediaList);
 					} catch (CloneNotSupportedException e) {
 					}
-				}else {
+				} else {
 					Toast.makeText(MainActivity.this, "Tags não achadas no id: " + jsonId, Toast.LENGTH_SHORT).show();
 				}
 				loading.setVisibility(View.GONE);
@@ -209,11 +210,15 @@ public class MainActivity extends Activity {
 
 	private void callCommonList() {
 
-		if(mediaList != null ){
+		if(mediaList != null ) {
 			mediaList.clear();
+		}else {
+			mediaList = new ArrayList<>();
 		}
 
 		loading.setVisibility(View.VISIBLE);
+
+		list.setAdapter(null);
 
 		//Making the call to project 4421
 		makeMediasCall("e88070d4-5b19-4a4f-a23f-6b9ca1bc5492", 4421);
@@ -227,7 +232,7 @@ public class MainActivity extends Activity {
 	 * @param medias - Array of objects representing the medias requested
 	 */
 	private void showMediasList(ArrayList<LiquidMedia> medias) {
-		list.setAdapter(null);
+
 		mAdapter = new MediasAdapter(this, medias);
 		list.setAdapter(mAdapter);
 
@@ -322,6 +327,14 @@ public class MainActivity extends Activity {
 			media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/manifest.f4m";
 			media.title = "Live Denmark channel (HDS: erro!)";
 			media.description = "Transmissão ao vivo inválida.";
+			media.thumbs = thumbs;
+			medias.add(media);
+
+			media = new LiquidMedia();
+			media.ph = "bc6a17435f3f389f37a514c171039b75";
+			media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/tvdiario_7a683b067e5eee5c8d45e1e1883f69b9/livestream/playlist.m3u8";
+			media.title = "Tv Diário";
+			media.description = "Transmissão ao vivo TV Diário";
 			media.thumbs = thumbs;
 			medias.add(media);
 
