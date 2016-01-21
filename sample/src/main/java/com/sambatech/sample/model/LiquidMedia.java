@@ -14,6 +14,7 @@ public class LiquidMedia implements Cloneable {
     public Boolean highlighted;
     public ArrayList<File> files;
     public ArrayList<Thumb> thumbs;
+    public String streamUrl;
 
     //Non liquid api
     public String ph;
