@@ -14,10 +14,11 @@ import com.sambatech.player.model.SambaMedia;
  */
 public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
-	private SambaPlayerBase playerController = SambaPlayerControllerNull.getInstance();
+	private SambaPlayer playerController = SambaPlayerControllerNull.getInstance();
 
 	public SambaPlayerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		SambaPlayerController.getInstance().init(this);
 
 		/*applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayerView, 0, 0));
 
@@ -27,10 +28,9 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 	@Override
 	public void setMedia(SambaMedia media) {
-		if (media == null)
-			throw new IllegalArgumentException("Media data is null");
-
-		SambaPlayerController.getInstance().setMedia(media);
+		// enable controller
+		playerController = SambaPlayerController.getInstance();
+		playerController.setMedia(media);
 	}
 
 	@Override
@@ -101,6 +101,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	@Override
 	public void destroy() {
 		playerController.destroy();
+		// disable controller
+		playerController = SambaPlayerControllerNull.getInstance();
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package com.sambatech.player;
 
 import android.util.Log;
+import android.view.View;
 
 import com.sambatech.player.model.SambaMedia;
 
@@ -9,7 +10,7 @@ import com.sambatech.player.model.SambaMedia;
  *
  * @author Leandro Zanol - 22/1/16
  */
-public class SambaPlayerControllerNull implements SambaPlayerBase {
+public class SambaPlayerControllerNull implements SambaPlayer {
 
 	private static final SambaPlayerControllerNull instance = new SambaPlayerControllerNull();
 
@@ -98,6 +99,11 @@ public class SambaPlayerControllerNull implements SambaPlayerBase {
 	@Override
 	public void destroy() {
 		logMessage();
+	}
+
+	@Override
+	public View getView() {
+		return null;
 	}
 
 	private void logMessage() {

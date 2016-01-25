@@ -1,9 +1,7 @@
 package com.sambatech.player;
 
 import android.app.Activity;
-import android.content.Context;
 import android.support.v4.content.ContextCompat;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -14,15 +12,13 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Exoplayer
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
+import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
+import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.plugins.PluginsManager;
-import com.sambatech.player.R;
-import com.sambatech.player.event.SambaEvent;
-import com.sambatech.player.event.SambaPlayerListener;
 
-import java.security.InvalidParameterException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -31,13 +27,14 @@ import java.util.TimerTask;
  *
  * @author Leandro Zanol - 7/12/15
  */
-public class SambaPlayerController implements SambaPlayerBase {
+public class SambaPlayerController implements SambaPlayer {
 
 	private SimpleVideoPlayer player;
 	private SambaMediaConfig media = new SambaMediaConfig();
 	private Timer progressTimer;
 	private boolean _hasStarted;
 	private boolean _hasFinished;
+	private FrameLayout container;
 
 	private static final SambaPlayerController instance = new SambaPlayerController();
 
@@ -116,9 +113,16 @@ public class SambaPlayerController implements SambaPlayerBase {
 		PluginsManager.getInstance().initialize();
 	}
 
+	public void init(FrameLayout container) {
+		this.container = container;
+	}
+
 	/**	Player API **/
 
 	public void setMedia(SambaMedia media) {
+		if (media == null)
+			throw new IllegalArgumentException("Media data is null");
+
 		this.media = (SambaMediaConfig)media;
 		destroy();
 	}
@@ -129,47 +133,46 @@ public class SambaPlayerController implements SambaPlayerBase {
 
 	public void play() {
 		if (player != null)
-			doAction("play", null, null);
+			player.play();
 		else createPlayer();
 	}
 
 	public void pause() {
 		if (_hasStarted)
-			doAction("pause", null, null);
+			player.pause();
 	}
 
 	public void stop() {
-		doAction("stop", null, null);
+		player.stop();
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.STOP));
 	}
 
 	public void seek(float position) {
-		doAction("seek", null, position * 1000f);
+		player.seek(Math.round(position * 1000f));
 	}
 
 	public void setFullscreen(boolean flag) {
-		doAction("fullscreen", flag, null);
+		player.setFullscreen(flag);
 	}
 
 	public boolean isFullscreen() {
-		return (getAction("isFullscreen") != 0.0f);
+		return player.isFullscreen();
 	}
 
 	public void show() {
-
-		doAction("visibility", true, null);
+		player.show();
 	}
 
 	public void hide() {
-		doAction("visibility", false, null);
+		player.hide();
 	}
 
 	public float getCurrentTime() {
-		return getAction("getCurrentTime");
+		return player.getCurrentPosition()/1000f;
 	}
 
 	public float getDuration() {
-		return getAction("getDuration");
+		return player.getDuration()/1000f;
 	}
 
 	public boolean hasStarted() {
@@ -181,8 +184,28 @@ public class SambaPlayerController implements SambaPlayerBase {
 	}
 
 	public void destroy() {
-		doAction("destroy", null, null);
+		if (player == null)
+			return;
+
+		PluginsManager.getInstance().onDestroy();
+		stopProgressTimer();
+		stop();
+		player.setPlayCallback(null);
+		player.setFullscreenCallback(null);
+		player.release();
+
+		player = null;
+		_hasStarted = false;
+		_hasFinished = false;
+
+		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
 	}
+
+	public View getView() {
+		return container;
+	}
+
+	/**	End Player API **/
 
 	private void createPlayer() {
 		if (player != null) {
@@ -194,8 +217,6 @@ public class SambaPlayerController implements SambaPlayerBase {
 			Log.e("player", "Media data is null!");
 	        return;
 		}
-
-		try{throw new InvalidParameterException("Media data is null");}catch(Exception e){Log.i("asdf", "blah!", e);}
 
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
@@ -209,7 +230,7 @@ public class SambaPlayerController implements SambaPlayerBase {
 		}
 
 		// no autoplay if there's ad because ImaWrapper controls the player through events
-        player = new SimpleVideoPlayer((Activity)getContext(), this,
+        player = new SimpleVideoPlayer((Activity)container.getContext(), container,
                 new Video(media.url, videoType),
                 media.title, media.adUrl == null || media.adUrl.isEmpty());
 
@@ -222,10 +243,11 @@ public class SambaPlayerController implements SambaPlayerBase {
 		// layer can be overlaid on top of it during ad playback.
 		player.moveSurfaceToBackground();
 
-		player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.share), getContext().getString(R.string.share_facebook), new OnClickListener() {
+		player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.share),
+				container.getContext().getString(R.string.share_facebook), new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
+				Toast.makeText(container.getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
 			}
 		});
 
@@ -259,78 +281,6 @@ public class SambaPlayerController implements SambaPlayerBase {
 		progressTimer = null;
 	}
 
-	private void doAction(String action, Boolean enable, Float time) {
-		Log.e("player:", action);
-		try{throw new InvalidParameterException("Media data is null");}catch(Exception e){Log.i("asdf", "blah!", e);}
-		if(player == null) return;
-
-		switch (action) {
-			case "play":
-				player.play();
-				break;
-			case "pause":
-				player.pause();
-				break;
-			case "fullscreen":
-				player.setFullscreen(enable);
-				break;
-
-			case "stop":
-				player.stop();
-				break;
-
-			case "seek":
-				player.seek(Math.round(time));
-				break;
-
-			case "destroy":
-				PluginsManager.getInstance().onDestroy();
-				stopProgressTimer();
-				stop();
-				player.setPlayCallback(null);
-				player.setFullscreenCallback(null);
-				player.release();
-
-				player = null;
-				_hasStarted = false;
-				_hasFinished = false;
-
-				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
-				break;
-
-			case "visibility":
-				Log.e("player:", String.valueOf(enable));
-
-				if(enable) {
-					player.show();
-				}else {
-					player.hide();
-				}
-				break;
-			default:
-				break;
-		}
-
-	}
-
-	private Float getAction(String action) {
-		if(player == null) return 0.0f;
-
-		Float f = 0f;
-		switch (action) {
-			case "getCurrentTime":
-				f = player.getCurrentPosition()/1000f;
-				break;
-			case "getDuration":
-				f = player.getDuration()/1000f;
-				break;
-			case "isFullscreen":
-				Boolean fs = player.isFullscreen();
-				f = fs?1.0f:0.0f;
-				break;
-		}
-		return f;
-	}
 	/*private void applyAttributes(TypedArray attrs) {
 		media.url = attrs.getString(R.styleable.SambaPlayerView_url);
 		media.title = attrs.getString(R.styleable.SambaPlayerView_title);
