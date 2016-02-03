@@ -22,12 +22,11 @@ public class OutputAdapter extends BaseAdapter {
 
 	private ArrayList<SambaMedia.Output> outputs;
 	private Context oContext;
-	private SambaPlayer playerView;
+
 
 	public OutputAdapter(Context context, ArrayList<SambaMedia.Output> oList, SambaPlayer pView) {
 		this.outputs = oList;
 		this.oContext = context;
-		this.playerView = pView;
 	}
 
 	@Override
@@ -45,6 +44,7 @@ public class OutputAdapter extends BaseAdapter {
 		return 0;
 	}
 
+	//TODO melhorar a renderização para não ser duplicada
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		LayoutInflater inflater = (LayoutInflater) oContext
@@ -65,15 +65,17 @@ public class OutputAdapter extends BaseAdapter {
 		SambaMedia.Output output = (SambaMedia.Output) getItem(position);
 
 		holder.label.setText(output.label);
-		if(output.current)
-			holder.radio.setChecked(true);
 
-		/**holder.label.setOnClickListener(new View.OnClickListener() {
+		if(output.current) {
+			holder.radio.setChecked(true);
+		}else {
+			holder.radio.setChecked(false);
+		}
+
+		/**holder.radio.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Log.e("outputs", "clicked");
-				SambaMedia.Outputs output = (SambaMedia.Outputs) getItem(position);
-				playerView.changeOutput(output.url);
 			}
 		});**/
 

@@ -3,6 +3,7 @@ package com.sambatech.sample.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -160,7 +161,6 @@ public class MainActivity extends Activity {
 					mediaList.addAll(medias);
 					showMediasList(mediaList);
 				}else {
-
 				}
 				loading.setVisibility(View.GONE);
 			}
@@ -221,10 +221,10 @@ public class MainActivity extends Activity {
 		list.setAdapter(null);
 
 		//Making the call to project 4421
-		makeMediasCall("e88070d4-5b19-4a4f-a23f-6b9ca1bc5492", 4421);
+		makeMediasCall("079cc2f1-4733-4c92-a7b5-7e1640698caa", 4421);
 
 		//Making the call to project 4460
-		makeMediasCall("b7e616d0-39e2-4cde-a5f7-639257c1247f", 4460);
+		makeMediasCall("079cc2f1-4733-4c92-a7b5-7e1640698caa", 4460);
 	}
 
 	/**
@@ -300,7 +300,7 @@ public class MainActivity extends Activity {
 
 			LiquidMedia media = new LiquidMedia();
 			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://gbbrlive2.sambatech.com.br/liveevent/sbttestesamba_8fcdc5f0f8df8d4de56b22a2c6660470/livestream/playlist.m3u8";
+			media.streamUrl = "http://gbbrlive2.sambatech.com.br/liveevent/sbt3_8fcdc5f0f8df8d4de56b22a2c6660470/livestream/manifest.m3u8";
 			media.title = "Live SBT (HLS)";
 			media.description = "Transmissão ao vivo do SBT.";
 			media.thumbs = thumbs;
