@@ -300,7 +300,7 @@ public class MainActivity extends Activity {
 
 			LiquidMedia media = new LiquidMedia();
 			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://gbbrlive2.sambatech.com.br/liveevent/sbt3_8fcdc5f0f8df8d4de56b22a2c6660470/livestream/manifest.f4m";
+			media.streamUrl = "http://gbbrlive2.sambatech.com.br/liveevent/sbttestesamba_8fcdc5f0f8df8d4de56b22a2c6660470/livestream/playlist.m3u8";
 			media.title = "Live SBT (HLS)";
 			media.description = "Transmissão ao vivo do SBT.";
 			media.thumbs = thumbs;

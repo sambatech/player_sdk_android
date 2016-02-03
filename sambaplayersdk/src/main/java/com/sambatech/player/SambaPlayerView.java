@@ -2,11 +2,18 @@ package com.sambatech.player;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.OrientationEventListener;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ListView;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.exoplayer.ExoPlayer;
@@ -14,15 +21,16 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Exoplayer
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
+import com.sambatech.player.adapter.OutputAdapter;
+import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
+import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.plugins.PluginsManager;
-import com.sambatech.player.R;
-import com.sambatech.player.event.SambaEvent;
-import com.sambatech.player.event.SambaPlayerListener;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -38,6 +46,9 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	private Timer progressTimer;
 	private boolean _hasStarted;
 	private boolean _hasFinished;
+	private OutputAdapter oAdapter;
+	private ListView oList;
+	private FrameLayout outputContainer;
 
 	private ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
@@ -134,7 +145,14 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	public void play() {
 		if (player != null)
 			doAction("play", null, null);
-		else createPlayer();
+		else {
+			createPlayer();
+
+
+			//TODO reunir em um "pos create"?
+			//Show controls
+			player.show();
+		};
 	}
 
 	public void pause() {
@@ -203,8 +221,6 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 			Log.e("player", "Media data is null!");
 		}
 
-		try{throw new InvalidParameterException("Media data is null");}catch(Exception e){Log.i("asdf", "blah!", e);}
-
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
 		switch (media.type.toLowerCase()) {
@@ -243,6 +259,33 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
         PluginsManager.getInstance().onLoad(this);
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
+
+		//Fullscreen
+		OrientationEventListener orientationEventListener = new OrientationEventListener(this.getContext()) {
+			@Override
+			public void onOrientationChanged(int orientation) {
+				if(player == null)
+					return;
+
+				if(orientation <= 15 && orientation >= 0) {
+					if(player.isFullscreen()) {
+						player.setFullscreen(false);
+					}
+					SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PORTRAIT));
+				}else if((orientation >= 80 && orientation <= 100 ) || (orientation >= 260 && orientation <= 290)){
+					if(!player.isFullscreen()) {
+						player.setFullscreen(true);
+					}
+					SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
+				}
+			}
+
+		};
+		orientationEventListener.enable();
+
+		//OutputList
+		oList = (ListView) this.findViewById(R.id.output_menu_list);
+		showOutputList(media.outputs);
 	}
 
     private void startProgressTimer() {
@@ -339,6 +382,22 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		}
 		return f;
 	}
+
+	private void showOutputList(ArrayList<SambaMedia.Outputs> outputs) {
+		oAdapter = new OutputAdapter(this.getContext(), outputs, this);
+		oList.setAdapter(oAdapter);
+
+		oAdapter.notifyDataSetChanged();
+	}
+
+	public void changeOutput(String url) {
+		int currentPosition = player.getCurrentPosition();
+		media.url = url;
+		destroy();
+		createPlayer();
+		player.seek(currentPosition);
+	}
+
 	/*private void applyAttributes(TypedArray attrs) {
 		media.url = attrs.getString(R.styleable.SambaPlayerView_url);
 		media.title = attrs.getString(R.styleable.SambaPlayerView_title);

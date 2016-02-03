@@ -10,6 +10,7 @@ import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
+import com.sambatech.player.utils.Helpers;
 
 import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
@@ -19,7 +20,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -31,6 +35,17 @@ public class SambaApi {
 
 	private Activity activity;
 	private String accessToken;
+
+	/** Output map **/
+	private static final Map<String, Integer> outputMap = new HashMap<String, Integer>() {{
+		put("_raw", -1);
+		put("abr_hls", 0);
+		put("240p", 1);
+		put("360p", 2);
+		put("480p", 3);
+		put("720p", 4);
+		put("1080p", 5);
+	}};
 
 	/**
 	 * @param activity Reference to the current Activity
@@ -177,6 +192,8 @@ public class SambaApi {
 					return null;
 
 				SambaMediaConfig media = new SambaMediaConfig();
+				ArrayList<SambaMedia.Outputs> outputsArray = new ArrayList<>();
+
 				JSONObject playerConfig = json.getJSONObject("playerConfig");
 				JSONObject apiConfig = json.getJSONObject("apiConfig");
 				JSONObject projectConfig = json.getJSONObject("project");
@@ -184,6 +201,7 @@ public class SambaApi {
 				media.projectHash = projectConfig.getString("playerHash");
 				media.projectId = projectConfig.getInt("id");
 				media.title = json.getString("title");
+				media.outputs = new ArrayList<>();
 
 				if (json.has("id"))
 					media.id = json.getString("id");
@@ -201,9 +219,12 @@ public class SambaApi {
 					String defaultOutputCurrent;
 
 					// looks for HLS delivery or the last taken
+					ArrayList<String> filledRules = new ArrayList<>();
 					for (int i = 0; i < totalRules; ++i) {
 						rule = rules.getJSONObject(i);
 						media.type = rule.getString("urlType").toLowerCase();
+
+						if(filledRules.contains(media.type)) continue;
 
 						if (!media.type.equals("hls") && !media.type.equals("progressive"))
 							continue;
@@ -214,19 +235,33 @@ public class SambaApi {
 
 						for (int j = outputs.length(); j-- > 0;) {
 							output = outputs.getJSONObject(j);
+							String label = output.getString("outputName");
 
-							if (!output.getString("outputName").equalsIgnoreCase("_raw") && !output.isNull("url") &&
-									(output.getString("outputName").equals(defaultOutputCurrent) || media.url == null)) {
+							SambaMediaConfig.Outputs cOutput = new SambaMedia.Outputs();
+							cOutput.url = output.getString("url");
+							cOutput.label = (output.getString("outputName").equals("abr_hls")) ? "auto" : output.getString("outputName");
+							cOutput.position = outputMap.get(output.getString("outputName").toLowerCase());
+
+							//TODO checar comportamento de projeto sem default output
+							if (!label.equalsIgnoreCase("_raw") && !output.isNull("url") &&
+									(label.equals(defaultOutputCurrent))) {
 
 								// if HLS (MBR), set to exit loop
 								if (media.type.equals("hls"))
 									i = totalRules;
 
 								media.url = output.getString("url");
-								break;
+								Log.e("outputs", output.getString("outputName"));
+								cOutput.current = true;
+								media.outputs.add(cOutput);
+							}else if(!label.equalsIgnoreCase("_raw") && !output.isNull("url")){
+								media.outputs.add(cOutput);
 							}
 						}
+						filledRules.add(media.type);
 					}
+
+					sortOutputs(media.outputs);
 				}
 				else if (json.has("liveOutput")) {
 					media.url = json.getJSONObject("liveOutput").getString("baseUrl");
@@ -263,6 +298,10 @@ public class SambaApi {
 			}
 
 			return null;
+		}
+
+		private void sortOutputs(ArrayList<SambaMedia.Outputs> outputs) {
+			Collections.sort(outputs, new Helpers.CustomSorter());
 		}
 	}
 }

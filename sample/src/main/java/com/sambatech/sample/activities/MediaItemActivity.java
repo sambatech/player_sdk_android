@@ -1,16 +1,12 @@
 package com.sambatech.sample.activities;
 
 import android.app.Activity;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.sambatech.sample.R;
-import com.sambatech.sample.model.LiquidMedia;
 import com.sambatech.player.SambaApi;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaApiCallback;
@@ -19,6 +15,8 @@ import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaRequest;
+import com.sambatech.sample.R;
+import com.sambatech.sample.model.LiquidMedia;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -118,6 +116,7 @@ public class MediaItemActivity extends Activity {
 
 	    initPlayer();
 		requestMedia(activityMedia);
+
 	}
 
 	/**
@@ -126,21 +125,6 @@ public class MediaItemActivity extends Activity {
     private void initPlayer() {
         SambaEventBus.unsubscribe(playerListener);
         SambaEventBus.subscribe(playerListener);
-    }
-
-	/**
-	 * Detects an change on the screen's orientation
-	 * @param newConfig
-	 */
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            player.setFullscreen(true);
-        }else if(newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            player.setFullscreen(false);
-        }
     }
 
 	@Override
@@ -206,5 +190,6 @@ public class MediaItemActivity extends Activity {
 
 	    //Play the media programmatically on its load ( similar to autoPlay=true param )
         player.play();
+
     }
 }

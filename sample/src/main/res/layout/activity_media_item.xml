@@ -4,27 +4,48 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.sambatech.sample.activities.MediaItemActivity">
+    tools:context="com.sambatech.sample.activities.MediaItemActivity"
+    android:background="@color/backgroundGray">
 
     <com.sambatech.player.SambaPlayerView
         android:id="@+id/samba_player"
         android:layout_width="match_parent"
-        android:layout_height="200dp" />
+        android:layout_height="200dp"
+        >
+
+    </com.sambatech.player.SambaPlayerView>
 
     <TextView
         android:id="@+id/title"
-        android:layout_width="match_parent"
-        android:text="Titulo"
+        android:layout_width="wrap_content"
+        android:layout_alignRight="@+id/duration"
+        android:text="Tituloasidjiasjdisaiasjdiasjdiajsdijsadijsadjsadjisa"
         android:layout_height="wrap_content"
         android:layout_below="@id/samba_player"
         android:padding="@dimen/activity_vertical_margin"
         android:textSize="30sp"/>
 
     <TextView
+        android:id="@+id/duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/samba_player"
+        android:layout_alignParentRight="true"
+        android:visibility="gone"
+        android:text="00:00"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginRight="@dimen/activity_vertical_margin"
+        android:background="@color/transparent_black_hex_8"
+        android:textColor="@color/backgroundGray"
+        android:padding="@dimen/activity_horizontal_margin"
+        />
+
+    <TextView
         android:id="@+id/description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/title"
+        android:layout_below="@+id/title"
+        android:text="Descrição"
         android:paddingLeft="@dimen/activity_vertical_margin"
         android:textSize="20sp"/>
 
@@ -32,6 +53,8 @@
         android:id="@+id/status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="Eventos"
+        android:gravity="center"
         android:layout_alignParentBottom="true"/>
 
     <LinearLayout android:id="@+id/progressbar_view"

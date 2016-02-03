@@ -62,6 +62,15 @@
         </RelativeLayout>
     </LinearLayout>
 
+    <include
+        layout="@layout/output_menu_layout"
+        android:id="@+id/output_menu"
+        android:layout_width="200sp"
+        android:layout_height="100sp"
+        android:layout_gravity="center">
+
+    </include>
+
     <ImageButton
         android:contentDescription="@string/pause"
         android:id="@+id/pause"
@@ -70,6 +79,7 @@
         android:layout_gravity="center"
         android:background="@android:color/transparent"
         android:src="@drawable/ic_action_pause_large" />
+
 
     <LinearLayout
         android:id="@+id/bottom_chrome"
@@ -123,7 +133,7 @@
 
             <ImageButton
                 android:contentDescription="@string/output"
-                android:id="@+id/output"
+                android:id="@+id/output_button"
                 android:src="@drawable/output"
                 android:background="@android:color/transparent"
                 style="@style/control" />

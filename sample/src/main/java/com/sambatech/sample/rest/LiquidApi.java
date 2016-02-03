@@ -14,7 +14,7 @@ public class LiquidApi {
     static public ILiquidApi getApi(String endpoint) {
 
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+        logging.setLevel(HttpLoggingInterceptor.Level.NONE);
 
         OkHttpClient httpClient = new OkHttpClient();
 

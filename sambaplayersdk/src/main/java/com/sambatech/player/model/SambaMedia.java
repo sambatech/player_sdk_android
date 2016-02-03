@@ -2,6 +2,8 @@ package com.sambatech.player.model;
 
 import android.graphics.drawable.Drawable;
 
+import java.util.ArrayList;
+
 /**
  * Data entity representing a media.
  *
@@ -15,4 +17,12 @@ public class SambaMedia {
 	public String adUrl;
 	public Drawable thumb;
 	public boolean isLive;
+	public ArrayList<Outputs> outputs;
+
+	public static class Outputs {
+		public String url;
+		public String label;
+		public Boolean current = false;
+		public int position;
+	}
 }

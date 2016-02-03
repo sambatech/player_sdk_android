@@ -132,4 +132,5 @@ public class LayerManager {
       exoplayerWrapper = null;
     }
   }
+
 }

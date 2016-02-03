@@ -20,7 +20,9 @@ public abstract class SambaPlayerListener {
 		FINISH,
 		RESIZE,
 		CLICK,
-		ERROR
+		ERROR,
+		PORTRAIT,
+		LANDSCAPE
 	}
 
 	public void onLoad(SambaEvent event) {}
@@ -48,5 +50,9 @@ public abstract class SambaPlayerListener {
 	public void onClick(SambaEvent event) {}
 
 	public void onError(SambaEvent event) {}
+
+	public void onPortrait(SambaEvent event) {}
+
+	public void onLandscape(SambaEvent event) {}
 
 }

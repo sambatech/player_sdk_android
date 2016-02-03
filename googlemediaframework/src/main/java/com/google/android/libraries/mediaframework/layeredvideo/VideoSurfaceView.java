@@ -85,5 +85,4 @@ public class VideoSurfaceView extends SurfaceView {
       requestLayout();
     }
   }
-
 }

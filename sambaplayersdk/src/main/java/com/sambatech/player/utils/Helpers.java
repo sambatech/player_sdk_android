@@ -1,5 +1,9 @@
 package com.sambatech.player.utils;
 
+import com.sambatech.player.model.SambaMedia;
+
+import java.util.Comparator;
+
 /**
  * Useful stuff for whole SambaPlayer project.
  *
@@ -29,4 +33,14 @@ public final class Helpers {
 	private static String getSessionComponent() {
 		return Integer.toHexString((int)((Math.random() + 1) * 0x10000)).substring(1);
 	}
+
+	//Order ouputs
+	public static class CustomSorter implements Comparator<SambaMedia.Outputs> {
+
+		@Override
+		public int compare(SambaMedia.Outputs lhs, SambaMedia.Outputs rhs) {
+			return lhs.position - rhs.position;
+		}
+	}
 }
+
