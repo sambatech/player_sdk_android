@@ -35,10 +35,10 @@ public final class Helpers {
 	}
 
 	//Order ouputs
-	public static class CustomSorter implements Comparator<SambaMedia.Outputs> {
+	public static class CustomSorter implements Comparator<SambaMedia.Output> {
 
 		@Override
-		public int compare(SambaMedia.Outputs lhs, SambaMedia.Outputs rhs) {
+		public int compare(SambaMedia.Output lhs, SambaMedia.Output rhs) {
 			return lhs.position - rhs.position;
 		}
 	}

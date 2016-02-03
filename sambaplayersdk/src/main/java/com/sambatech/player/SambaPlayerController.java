@@ -3,8 +3,11 @@ package com.sambatech.player;
 import android.app.Activity;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.view.OrientationEventListener;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.exoplayer.ExoPlayer;
@@ -12,6 +15,7 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Exoplayer
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
+import com.sambatech.player.adapter.OutputAdapter;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
@@ -35,6 +39,9 @@ public class SambaPlayerController implements SambaPlayer {
 	private boolean _hasStarted;
 	private boolean _hasFinished;
 	private FrameLayout container;
+	private OutputAdapter oAdapter;
+	private ListView oList;
+	private OrientationEventListener orientationEventListener;
 
 	private static final SambaPlayerController instance = new SambaPlayerController();
 
@@ -42,7 +49,7 @@ public class SambaPlayerController implements SambaPlayer {
 		return instance;
 	}
 
-	private ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
+	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
 		public void onStateChanged(boolean playWhenReady, int playbackState) {
 			Log.i("player", "state: " + playWhenReady + " " + playbackState);
@@ -79,7 +86,6 @@ public class SambaPlayerController implements SambaPlayer {
 		@Override
 		public void onError(Exception e) {
 			Log.i("player", "Error: " + media, e);
-			destroy();
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, e.getMessage()));
 		}
 
@@ -89,7 +95,7 @@ public class SambaPlayerController implements SambaPlayer {
 		}
 	};
 
-	private PlaybackControlLayer.PlayCallback playListener = new PlaybackControlLayer.PlayCallback() {
+	private final PlaybackControlLayer.PlayCallback playListener = new PlaybackControlLayer.PlayCallback() {
 		@Override
 		public void onPlay() {
 			if (player.getPlaybackState() == ExoPlayer.STATE_ENDED)
@@ -97,7 +103,7 @@ public class SambaPlayerController implements SambaPlayer {
 		}
 	};
 
-	private PlaybackControlLayer.FullscreenCallback fullscreenListener = new PlaybackControlLayer.FullscreenCallback() {
+	private final PlaybackControlLayer.FullscreenCallback fullscreenListener = new PlaybackControlLayer.FullscreenCallback() {
 		@Override
 		public void onGoToFullscreen() {
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN));
@@ -106,6 +112,15 @@ public class SambaPlayerController implements SambaPlayer {
 		@Override
 		public void onReturnFromFullscreen() {
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN_EXIT));
+		}
+	};
+
+	private final AdapterView.OnItemClickListener menuItemListener = new AdapterView.OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+			SambaMedia.Output output = (SambaMedia.Output) oAdapter.getItem(position);
+			changeOutput(output);
 		}
 	};
 
@@ -190,10 +205,17 @@ public class SambaPlayerController implements SambaPlayer {
 		PluginsManager.getInstance().onDestroy();
 		stopProgressTimer();
 		stop();
+
+		if (oList != null)
+			oList.setOnItemClickListener(null);
+
+		orientationEventListener.disable();
 		player.setPlayCallback(null);
 		player.setFullscreenCallback(null);
 		player.release();
 
+		oList = null;
+		orientationEventListener = null;
 		player = null;
 		_hasStarted = false;
 		_hasFinished = false;
@@ -203,6 +225,17 @@ public class SambaPlayerController implements SambaPlayer {
 
 	public View getView() {
 		return container;
+	}
+
+	public void changeOutput(SambaMedia.Output output) {
+		int currentPosition = player.getCurrentPosition();
+		for(SambaMedia.Output o : media.outputs) {
+			o.current = o.label.equals(output.label);
+		}
+		media.url = output.url;
+		destroy();
+		createPlayer();
+		player.seek(currentPosition);
 	}
 
 	/**	End Player API **/
@@ -245,18 +278,55 @@ public class SambaPlayerController implements SambaPlayer {
 
 		player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.share),
 				container.getContext().getString(R.string.share_facebook), new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Toast.makeText(container.getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
-			}
-		});
+					@Override
+					public void onClick(View v) {
+						Toast.makeText(container.getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
+					}
+				});
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
 		player.setFullscreenCallback(fullscreenListener);
 
+		// Fullscreen
+		orientationEventListener = new OrientationEventListener(container.getContext()) {
+
+			{ enable(); }
+
+			@Override
+			public void onOrientationChanged(int orientation) {
+				if(player == null)
+					return;
+
+				if(orientation <= 15 && orientation >= 0) {
+					if(player.isFullscreen()) {
+						player.setFullscreen(false);
+					}
+					SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PORTRAIT));
+				}else if((orientation >= 80 && orientation <= 100 ) || (orientation >= 260 && orientation <= 290)){
+					if(!player.isFullscreen()) {
+						player.setFullscreen(true);
+					}
+					SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
+				}
+			}
+		};
+
         PluginsManager.getInstance().onLoad(this);
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
+
+		if (media.outputs != null) {
+			//OutputList
+			oList = (ListView) container.findViewById(R.id.output_menu_list);
+			oAdapter = new OutputAdapter(container.getContext(), media.outputs, this);
+			oList.setAdapter(oAdapter);
+			oAdapter.notifyDataSetChanged();
+			oList.setOnItemClickListener(menuItemListener);
+		}
+
+		// TODO reunir em um "pos create"?
+		//Show controls
+		player.show();
 	}
 
     private void startProgressTimer() {

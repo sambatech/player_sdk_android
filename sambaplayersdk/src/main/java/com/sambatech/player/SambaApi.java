@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.sambatech.player.R;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
@@ -192,7 +191,7 @@ public class SambaApi {
 					return null;
 
 				SambaMediaConfig media = new SambaMediaConfig();
-				ArrayList<SambaMedia.Outputs> outputsArray = new ArrayList<>();
+				ArrayList<SambaMedia.Output> outputArray = new ArrayList<>();
 
 				JSONObject playerConfig = json.getJSONObject("playerConfig");
 				JSONObject apiConfig = json.getJSONObject("apiConfig");
@@ -237,7 +236,7 @@ public class SambaApi {
 							output = outputs.getJSONObject(j);
 							String label = output.getString("outputName");
 
-							SambaMediaConfig.Outputs cOutput = new SambaMedia.Outputs();
+							SambaMedia.Output cOutput = new SambaMedia.Output();
 							cOutput.url = output.getString("url");
 							cOutput.label = (output.getString("outputName").equals("abr_hls")) ? "auto" : output.getString("outputName");
 							cOutput.position = outputMap.get(output.getString("outputName").toLowerCase());
@@ -300,7 +299,7 @@ public class SambaApi {
 			return null;
 		}
 
-		private void sortOutputs(ArrayList<SambaMedia.Outputs> outputs) {
+		private void sortOutputs(ArrayList<SambaMedia.Output> outputs) {
 			Collections.sort(outputs, new Helpers.CustomSorter());
 		}
 	}

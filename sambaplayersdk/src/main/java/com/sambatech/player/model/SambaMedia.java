@@ -17,9 +17,9 @@ public class SambaMedia {
 	public String adUrl;
 	public Drawable thumb;
 	public boolean isLive;
-	public ArrayList<Outputs> outputs;
+	public ArrayList<Output> outputs;
 
-	public static class Outputs {
+	public static class Output {
 		public String url;
 		public String label;
 		public Boolean current = false;

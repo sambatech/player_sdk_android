@@ -66,6 +66,8 @@ public interface SambaPlayer {
 	 */
 	boolean hasStarted();
 
+	void changeOutput(SambaMedia.Output output);
+
 	void destroy();
 
 	/**

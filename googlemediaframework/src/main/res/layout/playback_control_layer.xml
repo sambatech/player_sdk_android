@@ -62,15 +62,6 @@
         </RelativeLayout>
     </LinearLayout>
 
-    <include
-        layout="@layout/output_menu_layout"
-        android:id="@+id/output_menu"
-        android:layout_width="200sp"
-        android:layout_height="100sp"
-        android:layout_gravity="center">
-
-    </include>
-
     <ImageButton
         android:contentDescription="@string/pause"
         android:id="@+id/pause"
@@ -146,4 +137,12 @@
                 style="@style/control" />
         </LinearLayout>
     </LinearLayout>
+
+    <include
+        layout="@layout/output_menu_layout"
+        android:id="@+id/output_menu"
+        android:layout_width="200sp"
+        android:layout_height="100sp"
+        android:layout_gravity="center" />
+
 </FrameLayout>

@@ -97,6 +97,11 @@ public class SambaPlayerControllerNull implements SambaPlayer {
 	}
 
 	@Override
+	public void changeOutput(SambaMedia.Output output) {
+		logMessage();
+	}
+
+	@Override
 	public void destroy() {
 		logMessage();
 	}
