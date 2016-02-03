@@ -147,8 +147,8 @@
     <include
         layout="@layout/output_menu_layout"
         android:id="@+id/output_menu"
-        android:layout_width="200sp"
-        android:layout_height="100sp"
+        android:layout_width="200dp"
+        android:layout_height="150dp"
         android:layout_gravity="center" />
 
 </FrameLayout>
