@@ -1,6 +1,7 @@
 package com.sambatech.player;
 
 import android.app.Activity;
+import android.media.Image;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.OrientationEventListener;
@@ -276,13 +277,13 @@ public class SambaPlayerController implements SambaPlayer {
 		// layer can be overlaid on top of it during ad playback.
 		player.moveSurfaceToBackground();
 
-		player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.share),
+		/**player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.share),
 				container.getContext().getString(R.string.share_facebook), new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						Toast.makeText(container.getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
 					}
-				});
+				});**/
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
@@ -311,6 +312,15 @@ public class SambaPlayerController implements SambaPlayer {
 				}
 			}
 		};
+
+		//Live treatment
+		if(media.isLive) {
+			((Activity) container.getContext()).findViewById(R.id.output_button).setVisibility(View.INVISIBLE);
+			((Activity) container.getContext()).findViewById(R.id.time_container).setVisibility(View.INVISIBLE);
+
+			player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.ic_live),
+				container.getContext().getString(R.string.live), null);
+		}
 
         PluginsManager.getInstance().onLoad(this);
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));

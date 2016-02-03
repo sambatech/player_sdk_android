@@ -1,13 +1,13 @@
 package com.sambatech.player;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 
-import com.sambatech.player.event.SambaEvent;
-import com.sambatech.player.event.SambaEventBus;
-import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 
 /**
@@ -27,6 +27,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
         if (!isInEditMode() && media.url != null)
             createPlayer();*/
+
 	}
 
 	@Override
