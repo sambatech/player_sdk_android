@@ -5,7 +5,7 @@ import android.view.View;
 import com.sambatech.player.model.SambaMedia;
 
 /**
- * Represents the player.
+ * Represents the player front-end API.
  *
  * @author Leandro Zanol - 28/12/15
  */
