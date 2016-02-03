@@ -250,17 +250,22 @@ public class SambaApi {
 									i = totalRules;
 
 								media.url = output.getString("url");
-								Log.e("outputs", output.getString("outputName"));
 								cOutput.current = true;
 								media.outputs.add(cOutput);
 							}else if(!label.equalsIgnoreCase("_raw") && !output.isNull("url")){
 								media.outputs.add(cOutput);
 							}
 						}
+
+						//TODO retirar o media.url
+						if(media.url == null) {
+							media.url = media.outputs.get(0).url;
+						}
+
 						filledRules.add(media.type);
 					}
-
 					sortOutputs(media.outputs);
+
 				}
 				else if (json.has("liveOutput")) {
 					media.url = json.getJSONObject("liveOutput").getString("baseUrl");

@@ -132,6 +132,7 @@
                 android:id="@+id/output_button"
                 android:src="@drawable/output"
                 android:background="@android:color/transparent"
+                android:visibility="gone"
                 style="@style/control" />
 
             <ImageButton

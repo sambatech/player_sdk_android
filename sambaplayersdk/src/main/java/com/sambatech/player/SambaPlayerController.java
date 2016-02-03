@@ -315,7 +315,6 @@ public class SambaPlayerController implements SambaPlayer {
 
 		//Live treatment
 		if(media.isLive) {
-			((Activity) container.getContext()).findViewById(R.id.output_button).setVisibility(View.INVISIBLE);
 			((Activity) container.getContext()).findViewById(R.id.time_container).setVisibility(View.INVISIBLE);
 
 			player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.ic_live),
@@ -325,13 +324,14 @@ public class SambaPlayerController implements SambaPlayer {
         PluginsManager.getInstance().onLoad(this);
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 
-		if (media.outputs != null) {
+		if (media.outputs != null && media.outputs.size() > 1) {
 			//OutputList
 			oList = (ListView) container.findViewById(R.id.output_menu_list);
 			oAdapter = new OutputAdapter(container.getContext(), media.outputs, this);
 			oList.setAdapter(oAdapter);
 			oAdapter.notifyDataSetChanged();
 			oList.setOnItemClickListener(menuItemListener);
+			((Activity) container.getContext()).findViewById(R.id.output_button).setVisibility(View.VISIBLE);
 		}
 
 		// TODO reunir em um "pos create"?
