@@ -24,7 +24,7 @@ public class OutputAdapter extends BaseAdapter {
 	private Context oContext;
 
 
-	public OutputAdapter(Context context, ArrayList<SambaMedia.Output> oList, SambaPlayer pView) {
+	public OutputAdapter(Context context, ArrayList<SambaMedia.Output> oList) {
 		this.outputs = oList;
 		this.oContext = context;
 	}

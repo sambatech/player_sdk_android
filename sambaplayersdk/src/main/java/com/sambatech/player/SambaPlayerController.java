@@ -38,8 +38,7 @@ public class SambaPlayerController implements SambaPlayer {
 	private boolean _hasStarted;
 	private boolean _hasFinished;
 	private FrameLayout container;
-	private OutputAdapter oAdapter;
-	private ListView oList;
+	private ListView outputMenuList;
 	private OrientationEventListener orientationEventListener;
 
 	private static final SambaPlayerController instance = new SambaPlayerController();
@@ -115,11 +114,9 @@ public class SambaPlayerController implements SambaPlayer {
 	};
 
 	private final AdapterView.OnItemClickListener menuItemListener = new AdapterView.OnItemClickListener() {
-
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			SambaMedia.Output output = (SambaMedia.Output) oAdapter.getItem(position);
-			changeOutput(output);
+			changeOutput((SambaMedia.Output)parent.getItemAtPosition(position));
 		}
 	};
 
@@ -281,6 +278,7 @@ public class SambaPlayerController implements SambaPlayer {
 		player.setPlayCallback(playListener);
 		player.setFullscreenCallback(fullscreenListener);
 
+		// TODO: add flag "autoFullscreen"
 		// Fullscreen
 		orientationEventListener = new OrientationEventListener(container.getContext()) {
 
@@ -310,14 +308,15 @@ public class SambaPlayerController implements SambaPlayer {
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 		}
 
+		// Output Menu
 		if (media.outputs != null && media.outputs.size() > 1) {
-			//OutputList
-			oList = (ListView) container.findViewById(R.id.output_menu_list);
-			oAdapter = new OutputAdapter(container.getContext(), media.outputs, this);
-			oList.setAdapter(oAdapter);
-			oAdapter.notifyDataSetChanged();
-			oList.setOnItemClickListener(menuItemListener);
-			((Activity) container.getContext()).findViewById(R.id.output_button).setVisibility(View.VISIBLE);
+			View outputMenu = ((Activity) container.getContext()).getLayoutInflater().inflate(R.layout.output_menu_layout, null);
+			OutputAdapter outputAdapter = new OutputAdapter(container.getContext(), media.outputs);
+			outputMenuList = (ListView)outputMenu.findViewById(R.id.output_menu_list);
+			outputMenuList.setAdapter(outputAdapter);
+			outputMenuList.setOnItemClickListener(menuItemListener);
+			outputAdapter.notifyDataSetChanged();
+			player.setOutputMenu(outputMenu);
 		}
 
 		// TODO reunir em um "pos create"?
@@ -333,15 +332,15 @@ public class SambaPlayerController implements SambaPlayer {
 		stopProgressTimer();
 		stop();
 
-		if (oList != null)
-			oList.setOnItemClickListener(null);
+		if (outputMenuList != null)
+			outputMenuList.setOnItemClickListener(null);
 
 		orientationEventListener.disable();
 		player.setPlayCallback(null);
 		player.setFullscreenCallback(null);
 		player.release();
 
-		oList = null;
+		outputMenuList = null;
 		orientationEventListener = null;
 		player = null;
 		_hasStarted = false;

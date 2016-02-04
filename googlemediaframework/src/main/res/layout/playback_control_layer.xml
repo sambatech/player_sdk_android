@@ -71,7 +71,6 @@
         android:background="@android:color/transparent"
         android:src="@drawable/ic_action_pause_large" />
 
-
     <LinearLayout
         android:id="@+id/bottom_chrome"
         android:background="@drawable/controls_bottom_background"
@@ -132,7 +131,6 @@
                 android:id="@+id/output_button"
                 android:src="@drawable/output"
                 android:background="@android:color/transparent"
-                android:visibility="gone"
                 style="@style/control" />
 
             <ImageButton
@@ -143,12 +141,4 @@
                 style="@style/control" />
         </LinearLayout>
     </LinearLayout>
-
-    <include
-        layout="@layout/output_menu_layout"
-        android:id="@+id/output_menu"
-        android:layout_width="200dp"
-        android:layout_height="150dp"
-        android:layout_gravity="center" />
-
 </FrameLayout>

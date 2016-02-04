@@ -10,16 +10,13 @@
     <com.sambatech.player.SambaPlayerView
         android:id="@+id/samba_player"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
-        >
-
-    </com.sambatech.player.SambaPlayerView>
+        android:layout_height="250dp" />
 
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_alignRight="@+id/duration"
-        android:text="Tituloasidjiasjdisaiasjdiasjdiajsdijsadijsadjsadjisa"
+        android:text="Titulo"
         android:layout_height="wrap_content"
         android:layout_below="@id/samba_player"
         android:padding="@dimen/activity_vertical_margin"

@@ -19,7 +19,9 @@ package com.google.android.libraries.mediaframework.layeredvideo;
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.ListAdapter;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
@@ -35,343 +37,351 @@ import java.util.List;
  */
 public class SimpleVideoPlayer {
 
-  /**
-   * The {@link Activity} that contains this video player.
-   */
-  private final Activity activity;
+	/**
+	 * The {@link Activity} that contains this video player.
+	 */
+	private final Activity activity;
 
-  /**
-   * The underlying {@link LayerManager} which is used to assemble the player.
-   */
-  private final LayerManager layerManager;
+	/**
+	 * The underlying {@link LayerManager} which is used to assemble the player.
+	 */
+	private final LayerManager layerManager;
 
-  /**
-   * The customizable view for playback control. It handles pause/play, fullscreen, seeking,
-   * title, and action buttons.
-   */
-  private final PlaybackControlLayer playbackControlLayer;
+	/**
+	 * The customizable view for playback control. It handles pause/play, fullscreen, seeking,
+	 * title, and action buttons.
+	 */
+	private final PlaybackControlLayer playbackControlLayer;
 
-  /**
-   * Displays subtitles at bottom center of video player.
-   */
-  private final SubtitleLayer subtitleLayer;
+	/**
+	 * Displays subtitles at bottom center of video player.
+	 */
+	private final SubtitleLayer subtitleLayer;
 
-  /**
-   * Renders the video.
-   */
-  private final VideoSurfaceLayer videoSurfaceLayer;
+	/**
+	 * Renders the video.
+	 */
+	private final VideoSurfaceLayer videoSurfaceLayer;
 
-  /**
-   * Set whether the video should play immediately.
-   */
-  private boolean autoplay;
+	/**
+	 * Set whether the video should play immediately.
+	 */
+	private boolean autoplay;
 
-  /**
-   * @param activity The activity that will contain the video player.
-   * @param container The {@link FrameLayout} which will contain the video player.
-   * @param video The video that should be played.
-   * @param videoTitle The title of the video (displayed on the left of the top chrome).
-   * @param autoplay Whether the video should start playing immediately.
-   */
-  public SimpleVideoPlayer(Activity activity,
-                           FrameLayout container,
-                           Video video,
-                           String videoTitle,
-                           boolean autoplay) {
-    this(activity, container, video, videoTitle, autoplay, 0, null);
-  }
+	/**
+	 * @param activity The activity that will contain the video player.
+	 * @param container The {@link FrameLayout} which will contain the video player.
+	 * @param video The video that should be played.
+	 * @param videoTitle The title of the video (displayed on the left of the top chrome).
+	 * @param autoplay Whether the video should start playing immediately.
+	 */
+	public SimpleVideoPlayer(Activity activity,
+			 FrameLayout container,
+			 Video video,
+			 String videoTitle,
+			 boolean autoplay) {
+		this(activity, container, video, videoTitle, autoplay, 0, null);
+	}
 
-  /**
-   * @param activity The activity that will contain the video player.
-   * @param container The {@link FrameLayout} which will contain the video player.
-   * @param video The video that should be played.
-   * @param videoTitle The title of the video (displayed on the left of the top chrome).
-   * @param autoplay Whether the video should start playing immediately.
-   * @param fullscreenCallback The callback which gets triggered when the player enters or leaves
-   *                           fullscreen mode.
-   */
-  public SimpleVideoPlayer(Activity activity,
-                           FrameLayout container,
-                           Video video,
-                           String videoTitle,
-                           boolean autoplay,
-                           int startPostitionMs,
-                           PlaybackControlLayer.FullscreenCallback fullscreenCallback) {
-    this.activity = activity;
+	/**
+	 * @param activity The activity that will contain the video player.
+	 * @param container The {@link FrameLayout} which will contain the video player.
+	 * @param video The video that should be played.
+	 * @param videoTitle The title of the video (displayed on the left of the top chrome).
+	 * @param autoplay Whether the video should start playing immediately.
+	 * @param fullscreenCallback The callback which gets triggered when the player enters or leaves
+	 *                           fullscreen mode.
+	 */
+	public SimpleVideoPlayer(Activity activity,
+			FrameLayout container,
+			Video video,
+			String videoTitle,
+			boolean autoplay,
+			int startPostitionMs,
+			PlaybackControlLayer.FullscreenCallback fullscreenCallback) {
+		this.activity = activity;
 
-    playbackControlLayer = new PlaybackControlLayer(videoTitle, fullscreenCallback);
-    subtitleLayer = new SubtitleLayer();
-    videoSurfaceLayer = new VideoSurfaceLayer(autoplay);
-    this.autoplay = autoplay;
+		playbackControlLayer = new PlaybackControlLayer(videoTitle, fullscreenCallback);
+		subtitleLayer = new SubtitleLayer();
+		videoSurfaceLayer = new VideoSurfaceLayer(autoplay);
+		this.autoplay = autoplay;
 
-    List<Layer> layers = new ArrayList<Layer>();
-    layers.add(videoSurfaceLayer);
-    layers.add(playbackControlLayer);
-    layers.add(subtitleLayer);
+		List<Layer> layers = new ArrayList<Layer>();
+		layers.add(videoSurfaceLayer);
+		layers.add(playbackControlLayer);
+		layers.add(subtitleLayer);
 
-    layerManager = new LayerManager(activity,
-        container,
-        video,
-        layers);
+		layerManager = new LayerManager(activity,
+				container,
+				video,
+				layers);
 
-    layerManager.getExoplayerWrapper().setTextListener(subtitleLayer);
+		layerManager.getExoplayerWrapper().setTextListener(subtitleLayer);
 
-    seek(startPostitionMs);
-  }
+		seek(startPostitionMs);
+	}
 
-  /**
-   * Creates a button to put in the top right of the video player.
-   *
-   * @param icon The image of the action (ex. trash can).
-   * @param contentDescription The text description this action. This is used in case the
-   *                           action buttons do not fit in the video player. If so, an overflow
-   *                           button will appear and, when clicked, it will display a list of the
-   *                           content descriptions for each action.
-   * @param onClickListener The handler for when the action is triggered.
-   */
-  public void addActionButton(Drawable icon,
-                              String contentDescription,
-                              View.OnClickListener onClickListener) {
-    playbackControlLayer.addActionButton(activity, icon, contentDescription, onClickListener);
-  }
+	/**
+	 * Creates a button to put in the top right of the video player.
+	 *
+	 * @param icon The image of the action (ex. trash can).
+	 * @param contentDescription The text description this action. This is used in case the
+	 *                           action buttons do not fit in the video player. If so, an overflow
+	 *                           button will appear and, when clicked, it will display a list of the
+	 *                           content descriptions for each action.
+	 * @param onClickListener The handler for when the action is triggered.
+	 */
+	public void addActionButton(Drawable icon,
+								String contentDescription,
+								View.OnClickListener onClickListener) {
+		playbackControlLayer.addActionButton(activity, icon, contentDescription, onClickListener);
+	}
 
-  /**
-   * Set a listener which reacts to state changes, video size changes, and errors.
-   * @param listener Listens to playback events.
-   */
-  public void addPlaybackListener(ExoplayerWrapper.PlaybackListener listener) {
-    layerManager.getExoplayerWrapper().addListener(listener);
-  }
+	/**
+	 * Set a listener which reacts to state changes, video size changes, and errors.
+	 * @param listener Listens to playback events.
+	 */
+	public void addPlaybackListener(ExoplayerWrapper.PlaybackListener listener) {
+		layerManager.getExoplayerWrapper().addListener(listener);
+	}
 
-  public int getPlaybackState() {
-    return layerManager.getExoplayerWrapper().getPlaybackState();
-  }
+	public int getPlaybackState() {
+		return layerManager.getExoplayerWrapper().getPlaybackState();
+	}
 
-  /**
-   * Hides the seek bar thumb and prevents the user from seeking to different time points in the
-   * video.
-   */
-  public void disableSeeking() {
-    playbackControlLayer.disableSeeking();
-  }
+	/**
+	 * Hides the seek bar thumb and prevents the user from seeking to different time points in the
+	 * video.
+	 */
+	public void disableSeeking() {
+		playbackControlLayer.disableSeeking();
+	}
 
-  /**
-   * Makes the seek bar thumb visible and allows the user to seek to different time points in the
-   * video.
-   */
-  public void enableSeeking() {
-    playbackControlLayer.enableSeeking();
-  }
+	/**
+	 * Makes the seek bar thumb visible and allows the user to seek to different time points in the
+	 * video.
+	 */
+	public void enableSeeking() {
+		playbackControlLayer.enableSeeking();
+	}
 
-  /**
-   * Returns the current playback position in milliseconds.
-   */
-  public int getCurrentPosition() {
-    return layerManager.getControl().getCurrentPosition();
-  }
+	/**
+	 * Returns the current playback position in milliseconds.
+	 */
+	public int getCurrentPosition() {
+		return layerManager.getControl().getCurrentPosition();
+	}
 
-  /**
-   * Returns the duration of the track in milliseconds or
-   * {@link com.google.android.exoplayer.ExoPlayer#UNKNOWN_TIME} if the duration is unknown.
-   */
-  public int getDuration() {
-    return layerManager.getControl().getDuration();
-  }
+	/**
+	 * Returns the duration of the track in milliseconds or
+	 * {@link com.google.android.exoplayer.ExoPlayer#UNKNOWN_TIME} if the duration is unknown.
+	 */
+	public int getDuration() {
+		return layerManager.getControl().getDuration();
+	}
 
-  /**
-   * Fades the playback control layer out and then removes it from the {@link LayerManager}'s
-   * container.
-   */
-  public void hide() {
-    playbackControlLayer.hide();
-    subtitleLayer.setVisibility(View.GONE);
-  }
+	/**
+	 * Fades the playback control layer out and then removes it from the {@link LayerManager}'s
+	 * container.
+	 */
+	public void hide() {
+		playbackControlLayer.hide();
+		subtitleLayer.setVisibility(View.GONE);
+	}
 
-  public void setControlsVisible(boolean value) {
-    if (!value)
-      playbackControlLayer.hideSeek();
-  }
+	public void setControlsVisible(boolean value) {
+		if (!value)
+			playbackControlLayer.hideSeek();
+	}
 
-  /**
-   * Hides the top chrome (which displays the logo, title, and action buttons).
-   */
-  public void hideTopChrome() {
-    playbackControlLayer.hideTopChrome();
-  }
+	/**
+	 * Hides the top chrome (which displays the logo, title, and action buttons).
+	 */
+	public void hideTopChrome() {
+		playbackControlLayer.hideTopChrome();
+	}
 
-  /**
-   * Returns whether the player is currently in fullscreen mode.
-   */
-  public boolean isFullscreen() {
-    return playbackControlLayer.isFullscreen();
-  }
+	/**
+	 * Returns whether the player is currently in fullscreen mode.
+	 */
+	public boolean isFullscreen() {
+		return playbackControlLayer.isFullscreen();
+	}
 
-  /**
-   * Make the player enter or leave fullscreen mode.
-   * @param shouldBeFullscreen If true, the player is put into fullscreen mode. If false, the player
-   *                           leaves fullscreen mode.
-   */
-  public void setFullscreen(boolean shouldBeFullscreen) {
-    playbackControlLayer.setFullscreen(shouldBeFullscreen);
-  }
+	/**
+	 * Make the player enter or leave fullscreen mode.
+	 * @param shouldBeFullscreen If true, the player is put into fullscreen mode. If false, the player
+	 *                           leaves fullscreen mode.
+	 */
+	public void setFullscreen(boolean shouldBeFullscreen) {
+		playbackControlLayer.setFullscreen(shouldBeFullscreen);
+	}
 
-  /**
-   * When mutliple surface layers are used (ex. in the case of ad playback), one layer must be
-   * overlaid on top of another. This method sends this player's surface layer to the background
-   * so that other surface layers can be overlaid on top of it.
-   */
-  public void moveSurfaceToBackground() {
-    videoSurfaceLayer.moveSurfaceToBackground();
-  }
+	/**
+	 * When mutliple surface layers are used (ex. in the case of ad playback), one layer must be
+	 * overlaid on top of another. This method sends this player's surface layer to the background
+	 * so that other surface layers can be overlaid on top of it.
+	 */
+	public void moveSurfaceToBackground() {
+		videoSurfaceLayer.moveSurfaceToBackground();
+	}
 
-  /**
-   * When mutliple surface layers are used (ex. in the case of ad playback), one layer must be
-   * overlaid on top of another. This method sends this player's surface layer to the foreground
-   * so that it is overlaid on top of all layers which are in the background.
-   */
-  public void moveSurfaceToForeground() {
-    videoSurfaceLayer.moveSurfaceToForeground();
-  }
+	/**
+	 * When mutliple surface layers are used (ex. in the case of ad playback), one layer must be
+	 * overlaid on top of another. This method sends this player's surface layer to the foreground
+	 * so that it is overlaid on top of all layers which are in the background.
+	 */
+	public void moveSurfaceToForeground() {
+		videoSurfaceLayer.moveSurfaceToForeground();
+	}
 
-  /**
-   * Pause video playback.
-   */
-  public void pause() {
-    // Set the autoplay for the video surface layer in case the surface hasn't been created yet.
-    // This way, when the surface is created, it won't start playing.
-    videoSurfaceLayer.setAutoplay(false);
+	/**
+	 * Pause video playback.
+	 */
+	public void pause() {
+		// Set the autoplay for the video surface layer in case the surface hasn't been created yet.
+		// This way, when the surface is created, it won't start playing.
+		videoSurfaceLayer.setAutoplay(false);
 
-    layerManager.getControl().pause();
-  }
+		layerManager.getControl().pause();
+	}
 
-  /**
-   * Resume video playback.
-   */
-  public void play() {
-    // Set the autoplay for the video surface layer in case the surface hasn't been created yet.
-    // This way, when the surface is created, it will automatically start playing.
-    videoSurfaceLayer.setAutoplay(autoplay);
+	/**
+	 * Resume video playback.
+	 */
+	public void play() {
+		// Set the autoplay for the video surface layer in case the surface hasn't been created yet.
+		// This way, when the surface is created, it will automatically start playing.
+		videoSurfaceLayer.setAutoplay(autoplay);
 
-    layerManager.getControl().start();
-  }
+		layerManager.getControl().start();
+	}
 
-  /**
-   * Moves media to a specific position.
-   * @param posMs The position in MS
-   */
-  public void seek(int posMs) {
-    if (posMs < 0)
-      return;
+	/**
+	 * Moves media to a specific position.
+	 * @param posMs The position in MS
+	 */
+	public void seek(int posMs) {
+		if (posMs < 0)
+			return;
 
-    layerManager.getExoplayerWrapper().seekTo(posMs);
-  }
+		layerManager.getExoplayerWrapper().seekTo(posMs);
+	}
 
-  public void stop() {
-    if (layerManager.getExoplayerWrapper() != null)
-      layerManager.getExoplayerWrapper().stop();
-  }
+	public void stop() {
+		if (layerManager.getExoplayerWrapper() != null)
+			layerManager.getExoplayerWrapper().stop();
+	}
 
-  /**
-   * Sets the color of the top chrome, bottom chrome, and background.
-   * @param color a color derived from the @{link Color} class
-   *              (ex. {@link android.graphics.Color#RED}).
-   */
-  public void setChromeColor(int color) {
-    playbackControlLayer.setChromeColor(color);
-  }
+	/**
+	 * Sets the color of the top chrome, bottom chrome, and background.
+	 * @param color a color derived from the @{link Color} class
+	 *              (ex. {@link android.graphics.Color#RED}).
+	 */
+	public void setChromeColor(int color) {
+		playbackControlLayer.setChromeColor(color);
+	}
 
-  /**
-   * Set the callback which will be called when the player enters and leaves fullscreen mode.
-   * @param fullscreenCallback The callback should hide other views in the activity when the player
-   *                           enters fullscreen mode and show other views when the player leaves
-   *                           fullscreen mode.
-   */
-  public void setFullscreenCallback(PlaybackControlLayer.FullscreenCallback fullscreenCallback) {
-    playbackControlLayer.setFullscreenCallback(fullscreenCallback);
-  }
+	/**
+	 * Set the callback which will be called when the player enters and leaves fullscreen mode.
+	 * @param fullscreenCallback The callback should hide other views in the activity when the player
+	 *                           enters fullscreen mode and show other views when the player leaves
+	 *                           fullscreen mode.
+	 */
+	public void setFullscreenCallback(PlaybackControlLayer.FullscreenCallback fullscreenCallback) {
+		playbackControlLayer.setFullscreenCallback(fullscreenCallback);
+	}
 
-  /**
-   * Set the callback which will be called when the player plays video.
-   * @param playCallback The callback.
-   */
-  public void setPlayCallback(PlaybackControlLayer.PlayCallback playCallback) {
-    playbackControlLayer.setPlayCallback(playCallback);
-  }
+	/**
+	 * Set the callback which will be called when the player plays video.
+	 * @param playCallback The callback.
+	 */
+	public void setPlayCallback(PlaybackControlLayer.PlayCallback playCallback) {
+		playbackControlLayer.setPlayCallback(playCallback);
+	}
 
-  /**
-   * Set the logo with appears in the left of the top chrome.
-   * @param logo The drawable which will be the logo.
-   */
-  public void setLogoImage(Drawable logo) {
-    playbackControlLayer.setLogoImageView(logo);
-  }
+	/**
+	 * Set the logo with appears in the left of the top chrome.
+	 * @param logo The drawable which will be the logo.
+	 */
+	public void setLogoImage(Drawable logo) {
+		playbackControlLayer.setLogoImageView(logo);
+	}
 
-  /**
-   * Sets the color of the buttons and seek bar.
-   * @param color a color derived from the @{link Color} class
-   *              (ex. {@link android.graphics.Color#RED}).
-   */
-  public void setPlaybackControlColor(int color) {
-    playbackControlLayer.setControlColor(color);
-  }
+	/**
+	 * Sets the color of the buttons and seek bar.
+	 * @param color a color derived from the @{link Color} class
+	 *              (ex. {@link android.graphics.Color#RED}).
+	 */
+	public void setPlaybackControlColor(int color) {
+		playbackControlLayer.setControlColor(color);
+	}
 
-  /**
-   * Sets the color of the seekbar_progress.
-   * @param color a color derived from the @{link Color} class
-   *              (ex. {@link android.graphics.Color#RED}).
-   */
-  public void setSeekbarColor(int color) {
-    playbackControlLayer.setSeekbarColor(color);
-  }
+	/**
+	 * Sets the color of the seekbar_progress.
+	 * @param color a color derived from the @{link Color} class
+	 *              (ex. {@link android.graphics.Color#RED}).
+	 */
+	public void setSeekbarColor(int color) {
+		playbackControlLayer.setSeekbarColor(color);
+	}
 
-  /**
-   * Sets the color of the text views
-   * @param color a color derived from the @{link Color} class
-   *              (ex. {@link android.graphics.Color#RED}).
-   */
-  public void setTextColor(int color) {
-    playbackControlLayer.setTextColor(color);
-  }
+	/**
+	 * Sets the color of the text views
+	 * @param color a color derived from the @{link Color} class
+	 *              (ex. {@link android.graphics.Color#RED}).
+	 */
+	public void setTextColor(int color) {
+		playbackControlLayer.setTextColor(color);
+	}
 
-  /**
-   * Set the title of the video in the left of the top chrome (to the right of the logo).
-   * @param title The video title. If it is too long, it will be ellipsized.
-   */
-  public void setVideoTitle (String title) {
-    playbackControlLayer.setVideoTitle(title);
-  }
+	/**
+	 * Set the title of the video in the left of the top chrome (to the right of the logo).
+	 * @param title The video title. If it is too long, it will be ellipsized.
+	 */
+	public void setVideoTitle (String title) {
+		playbackControlLayer.setVideoTitle(title);
+	}
 
-  /**
-   * Returns whether the player should be playing (based on whether the user has
-   * tapped pause or play). This can be used by other classes to look at the playback control
-   * layer's play/pause state and force the player to play or pause accordingly.
-   */
-  public boolean shouldBePlaying() {
-    return playbackControlLayer.shouldBePlaying();
-  }
+	/**
+	 * Returns whether the player should be playing (based on whether the user has
+	 * tapped pause or play). This can be used by other classes to look at the playback control
+	 * layer's play/pause state and force the player to play or pause accordingly.
+	 */
+	public boolean shouldBePlaying() {
+		return playbackControlLayer.shouldBePlaying();
+	}
 
-  /**
-   * Add the playback control layer back to the container. It will disappear when the user taps
-   * the screen.
-   */
-  public void show() {
-    playbackControlLayer.show();
-    subtitleLayer.setVisibility(View.VISIBLE);
-  }
+	/**
+	 * Add the playback control layer back to the container. It will disappear when the user taps
+	 * the screen.
+	 */
+	public void show() {
+		playbackControlLayer.show();
+		subtitleLayer.setVisibility(View.VISIBLE);
+	}
 
-  /**
-   * Shows the top chrome (which displays the logo, title, and action buttons).
-   */
-  public void showTopChrome() {
-    playbackControlLayer.showTopChrome();
-  }
+	/**
+	 * Shows the top chrome (which displays the logo, title, and action buttons).
+	 */
+	public void showTopChrome() {
+		playbackControlLayer.showTopChrome();
+	}
 
-  /**
-   * When you are finished using this {@link SimpleVideoPlayer}, make sure to call this method.
-   */
-  public void release() {
-    videoSurfaceLayer.release();
-    layerManager.release();
-  }
+	/**
+	 * Sets the adapter for the output menu.
+	 * @param view The view for the output menu.
+	 */
+	public void setOutputMenu(View view) {
+		playbackControlLayer.setOutputMenu(view);
+	}
+
+	/**
+	 * When you are finished using this {@link SimpleVideoPlayer}, make sure to call this method.
+	 */
+	public void release() {
+		videoSurfaceLayer.release();
+		layerManager.release();
+	}
 
 }
