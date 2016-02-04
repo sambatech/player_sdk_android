@@ -41,10 +41,10 @@ public class OutputAdapter extends BaseAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		return 0;
+		return 0    ;
 	}
 
-	//TODO melhorar a renderização para não ser duplicada
+	//TODO melhorar a renderizacao para nao ser duplicada
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
 		LayoutInflater inflater = (LayoutInflater) oContext

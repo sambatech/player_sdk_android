@@ -34,6 +34,7 @@ import java.util.TimerTask;
  */
 public class SambaPlayerController implements SambaPlayer {
 
+
 	private SimpleVideoPlayer player;
 	private SambaMediaConfig media = new SambaMediaConfig();
 	private Timer progressTimer;
@@ -46,6 +47,10 @@ public class SambaPlayerController implements SambaPlayer {
 
 	private static final SambaPlayerController instance = new SambaPlayerController();
 
+	/**
+	 * Returns the SambaPlayerController only instance.
+	 * @return SambaPlayerController
+	 */
 	public static SambaPlayerController getInstance() {
 		return instance;
 	}
@@ -129,11 +134,13 @@ public class SambaPlayerController implements SambaPlayer {
 		PluginsManager.getInstance().initialize();
 	}
 
+	/**
+	 * Player View informing its layout
+	 * @param container FrameLayout container
+	 */
 	public void init(FrameLayout container) {
 		this.container = container;
 	}
-
-	/**	Player API **/
 
 	public void setMedia(SambaMedia media) {
 		if (media == null)
@@ -239,8 +246,6 @@ public class SambaPlayerController implements SambaPlayer {
 		player.seek(currentPosition);
 	}
 
-	/**	End Player API **/
-
 	private void createPlayer() {
 		if (player != null) {
 			Log.e("player", "Player already created!");
@@ -251,7 +256,7 @@ public class SambaPlayerController implements SambaPlayer {
 			Log.e("player", "Media data is null!");
 	        return;
 		}
-
+		Log.e("outputs", media.url);
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
 		switch (media.type.toLowerCase()) {

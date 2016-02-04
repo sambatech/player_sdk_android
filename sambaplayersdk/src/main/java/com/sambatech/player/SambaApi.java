@@ -35,7 +35,9 @@ public class SambaApi {
 	private Activity activity;
 	private String accessToken;
 
-	/** Output map **/
+	/**
+	 * Output map
+	 */
 	private static final Map<String, Integer> outputMap = new HashMap<String, Integer>() {{
 		put("_raw", -1);
 		put("abr_hls", 0);
@@ -47,11 +49,13 @@ public class SambaApi {
 	}};
 
 	/**
+	 * SambaApi constructor
+	 *
 	 * @param activity Reference to the current Activity
 	 * @param accessToken Configured SambaTech access token (ignored for now, pass an empty string or null)
 	 */
 	public SambaApi(Activity activity, String accessToken) {
-		// TODO: validar "accessToken"
+		//TODO validar token
 		this.activity = activity;
 		this.accessToken = accessToken;
 	}
@@ -100,6 +104,9 @@ public class SambaApi {
 			requestMedia(req, callbackReq);
 	}
 
+	/**
+	 * Asynchronous request to the Samba Player API. Retrieves the media.
+	 */
 	private class RequestMediaTask extends AsyncTask<SambaMediaRequest, Void, SambaMedia> {
 		private SambaApiCallback listener;
 		private SambaMediaRequest request;
@@ -173,6 +180,10 @@ public class SambaApi {
 			return null;
 		}
 
+		/**
+		 * Triggered after the Samba Player API success response
+		 * @param media Samba Media
+		 */
 		@Override
 		protected void onPostExecute(SambaMedia media) {
 			if (media == null) {
@@ -183,6 +194,11 @@ public class SambaApi {
 			listener.onMediaResponse(media);
 		}
 
+		/**
+		 * Get the json response and serializes it
+		 * @param json Json Response
+		 * @return Samba Media object
+		 */
 		private SambaMedia parseMedia(JSONObject json) {
 			try {
 				String qualifier = json.getString("qualifier").toLowerCase();
@@ -248,7 +264,6 @@ public class SambaApi {
 								// if HLS (MBR), set to exit loop
 								if (media.type.equals("hls"))
 									i = totalRules;
-
 								media.url = output.getString("url");
 								cOutput.current = true;
 								media.outputs.add(cOutput);
@@ -304,6 +319,10 @@ public class SambaApi {
 			return null;
 		}
 
+		/**
+		 * Sort the outputs
+		 * @param outputs Current media outputs
+		 */
 		private void sortOutputs(ArrayList<SambaMedia.Output> outputs) {
 			Collections.sort(outputs, new Helpers.CustomSorter());
 		}

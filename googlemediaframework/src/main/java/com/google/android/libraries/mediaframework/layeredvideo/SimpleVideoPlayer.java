@@ -374,4 +374,16 @@ public class SimpleVideoPlayer {
     layerManager.release();
   }
 
+	/**
+	 * Set a listener to respond to media format changes, bandwidth samples, load events, and dropped
+	 * frames.
+	 * @param listener Listens to media format changes, bandwidth samples, load events, and dropped
+	 *                 frames.
+	 */
+	public void setInfoListener(ExoplayerWrapper.InfoListener listener) {
+		layerManager.getExoplayerWrapper().setInfoListener(listener);
+	}
+
+
+
 }
