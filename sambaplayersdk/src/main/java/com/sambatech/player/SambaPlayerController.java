@@ -1,7 +1,6 @@
 package com.sambatech.player;
 
 import android.app.Activity;
-import android.media.Image;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.OrientationEventListener;
@@ -9,7 +8,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.android.exoplayer.ExoPlayer;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
@@ -150,7 +148,7 @@ public class SambaPlayerController implements SambaPlayer {
 	public void play() {
 		if (player != null)
 			player.play();
-		else createPlayer();
+		else create();
 	}
 
 	public void pause() {
@@ -200,27 +198,7 @@ public class SambaPlayerController implements SambaPlayer {
 	}
 
 	public void destroy() {
-		if (player == null)
-			return;
-
-		PluginsManager.getInstance().onDestroy();
-		stopProgressTimer();
-		stop();
-
-		if (oList != null)
-			oList.setOnItemClickListener(null);
-
-		orientationEventListener.disable();
-		player.setPlayCallback(null);
-		player.setFullscreenCallback(null);
-		player.release();
-
-		oList = null;
-		orientationEventListener = null;
-		player = null;
-		_hasStarted = false;
-		_hasFinished = false;
-
+		destroyInternal();
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
 	}
 
@@ -234,14 +212,22 @@ public class SambaPlayerController implements SambaPlayer {
 			o.current = o.label.equals(output.label);
 		}
 		media.url = output.url;
-		destroy();
-		createPlayer();
+		destroyInternal();
+		createInternal();
 		player.seek(currentPosition);
 	}
 
 	/**	End Player API **/
 
-	private void createPlayer() {
+	private void create() {
+		create(true);
+	}
+
+	private void createInternal() {
+		create(false);
+	}
+
+	private void create(boolean notify) {
 		if (player != null) {
 			Log.e("player", "Player already created!");
 			return;
@@ -270,20 +256,26 @@ public class SambaPlayerController implements SambaPlayer {
 
 		player.setSeekbarColor(media.themeColor);
 
-		if (media.isLive)
-			player.setControlsVisible(false);
-
 		// Move the content player's surface layer to the background so that the ad player's surface
 		// layer can be overlaid on top of it during ad playback.
 		player.moveSurfaceToBackground();
 
+		//Live treatment
+		if(media.isLive) {
+			((Activity) container.getContext()).findViewById(R.id.time_container).setVisibility(View.INVISIBLE);
+
+			player.setControlsVisible(false);
+			player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.ic_live),
+					container.getContext().getString(R.string.live), null);
+		}
+
 		/**player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.share),
-				container.getContext().getString(R.string.share_facebook), new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						Toast.makeText(container.getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
-					}
-				});**/
+		        container.getContext().getString(R.string.share_facebook), new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Toast.makeText(container.getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
+			}
+		});**/
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
@@ -313,16 +305,10 @@ public class SambaPlayerController implements SambaPlayer {
 			}
 		};
 
-		//Live treatment
-		if(media.isLive) {
-			((Activity) container.getContext()).findViewById(R.id.time_container).setVisibility(View.INVISIBLE);
-
-			player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.ic_live),
-				container.getContext().getString(R.string.live), null);
+		if (notify) {
+			PluginsManager.getInstance().onLoad(this);
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 		}
-
-        PluginsManager.getInstance().onLoad(this);
-		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 
 		if (media.outputs != null && media.outputs.size() > 1) {
 			//OutputList
@@ -337,6 +323,29 @@ public class SambaPlayerController implements SambaPlayer {
 		// TODO reunir em um "pos create"?
 		//Show controls
 		player.show();
+	}
+
+	private void destroyInternal() {
+		if (player == null)
+			return;
+
+		PluginsManager.getInstance().onDestroy();
+		stopProgressTimer();
+		stop();
+
+		if (oList != null)
+			oList.setOnItemClickListener(null);
+
+		orientationEventListener.disable();
+		player.setPlayCallback(null);
+		player.setFullscreenCallback(null);
+		player.release();
+
+		oList = null;
+		orientationEventListener = null;
+		player = null;
+		_hasStarted = false;
+		_hasFinished = false;
 	}
 
     private void startProgressTimer() {
