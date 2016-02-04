@@ -27,10 +27,19 @@ public interface SambaPlayer {
 	 */
 	SambaMedia getMedia();
 
+	/**
+	 * Does the play action
+	 */
 	void play();
 
+	/**
+	 * Does the pause action
+	 */
 	void pause();
 
+	/**
+	 * Does the play action returning the video to it's beginning
+	 */
 	void stop();
 
 	/**
@@ -39,16 +48,38 @@ public interface SambaPlayer {
 	 */
 	void seek(float position);
 
+	/**
+	 * Set the fullscreen on or off
+	 * @param flag true to enter in the fullscreen mode on and false to exit
+	 */
 	void setFullscreen(boolean flag);
 
+	/**
+	 * Indicates the fullscreen mode on or off
+	 * @return Boolean
+	 */
 	boolean isFullscreen();
 
+	/**
+	 * Show the controllers
+ 	 */
 	void show();
 
+	/**
+	 * Hide the controllers
+	 */
 	void hide();
 
+	/**
+	 * Get the current time on the video.
+	 * @return Float current time
+	 */
 	float getCurrentTime();
 
+	/**
+	 * Get the total duration of the video
+	 * @return Float total duration
+	 */
 	float getDuration();
 
 	/**
@@ -66,8 +97,15 @@ public interface SambaPlayer {
 	 */
 	boolean hasStarted();
 
+	/**
+	 * Changes the current output
+	 * @param output SambaMedia.Output indicating the new output
+	 */
 	void changeOutput(SambaMedia.Output output);
 
+	/**
+	 * Destroy the player and it's events
+	 */
 	void destroy();
 
 	/**

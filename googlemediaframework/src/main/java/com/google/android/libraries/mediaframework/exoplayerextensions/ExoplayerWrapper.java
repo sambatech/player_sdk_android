@@ -23,6 +23,7 @@ package com.google.android.libraries.mediaframework.exoplayerextensions;
 import android.media.MediaCodec.CryptoException;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.Surface;
 
 import com.google.android.exoplayer.CodecCounters;
@@ -430,6 +431,7 @@ public class ExoplayerWrapper implements ExoPlayer.Listener, ChunkSampleSource.E
     // Disable text initially.
     trackStateForType[TYPE_TEXT] = DISABLED_TRACK;
     player.setSelectedTrack(TYPE_TEXT, TRACK_DISABLED);
+
   }
 
   /**
@@ -574,6 +576,7 @@ public class ExoplayerWrapper implements ExoPlayer.Listener, ChunkSampleSource.E
     videoRenderer = null;
     rendererBuildingState = RENDERER_BUILDING_STATE_BUILDING;
     maybeReportPlayerState();
+
     rendererBuilder.buildRenderers(this);
   }
 
@@ -768,7 +771,10 @@ public class ExoplayerWrapper implements ExoPlayer.Listener, ChunkSampleSource.E
   @Override
   public void onDownstreamFormatChanged(int sourceId, Format format, int trigger,
                                         long mediaTimeMs) {
-    if (infoListener == null) {
+	  Log.e("outputs", String.valueOf(format.bitrate));
+	  Log.e("outputs", String.valueOf(sourceId));
+
+	if (infoListener == null) {
       return;
     }
     if (sourceId == TYPE_VIDEO) {

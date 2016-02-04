@@ -112,6 +112,6 @@ public class SambaPlayerControllerNull implements SambaPlayer {
 	}
 
 	private void logMessage() {
-		Log.i("SambaPlayerControllerNull", "No action will be done.");
+		Log.e("SambaPlayer", "No action will be done.");
 	}
 }

@@ -29,6 +29,7 @@ import com.google.android.exoplayer.MediaCodecUtil.DecoderQueryException;
 import com.google.android.exoplayer.MediaCodecVideoTrackRenderer;
 import com.google.android.exoplayer.TrackRenderer;
 import com.google.android.exoplayer.audio.AudioCapabilities;
+import com.google.android.exoplayer.chunk.Format;
 import com.google.android.exoplayer.chunk.VideoFormatSelectorUtil;
 import com.google.android.exoplayer.hls.HlsChunkSource;
 import com.google.android.exoplayer.hls.HlsMasterPlaylist;
@@ -48,6 +49,7 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Exoplayer
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.Map;
@@ -172,6 +174,10 @@ public class HlsRendererBuilder implements RendererBuilder {
             renderers[ExoplayerWrapper.TYPE_METADATA] = id3Renderer;
             renderers[ExoplayerWrapper.TYPE_TEXT] = closedCaptionRenderer;
             player.onRenderers(renderers, bandwidthMeter);
+
+
+
+
         }
 
     }

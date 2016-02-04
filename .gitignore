@@ -9,3 +9,4 @@ local.properties
 .DS_Store
 player/player*.apk
 player/sample*.apk
+docs/JavaDoc*
