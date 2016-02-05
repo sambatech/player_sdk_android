@@ -23,7 +23,6 @@ package com.google.android.libraries.mediaframework.exoplayerextensions;
 import android.media.MediaCodec.CryptoException;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.view.Surface;
 
 import com.google.android.exoplayer.CodecCounters;
@@ -771,8 +770,6 @@ public class ExoplayerWrapper implements ExoPlayer.Listener, ChunkSampleSource.E
   @Override
   public void onDownstreamFormatChanged(int sourceId, Format format, int trigger,
                                         long mediaTimeMs) {
-	  Log.e("outputs", String.valueOf(format.bitrate));
-	  Log.e("outputs", String.valueOf(sourceId));
 
 	if (infoListener == null) {
       return;
