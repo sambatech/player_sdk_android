@@ -7,6 +7,5 @@ gmf-android.iml
 googlemediaframework/build/
 local.properties
 .DS_Store
-player/player*.apk
-player/sample*.apk
+player/*.apk
 docs/JavaDoc*
