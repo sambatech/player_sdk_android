@@ -51,20 +51,20 @@ public class MediasAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View view, ViewGroup viewGroup) {
-        LayoutInflater inflater = (LayoutInflater) mContext
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
+    public View getView(int position, View convertView, ViewGroup viewGroup) {
+	    View view;
         MediaItem holder;
 
-        if(view == null) {
+        if(convertView == null) {
+	        LayoutInflater inflater = (LayoutInflater) mContext
+			        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.media_list_item, viewGroup, false);
-
-            holder = new MediaItem(view);
-            view.setTag(holder);
         }else {
-            holder = (MediaItem) view.getTag();
+	        view = convertView;
         }
+
+	    holder = new MediaItem(view);
+	    view.setTag(holder);
 
 	    //Cores
 	    if(position % 2 == 0){
@@ -84,6 +84,8 @@ public class MediasAdapter extends BaseAdapter {
 	    if(media.description != null || media.shortDescription != null) {
 		    String text = (media.description != null ? media.description : "") + "\n " + (media.shortDescription != null ? media.shortDescription : "");
 		    holder.description.setText(text);
+	    }else {
+		    holder.description.setText("");
 	    }
 
         return view;
