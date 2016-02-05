@@ -1,6 +1,7 @@
 package com.sambatech.player;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -15,16 +16,12 @@ import com.sambatech.player.model.SambaMedia;
 public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
 	private SambaPlayer playerController = SambaPlayerControllerNull.getInstance();
+	private boolean autoFsMode;
 
 	public SambaPlayerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		SambaPlayerController.getInstance().init(this);
-
-		/*applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayerView, 0, 0));
-
-        if (!isInEditMode() && media.url != null)
-            createPlayer();*/
-
+		applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayerView, 0, 0));
 	}
 
 	@Override
@@ -32,6 +29,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		// enable controller
 		playerController = SambaPlayerController.getInstance();
 		playerController.setMedia(media);
+		playerController.setAutoFullscreenMode(autoFsMode);
 	}
 
 	@Override
@@ -122,5 +120,14 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	@Override
 	public View getView() {
 		return this;
+	}
+
+	private void applyAttributes(TypedArray attrs) {
+		try {
+			autoFsMode = attrs.getBoolean(R.styleable.SambaPlayerView_autoFullscreenMode, false);
+		}
+		finally {
+			attrs.recycle();
+		}
 	}
 }

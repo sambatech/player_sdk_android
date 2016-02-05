@@ -397,10 +397,4 @@ public class SambaPlayerController implements SambaPlayer {
 		progressTimer.purge();
 		progressTimer = null;
 	}
-
-	/*private void applyAttributes(TypedArray attrs) {
-		media.url = attrs.getString(R.styleable.SambaPlayerView_url);
-		media.title = attrs.getString(R.styleable.SambaPlayerView_title);
-		attrs.recycle();
-	}*/
 }
