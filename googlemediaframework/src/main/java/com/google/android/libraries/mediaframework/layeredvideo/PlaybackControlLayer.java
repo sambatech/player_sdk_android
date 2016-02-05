@@ -920,7 +920,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 		if (outputMenu == null) {
 			// hidden by default
-			outputButton.setVisibility(View.INVISIBLE);
+			outputButton.setVisibility(View.GONE);
 		}
 
 		// The play button should toggle play/pause when the play/pause button is clicked.
