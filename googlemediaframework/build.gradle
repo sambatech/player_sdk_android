@@ -40,5 +40,9 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    // DEV
+    //compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    // PROD
+    compile('com.sambatech.player.3rd:exoplayer:1.5.2') { transitive=true }
 }

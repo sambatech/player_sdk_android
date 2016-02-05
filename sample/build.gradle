@@ -24,8 +24,14 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':sambaplayersdk')
-    compile project(':googlemediaframework')
+
+    // DEV
+    //compile project(':sambaplayersdk')
+    //compile project(':googlemediaframework')
+
+    // PROD
+    compile 'com.sambatech.player:sdk-android:1.0.0-alpha'
+
     compile 'org.bitbucket.b_c:jose4j:0.4.4'
     compile 'com.mcxiaoke.volley:library:1.0.19'
     compile 'de.greenrobot:eventbus:2.4.0'

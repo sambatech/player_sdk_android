@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.sambatech.player</groupId>
+  <artifactId>sdk-android</artifactId>
+  <version>1.0.0-alpha</version>
+  <packaging>aar</packaging>
+  <name>Samba Player Android SDK</name>
+  <description>Samba Tech's video player SDK</description>
+  <url>http://sambatech.com</url>
+  <licenses>
+    <license>
+      <name>The MIT License (MIT)</name>
+      <url>https://opensource.org/licenses/MIT</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>sambatech</id>
+      <name>SAMBA MOBILE MULTIMIDIA S/A</name>
+    </developer>
+  </developers>
+  <dependencies>
+    <dependency>
+      <groupId>com.sambatech.player</groupId>
+      <artifactId>gmf</artifactId>
+      <version>0.2.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sambatech.player.3rd</groupId>
+      <artifactId>ima-android-sdk</artifactId>
+      <version>3.1.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.android.gms</groupId>
+      <artifactId>play-services-ads</artifactId>
+      <version>8.4.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bitbucket.b_c</groupId>
+      <artifactId>jose4j</artifactId>
+      <version>0.4.4</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>

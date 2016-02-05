@@ -19,6 +19,10 @@
 buildscript {
     repositories {
         mavenCentral()
+
+        maven {
+            url RELEASE_REPOSITORY_URL
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.5.0'
@@ -28,5 +32,9 @@ buildscript {
 allprojects {
     repositories {
         mavenCentral()
+
+        maven {
+            url RELEASE_REPOSITORY_URL
+        }
     }
 }
