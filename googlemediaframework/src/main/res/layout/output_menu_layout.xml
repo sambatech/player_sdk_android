@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:padding="16dp"
@@ -11,10 +11,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
+        android:layout_gravity="center_horizontal"
         android:text="@string/output"
-        android:textSize="24sp"/>
+        android:textSize="24sp"
+        android:textColor="#333333"/>
 
-    <ListView android:layout_width="wrap_content"
+    <ListView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="16dp"
@@ -22,11 +25,12 @@
         android:id="@+id/output_menu_list"/>
 
     <Button
-        android:id="@+id/output_cancel_button"
+        android:id="@+id/output_menu_cancel_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:background="@android:color/transparent"
-        android:text="Cancel"/>
+        android:text="@string/cancel"
+        android:textColor="@color/text_gray"/>
 
 </LinearLayout>

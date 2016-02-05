@@ -80,6 +80,11 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	@Override
+	public void setAutoFullscreenMode(boolean flag) {
+		playerController.setAutoFullscreenMode(flag);
+	}
+
+	@Override
 	public float getCurrentTime() {
 		return playerController.getCurrentTime();
 	}

@@ -407,6 +407,11 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	private Dialog outputMenu;
 
+	/**
+	 * Indicates playback last state before the output menu has open.
+	 */
+	private boolean outputMenuWasPlaying;
+
 	public PlaybackControlLayer(String videoTitle) {
 		this(videoTitle, null);
 	}
@@ -853,6 +858,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		}
 	}
 
+	// TODO it might not be here
 	/**
 	 * Sets the adapter for the output menu.
 	 * @param view The view for the output menu.
@@ -863,20 +869,23 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		outputMenu.setContentView(view);
 		outputMenu.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-		outputMenu.setOnCancelListener(new DialogInterface.OnCancelListener() {
-			@Override
-			public void onCancel(DialogInterface dialog) {
-				Log.i("asdf", "Cancel!");
-			}
-		});
 		outputMenu.setOnDismissListener(new DialogInterface.OnDismissListener() {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
-				Log.i("asdf", "dismiss!");
+				if (outputMenuWasPlaying)
+					playerControl.start();
 			}
 		});
 
 		outputButton.setVisibility(View.VISIBLE);
+	}
+
+	// TODO it might not be here
+	/**
+	 * Closes the output menu.
+	 */
+	public void closeOutputMenu() {
+		outputMenu.dismiss();
 	}
 
 	/**
@@ -903,6 +912,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				if (outputMenu == null)
 					return;
 
+				outputMenuWasPlaying = playerControl.isPlaying();
 				playerControl.pause();
 				outputMenu.show();
 			}

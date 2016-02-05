@@ -73,6 +73,11 @@ public class SambaPlayerControllerNull implements SambaPlayer {
 	}
 
 	@Override
+	public void setAutoFullscreenMode(boolean flag) {
+		logMessage();
+	}
+
+	@Override
 	public float getCurrentTime() {
 		logMessage();
 		return 0;

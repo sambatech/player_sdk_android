@@ -1,6 +1,7 @@
 package com.sambatech.player;
 
 import android.app.Activity;
+import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.OrientationEventListener;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.android.exoplayer.ExoPlayer;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
@@ -39,8 +41,9 @@ public class SambaPlayerController implements SambaPlayer {
 	private boolean _hasStarted;
 	private boolean _hasFinished;
 	private FrameLayout container;
-	private ListView outputMenuList;
 	private OrientationEventListener orientationEventListener;
+	private View outputMenu;
+	private boolean autoFsMode;
 
 	private static final SambaPlayerController instance = new SambaPlayerController();
 
@@ -63,6 +66,9 @@ public class SambaPlayerController implements SambaPlayer {
                         if (!_hasStarted) {
                             _hasStarted = true;
                             SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
+
+	                        //Show controls
+							player.show();
                         }
 
                         SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
@@ -121,7 +127,8 @@ public class SambaPlayerController implements SambaPlayer {
 	private final AdapterView.OnItemClickListener menuItemListener = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			changeOutput((SambaMedia.Output)parent.getItemAtPosition(position));
+			player.closeOutputMenu();
+			changeOutput((SambaMedia.Output) parent.getItemAtPosition(position));
 		}
 	};
 
@@ -175,6 +182,10 @@ public class SambaPlayerController implements SambaPlayer {
 
 	public boolean isFullscreen() {
 		return player.isFullscreen();
+	}
+
+	public void setAutoFullscreenMode(boolean flag) {
+		autoFsMode = flag;
 	}
 
 	public void show() {
@@ -285,15 +296,15 @@ public class SambaPlayerController implements SambaPlayer {
 		player.setPlayCallback(playListener);
 		player.setFullscreenCallback(fullscreenListener);
 
-		// TODO: add flag "autoFullscreen"
 		// Fullscreen
 		orientationEventListener = new OrientationEventListener(container.getContext()) {
 
 			{ enable(); }
 
 			@Override
-			public void onOrientationChanged(int orientation) {
-				if(player == null)
+			public void onOrientationChanged( int orientation) {
+				if (Settings.System.getInt(container.getContext().getContentResolver(),
+						Settings.System.ACCELEROMETER_ROTATION, 0) == 0 || !autoFsMode || player == null)
 					return;
 
 				if(orientation <= 15 && orientation >= 0) {
@@ -316,19 +327,28 @@ public class SambaPlayerController implements SambaPlayer {
 		}
 
 		// Output Menu
+		// TODO it might not be here
 		if (media.outputs != null && media.outputs.size() > 1) {
-			View outputMenu = ((Activity) container.getContext()).getLayoutInflater().inflate(R.layout.output_menu_layout, null);
+			outputMenu = ((Activity) container.getContext()).getLayoutInflater().inflate(R.layout.output_menu_layout, null);
+
+			TextView cancelButton = (TextView)outputMenu.findViewById(R.id.output_menu_cancel_button);
+			//cancelButton.setTextColor(media.themeColor);
+
+			cancelButton.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					player.closeOutputMenu();
+				}
+			});
+
 			OutputAdapter outputAdapter = new OutputAdapter(container.getContext(), media.outputs);
-			outputMenuList = (ListView)outputMenu.findViewById(R.id.output_menu_list);
+			ListView outputMenuList = (ListView) outputMenu.findViewById(R.id.output_menu_list);
+
 			outputMenuList.setAdapter(outputAdapter);
 			outputMenuList.setOnItemClickListener(menuItemListener);
 			outputAdapter.notifyDataSetChanged();
 			player.setOutputMenu(outputMenu);
 		}
-
-		// TODO reunir em um "pos create"?
-		//Show controls
-		player.show();
 	}
 
 	private void destroyInternal() {
@@ -339,15 +359,17 @@ public class SambaPlayerController implements SambaPlayer {
 		stopProgressTimer();
 		stop();
 
-		if (outputMenuList != null)
-			outputMenuList.setOnItemClickListener(null);
+		if (outputMenu != null) {
+			((ListView)outputMenu.findViewById(R.id.output_menu_list)).setOnItemClickListener(null);
+			outputMenu.findViewById(R.id.output_menu_cancel_button).setOnClickListener(null);
+		}
 
 		orientationEventListener.disable();
 		player.setPlayCallback(null);
 		player.setFullscreenCallback(null);
 		player.release();
 
-		outputMenuList = null;
+		outputMenu = null;
 		orientationEventListener = null;
 		player = null;
 		_hasStarted = false;

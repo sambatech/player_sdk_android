@@ -377,6 +377,13 @@ public class SimpleVideoPlayer {
 	}
 
 	/**
+	 * Closes output menu.
+	 */
+	public void closeOutputMenu() {
+		playbackControlLayer.closeOutputMenu();
+	}
+
+	/**
 	 * When you are finished using this {@link SimpleVideoPlayer}, make sure to call this method.
 	 */
 	public void release() {
@@ -393,7 +400,4 @@ public class SimpleVideoPlayer {
 	public void setInfoListener(ExoplayerWrapper.InfoListener listener) {
 		layerManager.getExoplayerWrapper().setInfoListener(listener);
 	}
-
-
-
 }

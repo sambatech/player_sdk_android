@@ -71,6 +71,12 @@ public interface SambaPlayer {
 	void hide();
 
 	/**
+	 * Sets whether the player should go automatically on fullscreen or not.
+	 * @param flag true to enable auto fullscreen mode and false to disable it
+	 */
+	void setAutoFullscreenMode(boolean flag);
+
+	/**
 	 * Get the current time on the video.
 	 * @return Float current time
 	 */
