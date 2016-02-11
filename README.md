@@ -1,6 +1,16 @@
 # SambaPlayer SDK (Android)
 
-## Como instalar em sua app:
+Instalação do Java, Android SDK & Build-Tools
+
+1) Faça o download e instalação do último [SDK Java](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+2) Faça o download e instalação do último [Android SDK](http://developer.android.com/sdk/installing/index.html)
+
+## Como rodar a APP:
+
+1) Clone o projeto
+2) Rode em seu Android SDK Studio
+
+## Como instalar em o SDK:
 
 1) Adicionar o repositório Maven e a dependência (build.gradle):
 ```java
