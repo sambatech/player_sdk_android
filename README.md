@@ -1,6 +1,6 @@
 # SambaPlayer SDK (Android)
 
-Instalação do Java, Android SDK & Build-Tools
+Instalação do Java, Android SDK
 
 1) Faça o download e instalação do último [SDK Java](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
