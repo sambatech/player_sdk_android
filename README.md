@@ -26,5 +26,18 @@ dependencies {
 <uses-permission android:name="android.permission.INTERNET"/>
 ```
 
+4) Recuperar a instância do SambaPlayer, efetuar requisição da mídia, aguardar resposta da API (via callback) e reproduzir:
+```java
+player = (SambaPlayer)findViewById(R.id.samba_player);
+SambaApi api = new SambaApi(this);
+api.requestMedia(new SambaMediaRequest("34f07cf52fd85ccfc41a39bcf499e83b", "0632f26a442ba9ba3bb9067a45e239e2"), new SambaApiCallback() {
+	@Override
+	public void onMediaResponse(SambaMedia media) {
+		player.setMedia(media);
+		player.play();
+	}
+});
+```
+
 Para maiores informações, favor consultar nossa página [Wiki](https://github.com/sambatech/player_androidsdk/wiki).
 Para informações sobre o JavaDoc favor consultar a nossa página no [SambaDev][http://dev.sambatech.com/documentation/androidsdk/index.html]
