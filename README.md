@@ -3,6 +3,7 @@
 Instalação do Java, Android SDK & Build-Tools
 
 1) Faça o download e instalação do último [SDK Java](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+
 2) Faça o download e instalação do último [Android SDK](http://developer.android.com/sdk/installing/index.html)
 
 ## Como rodar a APP:
