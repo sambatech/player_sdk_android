@@ -9,14 +9,11 @@
 
 Features | Suporte
 --- | ---
-Reprodução vídeos VOD PROGRESSIVE .mp4 | x
-Reprodução vídeos VOD HLS | x
-Reprodução vídeos LIVE HLS | x
-Suporte a entrega de ads DFP | x
-Suporte a troca de Output via ação do usuário | x
-Layout customizado | x
-Fullscreen | x
-Autostart | x
+Reprodução vídeos VOD PROGRESSIVE e HLS | x
+SambaPlayer API | x
+Suporte ao Samba Player Analytics | x
+Suporte a advertising DFP | x
+Player nativo do Android | x
 
 # SambaPlayer SDK (Android)
 
