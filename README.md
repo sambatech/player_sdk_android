@@ -1,5 +1,10 @@
 # Bem vindo ao SDK Android do SambaPlayer
 
+![sample app screenshot](http://i.imgur.com/PsrpYjJ.png)
+![sample app screenshot](http://i.imgur.com/i4UVMAb.png)
+![sample app screenshot](http://i.imgur.com/itH0xoW.png)
+![sample app screenshot](http://i.imgur.com/PWjhCQo.png)
+
 ## Features
 
 Features | Suporte
