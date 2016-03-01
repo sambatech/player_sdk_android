@@ -19,9 +19,10 @@ Instalação do Java, Android SDK
 ## Como rodar a APP:
 
 1) Clone o projeto
+
 2) Rode em seu Android SDK Studio
 
-## Como instalar em o SDK:
+## Como instalar o SDK:
 
 1) Adicionar o repositório Maven e a dependência (build.gradle):
 ```java
