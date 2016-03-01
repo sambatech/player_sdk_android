@@ -1,3 +1,13 @@
+## Features
+
+Features | Suporte
+--- | ---
+Reprodução vídeos VOD PROGRESSIVE e HLS | x
+SambaPlayer API | x
+Suporte ao Samba Player Analytics | x
+Suporte a advertising DFP | x
+Player nativo do Android | x
+
 # SambaPlayer SDK (Android)
 
 Instalação do Java, Android SDK
@@ -9,9 +19,10 @@ Instalação do Java, Android SDK
 ## Como rodar a APP:
 
 1) Clone o projeto
+
 2) Rode em seu Android SDK Studio
 
-## Como instalar em o SDK:
+## Como instalar o SDK:
 
 1) Adicionar o repositório Maven e a dependência (build.gradle):
 ```java
