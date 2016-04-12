@@ -356,7 +356,7 @@ public class ImaWrapper implements Plugin {
 
 		adTagUrl = Uri.parse(media.adUrl);
 		contentPlayer = player;
-		container = (FrameLayout)player.getView();
+		container = (FrameLayout)player;
 		activity = (Activity)container.getContext();
 
 		ImaSdkSettings sdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();

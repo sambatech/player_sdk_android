@@ -40,20 +40,10 @@ public class SambaPlayerController implements SambaPlayer {
 	private Timer progressTimer;
 	private boolean _hasStarted;
 	private boolean _hasFinished;
-	private FrameLayout container;
+	private FrameLayout view;
 	private OrientationEventListener orientationEventListener;
 	private View outputMenu;
 	private boolean autoFsMode;
-
-	private static final SambaPlayerController instance = new SambaPlayerController();
-
-	/**
-	 * Returns the SambaPlayerController only instance.
-	 * @return SambaPlayerController
-	 */
-	public static SambaPlayerController getInstance() {
-		return instance;
-	}
 
 	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
@@ -100,6 +90,7 @@ public class SambaPlayerController implements SambaPlayer {
 
 		@Override
 		public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
+			//Log.i("asdfg", unappliedRotationDegrees+" "+width + " " + height);
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.RESIZE, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
 		}
 	};
@@ -132,16 +123,9 @@ public class SambaPlayerController implements SambaPlayer {
 		}
 	};
 
-	private SambaPlayerController() {
+	public SambaPlayerController(FrameLayout view) {
+		this.view = view;
 		PluginsManager.getInstance().initialize();
-	}
-
-	/**
-	 * Player View informing its layout
-	 * @param container FrameLayout container
-	 */
-	public void init(FrameLayout container) {
-		this.container = container;
 	}
 
 	public void setMedia(SambaMedia media) {
@@ -217,10 +201,6 @@ public class SambaPlayerController implements SambaPlayer {
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
 	}
 
-	public View getView() {
-		return container;
-	}
-
 	public void changeOutput(SambaMedia.Output output) {
 		int currentPosition = player.getCurrentPosition();
 		for(SambaMedia.Output o : media.outputs) {
@@ -265,7 +245,7 @@ public class SambaPlayerController implements SambaPlayer {
 		}
 
 		// no autoplay if there's ad because ImaWrapper controls the player through events
-        player = new SimpleVideoPlayer((Activity)container.getContext(), container,
+        player = new SimpleVideoPlayer((Activity) view.getContext(), view,
                 new Video(media.url, videoType),
                 media.title, media.adUrl == null || media.adUrl.isEmpty());
 
@@ -277,18 +257,18 @@ public class SambaPlayerController implements SambaPlayer {
 
 		//Live treatment
 		if(media.isLive) {
-			((Activity) container.getContext()).findViewById(R.id.time_container).setVisibility(View.INVISIBLE);
+			((Activity) view.getContext()).findViewById(R.id.time_container).setVisibility(View.INVISIBLE);
 
 			player.setControlsVisible(false);
-			player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.ic_live),
-					container.getContext().getString(R.string.live), null);
+			player.addActionButton(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_live),
+					view.getContext().getString(R.string.live), null);
 		}
 
-		/**player.addActionButton(ContextCompat.getDrawable(container.getContext(), R.drawable.share),
-		        container.getContext().getString(R.string.share_facebook), new View.OnClickListener() {
+		/**player.addActionButton(ContextCompat.getDrawable(view.getContext(), R.drawable.share),
+		        view.getContext().getString(R.string.share_facebook), new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(container.getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
+				Toast.makeText(view.getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
 			}
 		});**/
 
@@ -297,13 +277,13 @@ public class SambaPlayerController implements SambaPlayer {
 		player.setFullscreenCallback(fullscreenListener);
 
 		// Fullscreen
-		orientationEventListener = new OrientationEventListener(container.getContext()) {
+		orientationEventListener = new OrientationEventListener(view.getContext()) {
 
 			{ enable(); }
 
 			@Override
 			public void onOrientationChanged( int orientation) {
-				if (Settings.System.getInt(container.getContext().getContentResolver(),
+				if (Settings.System.getInt(view.getContext().getContentResolver(),
 						Settings.System.ACCELEROMETER_ROTATION, 0) == 0 || !autoFsMode || player == null)
 					return;
 
@@ -323,13 +303,13 @@ public class SambaPlayerController implements SambaPlayer {
 
 		if (notify) {
 			PluginsManager.getInstance().onLoad(this);
-			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, view));
 		}
 
 		// Output Menu
 		// TODO it might not be here
 		if (media.outputs != null && media.outputs.size() > 1) {
-			outputMenu = ((Activity) container.getContext()).getLayoutInflater().inflate(R.layout.output_menu_layout, null);
+			outputMenu = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.output_menu_layout, null);
 
 			TextView cancelButton = (TextView)outputMenu.findViewById(R.id.output_menu_cancel_button);
 			//cancelButton.setTextColor(media.themeColor);
@@ -341,7 +321,7 @@ public class SambaPlayerController implements SambaPlayer {
 				}
 			});
 
-			OutputAdapter outputAdapter = new OutputAdapter(container.getContext(), media.outputs);
+			OutputAdapter outputAdapter = new OutputAdapter(view.getContext(), media.outputs);
 			ListView outputMenuList = (ListView) outputMenu.findViewById(R.id.output_menu_list);
 
 			outputMenuList.setAdapter(outputAdapter);

@@ -111,12 +111,7 @@ public class SambaPlayerControllerNull implements SambaPlayer {
 		logMessage();
 	}
 
-	@Override
-	public View getView() {
-		return null;
-	}
-
 	private void logMessage() {
-		Log.e("SambaPlayer", "No action will be done.");
+		Log.e("SambaPlayer", "No action will be done (call setMedia() to renable player).");
 	}
 }

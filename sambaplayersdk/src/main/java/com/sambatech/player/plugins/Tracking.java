@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
@@ -132,7 +133,7 @@ public class Tracking implements Plugin {
 			if (p > 99)
 				p = 99;
 
-			progresses.add(trackedRetentions.contains(p) ? String.format("p%02d", p) : String.format("p%02d,r%02d", p, p));
+			progresses.add(trackedRetentions.contains(p) ? String.format(Locale.getDefault(), "p%02d", p) : String.format(Locale.getDefault(), "p%02d,r%02d", p, p));
 			trackedRetentions.add(p);
 
 			if (progresses.size() >= 5)

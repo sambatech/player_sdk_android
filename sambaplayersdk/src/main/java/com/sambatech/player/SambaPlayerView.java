@@ -15,111 +15,106 @@ import com.sambatech.player.model.SambaMedia;
  */
 public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 
-	private SambaPlayer playerController = SambaPlayerControllerNull.getInstance();
+	private SambaPlayer controllerInstance = new SambaPlayerController(this);
+	private SambaPlayer controller = SambaPlayerControllerNull.getInstance();
 	private boolean autoFsMode;
 
 	public SambaPlayerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		SambaPlayerController.getInstance().init(this);
 		applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayerView, 0, 0));
 	}
 
 	@Override
 	public void setMedia(SambaMedia media) {
 		// enable controller
-		playerController = SambaPlayerController.getInstance();
-		playerController.setMedia(media);
-		playerController.setAutoFullscreenMode(autoFsMode);
+		controller = controllerInstance;
+		controller.setMedia(media);
+		controller.setAutoFullscreenMode(autoFsMode);
 	}
 
 	@Override
 	public SambaMedia getMedia() {
-		return playerController.getMedia();
+		return controller.getMedia();
 	}
 
 	@Override
 	public void play() {
-		playerController.play();
+		controller.play();
 	}
 
 	@Override
 	public void pause() {
-		playerController.pause();
+		controller.pause();
 	}
 
 	@Override
 	public void stop() {
-		playerController.stop();
+		controller.stop();
 	}
 
 	@Override
 	public void seek(float position) {
-		playerController.seek(position);
+		controller.seek(position);
 	}
 
 	@Override
 	public void setFullscreen(boolean flag) {
-		playerController.setFullscreen(flag);
+		controller.setFullscreen(flag);
 	}
 
 	@Override
 	public boolean isFullscreen() {
-		return playerController.isFullscreen();
+		return controller.isFullscreen();
 	}
 
 	@Override
 	public void show() {
-		playerController.show();
+		controller.show();
 	}
 
 	@Override
 	public void hide() {
-		playerController.hide();
+		controller.hide();
 	}
 
 	@Override
 	public void setAutoFullscreenMode(boolean flag) {
-		playerController.setAutoFullscreenMode(flag);
+		controller.setAutoFullscreenMode(flag);
 	}
 
 	@Override
 	public float getCurrentTime() {
-		return playerController.getCurrentTime();
+		return controller.getCurrentTime();
 	}
 
 	@Override
 	public float getDuration() {
-		return playerController.getDuration();
+		return controller.getDuration();
 	}
 
 	@Override
 	public boolean hasFinished() {
-		return playerController.hasFinished();
+		return controller.hasFinished();
 	}
 
 	@Override
 	public boolean hasStarted() {
-		return playerController.hasStarted();
+		return controller.hasStarted();
 	}
 
 	// TODO: alterar para "void changeOutput(int index)"
-	// TODO: incluir "int totalOutputs()"
+	// TODO: implementar "int totalOutputs()"
 
 	@Override
 	public void changeOutput(SambaMedia.Output output) {
-		playerController.changeOutput(output);
+		controller.changeOutput(output);
 	}
 
 	@Override
 	public void destroy() {
-		playerController.destroy();
+		controller.destroy();
 		// disable controller
-		playerController = SambaPlayerControllerNull.getInstance();
-	}
-
-	@Override
-	public View getView() {
-		return this;
+		controller = SambaPlayerControllerNull.getInstance();
 	}
 
 	private void applyAttributes(TypedArray attrs) {

@@ -113,10 +113,4 @@ public interface SambaPlayer {
 	 * Destroy the player and it's events
 	 */
 	void destroy();
-
-	/**
-	 * Returns the view layer associated with the player.
-	 * @return Android View layer
-	 */
-	View getView();
 }
