@@ -14,12 +14,20 @@
         android:layout_height="250dp"
         app:autoFullscreenMode="true"/>
 
+    <com.sambatech.player.SambaPlayerView
+        android:id="@+id/samba_player2"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        app:autoFullscreenMode="true"
+        android:layout_below="@+id/samba_player"
+        android:visibility="gone"/>
+
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_alignRight="@+id/duration"
         android:layout_height="wrap_content"
-        android:layout_below="@id/samba_player"
+        android:layout_below="@id/samba_player2"
         android:padding="@dimen/activity_vertical_margin"
         android:textSize="30sp"/>
 
@@ -27,7 +35,7 @@
         android:id="@+id/duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/samba_player"
+        android:layout_below="@id/samba_player2"
         android:layout_alignParentRight="true"
         android:visibility="gone"
         android:text="00:00"

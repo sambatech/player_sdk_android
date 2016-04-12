@@ -62,6 +62,7 @@ public class MainActivity extends Activity {
 		if(loading.getVisibility() == View.VISIBLE) return;
 
 		LiquidMedia media = (LiquidMedia) mAdapter.getItem(position);
+		media.highlighted = position == 0;
 
 		Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
 		EventBus.getDefault().postSticky(media);
@@ -150,7 +151,7 @@ public class MainActivity extends Activity {
 	 * @param pid - Project ID
 	 */
 	private void makeMediasCall(final String token, final int pid) {
-		Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid, true, "VIDEO");
+		Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid, true, "VIDEO,AUDIO");
 
 		call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
 			@Override

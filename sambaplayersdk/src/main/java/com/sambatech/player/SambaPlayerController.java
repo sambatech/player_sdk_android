@@ -132,7 +132,7 @@ public class SambaPlayerController implements SambaPlayer {
 		if (media == null)
 			throw new IllegalArgumentException("Media data is null");
 
-		this.media = (SambaMediaConfig)media;
+		this.media = new SambaMediaConfig(media);
 		destroy();
 	}
 

@@ -19,7 +19,7 @@ public class SambaEventBus {
 	private SambaEventBus() {}
 
 	/**
-	 * Register an event
+	 * Registers an event.
 	 * @param listener listener object
 	 */
 	public static void subscribe(Object listener) {
@@ -27,7 +27,7 @@ public class SambaEventBus {
 	}
 
 	/**
-	 * Unregister an event
+	 * Unregisters an event.
 	 * @param listener listener object
 	 */
 	public static void unsubscribe(Object listener) {
@@ -35,8 +35,8 @@ public class SambaEventBus {
 	}
 
 	/**
-	 * Triggers an event
-	 * @param e an particular event
+	 * Triggers an event.
+	 * @param e a particular event
 	 */
 	public static void post(SambaEvent e) {
 		_eventBus.post(e);

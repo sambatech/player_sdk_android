@@ -153,7 +153,11 @@ public class SambaApi {
 						default:
 					}
 
-					return parseMedia(new JSONObject(new String(Base64.decodeBase64(token))));
+					byte[] tokenBytes = Base64.decodeBase64(token);
+					String jsonString = new String(tokenBytes);
+					JSONObject json = new JSONObject(jsonString);
+
+					return parseMedia(json);
 				}
 			}
 			catch (Exception e) {
@@ -203,7 +207,7 @@ public class SambaApi {
 			try {
 				String qualifier = json.getString("qualifier").toLowerCase();
 
-				if (!qualifier.equals("video") && !qualifier.equals("live"))
+				if (!(qualifier.equals("video") || qualifier.equals("live") || qualifier.equals("audio")))
 					return null;
 
 				SambaMediaConfig media = new SambaMediaConfig();
@@ -245,7 +249,6 @@ public class SambaApi {
 							continue;
 
 						outputs = rule.getJSONArray("outputs");
-
 						defaultOutputCurrent = media.type.equals("hls") ? "abr_hls" : defaultOutput;
 
 						for (int j = outputs.length(); j-- > 0;) {
@@ -257,22 +260,27 @@ public class SambaApi {
 							cOutput.label = (output.getString("outputName").equals("abr_hls")) ? "auto" : output.getString("outputName");
 							cOutput.position = outputMap.get(output.getString("outputName").toLowerCase());
 
-							//TODO checar comportamento de projeto sem default output
-							if (!label.equalsIgnoreCase("_raw") && !output.isNull("url") &&
-									(label.equals(defaultOutputCurrent))) {
+							if (qualifier.equals("audio")) {
+								media.outputs.add(cOutput);
+								continue;
+							}
 
-								// if HLS (MBR), set to exit loop
-								if (media.type.equals("hls"))
-									i = totalRules;
-								media.url = output.getString("url");
-								cOutput.current = true;
-								media.outputs.add(cOutput);
-							}else if(!label.equalsIgnoreCase("_raw") && !output.isNull("url")){
-								media.outputs.add(cOutput);
+							//TODO checar comportamento de projeto sem default output
+							if (!label.equalsIgnoreCase("_raw") && !output.isNull("url")) {
+								if (label.equals(defaultOutputCurrent)) {
+
+									// if HLS (MBR), set to exit loop
+									if (media.type.equals("hls"))
+										i = totalRules;
+
+									media.url = output.getString("url");
+									cOutput.current = true;
+									media.outputs.add(cOutput);
+								}
+								else media.outputs.add(cOutput);
 							}
 						}
 
-						//TODO retirar o media.url
 						if(media.url == null) {
 							media.url = media.outputs.get(0).url;
 						}
