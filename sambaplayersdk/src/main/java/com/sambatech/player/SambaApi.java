@@ -221,6 +221,7 @@ public class SambaApi {
 				media.projectId = projectConfig.getInt("id");
 				media.title = json.getString("title");
 				media.outputs = new ArrayList<>();
+				media.isAudioOnly = qualifier.equals("audio");
 
 				if (json.has("id"))
 					media.id = json.getString("id");
@@ -260,7 +261,7 @@ public class SambaApi {
 							cOutput.label = (output.getString("outputName").equals("abr_hls")) ? "auto" : output.getString("outputName");
 							cOutput.position = outputMap.get(output.getString("outputName").toLowerCase());
 
-							if (qualifier.equals("audio")) {
+							if (media.isAudioOnly) {
 								media.outputs.add(cOutput);
 								continue;
 							}

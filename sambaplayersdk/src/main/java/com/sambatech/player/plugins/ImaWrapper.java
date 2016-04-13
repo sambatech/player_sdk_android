@@ -467,6 +467,7 @@ public class ImaWrapper implements Plugin {
 				adVideo,
 				"",
 				true,
+				false,
 				0,
 				fullscreenCallback);
 

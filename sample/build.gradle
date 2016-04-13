@@ -27,7 +27,6 @@ dependencies {
 
     // DEV
     compile project(':sambaplayersdk')
-    //compile project(':googlemediaframework')
 
     // PROD
     //compile 'com.sambatech.player:sdk-android:1.0.0-alpha'

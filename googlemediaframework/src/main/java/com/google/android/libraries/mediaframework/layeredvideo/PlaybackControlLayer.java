@@ -18,7 +18,6 @@ package com.google.android.libraries.mediaframework.layeredvideo;
 
 import android.animation.Animator;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
@@ -29,18 +28,15 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -51,6 +47,7 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.PlayerCon
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Formatter;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -122,6 +119,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	public interface PlayCallback {
 
 		public void onPlay();
+	}
+
+	private interface Callback {
+		void call();
 	}
 
 	/**
@@ -343,6 +344,11 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	/**
 	 * Displays the play icon when the video is playing, or the pause icon when the video is playing.
 	 */
+	private ImageButton pausePlayLargeButton;
+
+	/**
+	 * Play/pause toggle button; causes the player to play or pause the media.
+	 */
 	private ImageButton pausePlayButton;
 
 	/**
@@ -412,15 +418,25 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	private boolean outputMenuWasPlaying;
 
+	/**
+	 * Whether it should auto hide controls or not.
+	 */
+	private boolean autoHide = true;
+
+	private List<Callback> preInitCallbacks = new ArrayList<>();
+
+	private HashMap<String, Object> buttonsMap;
+
 	public PlaybackControlLayer(String videoTitle) {
-		this(videoTitle, null);
+		this(videoTitle, null, true);
 	}
 
-	public PlaybackControlLayer(String videoTitle, FullscreenCallback fullscreenCallback) {
+	public PlaybackControlLayer(String videoTitle, FullscreenCallback fullscreenCallback, boolean autoHide) {
 		this.videoTitle = videoTitle;
 		this.canSeek = true;
 		this.fullscreenCallback = fullscreenCallback;
 		this.shouldBePlaying = false;
+		this.autoHide = autoHide;
 		actionButtons = new ArrayList<ImageButton>();
 	}
 
@@ -494,6 +510,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		getLayerManager().getContainer().setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
+				if (!autoHide)
+					return;
+
 				if (isVisible) {
 					hide();
 				} else {
@@ -665,6 +684,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 *                controls will not disappear unless their container is tapped again.
 	 */
 	public void show(int timeout) {
+		if (!autoHide)
+			timeout = 0;
+
 		if (!isVisible && getLayerManager().getContainer() != null) {
 			playbackControlRootView.setAlpha(1.0f);
 			// Make the view visible.
@@ -700,6 +722,13 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	public void show() {
 		show(DEFAULT_TIMEOUT_MS);
+	}
+
+	public void setAutoHide(boolean state) {
+		autoHide = state;
+
+		if (state)
+			show();
 	}
 
 	/**
@@ -889,10 +918,55 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	}
 
 	/**
+	 * Enables/Disables the specified controls.
+	 * @param state Whether to enable or disable the listed controls
+	 * @param names Controls names: "play", "fullscreen", "outputMenu", "seekbar", "endTime", "currentTime"
+	 */
+	public void setControlsVisible(final boolean state, final String ... names) {
+		if (buttonsMap == null) {
+			preInitCallbacks.add(new Callback() {
+				public void call() {
+					setControlsVisible(state, names);
+				}
+			});
+			return;
+		}
+
+		for (String name : names)
+			if (buttonsMap.containsKey(name))
+				((View) buttonsMap.get(name)).setVisibility(state ? View.VISIBLE : View.GONE);
+
+		view.invalidate();
+	}
+
+	/*public void swapControls(final String name1, final String name2) {
+		if (buttonsMap == null) {
+			preInitCallbacks.add(new Callback() {
+				public void call() {
+					swapControls(name1, name2);
+				}
+			});
+			return;
+		}
+
+		if (buttonsMap.containsKey(name1) && buttonsMap.containsKey(name2)) {
+			View control1 = (View)buttonsMap.get(name1);
+			View control2 = (View)buttonsMap.get(name2);
+			int index1 = view.indexOfChild(control1);
+
+			view.removeView(control1);
+			view.addView(control1, view.indexOfChild(control2));
+			view.removeView(control2);
+			view.addView(control2, index1);
+		}
+	}*/
+
+	/**
 	 * Perform binding to UI, setup of event handlers and initialization of values.
 	 */
 	private void setupView() {
 		// Bind fields to UI elements.
+		pausePlayLargeButton = (ImageButton) view.findViewById(R.id.pauseLarge);
 		pausePlayButton = (ImageButton) view.findViewById(R.id.pause);
 		fullscreenButton = (ImageButton) view.findViewById((R.id.fullscreen));
 		outputButton = (ImageButton) view.findViewById(R.id.output_button);
@@ -924,9 +998,17 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		}
 
 		// The play button should toggle play/pause when the play/pause button is clicked.
-		pausePlayButton.setOnClickListener(new View.OnClickListener() {
+		pausePlayLargeButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
+				togglePlayPause();
+				show(DEFAULT_TIMEOUT_MS);
+			}
+		});
+
+		pausePlayButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
 				togglePlayPause();
 				show(DEFAULT_TIMEOUT_MS);
 			}
@@ -989,6 +1071,20 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		timeFormat = new StringBuilder();
 		timeFormatter = new Formatter(timeFormat, Locale.getDefault());
 
+		buttonsMap = new HashMap<>();
+		buttonsMap.put("play", pausePlayButton);
+		buttonsMap.put("fullscreen", fullscreenButton);
+		buttonsMap.put("outputMenu", outputButton);
+		buttonsMap.put("seekbar", seekBar);
+		buttonsMap.put("endTime", endTime);
+		buttonsMap.put("currentTime", currentTime);
+
+		if (preInitCallbacks.size() > 0) {
+			for (Callback callback : preInitCallbacks)
+				callback.call();
+
+			preInitCallbacks.clear();
+		}
 	}
 
 	/**
@@ -1098,7 +1194,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		videoTitleView.setTextColor(textColor);
 
 		fullscreenButton.setColorFilter(controlColor);
-		pausePlayButton.setColorFilter(controlColor);*/
+		pausePlayLargeButton.setColorFilter(controlColor);*/
 		((LayerDrawable)seekBar.getProgressDrawable()).findDrawableByLayerId(android.R.id.progress).setColorFilter(seekbarColor, PorterDuff.Mode.ADD);
 		//seekBar.getThumb().setColorFilter(seekbarColor, PorterDuff.Mode.SRC_ATOP);
 
@@ -1123,14 +1219,16 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	public void updatePlayPauseButton() {
 		PlayerControl playerControl = getLayerManager().getControl();
-		if (view == null || pausePlayButton == null || playerControl == null) {
+		if (view == null || pausePlayLargeButton == null || playerControl == null) {
 			return;
 		}
 
 		if (playerControl.isPlaying()) {
-			pausePlayButton.setImageResource(R.drawable.ic_action_pause_large);
+			pausePlayLargeButton.setImageResource(R.drawable.ic_action_pause_large);
+			pausePlayButton.setImageResource(R.drawable.ic_action_pause);
 		} else {
-			pausePlayButton.setImageResource(R.drawable.ic_action_play_large);
+			pausePlayLargeButton.setImageResource(R.drawable.ic_action_play_large);
+			pausePlayButton.setImageResource(R.drawable.ic_action_play);
 		}
 	}
 

@@ -246,8 +246,8 @@ public class SambaPlayerController implements SambaPlayer {
 
 		// no autoplay if there's ad because ImaWrapper controls the player through events
         player = new SimpleVideoPlayer((Activity) view.getContext(), view,
-                new Video(media.url, videoType),
-                media.title, media.adUrl == null || media.adUrl.isEmpty());
+                new Video(media.url, videoType), media.title,
+		        media.adUrl == null || media.adUrl.isEmpty(), media.isAudioOnly);
 
 		player.setSeekbarColor(media.themeColor);
 

@@ -18,10 +18,9 @@ package com.google.android.libraries.mediaframework.layeredvideo;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
-import android.widget.ListAdapter;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
@@ -79,8 +78,9 @@ public class SimpleVideoPlayer {
 			 FrameLayout container,
 			 Video video,
 			 String videoTitle,
-			 boolean autoplay) {
-		this(activity, container, video, videoTitle, autoplay, 0, null);
+			 boolean autoplay,
+	         boolean audioOnly) {
+		this(activity, container, video, videoTitle, autoplay, audioOnly, 0, null);
 	}
 
 	/**
@@ -97,14 +97,19 @@ public class SimpleVideoPlayer {
 			Video video,
 			String videoTitle,
 			boolean autoplay,
+			boolean audioOnly,
 			int startPostitionMs,
 			PlaybackControlLayer.FullscreenCallback fullscreenCallback) {
 		this.activity = activity;
 
-		playbackControlLayer = new PlaybackControlLayer(videoTitle, fullscreenCallback);
+		playbackControlLayer = new PlaybackControlLayer(videoTitle, fullscreenCallback, !audioOnly);
 		subtitleLayer = new SubtitleLayer();
 		videoSurfaceLayer = new VideoSurfaceLayer(autoplay);
 		this.autoplay = autoplay;
+
+		playbackControlLayer.setControlsVisible(true, "play");
+		playbackControlLayer.setControlsVisible(false, "fullscreen");
+		//playbackControlLayer.swapControls("endTime", "seekbar");
 
 		List<Layer> layers = new ArrayList<Layer>();
 		layers.add(videoSurfaceLayer);
@@ -189,9 +194,13 @@ public class SimpleVideoPlayer {
 		subtitleLayer.setVisibility(View.GONE);
 	}
 
-	public void setControlsVisible(boolean value) {
-		if (!value)
+	public void setControlsVisible(boolean state) {
+		if (!state)
 			playbackControlLayer.hideSeek();
+	}
+
+	public void setControlsVisible(boolean state, String ... names) {
+		playbackControlLayer.setControlsVisible(state, names);
 	}
 
 	/**
