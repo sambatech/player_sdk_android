@@ -232,7 +232,7 @@ public class SambaPlayerController implements SambaPlayer {
 			Log.e("player", "Media data is null!");
 	        return;
 		}
-		Log.e("outputs", media.url);
+
 		Video.VideoType videoType = Video.VideoType.OTHER;
 
 		switch (media.type.toLowerCase()) {
@@ -244,7 +244,7 @@ public class SambaPlayerController implements SambaPlayer {
 				break;
 		}
 
-		// no autoplay if there's ad because ImaWrapper controls the player through events
+		// no autoplay if there's ad because ImaWrapper takes control of the player
         player = new SimpleVideoPlayer((Activity) view.getContext(), view,
                 new Video(media.url, videoType), media.title,
 		        media.adUrl == null || media.adUrl.isEmpty(), media.isAudioOnly);
@@ -256,10 +256,10 @@ public class SambaPlayerController implements SambaPlayer {
 		player.moveSurfaceToBackground();
 
 		//Live treatment
-		if(media.isLive) {
+		if (media.isLive) {
 			((Activity) view.getContext()).findViewById(R.id.time_container).setVisibility(View.INVISIBLE);
 
-			player.setControlsVisible(false);
+			player.setControlsVisible(false, "seekbar");
 			player.addActionButton(ContextCompat.getDrawable(view.getContext(), R.drawable.ic_live),
 					view.getContext().getString(R.string.live), null);
 		}
@@ -274,7 +274,15 @@ public class SambaPlayerController implements SambaPlayer {
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
-		player.setFullscreenCallback(fullscreenListener);
+
+		if (media.isAudioOnly) {
+			player.setControlsVisible(true, "play");
+			player.setControlsVisible(false, "fullscreen", "playLarge", "topChrome");
+			//playbackControlLayer.swapControls("time", "seekbar");
+			player.setBackgroundColor(0xFF434343);
+			player.setChromeColor(0x00000000);
+		}
+		else player.setFullscreenCallback(fullscreenListener);
 
 		// Fullscreen
 		orientationEventListener = new OrientationEventListener(view.getContext()) {

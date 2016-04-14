@@ -23,13 +23,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public SambaMediaConfig() {}
 
 	public SambaMediaConfig(SambaMedia media) {
-		type = media.type;
-		title = media.title;
-		url = media.url;
-		adUrl = media.adUrl;
-		isLive = media.isLive;
-		outputs = media.outputs;
-		thumb = media.thumb;
+		super(media);
 	}
 
 	@Override

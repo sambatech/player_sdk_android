@@ -50,6 +50,7 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 
 /**
@@ -425,7 +426,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 	private List<Callback> preInitCallbacks = new ArrayList<>();
 
-	private HashMap<String, Object> buttonsMap;
+	private HashMap<String, View> controlsMap;
 
 	public PlaybackControlLayer(String videoTitle) {
 		this(videoTitle, null, true);
@@ -793,9 +794,12 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	public void setChromeColor(int color) {
 		chromeColor = color;
-		if (playbackControlRootView != null) {
+		bottomChrome.setBackgroundColor(color);
+		topChrome.setBackgroundColor(color);
+
+		/*if (playbackControlRootView != null) {
 			updateColors();
-		}
+		}*/
 	}
 
 	/**
@@ -832,6 +836,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		}
 	}
 
+	public void setBackgroundColor(int color) {
+		playbackControlRootView.setBackgroundColor(color);
+	}
+
 	/**
 	 * Set the callback which will be called when the player enters and leaves fullscreen mode.
 	 * @param fullscreenCallback The callback should hide other views in the activity when the player
@@ -843,7 +851,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		if (fullscreenButton != null && fullscreenCallback != null) {
 			fullscreenButton.setVisibility(View.VISIBLE);
 		} else if (fullscreenButton != null && fullscreenCallback == null) {
-			fullscreenButton.setVisibility(View.INVISIBLE);
+			fullscreenButton.setVisibility(View.GONE);
 		}
 	}
 
@@ -920,10 +928,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	/**
 	 * Enables/Disables the specified controls.
 	 * @param state Whether to enable or disable the listed controls
-	 * @param names Controls names: "play", "fullscreen", "outputMenu", "seekbar", "endTime", "currentTime"
+	 * @param names Controls names: "play", "playLarge", "fullscreen", "outputMenu", "seekbar", "time"
 	 */
 	public void setControlsVisible(final boolean state, final String ... names) {
-		if (buttonsMap == null) {
+		if (controlsMap == null) {
 			preInitCallbacks.add(new Callback() {
 				public void call() {
 					setControlsVisible(state, names);
@@ -932,15 +940,21 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			return;
 		}
 
-		for (String name : names)
-			if (buttonsMap.containsKey(name))
-				((View) buttonsMap.get(name)).setVisibility(state ? View.VISIBLE : View.GONE);
+		int visibility = state ? View.VISIBLE : View.GONE;
 
-		view.invalidate();
+		// specific
+		if (names.length > 0) {
+			for (String name : names)
+				if (controlsMap.containsKey(name))
+					controlsMap.get(name).setVisibility(state || !name.equals("seekbar") ? visibility : View.INVISIBLE);
+		}
+		// all
+		else for (Map.Entry<String, View> pair : controlsMap.entrySet())
+			pair.getValue().setVisibility(state || !pair.getKey().equals("seekbar") ? visibility : View.INVISIBLE);
 	}
 
 	/*public void swapControls(final String name1, final String name2) {
-		if (buttonsMap == null) {
+		if (controlsMap == null) {
 			preInitCallbacks.add(new Callback() {
 				public void call() {
 					swapControls(name1, name2);
@@ -949,9 +963,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			return;
 		}
 
-		if (buttonsMap.containsKey(name1) && buttonsMap.containsKey(name2)) {
-			View control1 = (View)buttonsMap.get(name1);
-			View control2 = (View)buttonsMap.get(name2);
+		if (controlsMap.containsKey(name1) && controlsMap.containsKey(name2)) {
+			View control1 = (View)controlsMap.get(name1);
+			View control2 = (View)controlsMap.get(name2);
 			int index1 = view.indexOfChild(control1);
 
 			view.removeView(control1);
@@ -1015,7 +1029,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		});
 
 		if (fullscreenCallback == null) {
-			fullscreenButton.setVisibility(View.INVISIBLE);
+			fullscreenButton.setVisibility(View.GONE);
 		}
 		// Go into fullscreen when the fullscreen button is clicked.
 		fullscreenButton.setOnClickListener(new View.OnClickListener() {
@@ -1071,13 +1085,15 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		timeFormat = new StringBuilder();
 		timeFormatter = new Formatter(timeFormat, Locale.getDefault());
 
-		buttonsMap = new HashMap<>();
-		buttonsMap.put("play", pausePlayButton);
-		buttonsMap.put("fullscreen", fullscreenButton);
-		buttonsMap.put("outputMenu", outputButton);
-		buttonsMap.put("seekbar", seekBar);
-		buttonsMap.put("endTime", endTime);
-		buttonsMap.put("currentTime", currentTime);
+		controlsMap = new HashMap<>();
+		controlsMap.put("playLarge", pausePlayLargeButton);
+		controlsMap.put("play", pausePlayButton);
+		controlsMap.put("fullscreen", fullscreenButton);
+		controlsMap.put("outputMenu", outputButton);
+		controlsMap.put("seekbar", seekBar);
+		controlsMap.put("topChrome", topChrome);
+		controlsMap.put("bottomChrome", bottomChrome);
+		controlsMap.put("time", view.findViewById(R.id.time_container));
 
 		if (preInitCallbacks.size() > 0) {
 			for (Callback callback : preInitCallbacks)
@@ -1269,10 +1285,5 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	public void setPlayCallback(PlayCallback playCallback) {
 		this.playCallback = playCallback;
-	}
-
-	public void hideSeek() {
-		seekBar.setVisibility(View.INVISIBLE);
-		//timeContainer.setVisibility(View.INVISIBLE);
 	}
 }

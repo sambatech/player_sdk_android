@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.sambatech.player.SambaApi;
 import com.sambatech.player.SambaPlayer;
+import com.sambatech.player.SambaPlayerView;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -37,7 +38,7 @@ public class MediaItemActivity extends Activity {
     TextView status;
 
     @Bind(R.id.samba_player)
-    SambaPlayer player;
+    SambaPlayerView player;
 
 	@Bind(R.id.samba_player2)
 	SambaPlayer player2;
@@ -193,6 +194,11 @@ public class MediaItemActivity extends Activity {
 	    loading.setVisibility(View.GONE);
 	    titleView.setVisibility(View.VISIBLE);
         titleView.setText(media.title);
+
+	    if (media.isAudioOnly) {
+		    player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
+			player.setLayoutParams(player.getLayoutParams());
+	    }
 
         player.setMedia(media);
 

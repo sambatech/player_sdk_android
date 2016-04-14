@@ -107,10 +107,6 @@ public class SimpleVideoPlayer {
 		videoSurfaceLayer = new VideoSurfaceLayer(autoplay);
 		this.autoplay = autoplay;
 
-		playbackControlLayer.setControlsVisible(true, "play");
-		playbackControlLayer.setControlsVisible(false, "fullscreen");
-		//playbackControlLayer.swapControls("endTime", "seekbar");
-
 		List<Layer> layers = new ArrayList<Layer>();
 		layers.add(videoSurfaceLayer);
 		layers.add(playbackControlLayer);
@@ -192,11 +188,6 @@ public class SimpleVideoPlayer {
 	public void hide() {
 		playbackControlLayer.hide();
 		subtitleLayer.setVisibility(View.GONE);
-	}
-
-	public void setControlsVisible(boolean state) {
-		if (!state)
-			playbackControlLayer.hideSeek();
 	}
 
 	public void setControlsVisible(boolean state, String ... names) {
@@ -289,6 +280,10 @@ public class SimpleVideoPlayer {
 	 */
 	public void setChromeColor(int color) {
 		playbackControlLayer.setChromeColor(color);
+	}
+
+	public void setBackgroundColor(int color) {
+		playbackControlLayer.setBackgroundColor(color);
 	}
 
 	/**
