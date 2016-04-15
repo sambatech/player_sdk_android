@@ -28,7 +28,7 @@ Instalação do Java, Android SDK
 ```java
 repositories {
     maven {
-        url 'http://arch2.sambatech.com.br:8081/nexus/content/repositories/sambaplayer-android-sdk'
+        url 'https://dl.bintray.com/sambatech/maven'
     }
 }
 ...
