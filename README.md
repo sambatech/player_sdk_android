@@ -33,7 +33,7 @@ repositories {
 }
 ...
 dependencies {
-    compile 'com.sambatech.player:sdk-android:1.0.0-alpha'
+    compile 'com.sambatech.player:sdk-android:0.2.0-beta'
 }
 ```
 
