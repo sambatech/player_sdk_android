@@ -21,7 +21,8 @@ buildscript {
         mavenCentral()
 
         maven {
-            url RELEASE_REPOSITORY_URL
+            //url RELEASE_REPOSITORY_URL
+            url 'https://dl.bintray.com/sambatech/maven'
         }
     }
     dependencies {
@@ -34,7 +35,8 @@ allprojects {
         mavenCentral()
 
         maven {
-            url RELEASE_REPOSITORY_URL
+            //url RELEASE_REPOSITORY_URL
+            url 'https://dl.bintray.com/sambatech/maven'
         }
     }
 }
