@@ -47,6 +47,7 @@ public class MainActivity extends Activity {
 	//Samba api and Json Tag endpoints
 	@BindString(R.string.sambaapi_endpoint) String api_endpoint;
 	@BindString(R.string.mysjon_endpoint) String tag_endpoint;
+	@BindString(R.string.access_token) String access_token;
 
 	MediasAdapter mAdapter;
 	Menu menu;
@@ -222,10 +223,10 @@ public class MainActivity extends Activity {
 		list.setAdapter(null);
 
 		//Making the call to project 4421
-		makeMediasCall("079cc2f1-4733-4c92-a7b5-7e1640698caa", 4421);
+		makeMediasCall(access_token, 4421);
 
 		//Making the call to project 4460
-		makeMediasCall("079cc2f1-4733-4c92-a7b5-7e1640698caa", 4460);
+		makeMediasCall(access_token, 4460);
 	}
 
 	/**
