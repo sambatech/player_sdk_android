@@ -19,13 +19,12 @@
 buildscript {
     repositories {
         mavenCentral()
-
         jcenter()
 
-        /**maven {
+        maven {
             //url RELEASE_REPOSITORY_URL
             url 'https://dl.bintray.com/sambatech/maven'
-        }**/
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.0.0'
@@ -36,9 +35,10 @@ allprojects {
     repositories {
         mavenCentral()
         jcenter()
-        /**maven {
+
+        maven {
             //url RELEASE_REPOSITORY_URL
             url 'https://dl.bintray.com/sambatech/maven'
-        }**/
+        }
     }
 }
