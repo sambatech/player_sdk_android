@@ -20,9 +20,10 @@ import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
 
+import org.greenrobot.eventbus.EventBus;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import de.greenrobot.event.EventBus;
 
 public class MediaItemActivity extends Activity {
 
@@ -39,9 +40,6 @@ public class MediaItemActivity extends Activity {
 
     @Bind(R.id.samba_player)
     SambaPlayerView player;
-
-	@Bind(R.id.samba_player2)
-	SambaPlayer player2;
 
 	@Bind(R.id.progressbar_view)
 	LinearLayout loading;
@@ -136,7 +134,6 @@ public class MediaItemActivity extends Activity {
 	public void onBackPressed() {
 		super.onBackPressed();
         player.destroy();
-		player2.destroy();
         finish();
     }
 
@@ -147,8 +144,6 @@ public class MediaItemActivity extends Activity {
         if (player != null && player.hasStarted())
             player.pause();
 
-	    if (player2 != null && player2.hasStarted())
-		    player2.pause();
     }
 
 	/**
@@ -195,6 +190,8 @@ public class MediaItemActivity extends Activity {
 	    titleView.setVisibility(View.VISIBLE);
         titleView.setText(media.title);
 
+
+	    /** If audio, we recommend you to customize the player's height**/
 	    if (media.isAudioOnly) {
 		    player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
 			player.setLayoutParams(player.getLayoutParams());
@@ -205,15 +202,5 @@ public class MediaItemActivity extends Activity {
 	    //Play the media programmatically on its load ( similar to autoPlay=true param )
         player.play();
 
-	    // TODO: remove; flag misused to test multiple players
-	    if (activityMedia.highlighted) {
-		    ((View)player2).setVisibility(View.VISIBLE);
-		    SambaMedia m = new SambaMedia();
-		    m.url = "http://svrp.sambavideos.sambatech.com/voda/_definst_/amlst%3Astg.test%3B100209%2C538%2C0a73c9dd8f10cc0d671b793788f1b642%3B%2Faccount%2F100209%2F71%2F2016-03-14%2Fvideo%2F%3B66792b1ddf07e70d8a69cbce67ebbe33%2FA120276_480p_360p.mp4%2C507904%2C640%2C360%2C6745cd4cb4d1cce7afb53ce3266c356c%2FA120276_480p_240p.mp4%2C297984%2C426%2C240%2C71b290a2fa04343e8e73b182a83b3159%2FA120276_480p_480p.mp4%2C657408%2C854%2C480%2C%3B/playlist.m3u8";
-		    m.title = "Segundo vídeo";
-		    m.type = "HLS";
-		    player2.setMedia(m);
-		    player2.play();
-	    }
     }
 }

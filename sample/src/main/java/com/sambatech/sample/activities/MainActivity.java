@@ -13,10 +13,21 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.sambatech.player.SambaApi;
+import com.sambatech.player.SambaPlayer;
+import com.sambatech.player.SambaPlayerView;
+import com.sambatech.player.event.SambaApiCallback;
+import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasAdapter;
 import com.sambatech.sample.model.LiquidMedia;
 import com.sambatech.sample.rest.LiquidApi;
+import com.sambatech.sample.utils.ItemClickEvent;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +38,6 @@ import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
 import butterknife.OnItemClick;
-import de.greenrobot.event.EventBus;
 import retrofit.Call;
 import retrofit.Callback;
 import retrofit.Retrofit;
@@ -40,7 +50,8 @@ public class MainActivity extends Activity {
 		put(4460, "36098808ae444ca5de4acf231949e312");
 	}};
 
-
+	@Bind(R.id.samba_player2)
+	SambaPlayerView player;
 	@Bind(R.id.media_list) ListView list;
 	@Bind(R.id.progressbar_view) LinearLayout loading;
 
@@ -58,9 +69,12 @@ public class MainActivity extends Activity {
 	ArrayList<LiquidMedia> mediaList;
 	//Array to store medias with ad tags
 	ArrayList<LiquidMedia> adMediaList;
+	//Controls loading
+	private Boolean loadingFlag;
 
 	@OnItemClick(R.id.media_list) public void mediaItemClick(int position) {
-		if(loading.getVisibility() == View.VISIBLE) return;
+
+		/**if(loading.getVisibility() == View.VISIBLE) return;
 
 		LiquidMedia media = (LiquidMedia) mAdapter.getItem(position);
 		media.highlighted = position == 0;
@@ -68,6 +82,8 @@ public class MainActivity extends Activity {
 		Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
 		EventBus.getDefault().postSticky(media);
 		startActivity(intent);
+
+		player.pause();**/
 	}
 
 	@Override
@@ -77,6 +93,9 @@ public class MainActivity extends Activity {
 
 		ButterKnife.bind(this);
 		callCommonList();
+
+		//EventBus
+		EventBus.getDefault().register(this);
 	}
 
 	@Override
@@ -153,22 +172,24 @@ public class MainActivity extends Activity {
 	 */
 	private void makeMediasCall(final String token, final int pid) {
 		Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid, true, "VIDEO,AUDIO");
-
+		loadingFlag = true;
 		call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
 			@Override
 			public void onResponse(retrofit.Response<ArrayList<LiquidMedia>> response, Retrofit retrofit) {
-				if(response.code() == 200) {
+				if (response.code() == 200) {
 					ArrayList<LiquidMedia> medias = response.body();
 					medias = insertExternalData(medias, pid);
 					mediaList.addAll(medias);
 					showMediasList(mediaList);
-				}else {
+					loadingFlag = false;
+				} else {
 				}
 				loading.setVisibility(View.GONE);
 			}
 
 			@Override
 			public void onFailure(Throwable t) {
+				loadingFlag = false;
 				makeMediasCall(token, pid);
 			}
 		});
@@ -239,6 +260,16 @@ public class MainActivity extends Activity {
 		list.setAdapter(mAdapter);
 
 		mAdapter.notifyDataSetChanged();
+
+		//Load one media
+		if(!loadingFlag) {
+			for(LiquidMedia media : medias) {
+				if(media.highlighted) {
+					requestMedia(media);
+					break;
+				}
+			}
+		}
 
 	}
 
@@ -342,4 +373,78 @@ public class MainActivity extends Activity {
 
 			return medias;
 	}
+
+	/**
+	 * Request the single media
+	 * @param media - Liquid media object
+	 */
+	private void requestMedia(LiquidMedia media) {
+
+		//Instantiates the SambaApi class
+		SambaApi api = new SambaApi(this, "token");
+
+		//Instantiate a unique request. Params: playerHash, mediaId, streamName, streamUrl ( alternateLive on our browser version )
+		SambaMediaRequest sbRequest = new SambaMediaRequest(media.ph, media.id, null, media.streamUrl);
+
+		//Make the media request
+		api.requestMedia(sbRequest, new SambaApiCallback() {
+
+			//Success response of one media only. Returns a SambaMedia object
+			@Override
+			public void onMediaResponse(SambaMedia media) {
+				/**if(activityMedia.adTag != null) {
+				 media.adUrl = activityMedia.adTag.url;
+				 media.title = activityMedia.adTag.name;
+				 }**/
+
+				loadSingleMedia(media);
+			}
+
+			//Response error
+			@Override
+			public void onMediaResponseError(String msg, SambaMediaRequest request) {
+			}
+		});
+	}
+
+	/**
+	 * Load the single media
+	 * @param media - SambaMedia media object
+	 */
+	private void loadSingleMedia(SambaMedia media) {
+		/** If audio, we recommend you to customize the player's height**/
+		if (media.isAudioOnly) {
+			player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
+			player.setLayoutParams(player.getLayoutParams());
+		}else {
+			player.getLayoutParams().height = (int)(180f * getResources().getDisplayMetrics().density);
+			player.setLayoutParams(player.getLayoutParams());
+		}
+
+		player.setMedia(media);
+
+		//Play the media programmatically on its load ( similar to autoPlay=true param )
+		player.play();
+
+	}
+
+	//teste event bus
+	@Subscribe
+	public void onItemClickEvent(ItemClickEvent event) {
+		if(loading.getVisibility() == View.VISIBLE) return;
+
+		LiquidMedia media = event.media;
+
+		if(event.type.equals("newActivity")) {
+			Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
+			EventBus.getDefault().postSticky(media);
+			startActivity(intent);
+			player.pause();
+		}else {
+			player.destroy();
+			requestMedia(media);
+		}
+
+	}
+
 }

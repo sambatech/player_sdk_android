@@ -4,7 +4,7 @@
 
     <string name="sambaapi_endpoint">http://api.sambavideos.sambatech.com/v1/</string>
     <string name="mysjon_endpoint">https://api.myjson.com/bins/</string>
-    <string name="access_token">4b904f1f&#8211;b919&#8211;4a5d&#8211;bc08&#8211;0bb803213b08</string>
+    <string name="access_token">ec8f5393-8e54-4ef2-842e-3f6cf0ea6287</string>
     <string name="ad_program">Ad Tags</string>
     <string name="common">VOD</string>
     <string name="live">Live</string>

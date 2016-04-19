@@ -13,6 +13,7 @@ public class SambaMediaConfig extends SambaMedia {
 
 	public String id;
 	public String projectHash;
+	public String qualifier;
 	public int projectId;
 	public int categoryId;
 	public String sessionId = Helpers.getSessionId();

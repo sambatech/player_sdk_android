@@ -316,7 +316,7 @@ public class SambaPlayerController implements SambaPlayer {
 
 		// Output Menu
 		// TODO it might not be here
-		if (media.outputs != null && media.outputs.size() > 1) {
+		if (media.outputs != null && media.outputs.size() > 1 && !media.isAudioOnly) {
 			outputMenu = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.output_menu_layout, null);
 
 			TextView cancelButton = (TextView)outputMenu.findViewById(R.id.output_menu_cancel_button);
