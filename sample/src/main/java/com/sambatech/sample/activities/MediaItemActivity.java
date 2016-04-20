@@ -2,14 +2,12 @@ package com.sambatech.sample.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sambatech.player.SambaApi;
-import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.SambaPlayerView;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
@@ -20,10 +18,9 @@ import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
 
-import org.greenrobot.eventbus.EventBus;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import de.greenrobot.event.EventBus;
 
 public class MediaItemActivity extends Activity {
 
@@ -203,4 +200,18 @@ public class MediaItemActivity extends Activity {
         player.play();
 
     }
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		player.destroy();
+		finish();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		player.destroy();
+		finish();
+	}
 }

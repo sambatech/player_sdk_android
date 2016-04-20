@@ -294,7 +294,7 @@ public class SambaPlayerController implements SambaPlayer {
 				if (Settings.System.getInt(view.getContext().getContentResolver(),
 						Settings.System.ACCELEROMETER_ROTATION, 0) == 0 || !autoFsMode || player == null)
 					return;
-
+				
 				if(orientation <= 15 && orientation >= 0) {
 					if(player.isFullscreen()) {
 						player.setFullscreen(false);
@@ -310,7 +310,7 @@ public class SambaPlayerController implements SambaPlayer {
 		};
 
 		if (notify) {
-			PluginsManager.getInstance().onLoad(this);
+			PluginsManager.getInstance().onLoad((SambaPlayer) view);
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, view));
 		}
 

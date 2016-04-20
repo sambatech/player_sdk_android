@@ -26,15 +26,15 @@ dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // DEV
-    //compile project(':sambaplayersdk')
+    compile project(':sambaplayersdk')
 
     // PROD
-    compile 'com.sambatech.player:sdk-android:0.2.1-beta'
+    //compile 'com.sambatech.player:sdk-android:0.2.0-beta'
 
 
     compile 'org.bitbucket.b_c:jose4j:0.4.4'
     compile 'com.mcxiaoke.volley:library:1.0.19'
-    compile 'org.greenrobot:eventbus:3.0.0'
+    compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
     compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
     compile 'com.jakewharton:butterknife:7.0.1'

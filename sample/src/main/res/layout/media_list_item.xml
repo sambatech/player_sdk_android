@@ -12,12 +12,12 @@
 
     <LinearLayout android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:padding="@dimen/activity_vertical_margin">
 
         <TextView
             android:id="@+id/titlePreview"
-            android:layout_width="210sp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
             android:text="Testando o título"
@@ -29,13 +29,13 @@
             android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone"
             android:textSize="15sp"
             android:text="testando subtitulo"
             android:textColor="@android:color/tertiary_text_light"
             android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
 
         <ImageView android:id="@+id/arrow"
+                   android:visibility="gone"
                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"
                    android:layout_gravity="right"

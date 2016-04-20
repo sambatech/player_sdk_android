@@ -1,34 +1,24 @@
 package com.sambatech.sample.adapters;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.sambatech.sample.R;
-import com.sambatech.sample.activities.MediaItemActivity;
 import com.sambatech.sample.model.LiquidMedia;
-import com.sambatech.sample.utils.ItemClickEvent;
 import com.sambatech.sample.utils.VolleySingleton;
 
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnItemClick;
 
 /**
  * Created by tmiranda on 11/01/16.
@@ -117,7 +107,7 @@ public class MediasAdapter extends BaseAdapter {
 
 		    view.setTag(holder);
 
-		    holder.arrow.setOnClickListener(new View.OnClickListener() {
+		    /**holder.arrow.setOnClickListener(new View.OnClickListener() {
 			    @Override
 			    public void onClick(View v) {
 				    LiquidMedia media = (LiquidMedia) getItem(position);
@@ -139,7 +129,7 @@ public class MediasAdapter extends BaseAdapter {
 				    LiquidMedia media = (LiquidMedia) getItem(position);
 				    EventBus.getDefault().post(new ItemClickEvent("sameActivity", media));
 			    }
-		    });
+		    });**/
 
 	    }
 
@@ -174,9 +164,6 @@ public class MediasAdapter extends BaseAdapter {
 
 	    @Bind(R.id.description)
 	    TextView description;
-
-	    @Bind(R.id.arrow)
-	    ImageView arrow;
 
         MediaItem(View view) {
             ButterKnife.bind(this, view);

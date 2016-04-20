@@ -6,13 +6,6 @@
     android:layout_height="match_parent"
     tools:context="com.sambatech.sample.activities.MainActivity">
 
-    <com.sambatech.player.SambaPlayerView
-        android:id="@+id/samba_player2"
-        android:layout_width="match_parent"
-        android:layout_height="180dp"
-        android:layout_below="@+id/samba_player"
-        android:visibility="visible"/>
-
     <ListView
         android:id="@+id/media_list"
         android:layout_width="match_parent"
