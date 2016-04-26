@@ -1,7 +1,5 @@
 package com.sambatech.player;
 
-import android.view.View;
-
 import com.sambatech.player.model.SambaMedia;
 
 /**
@@ -28,17 +26,17 @@ public interface SambaPlayer {
 	SambaMedia getMedia();
 
 	/**
-	 * Does the play action
+	 * Resumes media playback
 	 */
 	void play();
 
 	/**
-	 * Does the pause action
+	 * Pauses media playback
 	 */
 	void pause();
 
 	/**
-	 * Does the play action returning the video to it's beginning
+	 * Stops media playback returning the video to it's beginning
 	 */
 	void stop();
 
@@ -49,7 +47,7 @@ public interface SambaPlayer {
 	void seek(float position);
 
 	/**
-	 * Set the fullscreen on or off
+	 * Sets fullscreen mode on and off
 	 * @param flag true to enter in the fullscreen mode on and false to exit
 	 */
 	void setFullscreen(boolean flag);
@@ -61,12 +59,12 @@ public interface SambaPlayer {
 	boolean isFullscreen();
 
 	/**
-	 * Show the controllers
+	 * Shows player controls
  	 */
 	void show();
 
 	/**
-	 * Hide the controllers
+	 * Hides player controls
 	 */
 	void hide();
 
@@ -77,13 +75,13 @@ public interface SambaPlayer {
 	void setAutoFullscreenMode(boolean flag);
 
 	/**
-	 * Get the current time on the video.
+	 * Gets the current time on the video.
 	 * @return Float current time
 	 */
 	float getCurrentTime();
 
 	/**
-	 * Get the total duration of the video
+	 * Gets the total duration of the video
 	 * @return Float total duration
 	 */
 	float getDuration();
@@ -110,13 +108,7 @@ public interface SambaPlayer {
 	void changeOutput(SambaMedia.Output output);
 
 	/**
-	 * Destroy the player and it's events
+	 * Destroys the player and it's events
 	 */
 	void destroy();
-
-	/**
-	 * Returns the view layer associated with the player.
-	 * @return Android View layer
-	 */
-	View getView();
 }

@@ -13,12 +13,19 @@ public class SambaMediaConfig extends SambaMedia {
 
 	public String id;
 	public String projectHash;
+	public String qualifier;
 	public int projectId;
 	public int categoryId;
 	public String sessionId = Helpers.getSessionId();
 	public int themeColor = 0xFF72BE44;
 	public String sttmUrl;
 	public String sttmKey;
+
+	public SambaMediaConfig() {}
+
+	public SambaMediaConfig(SambaMedia media) {
+		super(media);
+	}
 
 	@Override
 	public String toString() {

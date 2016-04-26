@@ -64,12 +64,19 @@
 
     <ImageButton
         android:contentDescription="@string/pause"
-        android:id="@+id/pause"
+        android:id="@+id/pauseLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:background="@android:color/transparent"
         android:src="@drawable/ic_action_pause_large" />
+
+    <ProgressBar
+        android:id="@+id/loadingLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
 
     <LinearLayout
         android:id="@+id/bottom_chrome"
@@ -89,9 +96,24 @@
             android:layout_gravity="bottom"
             style="@style/control">
 
+            <!-- TODO: trocar por vetor -->
+            <ImageButton
+                android:contentDescription="@string/pause"
+                android:id="@+id/pause"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_action_pause"
+                android:visibility="gone"
+                style="@style/control"/>
+
+            <ProgressBar
+                android:id="@+id/loading"
+                android:visibility="gone"
+                style="@style/control"/>
+
             <LinearLayout android:id="@+id/time_container"
                           android:layout_width="wrap_content"
-                          android:layout_height="wrap_content">
+                          android:layout_height="wrap_content"
+                    style="@style/control">
 
                 <TextView
                     android:contentDescription="@string/time_current"

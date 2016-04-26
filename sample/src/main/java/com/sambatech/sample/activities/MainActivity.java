@@ -3,7 +3,6 @@ package com.sambatech.sample.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
-
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasAdapter;
 import com.sambatech.sample.model.LiquidMedia;
@@ -40,13 +38,13 @@ public class MainActivity extends Activity {
 		put(4460, "36098808ae444ca5de4acf231949e312");
 	}};
 
-
 	@Bind(R.id.media_list) ListView list;
 	@Bind(R.id.progressbar_view) LinearLayout loading;
 
 	//Samba api and Json Tag endpoints
 	@BindString(R.string.sambaapi_endpoint) String api_endpoint;
 	@BindString(R.string.mysjon_endpoint) String tag_endpoint;
+	@BindString(R.string.access_token) String access_token;
 
 	MediasAdapter mAdapter;
 	Menu menu;
@@ -57,11 +55,15 @@ public class MainActivity extends Activity {
 	ArrayList<LiquidMedia> mediaList;
 	//Array to store medias with ad tags
 	ArrayList<LiquidMedia> adMediaList;
+	//Controls loading
+	private Boolean loadingFlag;
 
 	@OnItemClick(R.id.media_list) public void mediaItemClick(int position) {
+
 		if(loading.getVisibility() == View.VISIBLE) return;
 
 		LiquidMedia media = (LiquidMedia) mAdapter.getItem(position);
+		media.highlighted = position == 0;
 
 		Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
 		EventBus.getDefault().postSticky(media);
@@ -150,23 +152,25 @@ public class MainActivity extends Activity {
 	 * @param pid - Project ID
 	 */
 	private void makeMediasCall(final String token, final int pid) {
-		Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid, true, "VIDEO");
-
+		Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid, true, "VIDEO,AUDIO");
+		loadingFlag = true;
 		call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
 			@Override
 			public void onResponse(retrofit.Response<ArrayList<LiquidMedia>> response, Retrofit retrofit) {
-				if(response.code() == 200) {
+				if (response.code() == 200) {
 					ArrayList<LiquidMedia> medias = response.body();
 					medias = insertExternalData(medias, pid);
 					mediaList.addAll(medias);
 					showMediasList(mediaList);
-				}else {
+					loadingFlag = false;
+				} else {
 				}
 				loading.setVisibility(View.GONE);
 			}
 
 			@Override
 			public void onFailure(Throwable t) {
+				loadingFlag = false;
 				makeMediasCall(token, pid);
 			}
 		});
@@ -221,10 +225,10 @@ public class MainActivity extends Activity {
 		list.setAdapter(null);
 
 		//Making the call to project 4421
-		makeMediasCall("079cc2f1-4733-4c92-a7b5-7e1640698caa", 4421);
+		makeMediasCall(access_token, 4421);
 
 		//Making the call to project 4460
-		makeMediasCall("079cc2f1-4733-4c92-a7b5-7e1640698caa", 4460);
+		makeMediasCall(access_token, 4460);
 	}
 
 	/**
@@ -340,4 +344,5 @@ public class MainActivity extends Activity {
 
 			return medias;
 	}
+
 }

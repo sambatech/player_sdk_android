@@ -8,7 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sambatech.player.SambaApi;
-import com.sambatech.player.SambaPlayer;
+import com.sambatech.player.SambaPlayerView;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -36,7 +36,7 @@ public class MediaItemActivity extends Activity {
     TextView status;
 
     @Bind(R.id.samba_player)
-    SambaPlayer player;
+    SambaPlayerView player;
 
 	@Bind(R.id.progressbar_view)
 	LinearLayout loading;
@@ -140,6 +140,7 @@ public class MediaItemActivity extends Activity {
 
         if (player != null && player.hasStarted())
             player.pause();
+
     }
 
 	/**
@@ -186,10 +187,31 @@ public class MediaItemActivity extends Activity {
 	    titleView.setVisibility(View.VISIBLE);
         titleView.setText(media.title);
 
+
+	    /** If audio, we recommend you to customize the player's height**/
+	    if (media.isAudioOnly) {
+		    player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
+			player.setLayoutParams(player.getLayoutParams());
+	    }
+
         player.setMedia(media);
 
 	    //Play the media programmatically on its load ( similar to autoPlay=true param )
         player.play();
 
     }
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		player.destroy();
+		finish();
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		player.destroy();
+		finish();
+	}
 }

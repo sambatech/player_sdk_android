@@ -4,6 +4,7 @@
 
     <string name="sambaapi_endpoint">http://api.sambavideos.sambatech.com/v1/</string>
     <string name="mysjon_endpoint">https://api.myjson.com/bins/</string>
+    <string name="access_token">ec8f5393-8e54-4ef2-842e-3f6cf0ea6287</string>
     <string name="ad_program">Ad Tags</string>
     <string name="common">VOD</string>
     <string name="live">Live</string>
@@ -15,6 +16,6 @@
     <string name="about_text">Sample App criada pelo time do Player da Sambatech - Leandro Zanol,
         Priscila Magalhães e Thiago Miranda
     </string>
-    <string name="loading">Carregando listagem...</string>
+    <string name="loading">Carregando listagem&#8230;</string>
     <string name="title_activity_menu">MenuActivity</string>
 </resources>
