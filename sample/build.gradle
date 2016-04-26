@@ -26,7 +26,7 @@ dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // DEV
-    //compile project(':sambaplayersdk')
+    //compile project(':sambaplayersdk')ß
 
     // PROD
     compile 'com.sambatech.player:sdk-android:0.2.1-beta'
