@@ -27,13 +27,11 @@ Instalação do Java, Android SDK
 1) Adicionar o repositório Maven e a dependência (build.gradle):
 ```java
 repositories {
-    maven {
-        url 'https://dl.bintray.com/sambatech/maven'
-    }
+    jcenter()
 }
 ...
 dependencies {
-    compile 'com.sambatech.player:sdk-android:0.2.0-beta'
+    compile 'com.sambatech.player:sdk-android:0.2.1-beta'
 }
 ```
 
