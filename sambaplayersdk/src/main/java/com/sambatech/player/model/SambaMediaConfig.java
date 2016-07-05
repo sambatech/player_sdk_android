@@ -25,6 +25,17 @@ public class SambaMediaConfig extends SambaMedia {
 
 	public SambaMediaConfig(SambaMedia media) {
 		super(media);
+		if(media instanceof SambaMediaConfig) {
+			SambaMediaConfig m = (SambaMediaConfig)media;
+			id = m.id;
+			projectHash = m.projectHash;
+			qualifier = m.qualifier;
+			projectId = m.projectId;
+			categoryId = m.categoryId;
+			themeColor = m.themeColor;
+			sttmKey = m.sttmKey;
+			sttmUrl = m.sttmUrl;
+		}
 	}
 
 	@Override

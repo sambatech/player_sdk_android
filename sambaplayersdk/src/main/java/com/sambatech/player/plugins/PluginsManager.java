@@ -1,5 +1,7 @@
 package com.sambatech.player.plugins;
 
+import android.util.Log;
+
 import com.sambatech.player.SambaPlayer;
 
 /**

@@ -11,7 +11,9 @@ import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMediaConfig;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +36,7 @@ public class Tracking implements Plugin {
 	private SambaPlayerListener playerListener = new SambaPlayerListener() {
 		@Override
 		public void onStart(SambaEvent event) {
+			Log.e("sttm", "onstart");
 			init();
 
 			if (sttm != null)
@@ -83,8 +86,14 @@ public class Tracking implements Plugin {
 			try {
 				Log.i(getClass().getSimpleName(), params[0]);
 
-				for (String url : params)
-					new URL(url).openConnection().connect();
+				for (String url : params) {
+					URL myURL = new URL(url);
+					URLConnection conn = myURL.openConnection();
+					conn.setRequestProperty("http.agent", "chrome");
+					conn.setDoOutput(false);
+					conn.setDoInput(true);
+					InputStream is = conn.getInputStream();
+				}
 			}
 			catch (IOException e) {
 				Log.e(getClass().getSimpleName(), "Failed to fetch URL", e);
@@ -114,6 +123,7 @@ public class Tracking implements Plugin {
 			new UrlTracker().execute(String.format("%s?sttmm=%s&sttmk=%s&sttms=%s&sttmu=123&sttmw=%s",
 					media.sttmUrl, TextUtils.join(",", targets), media.sttmKey, media.sessionId,
 					String.format("pid:%s/cat:%s/mid:%s", media.projectId, media.categoryId, media.id)));
+
 
 			targets.clear();
 		}
