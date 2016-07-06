@@ -315,9 +315,7 @@ public class SambaApi {
 
 				if (apiConfig.has("sttm")) {
 					JSONObject sttm = apiConfig.getJSONObject("sttm");
-					//media.sttmUrl = sttm.optString("url", "http://sttm.sambatech.com.br/collector/__sttm.gif");
-					media.sttmUrl = "http://192.168.0.92:8080/sttm/collector/__sttm.gif";
-
+					media.sttmUrl = sttm.optString("url", "http://sttm.sambatech.com.br/collector/__sttm.gif");
 					media.sttmKey = sttm.optString("key", "ae810ebc7f0654c4fadc50935adcf5ec");
 				}
 
