@@ -31,7 +31,8 @@ repositories {
 }
 ...
 dependencies {
-    compile 'com.sambatech.player:sdk-android:0.2.1-beta'
+    compile 'com.sambatech.player:sdk-android:0.2.2-beta'
+    //compile 'com.sambatech.player:sdk-android:0.+' //se você quiser usar a versão mais atual do beta
 }
 ```
 
