@@ -1,0 +1,3 @@
+[submodule "docs/player_androidsdk.wiki"]
+	path = docs/player_androidsdk.wiki
+	url = https://github.com/sambatech/player_androidsdk.wiki.git
