@@ -143,7 +143,11 @@ public class Tracking implements Plugin {
 			if (p > 99)
 				p = 99;
 
-			progresses.add(trackedRetentions.contains(p) ? String.format(Locale.getDefault(), "p%02d", p) : String.format(Locale.getDefault(), "p%02d,r%02d", p, p));
+			progresses.add(String.format(Locale.getDefault(), "p%02d", p));
+
+			if (!trackedRetentions.contains(p))
+				progresses.add(String.format(Locale.getDefault(), "r%02d", p));
+
 			trackedRetentions.add(p);
 
 			if (progresses.size() >= 5)
