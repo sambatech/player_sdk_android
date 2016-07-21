@@ -216,6 +216,7 @@ public class SambaApi {
 				JSONObject playerConfig = json.getJSONObject("playerConfig");
 				JSONObject apiConfig = json.getJSONObject("apiConfig");
 				JSONObject projectConfig = json.getJSONObject("project");
+				JSONArray ads = json.optJSONArray("advertisings");
 
 				media.projectHash = projectConfig.getString("playerHash");
 				media.projectId = projectConfig.getInt("id");
@@ -288,6 +289,7 @@ public class SambaApi {
 
 						filledRules.add(media.type);
 					}
+
 					sortOutputs(media.outputs);
 
 				}
@@ -317,6 +319,13 @@ public class SambaApi {
 					JSONObject sttm = apiConfig.getJSONObject("sttm");
 					media.sttmUrl = sttm.optString("url", "http://sttm.sambatech.com.br/collector/__sttm.gif");
 					media.sttmKey = sttm.optString("key", "ae810ebc7f0654c4fadc50935adcf5ec");
+				}
+
+				if (ads.length() > 0) {
+					JSONObject ad = ads.optJSONObject(0);
+
+					if (ad.getString("adServer").equalsIgnoreCase("dfp"))
+						media.adUrl = ad.getString("tagVast");
 				}
 
 				return media;
