@@ -740,6 +740,13 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	}
 
 	/**
+	 * Hides the bottom chrome ( play, seekbar, output, fullscreen )
+	 */
+	public void hideBottomChrome() {
+		bottomChrome.setVisibility(View.GONE);
+	}
+
+	/**
 	 * Shows the top chrome (which displays the logo, title, and action buttons).
 	 */
 	public void showTopChrome() {

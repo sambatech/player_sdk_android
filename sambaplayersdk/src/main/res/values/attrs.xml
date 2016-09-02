@@ -2,5 +2,6 @@
 <resources>
     <declare-styleable name="SambaPlayerView">
         <attr name="autoFullscreenMode" format="boolean" />
+        <attr name="enableControls" format="boolean" />
     </declare-styleable>
 </resources>

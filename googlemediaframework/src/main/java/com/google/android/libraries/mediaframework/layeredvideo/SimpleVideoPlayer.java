@@ -209,6 +209,14 @@ public class SimpleVideoPlayer {
 	}
 
 	/**
+	 * Set the controls to false via parameter disableControls ( only shows play/pause )
+	 */
+	public void disableControls() {
+		playbackControlLayer.hideTopChrome();
+		playbackControlLayer.hideBottomChrome();
+	}
+
+	/**
 	 * Make the player enter or leave fullscreen mode.
 	 * @param shouldBeFullscreen If true, the player is put into fullscreen mode. If false, the player
 	 *                           leaves fullscreen mode.

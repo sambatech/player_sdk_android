@@ -44,6 +44,7 @@ public class SambaPlayerController implements SambaPlayer {
 	private OrientationEventListener orientationEventListener;
 	private View outputMenu;
 	private boolean autoFsMode;
+	private boolean enableControls;
 
 	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
@@ -170,6 +171,11 @@ public class SambaPlayerController implements SambaPlayer {
 
 	public void setAutoFullscreenMode(boolean flag) {
 		autoFsMode = flag;
+	}
+
+
+	public void setEnableControls(boolean flag) {
+		enableControls = flag;
 	}
 
 	public void show() {
@@ -336,6 +342,10 @@ public class SambaPlayerController implements SambaPlayer {
 			outputMenuList.setOnItemClickListener(menuItemListener);
 			outputAdapter.notifyDataSetChanged();
 			player.setOutputMenu(outputMenu);
+		}
+
+		if(!enableControls && !media.isAudioOnly) {
+			player.disableControls();
 		}
 	}
 

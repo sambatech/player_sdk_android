@@ -109,10 +109,11 @@ public class MediaItemActivity extends Activity {
 		if (getActionBar() != null)
       		getActionBar().setDisplayHomeAsUpEnabled(true);
 
-	    if (activityMedia == null)
-			activityMedia = EventBus.getDefault().removeStickyEvent(LiquidMedia.class);
+	    if (activityMedia == null) {
+		    activityMedia = EventBus.getDefault().removeStickyEvent(LiquidMedia.class);
 
-	    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
+		    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
+	    }
 
 	    initPlayer();
 		requestMedia(activityMedia);

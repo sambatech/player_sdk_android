@@ -113,7 +113,7 @@ public class SambaEventBus {
 				// release locker
 				postponedUnsubscribes = null;
 
-				if (unsubs.size() > 0) {
+				if (unsubs != null && unsubs.size() > 0) {
 					for (Object ltn : unsubs)
 						unsubscribe(ltn);
 

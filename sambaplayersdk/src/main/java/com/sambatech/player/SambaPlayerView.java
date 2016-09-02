@@ -18,6 +18,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	private SambaPlayer controllerInstance = new SambaPlayerController(this);
 	private SambaPlayer controller = SambaPlayerControllerNull.getInstance();
 	private boolean autoFsMode;
+	private boolean enableControls = true;
 
 	public SambaPlayerView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -30,6 +31,9 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		controller = controllerInstance;
 		controller.setMedia(media);
 		controller.setAutoFullscreenMode(autoFsMode);
+
+		//Private attrs
+		((SambaPlayerController)controller).setEnableControls(enableControls);
 	}
 
 	@Override
@@ -120,6 +124,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	private void applyAttributes(TypedArray attrs) {
 		try {
 			autoFsMode = attrs.getBoolean(R.styleable.SambaPlayerView_autoFullscreenMode, false);
+			enableControls = attrs.getBoolean(R.styleable.SambaPlayerView_enableControls, true);
 		}
 		finally {
 			attrs.recycle();

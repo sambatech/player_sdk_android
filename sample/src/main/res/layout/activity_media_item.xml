@@ -12,6 +12,7 @@
         android:id="@+id/samba_player"
         android:layout_width="match_parent"
         android:layout_height="250dp"
+        app:enableControls="false"
         app:autoFullscreenMode="true"/>
 
     <com.sambatech.player.SambaPlayerView
@@ -19,6 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="250dp"
         app:autoFullscreenMode="true"
+
         android:layout_below="@+id/samba_player"
         android:visibility="gone"/>
 

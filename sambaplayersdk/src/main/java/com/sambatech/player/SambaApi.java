@@ -321,7 +321,7 @@ public class SambaApi {
 					media.sttmKey = sttm.optString("key", "ae810ebc7f0654c4fadc50935adcf5ec");
 				}
 
-				if (ads.length() > 0) {
+				if (ads != null && ads.length() > 0) {
 					JSONObject ad = ads.optJSONObject(0);
 
 					if (ad.getString("adServer").equalsIgnoreCase("dfp"))
