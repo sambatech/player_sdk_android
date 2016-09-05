@@ -756,6 +756,15 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	}
 
 	/**
+	 * Shows the bottom chrome
+	 */
+	public void showBottomChrome() {
+		bottomChrome.setVisibility(View.VISIBLE);
+		updateActionButtons();
+		updateColors();
+	}
+
+	/**
 	 * Returns whether the player is currently in fullscreen mode.
 	 */
 	public boolean isFullscreen() {

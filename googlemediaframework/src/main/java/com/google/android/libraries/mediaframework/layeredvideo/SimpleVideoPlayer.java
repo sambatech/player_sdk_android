@@ -217,6 +217,14 @@ public class SimpleVideoPlayer {
 	}
 
 	/**
+	 * Set the controls to true via parameter enableControls
+	 */
+	public void enableControls() {
+		playbackControlLayer.showTopChrome();
+		playbackControlLayer.showBottomChrome();
+	}
+
+	/**
 	 * Make the player enter or leave fullscreen mode.
 	 * @param shouldBeFullscreen If true, the player is put into fullscreen mode. If false, the player
 	 *                           leaves fullscreen mode.

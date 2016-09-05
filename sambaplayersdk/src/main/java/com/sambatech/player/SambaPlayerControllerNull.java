@@ -114,4 +114,9 @@ public class SambaPlayerControllerNull implements SambaPlayer {
 	private void logMessage() {
 		Log.i("SambaPlayer", "No action will be done (call setMedia() to renable player).");
 	}
+
+	@Override
+	public void setEnableControls(boolean flag) {
+		logMessage();
+	}
 }

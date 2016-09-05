@@ -18,6 +18,8 @@ import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
 
+import java.util.Random;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import de.greenrobot.event.EventBus;
@@ -117,7 +119,6 @@ public class MediaItemActivity extends Activity {
 
 	    initPlayer();
 		requestMedia(activityMedia);
-
 	}
 
 	/**
@@ -196,6 +197,15 @@ public class MediaItemActivity extends Activity {
 	    }
 
         player.setMedia(media);
+
+	    //Disable controls randomically
+	    Random random = new Random();
+	    Boolean flag = random.nextBoolean();
+
+	    //Set enable controls
+	    player.setEnableControls(flag);
+	    if(!flag)
+		    descView.setText("Mídia com controls desabilitados");
 
 	    //Play the media programmatically on its load ( similar to autoPlay=true param )
         player.play();

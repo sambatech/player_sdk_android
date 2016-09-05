@@ -47,6 +47,12 @@ public interface SambaPlayer {
 	void seek(float position);
 
 	/**
+	 * Sets enableControls
+	 * @param flag true to show or hide the controls
+	 */
+	void setEnableControls(boolean flag);
+
+	/**
 	 * Sets fullscreen mode on and off
 	 * @param flag true to enter in the fullscreen mode on and false to exit
 	 */

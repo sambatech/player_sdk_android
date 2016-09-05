@@ -175,7 +175,16 @@ public class SambaPlayerController implements SambaPlayer {
 
 
 	public void setEnableControls(boolean flag) {
-		enableControls = flag;
+		if(media.isAudioOnly) return;
+
+		if(player != null ) {
+			if(flag)
+				player.enableControls();
+			else
+				player.disableControls();
+		}
+
+		else enableControls = flag;
 	}
 
 	public void show() {

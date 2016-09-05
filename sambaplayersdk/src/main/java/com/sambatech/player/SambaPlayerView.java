@@ -37,6 +37,12 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 	}
 
 	@Override
+	public void setEnableControls(boolean flag) {
+		//Private attrs
+		((SambaPlayerController)controller).setEnableControls(flag);
+	}
+
+	@Override
 	public SambaMedia getMedia() {
 		return controller.getMedia();
 	}
