@@ -3,7 +3,6 @@ package com.sambatech.player;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.view.View;
 import android.widget.FrameLayout;
 
 import com.sambatech.player.model.SambaMedia;
@@ -31,15 +30,13 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer {
 		controller = controllerInstance;
 		controller.setMedia(media);
 		controller.setAutoFullscreenMode(autoFsMode);
-
-		//Private attrs
-		((SambaPlayerController)controller).setEnableControls(enableControls);
+		controller.setEnableControls(enableControls);
 	}
 
 	@Override
 	public void setEnableControls(boolean flag) {
 		//Private attrs
-		((SambaPlayerController)controller).setEnableControls(flag);
+		controller.setEnableControls(flag);
 	}
 
 	@Override

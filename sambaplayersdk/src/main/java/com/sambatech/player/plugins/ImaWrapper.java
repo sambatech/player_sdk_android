@@ -391,7 +391,7 @@ public class ImaWrapper implements Plugin {
 	}
 
 	public void onDestroy() {
-		Log.e("ima:", String.valueOf(adsLoader == null));
+		Log.i("ima:", String.valueOf(adsLoader == null));
 		if (adsLoader == null)
 			return;
 

@@ -36,7 +36,7 @@ public class Tracking implements Plugin {
 	private SambaPlayerListener playerListener = new SambaPlayerListener() {
 		@Override
 		public void onStart(SambaEvent event) {
-			Log.e("sttm", "onstart");
+			Log.i("sttm", "onstart");
 			init();
 
 			if (sttm != null)

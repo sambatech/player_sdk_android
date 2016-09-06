@@ -214,6 +214,7 @@ public class SimpleVideoPlayer {
 	public void disableControls() {
 		playbackControlLayer.hideTopChrome();
 		playbackControlLayer.hideBottomChrome();
+		playbackControlLayer.hideMainControls();
 	}
 
 	/**
