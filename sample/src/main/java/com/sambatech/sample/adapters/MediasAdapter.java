@@ -80,12 +80,12 @@ public class MediasAdapter extends BaseAdapter {
 
 	        LiquidMedia media = (LiquidMedia) getItem(position);
 	        ImageLoader mImageLoader = VolleySingleton.getInstance().getImageLoader();
-	        if (media.qualifier.equals("AUDIO")) {
+	        if (media.qualifier != null && media.qualifier.equals("AUDIO")) {
 		        //Log.e("player:", media.title);
 		        //Drawable drawable = view.getResources().getDrawable(R.drawable.ic_audio);
 		        //holder.thumb.setImageDrawable(drawable);
 		        holder.thumb.setImageUrl("https://cdn4.iconfinder.com/data/icons/defaulticon/icons/png/256x256/media-volume-2.png", mImageLoader);
-	        } else {
+	        } else if(media.qualifier !=null && media.qualifier.equals("VIDEO")){
 		        holder.thumb.setImageUrl(getIdealThumb(media.thumbs), mImageLoader);
 	        }
 
