@@ -150,6 +150,15 @@ public class MediaItemActivity extends Activity {
 	 * @param media - Liquid media object
 	 */
     private void requestMedia(LiquidMedia media) {
+	    // if injected media
+	    if (media.url != null && !media.url.isEmpty()) {
+		    SambaMedia m = new SambaMedia();
+		    m.url = media.url;
+		    m.title = media.title;
+		    m.type = media.type;
+		    loadMedia(m);
+		    return;
+	    }
 
 	    //Instantiates the SambaApi class
         SambaApi api = new SambaApi(this, "token");

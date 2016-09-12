@@ -220,6 +220,12 @@ public class MainActivity extends Activity {
 			mediaList = new ArrayList<>();
 		}
 
+		LiquidMedia m = new LiquidMedia();
+		m.url = "http://wowza-hel-loadbala-tjihmv7zwnlz-966664345.us-east-1.elb.amazonaws.com/vod/_definst_/amlst:stg;cid,pid,mid;/monitoring/;video_240p.mp4,200704,320,240;/manifest_mpm4sav_mvtime.mpd";
+		m.title = "Dash sample";
+		m.type = "dash";
+		mediaList.add(m);
+
 		loading.setVisibility(View.VISIBLE);
 
 		list.setAdapter(null);

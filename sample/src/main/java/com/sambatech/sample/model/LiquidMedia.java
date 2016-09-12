@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public class LiquidMedia implements Cloneable {
     public String id;
-    public String title;
+    public String title = "";
     public String description = "";
     public String shortDescription = "";
     public Long publishDate;
@@ -16,6 +16,8 @@ public class LiquidMedia implements Cloneable {
     public ArrayList<Thumb> thumbs;
     public String streamUrl;
 	public String qualifier;
+    public String url;
+    public String type = "";
 
     //Non liquid api
     public String ph;
