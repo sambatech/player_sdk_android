@@ -124,6 +124,13 @@ public class SambaPlayerController implements SambaPlayer {
 		}
 	};
 
+	private final Runnable progressDispatcher = new Runnable() {
+		@Override
+		public void run() {
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PROGRESS, getCurrentTime(), getDuration()));
+		}
+	};
+
 	public SambaPlayerController(FrameLayout view) {
 		this.view = view;
 		PluginsManager.getInstance().initialize();
@@ -389,7 +396,7 @@ public class SambaPlayerController implements SambaPlayer {
 		progressTimer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
-				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PROGRESS, getCurrentTime(), getDuration()));
+				((Activity)view.getContext()).runOnUiThread(progressDispatcher);
 			}
 		}, 0, 250);
 	}

@@ -220,10 +220,24 @@ public class MainActivity extends Activity {
 			mediaList = new ArrayList<>();
 		}
 
+		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+		thumb.url = "http://67.media.tumblr.com/avatar_b5715f76628b_128.png";
+		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
+
 		LiquidMedia m = new LiquidMedia();
 		m.url = "http://wowza-hel-loadbala-tjihmv7zwnlz-966664345.us-east-1.elb.amazonaws.com/vod/_definst_/amlst:stg;cid,pid,mid;/monitoring/;video_240p.mp4,200704,320,240;/manifest_mpm4sav_mvtime.mpd";
-		m.title = "Dash sample";
+		m.title = "Dash sample 1";
+		m.qualifier = "VIDEO";
 		m.type = "dash";
+		m.thumbs = thumbs;
+		mediaList.add(m);
+
+		m = new LiquidMedia();
+		m.url = "http://wowza-hel-loadbala-tjihmv7zwnlz-966664345.us-east-1.elb.amazonaws.com/vod/_definst_/amlst:stg;219,4421,d3ff15216acdbd9633689ca83998a8d3;/account/219/183/2016-01-08/video/;b7336c505c989d8f31ce51fefd27950b/Keep_On_Pushin__from_Ricki_Bedenbaugh_plus_240p.mp4,295936,426,240,5966d00bd7ef5044abafab8ac7221a7a/Keep_On_Pushin__from_Ricki_Bedenbaugh_plus_360p.mp4,948224,640,360,c6f7ec9b3d65325efb6a51108b0295fe/Keep_On_Pushin__from_Ricki_Bedenbaugh_plus_480p.mp4,1418240,854,480,e8a8e4581ceff50d50d01ec16e4dc4be/Keep_On_Pushin__from_Ricki_Bedenbaugh_plus_720p.mp4,2273280,1280,720,a7f09317a4681381486d2f7895281d34/Keep_On_Pushin__from_Ricki_Bedenbaugh_plus_1080p.mp4,3813376,1920,1080,;70000,120000/manifest.mpd";
+		m.title = "Dash sample 2";
+		m.qualifier = "VIDEO";
+		m.type = "dash";
+		m.thumbs = thumbs;
 		mediaList.add(m);
 
 		loading.setVisibility(View.VISIBLE);

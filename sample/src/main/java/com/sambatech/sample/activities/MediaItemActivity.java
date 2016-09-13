@@ -99,6 +99,11 @@ public class MediaItemActivity extends Activity {
 		public void onError(SambaEvent e) {
 			status.setText(String.format("Status: %s", e.getType() + " " + e.getData()));
 		}
+
+		@Override
+		public void onProgress(SambaEvent event) {
+			status.setText(String.format("Status: %s", event.getType()));
+		}
 	};
 
     @Override
