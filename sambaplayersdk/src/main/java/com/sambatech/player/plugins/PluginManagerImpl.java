@@ -1,7 +1,5 @@
 package com.sambatech.player.plugins;
 
-import android.util.Log;
-
 import com.sambatech.player.SambaPlayer;
 
 /**
@@ -9,19 +7,17 @@ import com.sambatech.player.SambaPlayer;
  *
  * @author Leandro Zanol - 12/01/2016
  */
-public class PluginsManager implements Plugin {
+public class PluginManagerImpl implements Plugin, PluginManager {
 
-	private static final PluginsManager instance = new PluginsManager();
+	private static final PluginManagerImpl instance = new PluginManagerImpl();
 
 	private Plugin[] plugins;
+	private PluginManager player;
+	private int pluginsLoaded;
 
-	private PluginsManager() {}
-
-	public static PluginsManager getInstance() {
+	public static PluginManagerImpl getInstance() {
 		return instance;
 	}
-
-	public void initialize() {}
 
 	public void onLoad(SambaPlayer player) {
 		if (plugins != null)
@@ -29,8 +25,12 @@ public class PluginsManager implements Plugin {
 
 		plugins = new Plugin[] {
 				new ImaWrapper(),
-				new Tracking()
+				new Tracking(),
+				new Drm()
 		};
+
+		this.player = (PluginManager)player;
+		pluginsLoaded = 0;
 
 		for (Plugin plugin : plugins)
 			plugin.onLoad(player);
@@ -44,5 +44,10 @@ public class PluginsManager implements Plugin {
 			plugin.onDestroy();
 
 		plugins = null;
+	}
+
+	public void notifyPluginLoaded(Plugin plugin) {
+		if (++pluginsLoaded == plugins.length)
+			player.notifyPluginLoaded(this);
 	}
 }

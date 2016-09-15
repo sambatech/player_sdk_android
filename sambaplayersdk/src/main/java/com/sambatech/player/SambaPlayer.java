@@ -1,6 +1,7 @@
 package com.sambatech.player;
 
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.plugins.PluginManager;
 
 /**
  * Represents the player front-end API.

@@ -32,6 +32,7 @@ public class SambaMediaConfig extends SambaMedia {
 			qualifier = m.qualifier;
 			projectId = m.projectId;
 			categoryId = m.categoryId;
+			sessionId = m.sessionId;
 			themeColor = m.themeColor;
 			sttmKey = m.sttmKey;
 			sttmUrl = m.sttmUrl;

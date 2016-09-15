@@ -22,7 +22,6 @@ import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
-import com.sambatech.player.plugins.PluginsManager;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,7 +32,6 @@ import java.util.TimerTask;
  * @author Leandro Zanol - 7/12/15
  */
 public class SambaPlayerController implements SambaPlayer {
-
 
 	private SimpleVideoPlayer player;
 	private SambaMediaConfig media = new SambaMediaConfig();
@@ -123,7 +121,6 @@ public class SambaPlayerController implements SambaPlayer {
 			changeOutput((SambaMedia.Output) parent.getItemAtPosition(position));
 		}
 	};
-
 	private final Runnable progressDispatcher = new Runnable() {
 		@Override
 		public void run() {
@@ -133,7 +130,6 @@ public class SambaPlayerController implements SambaPlayer {
 
 	public SambaPlayerController(FrameLayout view) {
 		this.view = view;
-		PluginsManager.getInstance().initialize();
 	}
 
 	public void setMedia(SambaMedia media) {
@@ -141,6 +137,7 @@ public class SambaPlayerController implements SambaPlayer {
 			throw new IllegalArgumentException("Media data is null");
 
 		this.media = new SambaMediaConfig(media);
+
 		destroy();
 	}
 
@@ -228,7 +225,7 @@ public class SambaPlayerController implements SambaPlayer {
 		}
 		media.url = output.url;
 		destroyInternal();
-		createInternal();
+		create(false);
 		player.seek(currentPosition);
 	}
 
@@ -236,10 +233,6 @@ public class SambaPlayerController implements SambaPlayer {
 
 	private void create() {
 		create(true);
-	}
-
-	private void createInternal() {
-		create(false);
 	}
 
 	private void create(boolean notify) {
@@ -330,7 +323,6 @@ public class SambaPlayerController implements SambaPlayer {
 		};
 
 		if (notify) {
-			PluginsManager.getInstance().onLoad((SambaPlayer) view);
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, view));
 		}
 
@@ -367,7 +359,6 @@ public class SambaPlayerController implements SambaPlayer {
 		if (player == null)
 			return;
 
-		PluginsManager.getInstance().onDestroy();
 		stopProgressTimer();
 		stop();
 

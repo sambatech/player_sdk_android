@@ -388,6 +388,7 @@ public class ImaWrapper implements Plugin {
 		};
 
 		SambaEventBus.subscribe(playerListener);
+		PluginManagerImpl.getInstance().notifyPluginLoaded(this);
 	}
 
 	public void onDestroy() {
