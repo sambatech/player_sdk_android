@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">SambaPlayer SDK</string>
-    <string name="player_endpoint">https://fast.player.liquidplatform.com/pApiv2/v1/</string>
+    <string name="player_endpoint_prod">https://fast.player.liquidplatform.com/pApiv2/v1/</string>
+    <string name="player_endpoint_local">http://192.168.0.127:8080/player-api/v1/</string>
+    <string name="player_endpoint_test">http://playerapitest2.liquidplatform.com:7091/v1/</string>
     <string name="share_facebook">Facebook</string>
     <string name="live">AO VIVO</string>
 </resources>

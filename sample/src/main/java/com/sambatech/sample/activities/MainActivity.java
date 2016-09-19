@@ -11,6 +11,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
+
+import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasAdapter;
 import com.sambatech.sample.model.LiquidMedia;
@@ -191,7 +193,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onResponse(retrofit.Response<ArrayList<LiquidMedia.AdTag>> response, Retrofit retrofit) {
 				if (response.code() == 200) {
-					ArrayList<LiquidMedia.AdTag> tags = (ArrayList<LiquidMedia.AdTag>) response.body();
+					ArrayList<LiquidMedia.AdTag> tags = response.body();
 					try {
 						ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
 						adMediaList = mediasModified;
@@ -240,8 +242,47 @@ public class MainActivity extends Activity {
 		m.thumbs = thumbs;
 		mediaList.add(m);
 
-		loading.setVisibility(View.VISIBLE);
+		m = new LiquidMedia();
+		m.ph = "be4a12397143caf9ec41c9acb98728bf";
+		m.id = "698b61bf17f1529ab8bc483cbb69265e";
+		m.title = "Dash API 1";
+		m.thumbs = thumbs;
+		m.environment = SambaMediaRequest.Environment.TEST;
+		mediaList.add(m);
 
+		m = new LiquidMedia();
+		m.ph = "be4a12397143caf9ec41c9acb98728bf";
+		m.id = "59b37af90f043e44e95723a93d067d1d";
+		m.title = "Dash API 2";
+		m.thumbs = thumbs;
+		m.environment = SambaMediaRequest.Environment.TEST;
+		mediaList.add(m);
+
+		m = new LiquidMedia();
+		m.ph = "be4a12397143caf9ec41c9acb98728bf";
+		m.id = "7e9371fa2f65c49d9bf9996ddf12a1ac";
+		m.title = "Dash API 3";
+		m.thumbs = thumbs;
+		m.environment = SambaMediaRequest.Environment.TEST;
+		mediaList.add(m);
+
+		m = new LiquidMedia();
+		m.ph = "be4a12397143caf9ec41c9acb98728bf";
+		m.id = "853a0a228ca4d31851369c4ae26e155c";
+		m.title = "Dash API 4";
+		m.thumbs = thumbs;
+		m.environment = SambaMediaRequest.Environment.TEST;
+		mediaList.add(m);
+
+		m = new LiquidMedia();
+		m.ph = "be4a12397143caf9ec41c9acb98728bf";
+		m.id = "f52e3f6a6c317db20b369ddc42d37c61";
+		m.title = "Dash API 5";
+		m.thumbs = thumbs;
+		m.environment = SambaMediaRequest.Environment.TEST;
+		mediaList.add(m);
+
+		loading.setVisibility(View.VISIBLE);
 		list.setAdapter(null);
 
 		//Making the call to project 4421
@@ -294,6 +335,7 @@ public class MainActivity extends Activity {
 		ArrayList<LiquidMedia> newMedias = new ArrayList<LiquidMedia>();
 
 		for(int i = 0; i < tags.size(); i++) {
+			//LiquidMedia m = (LiquidMedia) (i < medias.size() ? medias.get(i).clone() : newMedias.get(mIndex++).clone());
 			LiquidMedia m = new LiquidMedia();
 			if(i < medias.size()) {
 				m = (LiquidMedia) medias.get(i).clone();

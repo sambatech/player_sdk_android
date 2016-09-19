@@ -14,6 +14,7 @@ import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
@@ -157,10 +158,11 @@ public class MediaItemActivity extends Activity {
     private void requestMedia(LiquidMedia media) {
 	    // if injected media
 	    if (media.url != null && !media.url.isEmpty()) {
-		    SambaMedia m = new SambaMedia();
+		    SambaMediaConfig m = new SambaMediaConfig();
 		    m.url = media.url;
 		    m.title = media.title;
 		    m.type = media.type;
+		    m.token = "23srwef23";
 		    loadMedia(m);
 		    return;
 	    }
@@ -170,6 +172,9 @@ public class MediaItemActivity extends Activity {
 
 	    //Instantiate a unique request. Params: playerHash, mediaId, streamName, streamUrl ( alternateLive on our browser version )
         SambaMediaRequest sbRequest = new SambaMediaRequest(media.ph, media.id, null, media.streamUrl);
+
+	    if (media.environment != null)
+		    sbRequest.environment = media.environment;
 
 	    if(media.description != null || media.shortDescription != null) {
 		    descView.setText(((media.description != null) ? media.description : ""

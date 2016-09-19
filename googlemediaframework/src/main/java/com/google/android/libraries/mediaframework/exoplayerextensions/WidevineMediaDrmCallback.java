@@ -29,6 +29,7 @@ import android.text.TextUtils;
 import com.google.android.exoplayer.drm.MediaDrmCallback;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -38,37 +39,42 @@ import java.util.UUID;
 public class WidevineMediaDrmCallback implements MediaDrmCallback {
 
 	/**
-	 * The URL of the Widevine GTS.
+	 * The Widevine URL.
 	 */
-	private static final String WIDEVINE_GTS_DEFAULT_BASE_URI =
-			"http://wv-staging-proxy.appspot.com/proxy?provider=YouTube&video_id=";
+	private static final String WIDEVINE_GTS_DEFAULT_BASE_URI = "http://wv-staging-proxy.appspot.com/proxy?provider=YouTube&video_id=";
+	private static final String WIDEVINE_LICENSE_SERVER = "https://drm-widevine-licensing.axtest.net/AcquireLicense";
 
 	/**
-	 * The default Widevine GTS URL concatenated with the video ID.
+	 * Token used to validate media execution.
 	 */
-	private final String defaultUri;
+	private final String videoId;
 
 	/**
 	 * @param videoId The ID of the video to be played.
 	 */
 	public WidevineMediaDrmCallback(String videoId) {
-		defaultUri = WIDEVINE_GTS_DEFAULT_BASE_URI + videoId;
+		this.videoId = videoId;
 	}
 
 	@Override
-	public byte[] executeProvisionRequest(UUID uuid, ProvisionRequest request)
-			throws IOException {
+	public byte[] executeProvisionRequest(UUID uuid, ProvisionRequest request) throws IOException {
 		String url = request.getDefaultUrl() + "&signedRequest=" + new String(request.getData());
 		return ExoplayerUtil.executePost(url, null, null);
 	}
 
 	@Override
 	public byte[] executeKeyRequest(UUID uuid, KeyRequest request) throws IOException {
+		HashMap<String, String> requestProperties = null;
 		String url = request.getDefaultUrl();
-		if (TextUtils.isEmpty(url)) {
-			url = defaultUri;
-		}
-		return ExoplayerUtil.executePost(url, request.getData(), null);
-	}
 
+		if (videoId != null && !videoId.isEmpty()) {
+			requestProperties = new HashMap<>();
+			requestProperties.put("X-AxDRM-Message", videoId);
+			url = WIDEVINE_LICENSE_SERVER;
+		}
+		else if (url.isEmpty())
+			url = WIDEVINE_GTS_DEFAULT_BASE_URI;
+
+		return ExoplayerUtil.executePost(url, request.getData(), requestProperties);
+	}
 }

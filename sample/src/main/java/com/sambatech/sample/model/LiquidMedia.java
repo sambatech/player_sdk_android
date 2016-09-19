@@ -1,5 +1,7 @@
 package com.sambatech.sample.model;
 
+import com.sambatech.player.model.SambaMediaRequest;
+
 import java.util.ArrayList;
 
 /**
@@ -23,6 +25,7 @@ public class LiquidMedia implements Cloneable {
     public String ph;
     public String ad_program;
     public AdTag adTag;
+    public SambaMediaRequest.Environment environment;
 
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
