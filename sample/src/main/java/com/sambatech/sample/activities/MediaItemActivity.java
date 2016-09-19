@@ -26,8 +26,6 @@ import de.greenrobot.event.EventBus;
 
 public class MediaItemActivity extends Activity {
 
-	private static final String API_CATALOG = "https://drm-quick-start.azurewebsites.net/api/catalog/videos";
-
     private LiquidMedia activityMedia;
 
     @Bind(R.id.title)

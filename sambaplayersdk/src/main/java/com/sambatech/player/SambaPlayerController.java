@@ -139,6 +139,8 @@ public class SambaPlayerController implements SambaPlayer {
 		this.media = new SambaMediaConfig(media);
 
 		destroy();
+
+		// TODO: thumbnail
 	}
 
 	public SambaMedia getMedia() {

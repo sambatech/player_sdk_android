@@ -29,7 +29,6 @@ import java.util.TreeSet;
  */
 public class Tracking implements Plugin {
 
-	private SambaPlayer player;
 	private SambaMediaConfig media;
 	private Sttm sttm;
 
@@ -62,6 +61,8 @@ public class Tracking implements Plugin {
 
 		if (media.projectHash != null && media.id != null)
 			SambaEventBus.subscribe(playerListener);
+
+		PluginManagerImpl.getCurrentInstance().notifyPluginLoaded(this);
 	}
 
 	public void onDestroy() {
@@ -92,7 +93,7 @@ public class Tracking implements Plugin {
 					conn.setRequestProperty("http.agent", "chrome");
 					conn.setDoOutput(false);
 					conn.setDoInput(true);
-					InputStream is = conn.getInputStream();
+					conn.getInputStream();
 				}
 			}
 			catch (IOException e) {

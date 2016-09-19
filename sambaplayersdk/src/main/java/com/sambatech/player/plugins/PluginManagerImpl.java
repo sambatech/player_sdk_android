@@ -9,28 +9,32 @@ import com.sambatech.player.SambaPlayer;
  */
 public class PluginManagerImpl implements Plugin, PluginManager {
 
-	private static final PluginManagerImpl instance = new PluginManagerImpl();
+	private static PluginManagerImpl currentInstance;
 
 	private Plugin[] plugins;
 	private PluginManager player;
 	private int pluginsLoaded;
 
-	public static PluginManagerImpl getInstance() {
-		return instance;
+	public PluginManagerImpl() {
+		currentInstance = this;
+	}
+
+	public static PluginManagerImpl getCurrentInstance() {
+		return currentInstance;
 	}
 
 	public void onLoad(SambaPlayer player) {
 		if (plugins != null)
 			return;
 
+		this.player = (PluginManager)player;
+		pluginsLoaded = 0;
+
 		plugins = new Plugin[] {
 				new ImaWrapper(),
 				new Tracking(),
 				new Drm()
 		};
-
-		this.player = (PluginManager)player;
-		pluginsLoaded = 0;
 
 		for (Plugin plugin : plugins)
 			plugin.onLoad(player);

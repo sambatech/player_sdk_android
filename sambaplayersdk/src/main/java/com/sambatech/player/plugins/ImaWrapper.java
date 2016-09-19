@@ -351,8 +351,10 @@ public class ImaWrapper implements Plugin {
 		Log.i("ima", "load");
 		SambaMedia media = player.getMedia();
 
-		if (media.adUrl == null || media.adUrl.isEmpty())
+		if (media.adUrl == null || media.adUrl.isEmpty()) {
+			PluginManagerImpl.getCurrentInstance().notifyPluginLoaded(this);
 			return;
+		}
 
 		adTagUrl = Uri.parse(media.adUrl);
 		contentPlayer = player;
@@ -388,7 +390,7 @@ public class ImaWrapper implements Plugin {
 		};
 
 		SambaEventBus.subscribe(playerListener);
-		PluginManagerImpl.getInstance().notifyPluginLoaded(this);
+		PluginManagerImpl.getCurrentInstance().notifyPluginLoaded(this);
 	}
 
 	public void onDestroy() {

@@ -20,6 +20,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public int themeColor = 0xFF72BE44;
 	public String sttmUrl;
 	public String sttmKey;
+	public String token;
 
 	public SambaMediaConfig() {}
 

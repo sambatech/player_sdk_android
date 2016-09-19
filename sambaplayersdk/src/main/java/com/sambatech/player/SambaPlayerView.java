@@ -7,8 +7,8 @@ import android.widget.FrameLayout;
 
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.plugins.Plugin;
-import com.sambatech.player.plugins.PluginManagerImpl;
 import com.sambatech.player.plugins.PluginManager;
+import com.sambatech.player.plugins.PluginManagerImpl;
 
 /**
  * View layer for SambaPlayer.
@@ -32,7 +32,8 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer, PluginM
 		controllerReal.setMedia(media);
 		controllerReal.setAutoFullscreenMode(autoFsMode);
 		controllerReal.setEnableControls(enableControls);
-		PluginManagerImpl.getInstance().onLoad(this);
+
+		(new PluginManagerImpl()).onLoad(this);
 	}
 
 	public SambaMedia getMedia() {
@@ -105,7 +106,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer, PluginM
 	}
 
 	public void destroy() {
-		PluginManagerImpl.getInstance().onDestroy();
+		PluginManagerImpl.getCurrentInstance().onDestroy();
 		controller.destroy();
 
 		// disable controller
