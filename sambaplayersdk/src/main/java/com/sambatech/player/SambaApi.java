@@ -237,7 +237,6 @@ public class SambaApi {
 				media.projectHash = projectConfig.getString("playerHash");
 				media.projectId = projectConfig.getInt("id");
 				media.title = json.getString("title");
-				media.outputs = new ArrayList<>();
 				media.isAudioOnly = qualifier.equals("audio");
 
 				if (json.has("id"))
@@ -253,6 +252,7 @@ public class SambaApi {
 					JSONObject rule;
 					JSONArray outputs;
 					JSONObject output;
+					ArrayList<SambaMedia.Output> mediaOutputs;
 					String defaultOutputCurrent;
 					String type;
 					boolean isStreaming;
@@ -279,6 +279,7 @@ public class SambaApi {
 						}
 
 						media.type = type;
+						mediaOutputs = new ArrayList<>();
 						outputs = rule.getJSONArray("outputs");
 						isStreaming = type.equals("hls") || type.equals("dash");
 						defaultOutputCurrent = isStreaming ? "abr" : defaultOutput;
@@ -294,7 +295,7 @@ public class SambaApi {
 
 							if (media.isAudioOnly) {
 								if (!isStreaming || !cOutput.url.contains(".mp3"))
-									media.outputs.add(cOutput);
+									mediaOutputs.add(cOutput);
 								continue;
 							}
 
@@ -305,20 +306,22 @@ public class SambaApi {
 									cOutput.current = true;
 								}
 
-								media.outputs.add(cOutput);
+								mediaOutputs.add(cOutput);
 							}
 						}
 
-						// was a valid iteration
-						if (media.outputs.size() > 0) {
+						// was it a valid iteration?
+						if (mediaOutputs.size() > 0) {
 							if (media.url == null)
-								media.url = media.outputs.get(0).url;
+								media.url = mediaOutputs.get(0).url;
 
+							media.outputs = mediaOutputs;
 							filledRules.add(media.type);
 						}
 					}
 
-					sortOutputs(media.outputs);
+					if (media.outputs != null)
+						sortOutputs(media.outputs);
 
 				}
 				else if (json.has("liveOutput")) {
