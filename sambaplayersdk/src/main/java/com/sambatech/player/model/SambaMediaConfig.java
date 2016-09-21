@@ -20,13 +20,13 @@ public class SambaMediaConfig extends SambaMedia {
 	public int themeColor = 0xFF72BE44;
 	public String sttmUrl;
 	public String sttmKey;
-	public String token;
 
 	public SambaMediaConfig() {}
 
 	public SambaMediaConfig(SambaMedia media) {
 		super(media);
-		if(media instanceof SambaMediaConfig) {
+
+		if (media instanceof SambaMediaConfig) {
 			SambaMediaConfig m = (SambaMediaConfig)media;
 			id = m.id;
 			projectHash = m.projectHash;

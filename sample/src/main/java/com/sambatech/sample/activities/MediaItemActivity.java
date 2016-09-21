@@ -1,7 +1,11 @@
 package com.sambatech.sample.activities;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -19,7 +23,11 @@ import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
 
+import java.io.InputStream;
+import java.io.StringReader;
+import java.net.URL;
 import java.util.Random;
+import java.util.Scanner;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -63,7 +71,8 @@ public class MediaItemActivity extends Activity {
 	private SambaPlayerListener playerListener = new SambaPlayerListener() {
 		@Override
 		public void onLoad(SambaEvent e) {
-			status.setText(String.format("Status: %s", e.getType()));
+			String token = player.getMedia().drmToken != null ? " (token: \"" + player.getMedia().drmToken.substring(0, 10) + "...\")" : "";
+			status.setText(String.format("Status: %s%s", e.getType(), token));
 		}
 
 		@Override
@@ -156,14 +165,16 @@ public class MediaItemActivity extends Activity {
 	 * @param media - Liquid media object
 	 */
     private void requestMedia(LiquidMedia media) {
+	    final String drmUrl = media.drmUrl;
+
 	    // if injected media
 	    if (media.url != null && !media.url.isEmpty()) {
 		    SambaMediaConfig m = new SambaMediaConfig();
 		    m.url = media.url;
 		    m.title = media.title;
 		    m.type = media.type;
-		    m.token = "23srwef23";
-		    loadMedia(m);
+
+		    loadMedia(m, drmUrl);
 		    return;
 	    }
 
@@ -192,7 +203,7 @@ public class MediaItemActivity extends Activity {
                     media.title = activityMedia.adTag.name;
                 }
 
-                loadMedia(media);
+                loadMedia(media, drmUrl);
             }
 
 	        //Response error
@@ -203,33 +214,84 @@ public class MediaItemActivity extends Activity {
         });
     }
 
-    private void loadMedia(SambaMedia media) {
-	    loading.setVisibility(View.GONE);
-	    titleView.setVisibility(View.VISIBLE);
-        titleView.setText(media.title);
+    private void loadMedia(final SambaMedia media, String drmUrl) {
+	    // if DRM media
+	    if (drmUrl != null && !drmUrl.isEmpty()) {
+		    new AsyncTask<String, Void, String>() {
 
+			    @Override
+			    protected String doInBackground(String... params) {
+				    InputStream inputStream = null;
+				    Scanner scanner = null;
+				    Scanner scannerDelimited = null;
 
-	    /** If audio, we recommend you to customize the player's height**/
-	    if (media.isAudioOnly) {
-		    player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
-			player.setLayoutParams(player.getLayoutParams());
+				    try {
+					    inputStream = new URL(params[0]).openStream();
+					    scanner = new Scanner(inputStream);
+					    scannerDelimited = scanner.useDelimiter("\\A");
+					    String token = scannerDelimited.hasNext() ? scannerDelimited.next() : "";
+
+					    return token.substring(1, token.length() - 1);
+				    }
+				    catch (Exception e) {
+					    Log.e("SampleApp", "Error requesting DRM.");
+				    }
+				    finally {
+					    try {
+						    if (inputStream != null)
+							    inputStream.close();
+
+						    if (scanner != null)
+							    scanner.close();
+
+						    if (scannerDelimited != null)
+							    scannerDelimited.close();
+					    }
+					    catch (Exception e) {
+						    Log.e("SampleApp", "Error closing DRM request stream.");
+					    }
+				    }
+
+				    return null;
+			    }
+
+			    @Override
+			    protected void onPostExecute(String token) {
+				    media.drmToken = token;
+
+				    doLoadMedia(media);
+			    }
+		    }.execute(drmUrl);
 	    }
-
-        player.setMedia(media);
-
-	    //Disable controls randomically
-	    Random random = new Random();
-	    Boolean flag = random.nextBoolean();
-
-	    //Set enable controls
-	    player.setEnableControls(flag);
-	    if(!flag)
-		    descView.setText("Mídia com controls desabilitados");
-
-	    //Play the media programmatically on its load ( similar to autoPlay=true param )
-        player.play();
-
+		else doLoadMedia(media);
     }
+
+	private void doLoadMedia(SambaMedia media) {
+		loading.setVisibility(View.GONE);
+		titleView.setVisibility(View.VISIBLE);
+		titleView.setText(media.title);
+
+		/** If audio, we recommend you to customize the player's height**/
+		if (media.isAudioOnly) {
+			player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
+			player.setLayoutParams(player.getLayoutParams());
+		}
+
+		player.setMedia(media);
+
+		//Disable controls randomically
+		Random random = new Random();
+		Boolean flag = random.nextBoolean();
+
+		//Set enable controls
+		player.setEnableControls(flag);
+
+		if (!flag)
+			descView.setText("Mídia com controls desabilitados");
+
+		//Play the media programmatically on its load ( similar to autoPlay=true param )
+		player.play();
+	}
 
 	@Override
 	protected void onDestroy() {

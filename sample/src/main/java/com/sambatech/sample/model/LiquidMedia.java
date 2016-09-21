@@ -26,8 +26,9 @@ public class LiquidMedia implements Cloneable {
     public String ad_program;
     public AdTag adTag;
     public SambaMediaRequest.Environment environment;
+    public String drmUrl;
 
-	public Object clone() throws CloneNotSupportedException {
+    public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
 

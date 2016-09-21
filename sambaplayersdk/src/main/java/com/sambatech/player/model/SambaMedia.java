@@ -19,6 +19,7 @@ public class SambaMedia {
 	public boolean isLive;
 	public boolean isAudioOnly;
 	public ArrayList<Output> outputs;
+	public String drmToken;
 
 	public SambaMedia() {}
 
@@ -31,6 +32,7 @@ public class SambaMedia {
 		isAudioOnly = media.isAudioOnly;
 		outputs = media.outputs;
 		thumb = media.thumb;
+		drmToken = media.drmToken;
 	}
 
 	public static class Output {
