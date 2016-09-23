@@ -1,12 +1,14 @@
 package com.sambatech.sample.activities;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +33,7 @@ import java.util.Scanner;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 public class MediaItemActivity extends Activity {
@@ -55,6 +58,7 @@ public class MediaItemActivity extends Activity {
 	@Bind(R.id.loading_text)
 	TextView loading_text;
 
+	private boolean _autoPlay;
 
 	/**
 	 * Player Events
@@ -116,10 +120,13 @@ public class MediaItemActivity extends Activity {
 		}
 	};
 
-    @Override
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media_item);
+
+		if (getIntent() != null)
+			_autoPlay = getIntent().getBooleanExtra("autoPlay", true);
 
         ButterKnife.bind(this);
 
@@ -128,7 +135,6 @@ public class MediaItemActivity extends Activity {
 
 	    if (activityMedia == null) {
 		    activityMedia = EventBus.getDefault().removeStickyEvent(LiquidMedia.class);
-
 		    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
 	    }
 
@@ -159,6 +165,16 @@ public class MediaItemActivity extends Activity {
             player.pause();
 
     }
+
+	@OnClick(R.id.play) public void playHandler() {
+		if (player != null)
+			player.play();
+	}
+
+	@OnClick(R.id.pause) public void pauseHandler() {
+		if (player != null)
+			player.pause();
+	}
 
 	/**
 	 * Request the given media
@@ -289,8 +305,8 @@ public class MediaItemActivity extends Activity {
 		if (!flag)
 			descView.setText("Mídia com controls desabilitados");
 
-		//Play the media programmatically on its load ( similar to autoPlay=true param )
-		player.play();
+		if (_autoPlay)
+			player.play();
 	}
 
 	@Override

@@ -2,7 +2,12 @@ package com.sambatech.sample.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,6 +64,10 @@ public class MainActivity extends Activity {
 	ArrayList<LiquidMedia> adMediaList;
 	//Controls loading
 	private Boolean loadingFlag;
+	private boolean _autoPlay = true;
+	private Drawable _autoPlayIcon;
+	private static final int _autoPlayColor = 0xff99ccff;
+	private static final int _autoPlayColorDisabled = 0xff999999;
 
 	@OnItemClick(R.id.media_list) public void mediaItemClick(int position) {
 
@@ -67,8 +76,10 @@ public class MainActivity extends Activity {
 		LiquidMedia media = (LiquidMedia) mAdapter.getItem(position);
 		media.highlighted = position == 0;
 
-		Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
 		EventBus.getDefault().postSticky(media);
+
+		Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
+		intent.putExtra("autoPlay", _autoPlay);
 		startActivity(intent);
 	}
 
@@ -79,6 +90,12 @@ public class MainActivity extends Activity {
 
 		ButterKnife.bind(this);
 		callCommonList();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		ButterKnife.unbind(this);
 	}
 
 	@Override
@@ -110,6 +127,11 @@ public class MainActivity extends Activity {
 		magIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
 		magIcon.setVisibility(View.INVISIBLE);
 
+		_autoPlayIcon = DrawableCompat.wrap(menu.findItem(R.id.autoPlay).getIcon()).mutate();
+
+		if (_autoPlay)
+			DrawableCompat.setTint(_autoPlayIcon, _autoPlayColor);
+
 		return true;
 	}
 
@@ -118,31 +140,47 @@ public class MainActivity extends Activity {
 		int id = item.getItemId();
 
 		if(adEnabled) {
-			MenuItem dbclick = (MenuItem) menu.findItem(R.id.withTag);
+			MenuItem dbclick = menu.findItem(R.id.withTag);
 			dbclick.setIcon(R.drawable.ic_dbclick_disable);
 			showMediasList(mediaList);
 		}
 
-		if(id == R.id.withTag && !adEnabled) {
-			getTags("4xtfj");
-			item.setIcon(R.drawable.ic_dbclick);
-			adEnabled = true;
-		}
-		else if(id == R.id.withTag && adEnabled) {
-			adEnabled = false;
-		}else if (id == R.id.common) {
-			this.mediaList.clear();
-			callCommonList();
-			adEnabled = false;
-		}else if(id == R.id.about){
-			Intent about = new Intent(this, AboutActivity.class);
-			startActivity(about);
-		}else if (id == R.id.live) {
-			this.mediaList.clear();
-			list.setAdapter(null);
-			this.mediaList = populateLiveMedias();
-			showMediasList(this.mediaList);
-			adEnabled = false;
+		switch (id) {
+			case R.id.withTag:
+				if (!adEnabled) {
+					getTags("4xtfj");
+					item.setIcon(R.drawable.ic_dbclick);
+				}
+
+				adEnabled = !adEnabled;
+				break;
+
+			case R.id.common:
+				this.mediaList.clear();
+				callCommonList();
+				adEnabled = false;
+				break;
+
+			case R.id.about:
+				Intent about = new Intent(this, AboutActivity.class);
+				startActivity(about);
+				break;
+
+			case R.id.live:
+				this.mediaList.clear();
+				list.setAdapter(null);
+				this.mediaList = populateLiveMedias();
+				showMediasList(this.mediaList);
+				adEnabled = false;
+				break;
+
+			case R.id.autoPlay:
+				if (_autoPlay)
+					DrawableCompat.setTint(_autoPlayIcon, _autoPlayColorDisabled);
+				else DrawableCompat.setTint(_autoPlayIcon, _autoPlayColor);
+
+				_autoPlay = !_autoPlay;
+				break;
 		}
 
 		return super.onOptionsItemSelected(item);
