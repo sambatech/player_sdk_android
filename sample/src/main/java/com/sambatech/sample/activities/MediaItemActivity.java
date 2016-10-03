@@ -1,14 +1,10 @@
 package com.sambatech.sample.activities;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,7 +22,6 @@ import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
 
 import java.io.InputStream;
-import java.io.StringReader;
 import java.net.URL;
 import java.util.Random;
 import java.util.Scanner;
@@ -59,6 +54,7 @@ public class MediaItemActivity extends Activity {
 	TextView loading_text;
 
 	private boolean _autoPlay;
+	//private long ti; // benchmark
 
 	/**
 	 * Player Events
@@ -75,12 +71,14 @@ public class MediaItemActivity extends Activity {
 	private SambaPlayerListener playerListener = new SambaPlayerListener() {
 		@Override
 		public void onLoad(SambaEvent e) {
+			//Log.i("bench", String.format("Load time: %s", new Date().getTime() - ti));
 			String token = player.getMedia().drmToken != null ? " (token: \"" + player.getMedia().drmToken.substring(0, 10) + "...\")" : "";
 			status.setText(String.format("Status: %s%s", e.getType(), token));
 		}
 
 		@Override
 		public void onPlay(SambaEvent e) {
+			//Log.i("bench", String.format("Play time: %s", new Date().getTime() - ti));
 			status.setText(String.format("Status: %s", e.getType()));
 		}
 
@@ -146,15 +144,13 @@ public class MediaItemActivity extends Activity {
 	 * Subscribe the listeners of the player
 	 */
     private void initPlayer() {
-        SambaEventBus.unsubscribe(playerListener);
         SambaEventBus.subscribe(playerListener);
     }
 
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-        player.destroy();
-        finish();
+		destroy();
     }
 
     @Override
@@ -163,7 +159,6 @@ public class MediaItemActivity extends Activity {
 
         if (player != null && player.hasStarted())
             player.pause();
-
     }
 
 	@OnClick(R.id.play) public void playHandler() {
@@ -305,6 +300,8 @@ public class MediaItemActivity extends Activity {
 		if (!flag)
 			descView.setText("Mídia com controls desabilitados");
 
+		//ti = new Date().getTime();
+
 		if (_autoPlay)
 			player.play();
 	}
@@ -312,13 +309,17 @@ public class MediaItemActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		player.destroy();
-		finish();
+		destroy();
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		destroy();
+	}
+
+	private void destroy() {
+		SambaEventBus.unsubscribe(playerListener);
 		player.destroy();
 		finish();
 	}

@@ -283,13 +283,13 @@ public class MainActivity extends Activity {
 		m = new LiquidMedia();
 		m.url = "https://media.axprod.net/TestVectors/v6-MultiDRM/Manifest_1080p.mpd";
 		m.drmUrl = "https://drm-quick-start.azurewebsites.net/api/authorization/Axinom%20demo%20video";
-		m.title = "Dash Axinom";
+		m.title = "Dash DRM (Axinom)";
 		m.qualifier = "VIDEO";
 		m.type = "dash";
 		m.thumbs = thumbs;
 		mediaList.add(m);
 
-		m = new LiquidMedia();
+		/*m = new LiquidMedia();
 		m.ph = "be4a12397143caf9ec41c9acb98728bf";
 		m.id = "698b61bf17f1529ab8bc483cbb69265e";
 		m.title = "Dash API 1";
@@ -327,7 +327,7 @@ public class MainActivity extends Activity {
 		m.title = "Dash API 5";
 		m.thumbs = thumbs;
 		m.environment = SambaMediaRequest.Environment.TEST;
-		mediaList.add(m);
+		mediaList.add(m);*/
 
 		loading.setVisibility(View.VISIBLE);
 		list.setAdapter(null);

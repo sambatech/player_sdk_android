@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
+import android.util.Log;
 
 import com.google.android.exoplayer.ExoPlayerLibraryInfo;
 
@@ -37,6 +38,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -79,6 +81,7 @@ public class ExoplayerUtil {
   public static byte[] executePost(String url, byte[] data, Map<String, String> requestProperties)
       throws MalformedURLException, IOException {
     HttpURLConnection urlConnection = null;
+    //long d = new Date().getTime();
     try {
       urlConnection = (HttpURLConnection) new URL(url).openConnection();
       urlConnection.setRequestMethod("POST");
@@ -100,6 +103,7 @@ public class ExoplayerUtil {
       if (urlConnection != null) {
         urlConnection.disconnect();
       }
+      //Log.i("asdf", String.format("%d", (new Date()).getTime() - d));
     }
   }
 
