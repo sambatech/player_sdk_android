@@ -289,6 +289,20 @@ public class MainActivity extends Activity {
 		m.thumbs = thumbs;
 		mediaList.add(m);
 
+		m = new LiquidMedia();
+		m.ph = "36098808ae444ca5de4acf231949e312";
+		m.id = "0e060023c14f0427108e775dbf10d7b6";
+		m.qualifier = "VIDEO";
+		m.title = "SBT";
+		mediaList.add(m);
+
+		/*m = new LiquidMedia();
+		m.ph = "f9b073c78f3812cf96690a9c2989c781";
+		m.id = "8c9f8d1511d7805aab0cc6f23ea3c899";
+		m.qualifier = "VIDEO";
+		m.title = "Univer";
+		mediaList.add(m);*/
+
 		/*m = new LiquidMedia();
 		m.ph = "be4a12397143caf9ec41c9acb98728bf";
 		m.id = "698b61bf17f1529ab8bc483cbb69265e";

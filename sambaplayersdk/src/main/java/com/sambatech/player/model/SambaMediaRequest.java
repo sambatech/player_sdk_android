@@ -69,6 +69,7 @@ public class SambaMediaRequest {
 	public enum Environment {
 		LOCAL,
 		TEST,
+		STAGING,
 		PROD
 	}
 }

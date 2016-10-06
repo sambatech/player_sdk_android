@@ -133,6 +133,10 @@ public class SambaApi {
 					endpoint = activity.getString(R.string.player_endpoint_test);
 					break;
 
+				case STAGING:
+					endpoint = activity.getString(R.string.player_endpoint_staging);
+					break;
+
 				case PROD:
 				default:
 					endpoint = activity.getString(R.string.player_endpoint_prod);
