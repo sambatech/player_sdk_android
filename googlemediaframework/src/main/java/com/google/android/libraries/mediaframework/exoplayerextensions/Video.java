@@ -42,9 +42,9 @@ public class Video {
   private final VideoType videoType;
 
   /**
-   * ID of content (for DASH).
+   * DRM content info (for DASH/DRM).
    */
-  private final String contentId;
+  private final DrmRequest drmRequest;
 
   /**
    * @param url The URL pointing to the video.
@@ -57,19 +57,19 @@ public class Video {
   /**
    * @param url The URL pointing to the video.
    * @param videoType The video format of the video.
-   * @param contentId ID of content (for DASH).
+   * @param drmRequest DRM content info (for DASH/DRM).
    */
-  public Video(String url, VideoType videoType, String contentId) {
+  public Video(String url, VideoType videoType, DrmRequest drmRequest) {
     this.url = url;
     this.videoType = videoType;
-    this.contentId = contentId;
+    this.drmRequest = drmRequest;
   }
 
   /**
-   * Returns ID of content (for DASH).
+   * Returns DRM content info (for DASH/DRM).
    */
-  public String getContentId() {
-    return contentId;
+  public DrmRequest getDrmRequest() {
+    return drmRequest;
   }
 
   /**

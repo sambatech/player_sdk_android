@@ -38,7 +38,7 @@ public class RendererBuilderFactory {
       case DASH:
         return new DashRendererBuilder(ctx, ExoplayerUtil.getUserAgent(ctx),
                                        video.getUrl(),
-                                       new WidevineMediaDrmCallback(video.getContentId()));
+                                       new WidevineMediaDrmCallback(video.getDrmRequest()));
       case MP4:
         return new ExtractorRendererBuilder(ctx, ExoplayerUtil.getUserAgent(ctx), Uri.parse(video.getUrl()));
       case OTHER:

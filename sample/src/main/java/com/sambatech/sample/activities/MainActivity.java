@@ -17,16 +17,28 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
+import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasAdapter;
 import com.sambatech.sample.model.LiquidMedia;
 import com.sambatech.sample.rest.LiquidApi;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import butterknife.Bind;
 import butterknife.BindString;
@@ -280,10 +292,48 @@ public class MainActivity extends Activity {
 		m.thumbs = thumbs;
 		mediaList.add(m);
 
+		// AXINOM
 		m = new LiquidMedia();
 		m.url = "https://media.axprod.net/TestVectors/v6-MultiDRM/Manifest_1080p.mpd";
-		m.drmUrl = "https://drm-quick-start.azurewebsites.net/api/authorization/Axinom%20demo%20video";
+		m.drm = new LiquidMedia.Drm("https://drm-quick-start.azurewebsites.net/api/authorization/Axinom%20demo%20video", new LiquidMedia.DrmCallback() {
+			public void call(SambaMediaConfig media, String response) {
+				HashMap<String, String> requestProperties = new HashMap<>();
+				requestProperties.put("X-AxDRM-Message", response.substring(1, response.length() - 1));
+				media.drmRequest = new DrmRequest("https://drm-widevine-licensing.axtest.net/AcquireLicense", requestProperties);
+			}
+		});
 		m.title = "Dash DRM (Axinom)";
+		m.qualifier = "VIDEO";
+		m.type = "dash";
+		m.thumbs = thumbs;
+		mediaList.add(m);
+
+		// IRDETO
+		//b00772b75e3677dba5a59e09598b7a0d be4a12397143caf9ec41c9acb98728bf
+		m = new LiquidMedia();
+		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
+		m.id = "4a48d2ea922217a3d91771f2acf56fdf";
+		m.environment = SambaMediaRequest.Environment.TEST;
+		HashMap<String, String> headers = new HashMap<>();
+		headers.put("MAN-user-id", "app@sambatech.com");
+		headers.put("MAN-user-password", "c5kU6DCTmomi9fU");
+		m.drm = new LiquidMedia.Drm("http://sambatech.stage.ott.irdeto.com/services/CreateSession?CrmId=sambatech&UserId=smbUserTest", headers, new LiquidMedia.DrmCallback() {
+			public void call(SambaMediaConfig media, String response) {
+				if (media.drmRequest == null || media.drmRequest.requestProperties == null)
+					return;
+
+				try {
+					Document parse = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(response.getBytes()));
+					NamedNodeMap attributes = parse.getElementsByTagName("Session").item(0).getAttributes();
+					media.drmRequest.requestProperties.put("SessionId", attributes.getNamedItem("SessionId").getTextContent());
+					media.drmRequest.requestProperties.put("Ticket", attributes.getNamedItem("Ticket").getTextContent());
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		m.title = "Dash DRM (Irdeto)";
 		m.qualifier = "VIDEO";
 		m.type = "dash";
 		m.thumbs = thumbs;

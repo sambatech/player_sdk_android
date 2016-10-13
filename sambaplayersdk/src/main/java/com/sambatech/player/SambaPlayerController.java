@@ -12,6 +12,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer.ExoPlayer;
+import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
@@ -23,6 +24,7 @@ import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -261,7 +263,7 @@ public class SambaPlayerController implements SambaPlayer {
 
 		// no autoplay if there's ad because ImaWrapper takes control of the player
         player = new SimpleVideoPlayer((Activity) view.getContext(), view,
-                new Video(media.url, videoType, media.drmToken), media.title,
+                new Video(media.url, videoType, media.drmRequest), media.title,
 		        media.adUrl == null || media.adUrl.isEmpty(), media.isAudioOnly);
 
 		player.setSeekbarColor(media.themeColor);

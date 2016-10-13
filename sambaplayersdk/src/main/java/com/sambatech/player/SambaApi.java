@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
@@ -235,6 +236,7 @@ public class SambaApi {
 
 				JSONObject playerConfig = json.getJSONObject("playerConfig");
 				JSONObject apiConfig = json.getJSONObject("apiConfig");
+				JSONObject playerSecurity = json.optJSONObject("playerSecurity");
 				JSONObject projectConfig = json.getJSONObject("project");
 				JSONArray ads = json.optJSONArray("advertisings");
 
@@ -363,6 +365,21 @@ public class SambaApi {
 
 					if (ad.getString("adServer").equalsIgnoreCase("dfp"))
 						media.adUrl = ad.getString("tagVast");
+				}
+
+				if (playerSecurity != null) {
+					JSONObject drm = playerSecurity.optJSONObject("drmSecurity");
+
+					if (drm != null) {
+						HashMap<String, String> requestProperties = new HashMap<>();
+						requestProperties.put("SubContentType", drm.optString("subContentType", "Default"));
+						requestProperties.put("CrmId", drm.optString("crmId"));
+						requestProperties.put("AccountId", drm.optString("accountId"));
+						requestProperties.put("ContentId", "samba1"); //media.id
+
+						media.url = "http://52.10.169.196:1935/Irdeto/mp4:samba1.mp4/manifest.mpd"; // TODO: remover
+						media.drmRequest = new DrmRequest(drm.optString("widevineSignatureURL"), requestProperties);
+					}
 				}
 
 				return media;

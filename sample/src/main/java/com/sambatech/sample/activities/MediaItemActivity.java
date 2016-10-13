@@ -23,6 +23,8 @@ import com.sambatech.sample.model.LiquidMedia;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -176,7 +178,7 @@ public class MediaItemActivity extends Activity {
 	 * @param media - Liquid media object
 	 */
     private void requestMedia(LiquidMedia media) {
-	    final String drmUrl = media.drmUrl;
+	    final LiquidMedia.Drm drm = media.drm;
 
 	    // if injected media
 	    if (media.url != null && !media.url.isEmpty()) {
@@ -185,7 +187,7 @@ public class MediaItemActivity extends Activity {
 		    m.title = media.title;
 		    m.type = media.type;
 
-		    loadMedia(m, drmUrl);
+		    loadMedia(m, drm);
 		    return;
 	    }
 
@@ -214,7 +216,7 @@ public class MediaItemActivity extends Activity {
                     media.title = activityMedia.adTag.name;
                 }
 
-                loadMedia(media, drmUrl);
+                loadMedia(media, drm);
             }
 
 	        //Response error
@@ -225,56 +227,72 @@ public class MediaItemActivity extends Activity {
         });
     }
 
-    private void loadMedia(final SambaMedia media, String drmUrl) {
+    private void loadMedia(final SambaMedia media, final LiquidMedia.Drm drm) {
 	    // if DRM media
-	    if (drmUrl != null && !drmUrl.isEmpty()) {
-		    new AsyncTask<String, Void, String>() {
+	    String drmUrl = drm != null ? drm.url : "";
 
-			    @Override
-			    protected String doInBackground(String... params) {
-				    InputStream inputStream = null;
-				    Scanner scanner = null;
-				    Scanner scannerDelimited = null;
+	    if (drmUrl.isEmpty()) {
+		    doLoadMedia(media);
+		    return;
+	    }
 
+	    new AsyncTask<String, Void, String>() {
+
+		    @Override
+		    protected String doInBackground(String... params) {
+			    URLConnection connection = null;
+			    InputStream inputStream = null;
+			    Scanner scanner = null;
+			    Scanner scannerDelimited = null;
+
+			    try {
+				    connection = new URL(params[0]).openConnection();
+
+				    if (drm.headers != null) {
+					    connection.setDoOutput(true); // WARNING: assume POST
+
+					    for (Map.Entry<String, String> kv : drm.headers.entrySet())
+						    connection.addRequestProperty(kv.getKey(), kv.getValue());
+				    }
+
+				    inputStream = connection.getInputStream();
+				    scanner = new Scanner(inputStream);
+				    scannerDelimited = scanner.useDelimiter("\\A");
+
+				    return scannerDelimited.hasNext() ? scannerDelimited.next() : "";
+			    }
+			    catch (Exception e) {
+				    Log.e("SampleApp", "Error requesting DRM.");
+			    }
+			    finally {
 				    try {
-					    inputStream = new URL(params[0]).openStream();
-					    scanner = new Scanner(inputStream);
-					    scannerDelimited = scanner.useDelimiter("\\A");
-					    String token = scannerDelimited.hasNext() ? scannerDelimited.next() : "";
+					    if (inputStream != null)
+						    inputStream.close();
 
-					    return token.substring(1, token.length() - 1);
+					    if (scanner != null)
+						    scanner.close();
+
+					    if (scannerDelimited != null)
+						    scannerDelimited.close();
 				    }
 				    catch (Exception e) {
-					    Log.e("SampleApp", "Error requesting DRM.");
+					    Log.e("SampleApp", "Error closing DRM request stream.");
 				    }
-				    finally {
-					    try {
-						    if (inputStream != null)
-							    inputStream.close();
-
-						    if (scanner != null)
-							    scanner.close();
-
-						    if (scannerDelimited != null)
-							    scannerDelimited.close();
-					    }
-					    catch (Exception e) {
-						    Log.e("SampleApp", "Error closing DRM request stream.");
-					    }
-				    }
-
-				    return null;
 			    }
 
-			    @Override
-			    protected void onPostExecute(String token) {
-				    media.drmToken = token;
+			    return null;
+		    }
 
-				    doLoadMedia(media);
-			    }
-		    }.execute(drmUrl);
-	    }
-		else doLoadMedia(media);
+		    @Override
+		    protected void onPostExecute(String response) {
+			    SambaMediaConfig m = (SambaMediaConfig)media;
+
+			    if (m != null)
+			        drm.callback.call(m, response);
+
+			    doLoadMedia(media);
+		    }
+	    }.execute(drmUrl);
     }
 
 	private void doLoadMedia(SambaMedia media) {
