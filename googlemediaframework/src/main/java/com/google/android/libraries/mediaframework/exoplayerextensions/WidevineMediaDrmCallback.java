@@ -28,7 +28,6 @@ import android.media.MediaDrm.ProvisionRequest;
 import com.google.android.exoplayer.drm.MediaDrmCallback;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -66,11 +65,12 @@ public class WidevineMediaDrmCallback implements MediaDrmCallback {
 	public byte[] executeKeyRequest(UUID uuid, KeyRequest request) throws IOException {
 		String url = request.getDefaultUrl();
 		HashMap<String, String> requestProperties = drmRequest.requestProperties;
+		byte[] data = request.getData();
 
 		if (drmRequest.licenseServerUrl != null) {
 			url = drmRequest.licenseServerUrl;
 
-			if (drmRequest.methodGet) {
+			if (drmRequest.paramsByGet) {
 				String sep = "";
 
 				url += "?";
@@ -82,10 +82,15 @@ public class WidevineMediaDrmCallback implements MediaDrmCallback {
 
 				requestProperties = null;
 			}
+			else if (drmRequest.postData != null) {
+				data = drmRequest.postData.getBytes();
+			}
 		}
 		else if (url.isEmpty())
 			url = WIDEVINE_GTS_DEFAULT_BASE_URI;
 
-		return ExoplayerUtil.executePost(url, request.getData(), requestProperties);
+		// Irdeto path and query string need to go by post
+		//return ExoplayerUtil.executePost(url, request.getData(), requestProperties);
+		return ExoplayerUtil.executePost(url, data, requestProperties);
 	}
 }

@@ -377,8 +377,17 @@ public class SambaApi {
 						requestProperties.put("AccountId", drm.optString("accountId"));
 						requestProperties.put("ContentId", "samba1"); //media.id
 
+						String url = drm.optString("widevineSignatureURL");
+						String sep = "";
+						String postData = url.substring(37) + "?";
+
+						for (Map.Entry<String, String> kv : requestProperties.entrySet()) {
+							postData += sep + kv.getKey() + "=" + kv.getValue();
+							sep = "&";
+						}
+
 						media.url = "http://52.10.169.196:1935/Irdeto/mp4:samba1.mp4/manifest.mpd"; // TODO: remover
-						media.drmRequest = new DrmRequest(drm.optString("widevineSignatureURL"), requestProperties);
+						media.drmRequest = new DrmRequest(url.substring(0, 37), postData);
 					}
 				}
 

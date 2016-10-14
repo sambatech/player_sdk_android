@@ -319,14 +319,17 @@ public class MainActivity extends Activity {
 		headers.put("MAN-user-password", "c5kU6DCTmomi9fU");
 		m.drm = new LiquidMedia.Drm("http://sambatech.stage.ott.irdeto.com/services/CreateSession?CrmId=sambatech&UserId=smbUserTest", headers, new LiquidMedia.DrmCallback() {
 			public void call(SambaMediaConfig media, String response) {
-				if (media.drmRequest == null || media.drmRequest.requestProperties == null)
+				if (media.drmRequest == null)// || media.drmRequest.requestProperties == null)
 					return;
 
 				try {
 					Document parse = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(response.getBytes()));
 					NamedNodeMap attributes = parse.getElementsByTagName("Session").item(0).getAttributes();
-					media.drmRequest.requestProperties.put("SessionId", attributes.getNamedItem("SessionId").getTextContent());
-					media.drmRequest.requestProperties.put("Ticket", attributes.getNamedItem("Ticket").getTextContent());
+					//media.drmRequest.requestProperties.put("MANRoamingSession", attributes.getNamedItem("MANRoamingSession").getTextContent());
+					//media.drmRequest.requestProperties.put("SessionId", attributes.getNamedItem("SessionId").getTextContent());
+					//media.drmRequest.requestProperties.put("Ticket", attributes.getNamedItem("Ticket").getTextContent());
+					media.drmRequest.postData += "&SessionId=" + attributes.getNamedItem("SessionId").getTextContent();
+					media.drmRequest.postData += "&Ticket=" + attributes.getNamedItem("Ticket").getTextContent();
 				}
 				catch (Exception e) {
 					e.printStackTrace();
