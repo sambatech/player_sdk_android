@@ -21,9 +21,8 @@ if [[ alreadyProd -ne 1 ]]; then
 	git pull origin master --tags
 fi
 
-# TODO: grab version from sambaplayersdk.gradle
 v=$(cat sambaplayersdk/build.gradle | grep 'versionName' | sed $'s/^[^"\']*//' | sed 's/"*//g')
-# tags type must be annotated otherwise git cannot get the correct latest
+# tags must be of annotated type otherwise git cannot get the latest correctly
 t=$(git describe --tags --abbrev=0 2> /dev/null)
 
 # if exists some tagged version
@@ -33,7 +32,7 @@ else
 	echo 'No tagged versions.'
 fi
 
-# if configured version differ from latest
+# if configured version differs from latest
 if [[ ${#v} -gt 0 && (${#t} -eq 0 || "$v" != "$t") ]]; then
 	read -p "New version detected ($v). Create new release? (Y/n) " yn < /dev/tty
 	case $yn in
