@@ -38,8 +38,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.UUID;
 
 /**
@@ -79,7 +80,7 @@ public class ExoplayerUtil {
    * Do an HTTP POST and return the data as a byte array.
    */
   public static byte[] executePost(String url, byte[] data, Map<String, String> requestProperties)
-      throws MalformedURLException, IOException {
+      throws UnsupportedDrmException, IOException {
     HttpURLConnection urlConnection = null;
     //long d = new Date().getTime();
     try {
@@ -97,6 +98,16 @@ public class ExoplayerUtil {
         out.write(data);
         out.close();
       }
+
+      urlConnection.connect();
+
+      int responseCode = urlConnection.getResponseCode();
+
+      if (responseCode < 200 || responseCode > 299) {
+        printRequestData(urlConnection);
+        throw new UnsupportedDrmException(UnsupportedDrmException.REASON_INVALID_SERVER_CODE);
+      }
+
       InputStream in = new BufferedInputStream(urlConnection.getInputStream());
       return convertInputStreamToByteArray(in);
     } finally {
@@ -128,4 +139,56 @@ public class ExoplayerUtil {
     return bytes;
   }
 
+  private static void printRequestData(HttpURLConnection con) {
+    if (con == null) return;
+
+    String headers = "";
+    String content = "";
+    String error = "";
+    String requestMethod = "";
+    String permission = "";
+    int responseCode = -1;
+    String responseMessage = "";
+
+    Scanner ctn = null;
+    Scanner ctnd = null;
+    Scanner escn = null;
+    Scanner escnd = null;
+
+    try {
+      requestMethod = con.getRequestMethod();
+      permission = con.getPermission().toString();
+      responseCode = con.getResponseCode();
+      responseMessage = con.getResponseMessage();
+
+      for (Map.Entry<String, List<String>> kv : con.getHeaderFields().entrySet())
+        headers += kv.getKey() + ": " + kv.getValue() + "\n";
+
+      ctn = new Scanner((InputStream) con.getContent());
+      ctnd = ctn.useDelimiter("\\A");
+
+      content = ctnd.hasNext() ? ctnd.next() : "";
+
+      InputStream err = con.getErrorStream();
+
+      if (err != null) {
+        escn = new Scanner(err);
+        escnd = escn.useDelimiter("\\A");
+
+        error = escnd.hasNext() ? escnd.next() : "";
+      }
+    }
+    catch (Exception e) {
+      error = "DRM connection failed.";
+    }
+    finally {
+      Log.i("DRM", String.format("Request method: %s\nPermission: %s\nResponse code: %s\nResponse msg: %s\nHeaders: %s\nContent: %s\nError: %s",
+              requestMethod, permission, responseCode, responseMessage, headers, content, error));
+
+      if (ctn != null) ctn.close();
+      if (ctnd != null) ctnd.close();
+      if (escn != null) escn.close();
+      if (escnd != null) escnd.close();
+    }
+  }
 }

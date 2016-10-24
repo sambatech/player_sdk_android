@@ -263,6 +263,7 @@ public class MediaItemActivity extends Activity {
 			    }
 			    catch (Exception e) {
 				    Log.e("SampleApp", "Error requesting DRM.");
+				    e.printStackTrace();
 			    }
 			    finally {
 				    try {

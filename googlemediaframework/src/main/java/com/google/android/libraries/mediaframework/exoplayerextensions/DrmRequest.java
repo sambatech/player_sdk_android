@@ -1,33 +1,42 @@
 package com.google.android.libraries.mediaframework.exoplayerextensions;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class DrmRequest {
 
-	public String licenseServerUrl;
-	public HashMap<String, String> requestProperties;
-	public boolean paramsByGet;
-	public String postData;
-
-	public DrmRequest() {}
-
-	public DrmRequest(String licenseServerUrl, HashMap<String, String> requestProperties) {
-		this(licenseServerUrl, requestProperties, null, false);
-	}
-
-	public DrmRequest(String licenseServerUrl, String postData) {
-		this(licenseServerUrl, null, postData, false);
-	}
+	private String licenseUrl;
+	private HashMap<String, String> urlParams = new HashMap<>();
+	private HashMap<String, String> headerParams = new HashMap<>();
 
 	/**
-	 * @param licenseServerUrl The URL for the license server.
-	 * @param requestProperties The request properties for the license server.
-	 * @param paramsByGet Should params be passed by GET?
+	 * @param licenseUrl The URL for the license server.
 	 */
-	public DrmRequest(String licenseServerUrl, HashMap<String, String> requestProperties, String postData, boolean paramsByGet) {
-		this.licenseServerUrl = licenseServerUrl;
-		this.requestProperties = requestProperties;
-		this.postData = postData;
-		this.paramsByGet = paramsByGet;
+	public DrmRequest(String licenseUrl) {
+		this.licenseUrl = licenseUrl;
+	}
+
+	public String getLicenseUrl() {
+		String params = licenseUrl.contains("?") ? "" : "?";
+		String sep = "";
+
+		for (Map.Entry<String, String> kv : urlParams.entrySet()) {
+			params += sep + kv.getKey() + "=" + kv.getValue();
+			sep = "&";
+		}
+
+		return licenseUrl + params;
+	}
+
+	public HashMap<String, String> getHeaderParams() {
+		return headerParams;
+	}
+
+	public void addUrlParam(String k, String v) {
+		urlParams.put(k, v);
+	}
+
+	public void addHeaderParam(String k, String v) {
+		headerParams.put(k, v);
 	}
 }

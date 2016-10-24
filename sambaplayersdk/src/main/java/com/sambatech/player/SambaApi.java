@@ -371,23 +371,16 @@ public class SambaApi {
 					JSONObject drm = playerSecurity.optJSONObject("drmSecurity");
 
 					if (drm != null) {
-						HashMap<String, String> requestProperties = new HashMap<>();
-						requestProperties.put("SubContentType", drm.optString("subContentType", "Default"));
-						requestProperties.put("CrmId", drm.optString("crmId"));
-						requestProperties.put("AccountId", drm.optString("accountId"));
-						requestProperties.put("ContentId", "samba1"); //media.id
-
-						String url = drm.optString("widevineSignatureURL");
-						String sep = "";
-						String postData = url.substring(37) + "?";
-
-						for (Map.Entry<String, String> kv : requestProperties.entrySet()) {
-							postData += sep + kv.getKey() + "=" + kv.getValue();
-							sep = "&";
-						}
-
-						media.url = "http://52.10.169.196:1935/Irdeto/mp4:samba1.mp4/manifest.mpd"; // TODO: remover
-						media.drmRequest = new DrmRequest(url.substring(0, 37), postData);
+						//media.url = "http://52.10.169.196:1935/Irdeto/mp4:samba1.mp4/manifest.mpd";
+						media.url = "http://107.21.208.27/vodd/_definst_/mp4:myMovie.mp4/manifest_mvlist.mpd";
+						//media.url = "http://107.21.208.27/vodd/_definst_/mp4:chaves3_480p.mp4/manifest_mvlist.mpd";
+						media.drmRequest = new DrmRequest(drm.optString("widevineSignatureURL"));
+						media.drmRequest.addUrlParam("SubContentType", drm.optString("subContentType", "Default"));
+						media.drmRequest.addUrlParam("CrmId", drm.optString("crmId"));
+						media.drmRequest.addUrlParam("AccountId", drm.optString("accountId"));
+						media.drmRequest.addUrlParam("ContentId", "samba1"); //media.id
+						//media.drmRequest.addUrlParam("ContentId", "samba3_tvod"); //media.id
+						media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
 					}
 				}
 

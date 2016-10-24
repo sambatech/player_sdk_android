@@ -52,45 +52,29 @@ public class WidevineMediaDrmCallback implements MediaDrmCallback {
 	 * @param drmRequest DRM info to play encrypted media.
 	 */
 	public WidevineMediaDrmCallback(DrmRequest drmRequest) {
-		this.drmRequest = drmRequest != null ? drmRequest : new DrmRequest();
+		this.drmRequest = drmRequest;
 	}
 
 	@Override
-	public byte[] executeProvisionRequest(UUID uuid, ProvisionRequest request) throws IOException {
+	public byte[] executeProvisionRequest(UUID uuid, ProvisionRequest request)
+			throws UnsupportedDrmException, IOException {
 		String url = request.getDefaultUrl() + "&signedRequest=" + new String(request.getData());
 		return ExoplayerUtil.executePost(url, null, null);
 	}
 
 	@Override
-	public byte[] executeKeyRequest(UUID uuid, KeyRequest request) throws IOException {
+	public byte[] executeKeyRequest(UUID uuid, KeyRequest request)
+			throws UnsupportedDrmException, IOException {
 		String url = request.getDefaultUrl();
-		HashMap<String, String> requestProperties = drmRequest.requestProperties;
-		byte[] data = request.getData();
+		HashMap<String, String> requestProperties = null;
 
-		if (drmRequest.licenseServerUrl != null) {
-			url = drmRequest.licenseServerUrl;
-
-			if (drmRequest.paramsByGet) {
-				String sep = "";
-
-				url += "?";
-
-				for (Map.Entry<String, String> kv : drmRequest.requestProperties.entrySet()) {
-					url += sep + kv.getKey() + "=" + kv.getValue();
-					sep = "&";
-				}
-
-				requestProperties = null;
-			}
-			else if (drmRequest.postData != null) {
-				data = drmRequest.postData.getBytes();
-			}
+		if (drmRequest != null) {
+			url = drmRequest.getLicenseUrl();
+			requestProperties = drmRequest.getHeaderParams();
 		}
 		else if (url.isEmpty())
 			url = WIDEVINE_GTS_DEFAULT_BASE_URI;
 
-		// Irdeto path and query string need to go by post
-		//return ExoplayerUtil.executePost(url, request.getData(), requestProperties);
-		return ExoplayerUtil.executePost(url, data, requestProperties);
+		return ExoplayerUtil.executePost(url, request.getData(), requestProperties);
 	}
 }
