@@ -2,7 +2,9 @@ package com.sambatech.sample.activities;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
+
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasAdapter;
 import com.sambatech.sample.model.LiquidMedia;
@@ -33,10 +36,7 @@ import retrofit.Retrofit;
 public class MainActivity extends Activity {
 
 	//Simple map with player hashs and their pids
-	private static final Map<Integer, String> phMap = new HashMap<Integer, String>() {{
-		put(4421, "bc6a17435f3f389f37a514c171039b75");
-		put(4460, "36098808ae444ca5de4acf231949e312");
-	}};
+	private Map<Integer, String> phMap;
 
 	@Bind(R.id.media_list) ListView list;
 	@Bind(R.id.progressbar_view) LinearLayout loading;
@@ -57,6 +57,10 @@ public class MainActivity extends Activity {
 	ArrayList<LiquidMedia> adMediaList;
 	//Controls loading
 	private Boolean loadingFlag;
+	private boolean _autoPlay = true;
+	private Drawable _autoPlayIcon;
+	private static final int _autoPlayColor = 0xff99ccff;
+	private static final int _autoPlayColorDisabled = 0xff999999;
 
 	@OnItemClick(R.id.media_list) public void mediaItemClick(int position) {
 
@@ -65,8 +69,10 @@ public class MainActivity extends Activity {
 		LiquidMedia media = (LiquidMedia) mAdapter.getItem(position);
 		media.highlighted = position == 0;
 
-		Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
 		EventBus.getDefault().postSticky(media);
+
+		Intent intent = new Intent(MainActivity.this, MediaItemActivity.class);
+		intent.putExtra("autoPlay", _autoPlay);
 		startActivity(intent);
 	}
 
@@ -76,7 +82,19 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 
 		ButterKnife.bind(this);
+
+		phMap = new HashMap<>();
+		phMap.put(4421, "bc6a17435f3f389f37a514c171039b75");
+		phMap.put(4460, "36098808ae444ca5de4acf231949e312");
+		//phMap.put(562, "b00772b75e3677dba5a59e09598b7a0d");
+
 		callCommonList();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		ButterKnife.unbind(this);
 	}
 
 	@Override
@@ -108,6 +126,11 @@ public class MainActivity extends Activity {
 		magIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
 		magIcon.setVisibility(View.INVISIBLE);
 
+		_autoPlayIcon = DrawableCompat.wrap(menu.findItem(R.id.autoPlay).getIcon()).mutate();
+
+		if (_autoPlay)
+			DrawableCompat.setTint(_autoPlayIcon, _autoPlayColor);
+
 		return true;
 	}
 
@@ -116,31 +139,47 @@ public class MainActivity extends Activity {
 		int id = item.getItemId();
 
 		if(adEnabled) {
-			MenuItem dbclick = (MenuItem) menu.findItem(R.id.withTag);
+			MenuItem dbclick = menu.findItem(R.id.withTag);
 			dbclick.setIcon(R.drawable.ic_dbclick_disable);
 			showMediasList(mediaList);
 		}
 
-		if(id == R.id.withTag && !adEnabled) {
-			getTags("4xtfj");
-			item.setIcon(R.drawable.ic_dbclick);
-			adEnabled = true;
-		}
-		else if(id == R.id.withTag && adEnabled) {
-			adEnabled = false;
-		}else if (id == R.id.common) {
-			this.mediaList.clear();
-			callCommonList();
-			adEnabled = false;
-		}else if(id == R.id.about){
-			Intent about = new Intent(this, AboutActivity.class);
-			startActivity(about);
-		}else if (id == R.id.live) {
-			this.mediaList.clear();
-			list.setAdapter(null);
-			this.mediaList = populateLiveMedias();
-			showMediasList(this.mediaList);
-			adEnabled = false;
+		switch (id) {
+			case R.id.withTag:
+				if (!adEnabled) {
+					getTags("4xtfj");
+					item.setIcon(R.drawable.ic_dbclick);
+				}
+
+				adEnabled = !adEnabled;
+				break;
+
+			case R.id.common:
+				this.mediaList.clear();
+				callCommonList();
+				adEnabled = false;
+				break;
+
+			case R.id.about:
+				Intent about = new Intent(this, AboutActivity.class);
+				startActivity(about);
+				break;
+
+			case R.id.live:
+				this.mediaList.clear();
+				list.setAdapter(null);
+				this.mediaList = populateLiveMedias();
+				showMediasList(this.mediaList);
+				adEnabled = false;
+				break;
+
+			case R.id.autoPlay:
+				if (_autoPlay)
+					DrawableCompat.setTint(_autoPlayIcon, _autoPlayColorDisabled);
+				else DrawableCompat.setTint(_autoPlayIcon, _autoPlayColor);
+
+				_autoPlay = !_autoPlay;
+				break;
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -163,8 +202,8 @@ public class MainActivity extends Activity {
 					mediaList.addAll(medias);
 					showMediasList(mediaList);
 					loadingFlag = false;
-				} else {
 				}
+
 				loading.setVisibility(View.GONE);
 			}
 
@@ -191,7 +230,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onResponse(retrofit.Response<ArrayList<LiquidMedia.AdTag>> response, Retrofit retrofit) {
 				if (response.code() == 200) {
-					ArrayList<LiquidMedia.AdTag> tags = (ArrayList<LiquidMedia.AdTag>) response.body();
+					ArrayList<LiquidMedia.AdTag> tags = response.body();
 					try {
 						ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
 						adMediaList = mediasModified;
@@ -220,35 +259,31 @@ public class MainActivity extends Activity {
 			mediaList = new ArrayList<>();
 		}
 
-		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
-		thumb.url = "http://67.media.tumblr.com/avatar_b5715f76628b_128.png";
-		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
+		// INJECTED MEDIA
 
-		LiquidMedia m = new LiquidMedia();
-		m.url = "http://wowza-hel-loadbala-tjihmv7zwnlz-966664345.us-east-1.elb.amazonaws.com/vod/_definst_/amlst:stg;cid,pid,mid;/monitoring/;video_240p.mp4,200704,320,240;/manifest_mpm4sav_mvtime.mpd";
-		m.title = "Dash sample 1";
-		m.qualifier = "VIDEO";
-		m.type = "dash";
-		m.thumbs = thumbs;
-		mediaList.add(m);
+		// Injected media sample (SambaVideos)
+		//LiquidMedia m = new LiquidMedia();
+		//m.ph = "project_hash";
+		//m.id = "media_hash";
+		//m.title = "Media title";
+		//LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+		//thumb.url = "thumb_url";
+		//ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
+		//m.thumbs = thumbs;
+		//mediaList.add(m);
 
-		m = new LiquidMedia();
-		m.url = "http://wowza-hel-loadbala-tjihmv7zwnlz-966664345.us-east-1.elb.amazonaws.com/vod/_definst_/amlst:stg;219,4421,d3ff15216acdbd9633689ca83998a8d3;/account/219/183/2016-01-08/video/;b7336c505c989d8f31ce51fefd27950b/Keep_On_Pushin__from_Ricki_Bedenbaugh_plus_240p.mp4,295936,426,240,5966d00bd7ef5044abafab8ac7221a7a/Keep_On_Pushin__from_Ricki_Bedenbaugh_plus_360p.mp4,948224,640,360,c6f7ec9b3d65325efb6a51108b0295fe/Keep_On_Pushin__from_Ricki_Bedenbaugh_plus_480p.mp4,1418240,854,480,e8a8e4581ceff50d50d01ec16e4dc4be/Keep_On_Pushin__from_Ricki_Bedenbaugh_plus_720p.mp4,2273280,1280,720,a7f09317a4681381486d2f7895281d34/Keep_On_Pushin__from_Ricki_Bedenbaugh_plus_1080p.mp4,3813376,1920,1080,;70000,120000/manifest.mpd";
-		m.title = "Dash sample 2";
-		m.qualifier = "VIDEO";
-		m.type = "dash";
-		m.thumbs = thumbs;
-		mediaList.add(m);
+		// Injected media sample 2 (external URL)
+		//LiquidMedia m = new LiquidMedia();
+		//m.url = "media_url";
+		//m.title = "Media title";
+		//mediaList.add(m);
 
 		loading.setVisibility(View.VISIBLE);
-
 		list.setAdapter(null);
 
-		//Making the call to project 4421
-		makeMediasCall(access_token, 4421);
-
-		//Making the call to project 4460
-		makeMediasCall(access_token, 4460);
+		// making the call to projects
+		for (Map.Entry<Integer, String> kv : phMap.entrySet())
+			makeMediasCall(access_token, kv.getKey());
 	}
 
 	/**
@@ -294,6 +329,7 @@ public class MainActivity extends Activity {
 		ArrayList<LiquidMedia> newMedias = new ArrayList<LiquidMedia>();
 
 		for(int i = 0; i < tags.size(); i++) {
+			//LiquidMedia m = (LiquidMedia) (i < medias.size() ? medias.get(i).clone() : newMedias.get(mIndex++).clone());
 			LiquidMedia m = new LiquidMedia();
 			if(i < medias.size()) {
 				m = (LiquidMedia) medias.get(i).clone();

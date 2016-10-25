@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.sambatech.player.BuildConfig;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -29,7 +30,6 @@ import java.util.TreeSet;
  */
 public class Tracking implements Plugin {
 
-	private SambaPlayer player;
 	private SambaMediaConfig media;
 	private Sttm sttm;
 
@@ -62,6 +62,8 @@ public class Tracking implements Plugin {
 
 		if (media.projectHash != null && media.id != null)
 			SambaEventBus.subscribe(playerListener);
+
+		PluginManagerImpl.getCurrentInstance().notifyPluginLoaded(this);
 	}
 
 	public void onDestroy() {
@@ -92,7 +94,7 @@ public class Tracking implements Plugin {
 					conn.setRequestProperty("http.agent", "chrome");
 					conn.setDoOutput(false);
 					conn.setDoInput(true);
-					InputStream is = conn.getInputStream();
+					conn.getInputStream();
 				}
 			}
 			catch (IOException e) {
@@ -120,6 +122,7 @@ public class Tracking implements Plugin {
 			if (targets.size() == 0)
 				return;
 
+			// TODO: add version to STTM (BuildConfig.VERSION_NAME)
 			new UrlTracker().execute(String.format("%s?sttmm=%s&sttmk=%s&sttms=%s&sttmu=123&sttmw=%s",
 					media.sttmUrl, TextUtils.join(",", targets), media.sttmKey, media.sessionId,
 					String.format("pid:%s/cat:%s/mid:%s", media.projectId, media.categoryId, media.id)));

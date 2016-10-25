@@ -40,6 +40,7 @@ public class SambaApi {
 	 */
 	private static final Map<String, Integer> outputMap = new HashMap<String, Integer>() {{
 		put("_raw", -1);
+		put("abr", 0);
 		put("abr_hls", 0);
 		put("240p", 1);
 		put("360p", 2);
@@ -119,11 +120,30 @@ public class SambaApi {
 		@Override
 		protected SambaMedia doInBackground(SambaMediaRequest... params) {
 			request = params[0];
-			int delimiter = request.mediaId != null ? Integer.parseInt(request.mediaId.split("(?=\\d[a-zA-Z]*$)")[1].substring(0, 1)) : 0;
 
-			String url = activity.getString(R.string.player_endpoint) + request.projectHash +
-					(request.mediaId != null ? "/" + request.mediaId : "?" +
-							(request.streamUrls.length > 0 ? "alternateLive=" + request.streamUrls[0] : "streamName=" + request.streamName));
+			int delimiter = request.mediaId != null ? Integer.parseInt(request.mediaId.split("(?=\\d[a-zA-Z]*$)")[1].substring(0, 1)) : 0;
+			String endpoint;
+
+			switch (request.environment) {
+				case LOCAL:
+					endpoint = activity.getString(R.string.player_endpoint_local);
+					break;
+
+				case TEST:
+					endpoint = activity.getString(R.string.player_endpoint_test);
+					break;
+
+				case STAGING:
+					endpoint = activity.getString(R.string.player_endpoint_staging);
+					break;
+
+				case PROD:
+				default:
+					endpoint = activity.getString(R.string.player_endpoint_prod);
+			}
+
+			String url = endpoint + request.projectHash + (request.mediaId != null ? "/" + request.mediaId : "?" +
+					(request.streamUrls.length > 0 ? "alternateLive=" + request.streamUrls[0] : "streamName=" + request.streamName));
 
 			InputStream inputStream = null;
 			Scanner scanner = null;
@@ -215,13 +235,13 @@ public class SambaApi {
 
 				JSONObject playerConfig = json.getJSONObject("playerConfig");
 				JSONObject apiConfig = json.getJSONObject("apiConfig");
+				JSONObject playerSecurity = json.optJSONObject("playerSecurity");
 				JSONObject projectConfig = json.getJSONObject("project");
 				JSONArray ads = json.optJSONArray("advertisings");
 
 				media.projectHash = projectConfig.getString("playerHash");
 				media.projectId = projectConfig.getInt("id");
 				media.title = json.getString("title");
-				media.outputs = new ArrayList<>();
 				media.isAudioOnly = qualifier.equals("audio");
 
 				if (json.has("id"))
@@ -237,21 +257,37 @@ public class SambaApi {
 					JSONObject rule;
 					JSONArray outputs;
 					JSONObject output;
+					ArrayList<SambaMedia.Output> mediaOutputs;
 					String defaultOutputCurrent;
+					String type;
+					boolean isStreaming;
 
-					// looks for HLS delivery or the last taken
+					// looks for Dash, HLS or the last taken
 					ArrayList<String> filledRules = new ArrayList<>();
 					for (int i = 0; i < totalRules; ++i) {
 						rule = rules.getJSONObject(i);
-						media.type = rule.getString("urlType").toLowerCase();
+						type = rule.getString("urlType").toLowerCase();
 
-						if(filledRules.contains(media.type)) continue;
+						// must be one of the following delivery types
+						switch (type) {
+							case "dash":
+							case "hls":
+							case "progressive":
+								// do not repeat and keep priorities (dash, hls, progressive)
+								if (filledRules.contains(type) ||
+										type.equals("progressive") && filledRules.contains("hls") ||
+										(type.equals("progressive") || type.equals("hls")) && filledRules.contains("dash"))
+									continue;
+								break;
+							default:
+								continue;
+						}
 
-						if (!media.type.equals("hls") && !media.type.equals("progressive"))
-							continue;
-
+						media.type = type;
+						mediaOutputs = new ArrayList<>();
 						outputs = rule.getJSONArray("outputs");
-						defaultOutputCurrent = media.type.equals("hls") ? "abr_hls" : defaultOutput;
+						isStreaming = type.equals("hls") || type.equals("dash");
+						defaultOutputCurrent = isStreaming ? "abr" : defaultOutput;
 
 						for (int j = outputs.length(); j-- > 0;) {
 							output = outputs.getJSONObject(j);
@@ -259,38 +295,38 @@ public class SambaApi {
 
 							SambaMedia.Output cOutput = new SambaMedia.Output();
 							cOutput.url = output.getString("url");
-							cOutput.label = (output.getString("outputName").equals("abr_hls")) ? "auto" : output.getString("outputName");
+							cOutput.label = output.getString("outputName").startsWith("abr") ? "Auto" : output.getString("outputName");
 							cOutput.position = outputMap.get(output.getString("outputName").toLowerCase());
 
 							if (media.isAudioOnly) {
-								media.outputs.add(cOutput);
+								if (!isStreaming || !cOutput.url.contains(".mp3"))
+									mediaOutputs.add(cOutput);
 								continue;
 							}
 
-							//TODO checar comportamento de projeto sem default output
+							// TODO: checar comportamento de projeto sem default output
 							if (!label.equalsIgnoreCase("_raw") && !output.isNull("url")) {
-								if (label.equals(defaultOutputCurrent)) {
-
-									// if HLS (MBR), set to exit loop
-									if (media.type.equals("hls"))
-										i = totalRules;
-
+								if (label.startsWith(defaultOutputCurrent)) {
 									media.url = output.getString("url");
 									cOutput.current = true;
-									media.outputs.add(cOutput);
 								}
-								else media.outputs.add(cOutput);
+
+								mediaOutputs.add(cOutput);
 							}
 						}
 
-						if(media.url == null) {
-							media.url = media.outputs.get(0).url;
-						}
+						// was it a valid iteration?
+						if (mediaOutputs.size() > 0) {
+							if (media.url == null)
+								media.url = mediaOutputs.get(0).url;
 
-						filledRules.add(media.type);
+							media.outputs = mediaOutputs;
+							filledRules.add(media.type);
+						}
 					}
 
-					sortOutputs(media.outputs);
+					if (media.outputs != null)
+						sortOutputs(media.outputs);
 
 				}
 				else if (json.has("liveOutput")) {
@@ -300,6 +336,8 @@ public class SambaApi {
 					// media type relies on URL
 					if (media.url.contains(".m3u8"))
 						media.type = "hls";
+					else if (media.url.contains(".mpd"))
+						media.type = "dash";
 				}
 
 				JSONArray thumbs = json.optJSONArray("thumbnails");
@@ -321,7 +359,7 @@ public class SambaApi {
 					media.sttmKey = sttm.optString("key", "ae810ebc7f0654c4fadc50935adcf5ec");
 				}
 
-				if (ads != null && ads.length() > 0) {
+				if (!media.isAudioOnly && (ads != null && ads.length() > 0)) {
 					JSONObject ad = ads.optJSONObject(0);
 
 					if (ad.getString("adServer").equalsIgnoreCase("dfp"))

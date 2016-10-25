@@ -11,6 +11,7 @@ public class SambaMediaRequest {
 	public String mediaId;
 	public String streamName;
 	public String[] streamUrls;
+	public Environment environment = Environment.PROD;
 
 	/**
 	 * Represents a VOD media request.
@@ -63,5 +64,12 @@ public class SambaMediaRequest {
 	@Override
 	public String toString() {
 		return String.format("projectHash: %s, id: %s, streamName: %s, streamUrls: %s", projectHash, mediaId, streamName, streamUrls.length > 0 ? streamUrls[0] : null);
+	}
+
+	public enum Environment {
+		LOCAL,
+		TEST,
+		STAGING,
+		PROD
 	}
 }

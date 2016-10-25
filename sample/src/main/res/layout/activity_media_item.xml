@@ -56,6 +56,24 @@
         android:paddingLeft="@dimen/activity_vertical_margin"
         android:textSize="20sp"/>
 
+    <Button
+        android:id="@+id/play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/description"
+        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+        android:text="Play"/>
+
+    <Button
+        android:id="@+id/pause"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/description"
+        android:layout_toEndOf="@id/play"
+        android:layout_toRightOf="@id/play"
+        style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+        android:text="Pause"/>
+
     <TextView
         android:id="@+id/status"
         android:layout_width="match_parent"

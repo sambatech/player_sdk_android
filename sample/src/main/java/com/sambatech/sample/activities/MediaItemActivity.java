@@ -1,7 +1,9 @@
 package com.sambatech.sample.activities;
 
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -14,14 +16,21 @@ import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Map;
 import java.util.Random;
+import java.util.Scanner;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 public class MediaItemActivity extends Activity {
@@ -46,6 +55,8 @@ public class MediaItemActivity extends Activity {
 	@Bind(R.id.loading_text)
 	TextView loading_text;
 
+	private boolean _autoPlay;
+	//private long ti; // benchmark
 
 	/**
 	 * Player Events
@@ -62,11 +73,13 @@ public class MediaItemActivity extends Activity {
 	private SambaPlayerListener playerListener = new SambaPlayerListener() {
 		@Override
 		public void onLoad(SambaEvent e) {
+			//Log.i("bench", String.format("Load time: %s", new Date().getTime() - ti));
 			status.setText(String.format("Status: %s", e.getType()));
 		}
 
 		@Override
 		public void onPlay(SambaEvent e) {
+			//Log.i("bench", String.format("Play time: %s", new Date().getTime() - ti));
 			status.setText(String.format("Status: %s", e.getType()));
 		}
 
@@ -106,10 +119,13 @@ public class MediaItemActivity extends Activity {
 		}
 	};
 
-    @Override
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media_item);
+
+		if (getIntent() != null)
+			_autoPlay = getIntent().getBooleanExtra("autoPlay", true);
 
         ButterKnife.bind(this);
 
@@ -118,7 +134,6 @@ public class MediaItemActivity extends Activity {
 
 	    if (activityMedia == null) {
 		    activityMedia = EventBus.getDefault().removeStickyEvent(LiquidMedia.class);
-
 		    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
 	    }
 
@@ -130,15 +145,13 @@ public class MediaItemActivity extends Activity {
 	 * Subscribe the listeners of the player
 	 */
     private void initPlayer() {
-        SambaEventBus.unsubscribe(playerListener);
         SambaEventBus.subscribe(playerListener);
     }
 
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-        player.destroy();
-        finish();
+		destroy();
     }
 
     @Override
@@ -147,8 +160,17 @@ public class MediaItemActivity extends Activity {
 
         if (player != null && player.hasStarted())
             player.pause();
-
     }
+
+	@OnClick(R.id.play) public void playHandler() {
+		if (player != null)
+			player.play();
+	}
+
+	@OnClick(R.id.pause) public void pauseHandler() {
+		if (player != null)
+			player.pause();
+	}
 
 	/**
 	 * Request the given media
@@ -170,6 +192,9 @@ public class MediaItemActivity extends Activity {
 
 	    //Instantiate a unique request. Params: playerHash, mediaId, streamName, streamUrl ( alternateLive on our browser version )
         SambaMediaRequest sbRequest = new SambaMediaRequest(media.ph, media.id, null, media.streamUrl);
+
+	    if (media.environment != null)
+		    sbRequest.environment = media.environment;
 
 	    if(media.description != null || media.shortDescription != null) {
 		    descView.setText(((media.description != null) ? media.description : ""
@@ -203,39 +228,44 @@ public class MediaItemActivity extends Activity {
 	    titleView.setVisibility(View.VISIBLE);
         titleView.setText(media.title);
 
-
-	    /** If audio, we recommend you to customize the player's height**/
-	    if (media.isAudioOnly) {
-		    player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
+		/** If audio, we recommend you to customize the player's height**/
+		if (media.isAudioOnly) {
+			player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
 			player.setLayoutParams(player.getLayoutParams());
-	    }
+		}
 
-        player.setMedia(media);
+		player.setMedia(media);
 
-	    //Disable controls randomically
-	    Random random = new Random();
-	    Boolean flag = random.nextBoolean();
+		//Disable controls randomically
+		Random random = new Random();
+		Boolean flag = random.nextBoolean();
 
-	    //Set enable controls
-	    player.setEnableControls(flag);
-	    if(!flag)
-		    descView.setText("Mídia com controls desabilitados");
+		//Set enable controls
+		player.setEnableControls(flag);
 
-	    //Play the media programmatically on its load ( similar to autoPlay=true param )
-        player.play();
+		if (!flag)
+			descView.setText("Mídia com controls desabilitados");
 
-    }
+		//ti = new Date().getTime();
+
+		if (_autoPlay)
+			player.play();
+	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		player.destroy();
-		finish();
+		destroy();
 	}
 
 	@Override
 	protected void onStop() {
 		super.onStop();
+		destroy();
+	}
+
+	private void destroy() {
+		SambaEventBus.unsubscribe(playerListener);
 		player.destroy();
 		finish();
 	}

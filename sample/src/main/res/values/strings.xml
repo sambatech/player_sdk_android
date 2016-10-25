@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SBPlayer Sample</string>
+    <string name="app_name">SBPlayer</string>
 
     <string name="sambaapi_endpoint">http://api.sambavideos.sambatech.com/v1/</string>
     <string name="mysjon_endpoint">https://api.myjson.com/bins/</string>
