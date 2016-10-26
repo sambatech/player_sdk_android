@@ -38,6 +38,7 @@ if [[ ${#v} -gt 0 && (${#t} -eq 0 || "$v" != "$t") ]]; then
 	case $yn in
 	Y )
 		git tag -a $v -m "$(git log --oneline -n 1)"
+		# TODO: update README.md
 		git push origin $v --no-verify
 		;;
 	esac
