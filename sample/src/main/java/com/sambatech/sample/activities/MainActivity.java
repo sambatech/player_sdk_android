@@ -14,24 +14,16 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
-import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
-import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasAdapter;
 import com.sambatech.sample.model.LiquidMedia;
 import com.sambatech.sample.rest.LiquidApi;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import butterknife.Bind;
 import butterknife.BindString;
@@ -70,8 +62,6 @@ public class MainActivity extends Activity {
 	private Drawable _autoPlayIcon;
 	private static final int _autoPlayColor = 0xff99ccff;
 	private static final int _autoPlayColorDisabled = 0xff999999;
-	private LiquidMedia.ValidationRequest validationRequestIrdeto;
-	private LiquidMedia.ValidationRequest validationRequestAxinom;
 
 	@OnItemClick(R.id.media_list) public void mediaItemClick(int position) {
 
@@ -246,8 +236,8 @@ public class MainActivity extends Activity {
 						ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
 						adMediaList = mediasModified;
 						showMediasList(adMediaList);
-					} catch (CloneNotSupportedException e) {
 					}
+					catch (CloneNotSupportedException e) {}
 				} else {
 					Toast.makeText(MainActivity.this, "Tags não achadas no id: " + jsonId, Toast.LENGTH_SHORT).show();
 				}
@@ -272,10 +262,10 @@ public class MainActivity extends Activity {
 
 		// Injected medias
 
-		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+		/*LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
 		thumb.url = "http://pcgamingwiki.com/images/thumb/b/b3/DRM-free_icon.svg/120px-DRM-free_icon.svg.png";
 		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
-		LiquidMedia m;
+		LiquidMedia m;*/
 
 		// AXINOM
 		/*m = new LiquidMedia();
@@ -288,15 +278,15 @@ public class MainActivity extends Activity {
 
 		// IRDETO
 		//b00772b75e3677dba5a59e09598b7a0d be4a12397143caf9ec41c9acb98728bf
-		m = new LiquidMedia();
+		/*m = new LiquidMedia();
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "4a48d2ea922217a3d91771f2acf56fdf";
-		m.validationRequest = getValidationRequestIrdeto();
+		m.validationRequest = new LiquidMedia.ValidationRequest(10);
 		m.environment = SambaMediaRequest.Environment.TEST;
 		m.title = "DRM Irdeto (pol#7)";
 		m.type = "dash";
 		m.thumbs = thumbs;
-		mediaList.add(m);
+		mediaList.add(m);*/
 
 		loading.setVisibility(View.VISIBLE);
 		list.setAdapter(null);
@@ -306,7 +296,7 @@ public class MainActivity extends Activity {
 			makeMediasCall(access_token, kv.getKey());
 	}
 
-	private LiquidMedia.ValidationRequest getValidationRequestAxinom() {
+	/*private LiquidMedia.ValidationRequest getValidationRequestAxinom() {
 		if (validationRequestAxinom != null) return validationRequestAxinom;
 
 		return validationRequestAxinom = new LiquidMedia.ValidationRequest("https://drmIrdeto-quick-start.azurewebsites.net/api/authorization/Axinom%20demo%20video", new LiquidMedia.DrmCallback() {
@@ -317,32 +307,7 @@ public class MainActivity extends Activity {
 				media.drmRequest.addHeaderParam("X-AxDRM-Message", response.substring(1, response.length() - 1));
 			}
 		});
-	}
-
-	private LiquidMedia.ValidationRequest getValidationRequestIrdeto() {
-		if (validationRequestIrdeto != null) return validationRequestIrdeto;
-
-		HashMap<String, String> headers = new HashMap<>();
-		headers.put("MAN-user-id", "app@sambatech.com");
-		headers.put("MAN-user-password", "c5kU6DCTmomi9fU");
-
-		return validationRequestIrdeto = new LiquidMedia.ValidationRequest("http://sambatech.stage.ott.irdeto.com/services/CreateSession?CrmId=sambatech&UserId=smbUserTest", headers, new LiquidMedia.DrmCallback() {
-			public void call(SambaMediaConfig media, String response) {
-				if (media.drmRequest == null) return;
-
-				try {
-					Document parse = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(response.getBytes()));
-					NamedNodeMap attributes = parse.getElementsByTagName("Session").item(0).getAttributes();
-
-					media.drmRequest.addUrlParam("SessionId", attributes.getNamedItem("SessionId").getTextContent());
-					media.drmRequest.addUrlParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+	}*/
 
 	/**
 	 * Populates the MediaItem with the given medias

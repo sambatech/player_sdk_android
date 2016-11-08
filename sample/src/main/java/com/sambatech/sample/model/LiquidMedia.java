@@ -4,7 +4,6 @@ import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by tmiranda on 12/01/16.
@@ -53,24 +52,12 @@ public class LiquidMedia implements Cloneable {
         public String url;
     }
 
-	public interface DrmCallback {
-		void call(SambaMediaConfig media, String response);
-	}
-
     public static class ValidationRequest {
-        public String url;
-	    public HashMap<String, String> headers;
-	    public DrmCallback callback;
+        public final int packageId;
 	    public SambaMediaConfig media;
 
-	    public ValidationRequest(String url, DrmCallback callback) {
-		    this(url, null, callback);
+	    public ValidationRequest(int packageId) {
+		    this.packageId = packageId;
 	    }
-
-        public ValidationRequest(String url, HashMap<String, String> headers, DrmCallback callback) {
-            this.url = url;
-	        this.headers = headers;
-	        this.callback = callback;
-        }
     }
 }

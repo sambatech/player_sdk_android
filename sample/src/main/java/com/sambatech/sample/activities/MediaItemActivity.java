@@ -1,9 +1,7 @@
 package com.sambatech.sample.activities;
 
 import android.app.Activity;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,14 +26,8 @@ import org.w3c.dom.NamedNodeMap;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Scanner;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -282,80 +274,14 @@ public class MediaItemActivity extends Activity {
     }
 
     private void loadPlayer(final SambaMedia media) {
+	    if (activityMedia.url != null)
+		    media.url = activityMedia.url;
+
 	    if (activityMedia.adTag != null) {
 		    media.adUrl = activityMedia.adTag.url;
 		    media.title = activityMedia.adTag.name;
 	    }
 
-	    // if DRM media
-	    String drmUrl = validationRequest != null ? validationRequest.url : "";
-
-	    if (drmUrl.isEmpty()) {
-		    doLoadMedia(media);
-		    return;
-	    }
-
-	    new AsyncTask<String, Void, String>() {
-
-		    @Override
-		    protected String doInBackground(String... params) {
-			    URLConnection connection = null;
-			    InputStream inputStream = null;
-			    Scanner scanner = null;
-			    Scanner scannerDelimited = null;
-
-			    try {
-				    connection = new URL(params[0]).openConnection();
-
-				    if (validationRequest.headers != null) {
-					    connection.setDoOutput(true); // WARNING: assume POST
-
-					    for (Map.Entry<String, String> kv : validationRequest.headers.entrySet())
-						    connection.addRequestProperty(kv.getKey(), kv.getValue());
-				    }
-
-				    inputStream = connection.getInputStream();
-				    scanner = new Scanner(inputStream);
-				    scannerDelimited = scanner.useDelimiter("\\A");
-
-				    return scannerDelimited.hasNext() ? scannerDelimited.next() : "";
-			    }
-			    catch (Exception e) {
-				    Log.e("SampleApp", "Error requesting DRM.");
-				    e.printStackTrace();
-			    }
-			    finally {
-				    try {
-					    if (inputStream != null)
-						    inputStream.close();
-
-					    if (scanner != null)
-						    scanner.close();
-
-					    if (scannerDelimited != null)
-						    scannerDelimited.close();
-				    }
-				    catch (Exception e) {
-					    Log.e("SampleApp", "Error closing DRM request stream.");
-				    }
-			    }
-
-			    return null;
-		    }
-
-		    @Override
-		    protected void onPostExecute(String response) {
-			    SambaMediaConfig m = (SambaMediaConfig)media;
-
-			    if (m != null)
-			        validationRequest.callback.call(m, response);
-
-			    doLoadMedia(media);
-		    }
-	    }.execute(drmUrl);
-    }
-
-	private void doLoadMedia(SambaMedia media) {
 		loading.setVisibility(View.GONE);
 		titleView.setVisibility(View.VISIBLE);
 		titleView.setText(media.title);
@@ -368,7 +294,7 @@ public class MediaItemActivity extends Activity {
 
 		player.setMedia(media);
 
-		//Disable controls randomically
+		/*//Disable controls randomically
 		Random random = new Random();
 		Boolean flag = random.nextBoolean();
 
@@ -376,7 +302,7 @@ public class MediaItemActivity extends Activity {
 		player.setEnableControls(flag);
 
 		if (!flag)
-			descView.setText("Mídia com controls desabilitados");
+			descView.setText("Mídia com controls desabilitados");*/
 
 		//ti = new Date().getTime();
 
