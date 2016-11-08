@@ -54,7 +54,7 @@ public class LiquidMedia implements Cloneable {
 
     public static class ValidationRequest {
         public final int packageId;
-	    public SambaMediaConfig media;
+	    //public SambaMediaConfig media;
 
 	    public ValidationRequest(int packageId) {
 		    this.packageId = packageId;

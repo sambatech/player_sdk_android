@@ -174,7 +174,7 @@ public class MediaItemActivity extends Activity {
 	}
 
 	@OnClick(R.id.create_session) public void createSessionHandler() {
-		if (validationRequest == null || validationRequest.media == null) return;
+		/*if (validationRequest == null || validationRequest.media == null) return;
 
 		final DrmRequest drmRequest = validationRequest.media.drmRequest;
 
@@ -208,7 +208,7 @@ public class MediaItemActivity extends Activity {
 		}
 		catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	@OnClick(R.id.authorize) public void authorizeHandler() {
@@ -229,7 +229,7 @@ public class MediaItemActivity extends Activity {
 			    LiquidMedia.ValidationRequest validationRequest = liquidMedia.validationRequest;
 
 			    if (validationRequest != null) {
-				    validationRequest.media = (SambaMediaConfig)media;
+				    //validationRequest.media = (SambaMediaConfig)media;
 				    MediaItemActivity.this.validationRequest = validationRequest;
 
 				    validationControlbar.setVisibility(View.VISIBLE);
