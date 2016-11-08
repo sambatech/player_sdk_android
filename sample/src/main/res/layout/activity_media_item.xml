@@ -30,7 +30,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/samba_player2"
         android:padding="@dimen/activity_vertical_margin"
-        android:textSize="30sp"/>
+        android:maxLines="2"
+        android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/duration"
@@ -52,15 +53,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title"
-        android:text=""
+        android:maxLength="100"
         android:paddingLeft="@dimen/activity_vertical_margin"
-        android:textSize="20sp"/>
+        android:textSize="12sp"/>
 
     <Button
         android:id="@+id/play"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/description"
+        android:layout_above="@+id/validation_controlbar"
         style="@android:style/Widget.DeviceDefault.Button.Small"
         android:text="Play"/>
 
@@ -68,40 +69,11 @@
         android:id="@+id/pause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/description"
+        android:layout_above="@+id/validation_controlbar"
         android:layout_toEndOf="@id/play"
         android:layout_toRightOf="@id/play"
         style="@android:style/Widget.DeviceDefault.Button.Small"
         android:text="Pause"/>
-
-    <LinearLayout
-        android:id="@+id/validationControlbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@id/play">
-
-        <Button
-            android:id="@+id/create_session"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@android:style/Widget.DeviceDefault.Button.Small"
-            android:text="Create Session"/>
-
-        <Button
-            android:id="@+id/authorize"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@android:style/Widget.DeviceDefault.Button.Small"
-            android:text="Authorize"/>
-
-        <Button
-            android:id="@+id/load"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@android:style/Widget.DeviceDefault.Button.Small"
-            android:text="Load"/>
-    </LinearLayout>
 
     <TextView
         android:id="@+id/status"
@@ -139,6 +111,36 @@
 
         </LinearLayout>
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/validation_controlbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="invisible"
+        android:layout_above="@id/status">
+
+        <Button
+            android:id="@+id/create_session"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.DeviceDefault.Button.Small"
+            android:text="Create Session"/>
+
+        <Button
+            android:id="@+id/authorize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.DeviceDefault.Button.Small"
+            android:text="Authorize"/>
+
+        <Button
+            android:id="@+id/load"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.DeviceDefault.Button.Small"
+            android:text="Load"/>
     </LinearLayout>
 
 </RelativeLayout>

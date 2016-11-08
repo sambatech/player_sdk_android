@@ -58,11 +58,12 @@ public class MediaItemActivity extends Activity {
 	@Bind(R.id.loading_text)
 	TextView loading_text;
 
-	@Bind(R.id.validationControlbar)
+	@Bind(R.id.validation_controlbar)
 	View validationControlbar;
 
 	private boolean _autoPlay;
 	private LiquidMedia.ValidationRequest validationRequest;
+	private SambaMediaConfig media;
 	//private long ti; // benchmark
 
 	/**
@@ -163,58 +164,6 @@ public class MediaItemActivity extends Activity {
             player.pause();
     }
 
-	@OnClick(R.id.play) public void playHandler() {
-		if (player != null)
-			player.play();
-	}
-
-	@OnClick(R.id.pause) public void pauseHandler() {
-		if (player != null)
-			player.pause();
-	}
-
-	@OnClick(R.id.create_session) public void createSessionHandler() {
-		/*if (validationRequest == null || validationRequest.media == null) return;
-
-		final DrmRequest drmRequest = validationRequest.media.drmRequest;
-
-		status.setText("Creating session...");
-
-		try {
-			HttpURLConnection con = (HttpURLConnection)new URL("http://sambatech.stage.ott.irdeto.com/services/CreateSession?CrmId=sambatech&UserId=smbUserTest").openConnection();
-
-			con.setRequestMethod("POST");
-			con.addRequestProperty("MAN-user-id", "app@sambatech.com");
-			con.addRequestProperty("MAN-user-password", "c5kU6DCTmomi9fU");
-
-			Helpers.requestUrl(con, new Helpers.Callback() {
-				@Override
-				public void call(String response) {
-					try {
-						Document parse = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(response.getBytes()));
-						NamedNodeMap attributes = parse.getElementsByTagName("Session").item(0).getAttributes();
-						String sessionId = attributes.getNamedItem("SessionId").getTextContent();
-
-						drmRequest.addUrlParam("SessionId", sessionId);
-						drmRequest.addUrlParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
-
-						status.setText(String.format("Session: %s", sessionId));
-					}
-					catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			});
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}*/
-	}
-
-	@OnClick(R.id.authorize) public void authorizeHandler() {
-		status.setText("Authorizing...");
-	}
-
 	/**
 	 * Request the given media
 	 * @param liquidMedia - Liquid media object
@@ -229,10 +178,14 @@ public class MediaItemActivity extends Activity {
 			    LiquidMedia.ValidationRequest validationRequest = liquidMedia.validationRequest;
 
 			    if (validationRequest != null) {
-				    //validationRequest.media = (SambaMediaConfig)media;
+				    MediaItemActivity.this.media = (SambaMediaConfig)media;
 				    MediaItemActivity.this.validationRequest = validationRequest;
 
+				    loading.setVisibility(View.GONE);
+				    titleView.setVisibility(View.VISIBLE);
+				    titleView.setText(media.title);
 				    validationControlbar.setVisibility(View.VISIBLE);
+				    return;
 			    }
 
 			    loadPlayer(media);
@@ -274,6 +227,8 @@ public class MediaItemActivity extends Activity {
     }
 
     private void loadPlayer(final SambaMedia media) {
+	    if (media == null) return;
+	    
 	    if (activityMedia.url != null)
 		    media.url = activityMedia.url;
 
@@ -320,6 +275,62 @@ public class MediaItemActivity extends Activity {
 	protected void onStop() {
 		super.onStop();
 		destroy();
+	}
+
+	@OnClick(R.id.play) public void playHandler() {
+		if (player != null)
+			player.play();
+	}
+
+	@OnClick(R.id.pause) public void pauseHandler() {
+		if (player != null)
+			player.pause();
+	}
+
+	@OnClick(R.id.create_session) public void createSessionHandler() {
+		if (media == null) return;
+
+		final DrmRequest drmRequest = media.drmRequest;
+
+		status.setText("Creating session...");
+
+		try {
+			HttpURLConnection con = (HttpURLConnection)new URL("http://sambatech.stage.ott.irdeto.com/services/CreateSession?CrmId=sambatech&UserId=smbUserTest").openConnection();
+
+			con.setRequestMethod("POST");
+			con.addRequestProperty("MAN-user-id", "app@sambatech.com");
+			con.addRequestProperty("MAN-user-password", "c5kU6DCTmomi9fU");
+
+			Helpers.requestUrl(con, new Helpers.Callback() {
+				@Override
+				public void call(String response) {
+					try {
+						Document parse = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(response.getBytes()));
+						NamedNodeMap attributes = parse.getElementsByTagName("Session").item(0).getAttributes();
+						String sessionId = attributes.getNamedItem("SessionId").getTextContent();
+
+						drmRequest.addUrlParam("SessionId", sessionId);
+						drmRequest.addUrlParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
+
+						status.setText(String.format("Session: %s", sessionId));
+					}
+					catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@OnClick(R.id.authorize) public void authorizeHandler() {
+		status.setText("Authorizing...");
+	}
+
+	@OnClick(R.id.load) public void loadHandler() {
+		loadPlayer(media);
 	}
 
 	private void destroy() {

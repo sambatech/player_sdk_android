@@ -262,10 +262,10 @@ public class MainActivity extends Activity {
 
 		// Injected medias
 
-		/*LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+		LiquidMedia m;
+		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
 		thumb.url = "http://pcgamingwiki.com/images/thumb/b/b3/DRM-free_icon.svg/120px-DRM-free_icon.svg.png";
 		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
-		LiquidMedia m;*/
 
 		// AXINOM
 		/*m = new LiquidMedia();
@@ -278,7 +278,7 @@ public class MainActivity extends Activity {
 
 		// IRDETO
 		//b00772b75e3677dba5a59e09598b7a0d be4a12397143caf9ec41c9acb98728bf
-		/*m = new LiquidMedia();
+		m = new LiquidMedia();
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "4a48d2ea922217a3d91771f2acf56fdf";
 		m.validationRequest = new LiquidMedia.ValidationRequest(10);
@@ -286,7 +286,7 @@ public class MainActivity extends Activity {
 		m.title = "DRM Irdeto (pol#7)";
 		m.type = "dash";
 		m.thumbs = thumbs;
-		mediaList.add(m);*/
+		mediaList.add(m);
 
 		loading.setVisibility(View.VISIBLE);
 		list.setAdapter(null);
