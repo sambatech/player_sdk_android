@@ -33,7 +33,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer, PluginM
 		controllerReal.setAutoFullscreenMode(autoFsMode);
 		controllerReal.setEnableControls(enableControls);
 
-		(new PluginManagerImpl()).onLoad(this);
+		PluginManagerImpl.getCurrentInstance().onLoad(this);
 	}
 
 	public SambaMedia getMedia() {

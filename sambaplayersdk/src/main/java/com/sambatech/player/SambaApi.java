@@ -371,15 +371,10 @@ public class SambaApi {
 					JSONObject drm = playerSecurity.optJSONObject("drmSecurity");
 
 					if (drm != null) {
-						//media.url = "http://52.10.169.196:1935/Irdeto/mp4:samba1.mp4/manifest.mpd";
-						media.url = "http://107.21.208.27/vodd/_definst_/mp4:myMovie.mp4/manifest_mvlist.mpd";
-						//media.url = "http://107.21.208.27/vodd/_definst_/mp4:chaves3_480p.mp4/manifest_mvlist.mpd";
 						media.drmRequest = new DrmRequest(drm.optString("widevineSignatureURL"));
 						media.drmRequest.addUrlParam("SubContentType", drm.optString("subContentType", "Default"));
 						media.drmRequest.addUrlParam("CrmId", drm.optString("crmId"));
 						media.drmRequest.addUrlParam("AccountId", drm.optString("accountId"));
-						media.drmRequest.addUrlParam("ContentId", "samba1"); //media.id
-						//media.drmRequest.addUrlParam("ContentId", "samba3_tvod"); //media.id
 						media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
 					}
 				}

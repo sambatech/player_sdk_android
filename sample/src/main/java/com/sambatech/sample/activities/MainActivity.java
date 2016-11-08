@@ -281,7 +281,8 @@ public class MainActivity extends Activity {
 		m = new LiquidMedia();
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "4a48d2ea922217a3d91771f2acf56fdf";
-		m.validationRequest = new LiquidMedia.ValidationRequest(10);
+		m.url = "http://107.21.208.27/vodd/_definst_/mp4:myMovie.mp4/manifest_mvlist.mpd";
+		m.validationRequest = new LiquidMedia.ValidationRequest(10, "samba_p7_test");
 		m.environment = SambaMediaRequest.Environment.TEST;
 		m.title = "DRM Irdeto (pol#7)";
 		m.type = "dash";

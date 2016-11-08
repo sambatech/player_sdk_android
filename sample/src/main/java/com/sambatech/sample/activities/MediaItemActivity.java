@@ -177,6 +177,9 @@ public class MediaItemActivity extends Activity {
 
 			    LiquidMedia.ValidationRequest validationRequest = liquidMedia.validationRequest;
 
+			    if (liquidMedia.url != null)
+				    media.url = liquidMedia.url;
+
 			    if (validationRequest != null) {
 				    MediaItemActivity.this.media = (SambaMediaConfig)media;
 				    MediaItemActivity.this.validationRequest = validationRequest;
@@ -199,7 +202,7 @@ public class MediaItemActivity extends Activity {
 	    };
 
 	    // if injected media
-	    if (liquidMedia.url != null && !liquidMedia.url.isEmpty()) {
+	    if (liquidMedia.ph == null && liquidMedia.url != null && !liquidMedia.url.isEmpty()) {
 		    SambaMediaConfig m = new SambaMediaConfig();
 		    m.url = liquidMedia.url;
 		    m.title = liquidMedia.title;
@@ -228,9 +231,6 @@ public class MediaItemActivity extends Activity {
 
     private void loadPlayer(final SambaMedia media) {
 	    if (media == null) return;
-	    
-	    if (activityMedia.url != null)
-		    media.url = activityMedia.url;
 
 	    if (activityMedia.adTag != null) {
 		    media.adUrl = activityMedia.adTag.url;
@@ -288,7 +288,8 @@ public class MediaItemActivity extends Activity {
 	}
 
 	@OnClick(R.id.create_session) public void createSessionHandler() {
-		if (media == null) return;
+		if (validationRequest == null || media == null ||
+				media.drmRequest == null) return;
 
 		final DrmRequest drmRequest = media.drmRequest;
 
@@ -311,6 +312,7 @@ public class MediaItemActivity extends Activity {
 
 						drmRequest.addUrlParam("SessionId", sessionId);
 						drmRequest.addUrlParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
+						drmRequest.addUrlParam("ContentId", validationRequest.contentId);
 
 						status.setText(String.format("Session: %s", sessionId));
 					}
