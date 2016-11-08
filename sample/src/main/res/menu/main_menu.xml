@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/addTag"
+        android:id="@+id/adTag"
         android:orderInCategory="100"
         android:title="+"
         android:showAsAction="always"

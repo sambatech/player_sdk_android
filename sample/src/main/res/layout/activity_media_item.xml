@@ -61,7 +61,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/description"
-        style="@android:style/Widget.Holo.Button.Borderless"
+        style="@android:style/Widget.DeviceDefault.Button.Small"
         android:text="Play"/>
 
     <Button
@@ -71,8 +71,37 @@
         android:layout_below="@id/description"
         android:layout_toEndOf="@id/play"
         android:layout_toRightOf="@id/play"
-        style="@android:style/Widget.Holo.Button.Borderless"
+        style="@android:style/Widget.DeviceDefault.Button.Small"
         android:text="Pause"/>
+
+    <LinearLayout
+        android:id="@+id/validationControlbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/play">
+
+        <Button
+            android:id="@+id/create_session"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.DeviceDefault.Button.Small"
+            android:text="Create Session"/>
+
+        <Button
+            android:id="@+id/authorize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.DeviceDefault.Button.Small"
+            android:text="Authorize"/>
+
+        <Button
+            android:id="@+id/load"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.DeviceDefault.Button.Small"
+            android:text="Load"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/status"

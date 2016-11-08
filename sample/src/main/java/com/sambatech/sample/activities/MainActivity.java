@@ -70,8 +70,8 @@ public class MainActivity extends Activity {
 	private Drawable _autoPlayIcon;
 	private static final int _autoPlayColor = 0xff99ccff;
 	private static final int _autoPlayColorDisabled = 0xff999999;
-	private LiquidMedia.Drm drmIrdeto;
-	private LiquidMedia.Drm drmAxinom;
+	private LiquidMedia.ValidationRequest validationRequestIrdeto;
+	private LiquidMedia.ValidationRequest validationRequestAxinom;
 
 	@OnItemClick(R.id.media_list) public void mediaItemClick(int position) {
 
@@ -114,10 +114,10 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main_menu, menu);
 		this.menu = menu;
 
-		SearchView addTag = (SearchView) menu.findItem(R.id.addTag).getActionView();
-		addTag.setQueryHint("myjson id ( ex: 26dyf )");
+		SearchView adTag = (SearchView) menu.findItem(R.id.adTag).getActionView();
+		adTag.setQueryHint("myjson id ( ex: 26dyf )");
 
-		addTag.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+		adTag.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
 			@Override
 			public boolean onQueryTextSubmit(String query) {
@@ -132,8 +132,8 @@ public class MainActivity extends Activity {
 		});
 
 		// Clean magnifier
-		int searchCloseButtonId = addTag.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
-		ImageView magIcon = (ImageView) addTag.findViewById(searchCloseButtonId);
+		int searchCloseButtonId = adTag.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
+		ImageView magIcon = (ImageView) adTag.findViewById(searchCloseButtonId);
 		magIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
 		magIcon.setVisibility(View.INVISIBLE);
 
@@ -273,16 +273,15 @@ public class MainActivity extends Activity {
 		// Injected medias
 
 		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
-		thumb.url = "http://67.media.tumblr.com/avatar_b5715f76628b_128.png";
+		thumb.url = "http://pcgamingwiki.com/images/thumb/b/b3/DRM-free_icon.svg/120px-DRM-free_icon.svg.png";
 		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
 		LiquidMedia m;
 
 		// AXINOM
 		/*m = new LiquidMedia();
 		m.url = "https://media.axprod.net/TestVectors/v6-MultiDRM/Manifest_1080p.mpd";
-		m.drm = getDrmAxinom();
+		m.validationRequest = getDrmAxinom();
 		m.title = "Dash DRM (Axinom)";
-		m.qualifier = "VIDEO";
 		m.type = "dash";
 		m.thumbs = thumbs;
 		mediaList.add(m);*/
@@ -292,67 +291,12 @@ public class MainActivity extends Activity {
 		m = new LiquidMedia();
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "4a48d2ea922217a3d91771f2acf56fdf";
+		m.validationRequest = getValidationRequestIrdeto();
 		m.environment = SambaMediaRequest.Environment.TEST;
-		m.drm = getDrmIrdeto();
-		m.title = "Dash DRM (Irdeto)";
-		m.qualifier = "VIDEO";
+		m.title = "DRM Irdeto (pol#7)";
 		m.type = "dash";
 		m.thumbs = thumbs;
 		mediaList.add(m);
-
-		m = new LiquidMedia();
-		m.ph = "36098808ae444ca5de4acf231949e312";
-		m.id = "0e060023c14f0427108e775dbf10d7b6";
-		m.qualifier = "VIDEO";
-		m.title = "SBT";
-		mediaList.add(m);
-
-		/*m = new LiquidMedia();
-		m.ph = "f9b073c78f3812cf96690a9c2989c781";
-		m.id = "8c9f8d1511d7805aab0cc6f23ea3c899";
-		m.qualifier = "VIDEO";
-		m.title = "Univer";
-		mediaList.add(m);*/
-
-		/*m = new LiquidMedia();
-		m.ph = "be4a12397143caf9ec41c9acb98728bf";
-		m.id = "698b61bf17f1529ab8bc483cbb69265e";
-		m.title = "Dash API 1";
-		m.thumbs = thumbs;
-		m.environment = SambaMediaRequest.Environment.TEST;
-		mediaList.add(m);
-
-		m = new LiquidMedia();
-		m.ph = "be4a12397143caf9ec41c9acb98728bf";
-		m.id = "59b37af90f043e44e95723a93d067d1d";
-		m.title = "Dash API 2";
-		m.thumbs = thumbs;
-		m.environment = SambaMediaRequest.Environment.TEST;
-		mediaList.add(m);
-
-		m = new LiquidMedia();
-		m.ph = "be4a12397143caf9ec41c9acb98728bf";
-		m.id = "7e9371fa2f65c49d9bf9996ddf12a1ac";
-		m.title = "Dash API 3";
-		m.thumbs = thumbs;
-		m.environment = SambaMediaRequest.Environment.TEST;
-		mediaList.add(m);
-
-		m = new LiquidMedia();
-		m.ph = "be4a12397143caf9ec41c9acb98728bf";
-		m.id = "853a0a228ca4d31851369c4ae26e155c";
-		m.title = "Dash API 4";
-		m.thumbs = thumbs;
-		m.environment = SambaMediaRequest.Environment.TEST;
-		mediaList.add(m);
-
-		m = new LiquidMedia();
-		m.ph = "be4a12397143caf9ec41c9acb98728bf";
-		m.id = "f52e3f6a6c317db20b369ddc42d37c61";
-		m.title = "Dash API 5";
-		m.thumbs = thumbs;
-		m.environment = SambaMediaRequest.Environment.TEST;
-		mediaList.add(m);*/
 
 		loading.setVisibility(View.VISIBLE);
 		list.setAdapter(null);
@@ -362,10 +306,10 @@ public class MainActivity extends Activity {
 			makeMediasCall(access_token, kv.getKey());
 	}
 
-	private LiquidMedia.Drm getDrmAxinom() {
-		if (drmAxinom != null) return drmAxinom;
+	private LiquidMedia.ValidationRequest getValidationRequestAxinom() {
+		if (validationRequestAxinom != null) return validationRequestAxinom;
 
-		return drmAxinom = new LiquidMedia.Drm("https://drmIrdeto-quick-start.azurewebsites.net/api/authorization/Axinom%20demo%20video", new LiquidMedia.DrmCallback() {
+		return validationRequestAxinom = new LiquidMedia.ValidationRequest("https://drmIrdeto-quick-start.azurewebsites.net/api/authorization/Axinom%20demo%20video", new LiquidMedia.DrmCallback() {
 			public void call(SambaMediaConfig media, String response) {
 				if (response == null) return;
 
@@ -375,14 +319,14 @@ public class MainActivity extends Activity {
 		});
 	}
 
-	private LiquidMedia.Drm getDrmIrdeto() {
-		if (drmIrdeto != null) return drmIrdeto;
+	private LiquidMedia.ValidationRequest getValidationRequestIrdeto() {
+		if (validationRequestIrdeto != null) return validationRequestIrdeto;
 
 		HashMap<String, String> headers = new HashMap<>();
 		headers.put("MAN-user-id", "app@sambatech.com");
 		headers.put("MAN-user-password", "c5kU6DCTmomi9fU");
 
-		return drmIrdeto = new LiquidMedia.Drm("http://sambatech.stage.ott.irdeto.com/services/CreateSession?CrmId=sambatech&UserId=smbUserTest", headers, new LiquidMedia.DrmCallback() {
+		return validationRequestIrdeto = new LiquidMedia.ValidationRequest("http://sambatech.stage.ott.irdeto.com/services/CreateSession?CrmId=sambatech&UserId=smbUserTest", headers, new LiquidMedia.DrmCallback() {
 			public void call(SambaMediaConfig media, String response) {
 				if (media.drmRequest == null) return;
 
@@ -390,7 +334,6 @@ public class MainActivity extends Activity {
 					Document parse = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new ByteArrayInputStream(response.getBytes()));
 					NamedNodeMap attributes = parse.getElementsByTagName("Session").item(0).getAttributes();
 
-					media.drmRequest.addUrlParam("MANRoamingSession", attributes.getNamedItem("MANRoamingSession").getTextContent());
 					media.drmRequest.addUrlParam("SessionId", attributes.getNamedItem("SessionId").getTextContent());
 					media.drmRequest.addUrlParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
 				}
