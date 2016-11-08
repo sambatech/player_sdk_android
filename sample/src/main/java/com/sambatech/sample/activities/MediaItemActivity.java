@@ -328,7 +328,30 @@ public class MediaItemActivity extends Activity {
 	}
 
 	@OnClick(R.id.authorize) public void authorizeHandler() {
+		if (media == null || media.drmRequest == null) return;
+
+		final DrmRequest drmRequest = media.drmRequest;
+
 		status.setText("Authorizing...");
+
+		try {
+			HttpURLConnection con = (HttpURLConnection)new URL(String.format("http://sambatech.stage.ott.irdeto.com/services/Authorize?CrmId=sambatech&AccountId=sambatech&ContentId=%s&SessionId=%s",
+					drmRequest.getUrlParam("ContentId"), drmRequest.getUrlParam("SessionId"))).openConnection();
+
+			con.setRequestMethod("POST");
+			con.addRequestProperty("MAN-user-id", "app@sambatech.com");
+			con.addRequestProperty("MAN-user-password", "c5kU6DCTmomi9fU");
+
+			Helpers.requestUrl(con, new Helpers.Callback() {
+				@Override
+				public void call(String response) {
+					status.setText(String.format("Auth: %s", response));
+				}
+			});
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@OnClick(R.id.load) public void loadHandler() {

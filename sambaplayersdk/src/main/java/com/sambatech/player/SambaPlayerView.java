@@ -113,6 +113,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer, PluginM
 		controller = SambaPlayerControllerNull.getInstance();
 		pendingPlay = false;
 
+		// TODO: migrar para "reset()"
 		// rearming player
 		setMedia(getMedia());
 	}

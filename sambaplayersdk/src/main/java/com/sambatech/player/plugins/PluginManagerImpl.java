@@ -22,8 +22,6 @@ public class PluginManagerImpl implements Plugin, PluginManager {
 	}
 
 	public void onLoad(SambaPlayer player) {
-		if (plugins != null) return;
-
 		this.player = (PluginManager)player;
 		pluginsLoaded = 0;
 

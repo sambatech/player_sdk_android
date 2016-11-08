@@ -39,4 +39,8 @@ public class DrmRequest {
 	public void addHeaderParam(String k, String v) {
 		headerParams.put(k, v);
 	}
+
+	public String getUrlParam(String k) {
+		return urlParams.get(k);
+	}
 }

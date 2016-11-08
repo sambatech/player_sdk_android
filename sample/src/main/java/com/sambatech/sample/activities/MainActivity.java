@@ -279,12 +279,34 @@ public class MainActivity extends Activity {
 		// IRDETO
 		//b00772b75e3677dba5a59e09598b7a0d be4a12397143caf9ec41c9acb98728bf
 		m = new LiquidMedia();
+		m.title = "DRM Samba (pol#7)";
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "4a48d2ea922217a3d91771f2acf56fdf";
 		m.url = "http://107.21.208.27/vodd/_definst_/mp4:myMovie.mp4/manifest_mvlist.mpd";
 		m.validationRequest = new LiquidMedia.ValidationRequest(10, "samba_p7_test");
 		m.environment = SambaMediaRequest.Environment.TEST;
-		m.title = "DRM Irdeto (pol#7)";
+		m.type = "dash";
+		m.thumbs = thumbs;
+		mediaList.add(m);
+
+		m = new LiquidMedia();
+		m.title = "DRM Samba (pol#8)";
+		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
+		m.id = "4a48d2ea922217a3d91771f2acf56fdf";
+		m.url = "http://107.21.208.27/vodd/_definst_/mp4:chaves3_480p.mp4/manifest_mvlist.mpd";
+		m.validationRequest = new LiquidMedia.ValidationRequest(10, "samba_p8_test");
+		m.environment = SambaMediaRequest.Environment.TEST;
+		m.type = "dash";
+		m.thumbs = thumbs;
+		mediaList.add(m);
+
+		m = new LiquidMedia();
+		m.title = "DRM Samba (pol#9)";
+		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
+		m.id = "4a48d2ea922217a3d91771f2acf56fdf";
+		m.url = "http://107.21.208.27/vodd/_definst_/mp4:agdq.mp4/manifest_mvlist.mpd";
+		m.validationRequest = new LiquidMedia.ValidationRequest(10, "samba_p9_test");
+		m.environment = SambaMediaRequest.Environment.TEST;
 		m.type = "dash";
 		m.thumbs = thumbs;
 		mediaList.add(m);
