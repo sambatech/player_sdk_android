@@ -16,8 +16,11 @@
 
 package com.google.android.libraries.mediaframework.layeredvideo;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.graphics.Color;
+import android.view.SurfaceView;
+import android.view.View;
 import android.widget.FrameLayout;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
@@ -86,7 +89,12 @@ public class LayerManager {
     // Put the layers into the container.
     container.removeAllViews();
     for (Layer layer : layers) {
-      container.addView(layer.createView(this));
+      View view = layer.createView(this);
+
+      if (layer instanceof VideoSurfaceLayer && video.getDrmRequest() != null)
+        ((VideoSurfaceLayer)layer).getSurfaceView().setSecure(true);
+
+      container.addView(view);
       layer.onLayerDisplayed(this);
     }
   }

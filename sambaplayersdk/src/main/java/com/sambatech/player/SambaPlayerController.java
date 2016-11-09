@@ -6,13 +6,13 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer.ExoPlayer;
-import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
@@ -24,7 +24,6 @@ import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 
-import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -261,8 +260,11 @@ public class SambaPlayerController implements SambaPlayer {
 				break;
 		}
 
+		/*if (media.drmRequest != null)
+			activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);*/
+
 		// no autoplay if there's ad because ImaWrapper takes control of the player
-        player = new SimpleVideoPlayer((Activity) view.getContext(), view,
+        player = new SimpleVideoPlayer((Activity)view.getContext(), view,
                 new Video(media.url, videoType, media.drmRequest), media.title,
 		        media.adUrl == null || media.adUrl.isEmpty(), media.isAudioOnly);
 
