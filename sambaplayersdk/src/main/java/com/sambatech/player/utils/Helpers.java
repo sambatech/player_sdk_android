@@ -2,6 +2,9 @@ package com.sambatech.player.utils;
 
 import com.sambatech.player.model.SambaMedia;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
 import java.util.Comparator;
 
 /**
@@ -34,7 +37,11 @@ public final class Helpers {
 		return Integer.toHexString((int)((Math.random() + 1) * 0x10000)).substring(1);
 	}
 
-	//Order ouputs
+	public static boolean isDeviceRooted() {
+		return RootUtil.isDeviceRooted();
+	}
+
+	//Order outputs
 	public static class CustomSorter implements Comparator<SambaMedia.Output> {
 
 		@Override
@@ -44,3 +51,37 @@ public final class Helpers {
 	}
 }
 
+/** @author Kevin Kowalewski */
+class RootUtil {
+	public static boolean isDeviceRooted() {
+		return checkRootMethod1() || checkRootMethod2() || checkRootMethod3();
+	}
+
+	private static boolean checkRootMethod1() {
+		String buildTags = android.os.Build.TAGS;
+		return buildTags != null && buildTags.contains("test-keys");
+	}
+
+	private static boolean checkRootMethod2() {
+		String[] paths = { "/system/app/Superuser.apk", "/sbin/su", "/system/bin/su", "/system/xbin/su", "/data/local/xbin/su", "/data/local/bin/su", "/system/sd/xbin/su",
+				"/system/bin/failsafe/su", "/data/local/su", "/su/bin/su"};
+		for (String path : paths) {
+			if (new File(path).exists()) return true;
+		}
+		return false;
+	}
+
+	private static boolean checkRootMethod3() {
+		Process process = null;
+		try {
+			process = Runtime.getRuntime().exec(new String[] { "/system/xbin/which", "su" });
+			BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			if (in.readLine() != null) return true;
+			return false;
+		} catch (Throwable t) {
+			return false;
+		} finally {
+			if (process != null) process.destroy();
+		}
+	}
+}

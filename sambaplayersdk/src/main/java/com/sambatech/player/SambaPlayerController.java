@@ -6,7 +6,6 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
@@ -21,8 +20,10 @@ import com.sambatech.player.adapter.OutputAdapter;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
+import com.sambatech.player.exception.SambaPlayerException;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
+import com.sambatech.player.utils.Helpers;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -48,7 +49,7 @@ public class SambaPlayerController implements SambaPlayer {
 	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
 		public void onStateChanged(boolean playWhenReady, int playbackState) {
-			Log.i("player", "state: " + playWhenReady + " " + playbackState);
+			Log.i("SambaPlayer", "state: " + playWhenReady + " " + playbackState);
 
 			switch (playbackState) {
 				case ExoPlayer.STATE_READY:
@@ -84,13 +85,13 @@ public class SambaPlayerController implements SambaPlayer {
 
 		@Override
 		public void onError(Exception e) {
-			Log.i("player", "Error: " + media, e);
+			Log.i("SambaPlayer", "Error: " + media, e);
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, e.getMessage()));
 		}
 
 		@Override
 		public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-			//Log.i("asdfg", unappliedRotationDegrees+" "+width + " " + height);
+			//Log.i("SambaPlayer", unappliedRotationDegrees+" "+width + " " + height);
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.RESIZE, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
 		}
 	};
@@ -135,11 +136,19 @@ public class SambaPlayerController implements SambaPlayer {
 		this.view = view;
 	}
 
-	public void setMedia(SambaMedia media) {
+	public void setMedia(SambaMedia media) throws SambaPlayerException {
 		if (media == null)
-			throw new IllegalArgumentException("Media data is null");
+			throw new SambaPlayerException(SambaPlayerException.INVALID_MEDIA);
 
-		this.media = new SambaMediaConfig(media);
+		SambaMediaConfig m = new SambaMediaConfig(media);
+
+		if (m.dontPlayIfRooted && Helpers.isDeviceRooted())
+			throw new SambaPlayerException(SambaPlayerException.ROOTED_DEVICE, m);
+
+		if (m.url == null || m.url.isEmpty())
+			throw new SambaPlayerException(SambaPlayerException.INVALID_MEDIA, m);
+
+		this.media = m;
 
 		destroy();
 
@@ -223,12 +232,16 @@ public class SambaPlayerController implements SambaPlayer {
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
 	}
 
-	public void changeOutput(SambaMedia.Output output) {
+	public void changeOutput(SambaMedia.Output output) throws SambaPlayerException {
 		int currentPosition = player.getCurrentPosition();
 		for(SambaMedia.Output o : media.outputs) {
 			o.current = o.label.equals(output.label);
 		}
 		media.url = output.url;
+
+		if (media.url == null || media.url.isEmpty())
+			throw new SambaPlayerException(SambaPlayerException.INVALID_MEDIA, media);
+
 		destroyInternal();
 		create(false);
 		player.seek(currentPosition);
@@ -242,13 +255,13 @@ public class SambaPlayerController implements SambaPlayer {
 
 	private void create(boolean notify) {
 		if (player != null) {
-			Log.e("player", "Player already created!");
+			Log.e("SambaPlayer", "Player already created!");
 			return;
 		}
 
-        if (media.url == null || media.url.isEmpty()) {
-			Log.e("player", "Media data is null!");
-	        return;
+		if (media.url == null || media.url.isEmpty()) {
+			Log.e("SambaPlayer", (new SambaPlayerException(SambaPlayerException.INVALID_MEDIA, media)).getMessage());
+			return;
 		}
 
 		Video.VideoType videoType = Video.VideoType.OTHER;

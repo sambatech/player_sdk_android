@@ -1,5 +1,6 @@
 package com.sambatech.player;
 
+import com.sambatech.player.exception.SambaPlayerException;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.plugins.PluginManager;
 
@@ -13,8 +14,9 @@ public interface SambaPlayer {
 	/**
 	 * Defines/overwrites current media.
 	 * @param media The media to be played.
+	 * @throws SambaPlayerException When media not allowed to play on a rooted device when that's the case or when media is not valid somehow (null, empty URL, etc.)
 	 */
-	void setMedia(SambaMedia media);
+	void setMedia(SambaMedia media) throws SambaPlayerException;
 
 	/**
 	 * Retrieves the current media data in use.

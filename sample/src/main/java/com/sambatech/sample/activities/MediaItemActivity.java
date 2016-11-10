@@ -15,6 +15,7 @@ import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
+import com.sambatech.player.exception.SambaPlayerException;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
@@ -248,7 +249,12 @@ public class MediaItemActivity extends Activity {
 			player.setLayoutParams(player.getLayoutParams());
 		}
 
-		player.setMedia(media);
+	    try {
+		    player.setMedia(media);
+	    }
+	    catch (SambaPlayerException e) {
+		    e.printStackTrace();
+	    }
 
 		/*//Disable controls randomically
 		Random random = new Random();
