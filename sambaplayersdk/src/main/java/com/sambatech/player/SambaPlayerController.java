@@ -124,6 +124,8 @@ public class SambaPlayerController implements SambaPlayer {
 	private final Runnable progressDispatcher = new Runnable() {
 		@Override
 		public void run() {
+			if (player == null) return;
+			
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PROGRESS, getCurrentTime(), getDuration()));
 		}
 	};
