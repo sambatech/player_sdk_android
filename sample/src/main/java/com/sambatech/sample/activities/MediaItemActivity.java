@@ -319,7 +319,6 @@ public class MediaItemActivity extends Activity {
 
 						drmRequest.addUrlParam("SessionId", sessionId);
 						drmRequest.addUrlParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
-						drmRequest.addUrlParam("ContentId", validationRequest.contentId);
 
 						status.setText(String.format("Session: %s", sessionId));
 					}

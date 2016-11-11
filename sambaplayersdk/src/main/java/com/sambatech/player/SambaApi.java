@@ -375,8 +375,11 @@ public class SambaApi {
 						media.drmRequest.addUrlParam("SubContentType", drm.optString("subContentType", "Default"));
 						media.drmRequest.addUrlParam("CrmId", drm.optString("crmId"));
 						media.drmRequest.addUrlParam("AccountId", drm.optString("accountId"));
+						media.drmRequest.addUrlParam("ContentId", drm.optString("contentId"));
 						media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
 					}
+
+					media.dontPlayIfRooted = playerSecurity.optBoolean("rootedDevices", false);
 				}
 
 				return media;

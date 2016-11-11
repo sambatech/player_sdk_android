@@ -54,11 +54,9 @@ public class LiquidMedia implements Cloneable {
 
     public static class ValidationRequest {
         public final int packageId;
-        public final String contentId;
 
-	    public ValidationRequest(int packageId, String contentId) {
+	    public ValidationRequest(int packageId) {
 		    this.packageId = packageId;
-            this.contentId = contentId;
 	    }
     }
 }
