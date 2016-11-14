@@ -33,6 +33,17 @@ public class Helpers {
 
 				try {
 					con.connect();
+
+					/*System.out.println("Request method: " + con.getRequestMethod());
+					System.out.println("Permission: " + con.getPermission());
+					System.out.println("Response code: " + con.getResponseCode());
+					System.out.println("Response msg: " + con.getResponseMessage());
+
+					s = "";
+					for (Map.Entry<String, List<String>> kv : con.getHeaderFields().entrySet())
+						s += kv.getKey() + ": " + kv.getValue() + "\n";
+					System.out.println(s);*/
+
 					inputStream = con.getInputStream();
 					scanner = new Scanner(inputStream);
 					scannerDelimited = scanner.useDelimiter("\\A");

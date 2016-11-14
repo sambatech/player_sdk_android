@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Build;
+import android.os.Environment;
 import android.util.Log;
 
 import com.google.android.exoplayer.ExoPlayerLibraryInfo;
@@ -32,6 +33,7 @@ import com.google.android.exoplayer.ExoPlayerLibraryInfo;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -182,8 +184,8 @@ public class ExoplayerUtil {
       error = "DRM connection failed.";
     }
     finally {
-      Log.i("DRM", String.format("Request method: %s\nPermission: %s\nResponse code: %s\nResponse msg: %s\nHeaders: %s\nContent: %s\nError: %s",
-              requestMethod, permission, responseCode, responseMessage, headers, content, error));
+      Log.i("DRM", String.format("URL: %s\nRequest method: %s\nPermission: %s\nResponse code: %s\nResponse msg: %s\nHeaders: %s\nContent: %s\nError: %s",
+              con.getURL(), requestMethod, permission, responseCode, responseMessage, headers, content, error));
 
       if (ctn != null) ctn.close();
       if (ctnd != null) ctnd.close();

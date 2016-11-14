@@ -281,7 +281,7 @@ public class MainActivity extends Activity {
 		m.title = "DRM Samba (pol#7)";
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "eec9fa7ab62032a377cff462522f69dc";
-		m.validationRequest = new LiquidMedia.ValidationRequest(10);
+		m.validationRequest = new LiquidMedia.ValidationRequest(10, "samba_p7_test");
 		m.environment = SambaMediaRequest.Environment.TEST;
 		m.type = "dash";
 		m.thumbs = thumbs;
@@ -291,7 +291,7 @@ public class MainActivity extends Activity {
 		m.title = "DRM Samba (pol#8)";
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "3153f923ae18c999a01db465d50d0dac";
-		m.validationRequest = new LiquidMedia.ValidationRequest(10);
+		m.validationRequest = new LiquidMedia.ValidationRequest(10, "samba_p8_test");
 		m.environment = SambaMediaRequest.Environment.TEST;
 		m.type = "dash";
 		m.thumbs = thumbs;
@@ -301,7 +301,7 @@ public class MainActivity extends Activity {
 		m.title = "DRM Samba (pol#9)";
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "d3c7ec784a4ff90b7c6a0e51b4657a5e";
-		m.validationRequest = new LiquidMedia.ValidationRequest(10);
+		m.validationRequest = new LiquidMedia.ValidationRequest(10, "samba_p9_test");
 		m.environment = SambaMediaRequest.Environment.TEST;
 		m.type = "dash";
 		m.thumbs = thumbs;
