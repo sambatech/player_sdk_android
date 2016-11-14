@@ -233,8 +233,7 @@ public class MainActivity extends Activity {
 				if (response.code() == 200) {
 					ArrayList<LiquidMedia.AdTag> tags = response.body();
 					try {
-						ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
-						adMediaList = mediasModified;
+						adMediaList = mediasWithTags(mediaList, tags);
 						showMediasList(adMediaList);
 					}
 					catch (CloneNotSupportedException e) {}

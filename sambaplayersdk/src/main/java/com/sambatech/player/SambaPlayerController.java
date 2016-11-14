@@ -20,9 +20,9 @@ import com.sambatech.player.adapter.OutputAdapter;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
-import com.sambatech.player.exception.SambaPlayerException;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
+import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.player.utils.Helpers;
 
 import java.util.Timer;
@@ -45,6 +45,7 @@ public class SambaPlayerController implements SambaPlayer {
 	private View outputMenu;
 	private boolean autoFsMode;
 	private boolean enableControls;
+	private boolean _disabled;
 
 	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
@@ -136,23 +137,25 @@ public class SambaPlayerController implements SambaPlayer {
 		this.view = view;
 	}
 
-	public void setMedia(SambaMedia media) throws SambaPlayerException {
-		if (media == null)
-			throw new SambaPlayerException(SambaPlayerException.INVALID_MEDIA);
+	public void setMedia(SambaMedia media) {
+		if (media == null) {
+			_disabled = true;
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, SambaPlayerError.invalidMedia));
+			return;
+		}
 
 		SambaMediaConfig m = new SambaMediaConfig(media);
 
-		if (m.dontPlayIfRooted && Helpers.isDeviceRooted())
-			throw new SambaPlayerException(SambaPlayerException.ROOTED_DEVICE, m);
-
-		if (m.url == null || m.url.isEmpty())
-			throw new SambaPlayerException(SambaPlayerException.INVALID_MEDIA, m);
+		if (m.dontPlayIfRooted && Helpers.isDeviceRooted()) {
+			_disabled = true;
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, SambaPlayerError.rootedDevice));
+		}
 
 		this.media = m;
 
 		destroy();
 
-		// TODO: thumbnail
+		// TODO: create thumbnail or create audio player
 	}
 
 	public SambaMedia getMedia() {
@@ -162,7 +165,8 @@ public class SambaPlayerController implements SambaPlayer {
 	public void play() {
 		if (player != null)
 			player.play();
-		else create();
+		else if (!_disabled)
+			create();
 	}
 
 	public void pause() {
@@ -232,7 +236,7 @@ public class SambaPlayerController implements SambaPlayer {
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
 	}
 
-	public void changeOutput(SambaMedia.Output output) throws SambaPlayerException {
+	public void changeOutput(SambaMedia.Output output) {
 		int currentPosition = player.getCurrentPosition();
 		for(SambaMedia.Output o : media.outputs) {
 			o.current = o.label.equals(output.label);
@@ -240,7 +244,7 @@ public class SambaPlayerController implements SambaPlayer {
 		media.url = output.url;
 
 		if (media.url == null || media.url.isEmpty())
-			throw new SambaPlayerException(SambaPlayerException.INVALID_MEDIA, media);
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, SambaPlayerError.emptyUrl));
 
 		destroyInternal();
 		create(false);
@@ -255,12 +259,12 @@ public class SambaPlayerController implements SambaPlayer {
 
 	private void create(boolean notify) {
 		if (player != null) {
-			Log.e("SambaPlayer", "Player already created!");
+			Log.i("SambaPlayer", "Player already created!");
 			return;
 		}
 
 		if (media.url == null || media.url.isEmpty()) {
-			Log.e("SambaPlayer", (new SambaPlayerException(SambaPlayerException.INVALID_MEDIA, media)).getMessage());
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, SambaPlayerError.emptyUrl));
 			return;
 		}
 
@@ -398,6 +402,7 @@ public class SambaPlayerController implements SambaPlayer {
 		player = null;
 		_hasStarted = false;
 		_hasFinished = false;
+		_disabled = false;
 	}
 
     private void startProgressTimer() {

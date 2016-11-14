@@ -15,10 +15,10 @@ import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
-import com.sambatech.player.exception.SambaPlayerException;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
+import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
 import com.sambatech.sample.utils.Helpers;
@@ -249,12 +249,7 @@ public class MediaItemActivity extends Activity {
 			player.setLayoutParams(player.getLayoutParams());
 		}
 
-	    try {
-		    player.setMedia(media);
-	    }
-	    catch (SambaPlayerException e) {
-		    e.printStackTrace();
-	    }
+	    player.setMedia(media);
 
 		/*//Disable controls randomically
 		Random random = new Random();
