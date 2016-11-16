@@ -19,7 +19,6 @@
         android:layout_width="match_parent"
         android:layout_height="250dp"
         app:autoFullscreenMode="true"
-
         android:layout_below="@+id/samba_player"
         android:visibility="gone"/>
 
@@ -126,14 +125,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@android:style/Widget.DeviceDefault.Button.Small"
-            android:text="Create Session"/>
+            android:text="Session"/>
 
         <Button
             android:id="@+id/authorize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@android:style/Widget.DeviceDefault.Button.Small"
-            android:text="Authorize"/>
+            android:text="Auth"/>
+
+        <Button
+            android:id="@+id/authorize_rental"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@android:style/Widget.DeviceDefault.Button.Small"
+            android:text="Rent"/>
 
         <Button
             android:id="@+id/load"

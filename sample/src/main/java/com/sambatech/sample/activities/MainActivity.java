@@ -278,30 +278,44 @@ public class MainActivity extends Activity {
 		// IRDETO
 		//b00772b75e3677dba5a59e09598b7a0d be4a12397143caf9ec41c9acb98728bf
 		m = new LiquidMedia();
-		m.title = "DRM Samba (pol#7)";
+		m.title = "DRM Irdeto (p#7)";
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "eec9fa7ab62032a377cff462522f69dc";
-		m.validationRequest = new LiquidMedia.ValidationRequest(10, "samba_p7_test");
+		m.url = "http://52.32.88.36/sambatech/stage/MrPoppersPenguins.ism/manifest_mvlist.mpd";
+		m.entitlementScheme = new LiquidMedia.EntitlementScheme("MrPoppersPenguins");
 		m.environment = SambaMediaRequest.Environment.TEST;
 		m.type = "dash";
 		m.thumbs = thumbs;
 		mediaList.add(m);
 
 		m = new LiquidMedia();
-		m.title = "DRM Samba (pol#8)";
+		m.title = "DRM Samba (p#7)";
+		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
+		m.id = "eec9fa7ab62032a377cff462522f69dc";
+		m.url = "http://107.21.208.27/vodd/_definst_/mp4:myMovie.mp4/manifest_mvlist.mpd";
+		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p7_test");
+		m.environment = SambaMediaRequest.Environment.TEST;
+		m.type = "dash";
+		m.thumbs = thumbs;
+		mediaList.add(m);
+
+		m = new LiquidMedia();
+		m.title = "DRM Samba (p#8)";
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "3153f923ae18c999a01db465d50d0dac";
-		m.validationRequest = new LiquidMedia.ValidationRequest(10, "samba_p8_test");
+		m.url = "http://107.21.208.27/vodd/_definst_/mp4:chaves3_480p.mp4/manifest_mvlist.mpd";
+		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p8_test", true, 10);
 		m.environment = SambaMediaRequest.Environment.TEST;
 		m.type = "dash";
 		m.thumbs = thumbs;
 		mediaList.add(m);
 
 		m = new LiquidMedia();
-		m.title = "DRM Samba (pol#9)";
+		m.title = "DRM Samba (p#9)";
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "d3c7ec784a4ff90b7c6a0e51b4657a5e";
-		m.validationRequest = new LiquidMedia.ValidationRequest(10, "samba_p9_test");
+		m.url = "http://107.21.208.27/vodd/_definst_/mp4:agdq.mp4/manifest_mvlist.mpd";
+		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p9_test", 11);
 		m.environment = SambaMediaRequest.Environment.TEST;
 		m.type = "dash";
 		m.thumbs = thumbs;

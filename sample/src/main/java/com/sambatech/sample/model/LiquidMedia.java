@@ -1,6 +1,5 @@
 package com.sambatech.sample.model;
 
-import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
 
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ public class LiquidMedia implements Cloneable {
     public String ad_program;
     public AdTag adTag;
     public SambaMediaRequest.Environment environment;
-    public ValidationRequest validationRequest;
+    public EntitlementScheme entitlementScheme;
 
     public Object clone() throws CloneNotSupportedException {
 		return super.clone();
@@ -52,13 +51,23 @@ public class LiquidMedia implements Cloneable {
         public String url;
     }
 
-    public static class ValidationRequest {
-        public final int packageId;
-        public String contentId;
+    public static class EntitlementScheme {
+        public final int[] policyIdList;
+        public final String contentId;
+        public final boolean policyOnly;
 
-        public ValidationRequest(int packageId, String contentId) {
-            this.packageId = packageId;
+        public EntitlementScheme(int ... policyIdList) {
+            this(null, policyIdList);
+        }
+
+        public EntitlementScheme(String contentId, int ... policyIdList) {
+            this(contentId, false, policyIdList);
+        }
+
+        public EntitlementScheme(String contentId, boolean policyOnly, int ... policyIdList) {
             this.contentId = contentId;
+            this.policyOnly = policyOnly;
+            this.policyIdList = policyIdList;
         }
     }
 }
