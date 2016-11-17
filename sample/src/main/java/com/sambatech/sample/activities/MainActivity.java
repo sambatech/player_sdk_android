@@ -43,9 +43,11 @@ public class MainActivity extends Activity {
 	@Bind(R.id.progressbar_view) LinearLayout loading;
 
 	//Samba api and Json Tag endpoints
-	@BindString(R.string.sambaapi_endpoint) String api_endpoint;
+	@BindString(R.string.svapi_stage) String svapi_stage;
+	@BindString(R.string.svapi_dev) String svapi_dev;
 	@BindString(R.string.mysjon_endpoint) String tag_endpoint;
-	@BindString(R.string.access_token) String access_token;
+	@BindString(R.string.svapi_token_prod) String svapi_token_prod;
+	@BindString(R.string.svapi_token_dev) String svapi_token_dev;
 
 	MediasAdapter mAdapter;
 	Menu menu;
@@ -85,9 +87,13 @@ public class MainActivity extends Activity {
 		ButterKnife.bind(this);
 
 		phMap = new HashMap<>();
+		// PROD
 		phMap.put(4421, "bc6a17435f3f389f37a514c171039b75");
-		phMap.put(4460, "36098808ae444ca5de4acf231949e312");
-		//phMap.put(562, "b00772b75e3677dba5a59e09598b7a0d");
+		phMap.put(6050, "2893ae96e3f2fade7391695553400f80");
+		//phMap.put(4460, "36098808ae444ca5de4acf231949e312");
+		// DEV
+		phMap.put(543, "664a1791fa5d4b0861416d0059da8cda");
+		phMap.put(562, "b00772b75e3677dba5a59e09598b7a0d");
 
 		callCommonList();
 	}
@@ -188,11 +194,12 @@ public class MainActivity extends Activity {
 
 	/**
 	 * Make the request to the Samba Api ( see also http://dev.sambatech.com/documentation/sambavideos/index.html )
-	 * @param token - Api token
 	 * @param pid - Project ID
 	 */
-	private void makeMediasCall(final String token, final int pid) {
-		Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid, true, "VIDEO,AUDIO");
+	private void makeMediasCall(final int pid) {
+		boolean isDev = pid == 543 || pid == 562;
+		Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(isDev ? svapi_dev : svapi_stage).
+				getMedias(isDev ? svapi_token_dev : svapi_token_prod, pid, true, "VIDEO,AUDIO");
 		loadingFlag = true;
 		call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
 			@Override
@@ -211,7 +218,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onFailure(Throwable t) {
 				loadingFlag = false;
-				makeMediasCall(token, pid);
+				makeMediasCall(pid);
 			}
 		});
 	}
@@ -283,7 +290,7 @@ public class MainActivity extends Activity {
 		m.id = "eec9fa7ab62032a377cff462522f69dc";
 		m.url = "http://52.32.88.36/sambatech/stage/MrPoppersPenguins.ism/manifest_mvlist.mpd";
 		m.entitlementScheme = new LiquidMedia.EntitlementScheme("MrPoppersPenguins");
-		m.environment = SambaMediaRequest.Environment.TEST;
+		m.environment = SambaMediaRequest.Environment.DEV;
 		m.type = "dash";
 		m.thumbs = thumbs;
 		mediaList.add(m);
@@ -294,7 +301,7 @@ public class MainActivity extends Activity {
 		m.id = "eec9fa7ab62032a377cff462522f69dc";
 		m.url = "http://107.21.208.27/vodd/_definst_/mp4:myMovie.mp4/manifest_mvlist.mpd";
 		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p7_test");
-		m.environment = SambaMediaRequest.Environment.TEST;
+		m.environment = SambaMediaRequest.Environment.DEV;
 		m.type = "dash";
 		m.thumbs = thumbs;
 		mediaList.add(m);
@@ -305,7 +312,7 @@ public class MainActivity extends Activity {
 		m.id = "3153f923ae18c999a01db465d50d0dac";
 		m.url = "http://107.21.208.27/vodd/_definst_/mp4:chaves3_480p.mp4/manifest_mvlist.mpd";
 		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p8_test", true, 10);
-		m.environment = SambaMediaRequest.Environment.TEST;
+		m.environment = SambaMediaRequest.Environment.DEV;
 		m.type = "dash";
 		m.thumbs = thumbs;
 		mediaList.add(m);
@@ -316,7 +323,7 @@ public class MainActivity extends Activity {
 		m.id = "d3c7ec784a4ff90b7c6a0e51b4657a5e";
 		m.url = "http://107.21.208.27/vodd/_definst_/mp4:agdq.mp4/manifest_mvlist.mpd";
 		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p9_test", 11);
-		m.environment = SambaMediaRequest.Environment.TEST;
+		m.environment = SambaMediaRequest.Environment.DEV;
 		m.type = "dash";
 		m.thumbs = thumbs;
 		mediaList.add(m);
@@ -326,7 +333,7 @@ public class MainActivity extends Activity {
 
 		// making the call to projects
 		for (Map.Entry<Integer, String> kv : phMap.entrySet())
-			makeMediasCall(access_token, kv.getKey());
+			makeMediasCall(kv.getKey());
 	}
 
 	/*private LiquidMedia.ValidationRequest getValidationRequestAxinom() {
@@ -367,6 +374,12 @@ public class MainActivity extends Activity {
 
 			for(LiquidMedia media : medias) {
 				media.ph = phMap.get(pid);
+				media.environment = pid == 543 || pid == 562 ? SambaMediaRequest.Environment.DEV : SambaMediaRequest.Environment.STAGING;
+
+				if (media.title.toLowerCase().contains("policy 8"))
+					media.entitlementScheme = new LiquidMedia.EntitlementScheme(media.id, true, 10);
+				else if (media.title.toLowerCase().contains("policy 9"))
+					media.entitlementScheme = new LiquidMedia.EntitlementScheme(media.id, 11);
 			}
 
 		}
@@ -408,53 +421,61 @@ public class MainActivity extends Activity {
 	 */
 	private ArrayList<LiquidMedia> populateLiveMedias() {
 
-			ArrayList<LiquidMedia> medias = new ArrayList<>();
+		ArrayList<LiquidMedia> medias = new ArrayList<>();
 
-			LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
-			thumb.url = "http://www.impactmobile.com/files/2012/09/icon64-broadcasts.png";
-			ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
+		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+		thumb.url = "http://www.impactmobile.com/files/2012/09/icon64-broadcasts.png";
+		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
 
-			LiquidMedia media = new LiquidMedia();
-			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://gbbrlive2.sambatech.com.br/liveevent/sbt3_8fcdc5f0f8df8d4de56b22a2c6660470/livestream/manifest.m3u8";
-			media.title = "Live SBT (HLS)";
-			media.description = "Transmissão ao vivo do SBT.";
-			media.thumbs = thumbs;
-			medias.add(media);
+		LiquidMedia media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbt.m3u8";
+		media.title = "Live SBT (HLS)";
+		media.description = "Transmissão ao vivo do SBT.";
+		media.thumbs = thumbs;
+		medias.add(media);
 
-			media = new LiquidMedia();
-			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8";
-			media.title = "Live VEVO (HLS)";
-			media.description = "Transmissão ao vivo do VEVO.";
-			media.thumbs = thumbs;
-			medias.add(media);
+		media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8";
+		media.title = "Live VEVO (HLS)";
+		media.description = "Transmissão ao vivo do VEVO.";
+		media.thumbs = thumbs;
+		medias.add(media);
 
-			media = new LiquidMedia();
-			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/playlist.m3u8";
-			media.title = "Live Denmark channel (HLS)";
-			media.description = "Transmissão ao vivo TV-DN.";
-			media.thumbs = thumbs;
-			medias.add(media);
+		media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/playlist.m3u8";
+		media.title = "Live Denmark channel (HLS)";
+		media.description = "Transmissão ao vivo TV-DN.";
+		media.thumbs = thumbs;
+		medias.add(media);
 
-			media = new LiquidMedia();
-			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/manifest.f4m";
-			media.title = "Live Denmark channel (HDS: erro!)";
-			media.description = "Transmissão ao vivo inválida.";
-			media.thumbs = thumbs;
-			medias.add(media);
+		media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/manifest.f4m";
+		media.title = "Live Denmark channel (HDS: erro!)";
+		media.description = "Transmissão ao vivo inválida.";
+		media.thumbs = thumbs;
+		medias.add(media);
 
-			media = new LiquidMedia();
-			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/tvdiario_7a683b067e5eee5c8d45e1e1883f69b9/livestream/playlist.m3u8";
-			media.title = "Tv Diário";
-			media.description = "Transmissão ao vivo TV Diário";
-			media.thumbs = thumbs;
-			medias.add(media);
+		media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/tvdiario_7a683b067e5eee5c8d45e1e1883f69b9/livestream/playlist.m3u8";
+		media.title = "Tv Diário";
+		media.description = "Transmissão ao vivo TV Diário";
+		media.thumbs = thumbs;
+		medias.add(media);
 
-			return medias;
+		media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://slrp.sambavideos.sambatech.com/radio/pajucara4_7fbed8aac5d5d915877e6ec61e3cf0db/livestream/playlist.m3u8";
+		media.title = "Audio Live";
+		media.description = "Live de audio.";
+		media.thumbs = thumbs;
+		medias.add(media);
+
+		return medias;
 	}
 
 }

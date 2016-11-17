@@ -2,9 +2,12 @@
 <resources>
     <string name="app_name">SBPlayer</string>
 
-    <string name="sambaapi_endpoint">http://api.sambavideos.sambatech.com/v1/</string>
+    <string name="svapi_prod">http://api.sambavideos.sambatech.com/v1/</string>
+    <string name="svapi_stage">http://staging.sambavideos.sambatech.com/v1/</string>
+    <string name="svapi_dev">http://52.2.166.124:8091/v1/</string>
+    <string name="svapi_token_prod">ec8f5393-8e54-4ef2-842e-3f6cf0ea6287</string>
+    <string name="svapi_token_dev">08008acb-c9b8-4452-af78-2d36d83db640</string>
     <string name="mysjon_endpoint">https://api.myjson.com/bins/</string>
-    <string name="access_token">ec8f5393-8e54-4ef2-842e-3f6cf0ea6287</string>
     <string name="ad_program">Ad Tags</string>
     <string name="common">VOD</string>
     <string name="live">Live</string>

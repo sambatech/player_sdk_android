@@ -130,7 +130,7 @@ public class SambaApi {
 					endpoint = activity.getString(R.string.player_endpoint_local);
 					break;
 
-				case TEST:
+				case DEV:
 					endpoint = activity.getString(R.string.player_endpoint_test);
 					break;
 
