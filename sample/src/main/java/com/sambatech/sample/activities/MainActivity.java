@@ -90,6 +90,8 @@ public class MainActivity extends Activity {
 		// PROD
 		phMap.put(4421, "bc6a17435f3f389f37a514c171039b75");
 		phMap.put(6050, "2893ae96e3f2fade7391695553400f80");
+		phMap.put(5952, "1190b8e6d5e846c0c749e3db38ed0dcf");
+		phMap.put(5719, "2dcbb8a0463215c2833dd7b178bc05da");
 		//phMap.put(4460, "36098808ae444ca5de4acf231949e312");
 		// DEV
 		phMap.put(543, "664a1791fa5d4b0861416d0059da8cda");
@@ -376,10 +378,17 @@ public class MainActivity extends Activity {
 				media.ph = phMap.get(pid);
 				media.environment = pid == 543 || pid == 562 ? SambaMediaRequest.Environment.DEV : SambaMediaRequest.Environment.STAGING;
 
-				if (media.title.toLowerCase().contains("policy 8"))
-					media.entitlementScheme = new LiquidMedia.EntitlementScheme(media.id, true, 10);
-				else if (media.title.toLowerCase().contains("policy 9"))
-					media.entitlementScheme = new LiquidMedia.EntitlementScheme(media.id, 11);
+				String title = media.title.toLowerCase();
+				boolean p9 = title.contains("policy 9");
+				boolean p8 = title.contains("policy 8");
+
+				// WORKAROUND: to identify which policy to apply
+				if (pid == 5952 || pid == 6050 || pid == 5719 || p8 || p9) {
+					// policy 8
+					if (pid == 5952 || p8)
+						media.entitlementScheme = new LiquidMedia.EntitlementScheme(media.id, true, 10);
+					else media.entitlementScheme = new LiquidMedia.EntitlementScheme(media.id, 11);
+				}
 			}
 
 		}
@@ -398,14 +407,7 @@ public class MainActivity extends Activity {
 		ArrayList<LiquidMedia> newMedias = new ArrayList<LiquidMedia>();
 
 		for(int i = 0; i < tags.size(); i++) {
-			//LiquidMedia m = (LiquidMedia) (i < medias.size() ? medias.get(i).clone() : newMedias.get(mIndex++).clone());
-			LiquidMedia m = new LiquidMedia();
-			if(i < medias.size()) {
-				m = (LiquidMedia) medias.get(i).clone();
-			}else {
-				m = (LiquidMedia) newMedias.get(mIndex).clone();
-				mIndex = mIndex++;
-			}
+			LiquidMedia m = (LiquidMedia) (i < medias.size() ? medias.get(i).clone() : newMedias.get(mIndex++).clone());
 			m.adTag = new LiquidMedia.AdTag();
 			m.adTag.name = tags.get(i).name;
 			m.adTag.url = tags.get(i).url;
