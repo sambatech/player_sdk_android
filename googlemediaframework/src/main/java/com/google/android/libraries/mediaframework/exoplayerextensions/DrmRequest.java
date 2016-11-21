@@ -32,7 +32,7 @@ public class DrmRequest {
 		return headerParams;
 	}
 
-	public void addUrlParam(String k, String v) {
+	public void addLicenseParam(String k, String v) {
 		urlParams.put(k, v);
 	}
 
@@ -40,7 +40,7 @@ public class DrmRequest {
 		headerParams.put(k, v);
 	}
 
-	public String getUrlParam(String k) {
+	public String getLicenseParam(String k) {
 		return urlParams.get(k);
 	}
 }

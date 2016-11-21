@@ -146,7 +146,7 @@ public class SambaPlayerController implements SambaPlayer {
 
 		SambaMediaConfig m = new SambaMediaConfig(media);
 
-		if (m.dontPlayIfRooted && Helpers.isDeviceRooted()) {
+		if (m.blockIfRooted && Helpers.isDeviceRooted()) {
 			_disabled = true;
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, SambaPlayerError.rootedDevice));
 		}

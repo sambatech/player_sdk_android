@@ -315,9 +315,9 @@ public class MediaItemActivity extends Activity {
 						NamedNodeMap attributes = parse.getElementsByTagName("Session").item(0).getAttributes();
 						String sessionId = attributes.getNamedItem("SessionId").getTextContent();
 
-						drmRequest.addUrlParam("SessionId", sessionId);
-						drmRequest.addUrlParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
-						drmRequest.addUrlParam("ContentId", entitlementScheme.contentId);
+						drmRequest.addLicenseParam("SessionId", sessionId);
+						drmRequest.addLicenseParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
+						drmRequest.addLicenseParam("ContentId", entitlementScheme.contentId);
 
 						status.setText(String.format("Session: %s", sessionId));
 					}
@@ -349,7 +349,7 @@ public class MediaItemActivity extends Activity {
 
 		try {
 			String url = String.format("http://sambatech.stage.ott.irdeto.com/services/Authorize?CrmId=sambatech&AccountId=sambatech&SessionId=%s%s",
-					drmRequest.getUrlParam("SessionId"),
+					drmRequest.getLicenseParam("SessionId"),
 					(policyIdList.length > 0 ?
 							(contentId != null ? "&OptionId=" : "&PackageId=") + policyIdList[0] : "") +
 					(contentId != null ? "&ContentId=" + contentId : ""));
@@ -382,7 +382,7 @@ public class MediaItemActivity extends Activity {
 
 		try {
 			String url = String.format("http://sambatech.stage.ott.irdeto.com/services/Authorize?CrmId=sambatech&AccountId=sambatech&ContentId=%s&OptionId=%s&SessionId=%s",
-					entitlementScheme.contentId, entitlementScheme.policyIdList[1], drmRequest.getUrlParam("SessionId"));
+					entitlementScheme.contentId, entitlementScheme.policyIdList[1], drmRequest.getLicenseParam("SessionId"));
 			HttpURLConnection con = (HttpURLConnection)new URL(url).openConnection();
 
 			con.setRequestMethod("POST");

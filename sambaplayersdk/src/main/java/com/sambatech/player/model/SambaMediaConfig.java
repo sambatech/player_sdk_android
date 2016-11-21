@@ -22,7 +22,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public String sttmUrl;
 	public String sttmKey;
 	public DrmRequest drmRequest;
-	public boolean dontPlayIfRooted;
+	public boolean blockIfRooted;
 
 	public SambaMediaConfig() {}
 
