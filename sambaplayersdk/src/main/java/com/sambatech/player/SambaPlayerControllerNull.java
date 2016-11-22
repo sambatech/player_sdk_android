@@ -4,6 +4,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaPlayerError;
 
 /**
  * Disabled version of controller layer for SambaPlayer.
@@ -108,6 +109,11 @@ public class SambaPlayerControllerNull implements SambaPlayer {
 
 	@Override
 	public void destroy() {
+		destroy(null);
+	}
+
+	@Override
+	public void destroy(SambaPlayerError error) {
 		logMessage();
 	}
 

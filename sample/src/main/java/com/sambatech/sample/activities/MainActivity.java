@@ -472,6 +472,7 @@ public class MainActivity extends Activity {
 		media = new LiquidMedia();
 		media.ph = "bc6a17435f3f389f37a514c171039b75";
 		media.streamUrl = "http://slrp.sambavideos.sambatech.com/radio/pajucara4_7fbed8aac5d5d915877e6ec61e3cf0db/livestream/playlist.m3u8";
+		media.qualifier = "AUDIO";
 		media.title = "Audio Live";
 		media.description = "Live de audio.";
 		media.thumbs = thumbs;
