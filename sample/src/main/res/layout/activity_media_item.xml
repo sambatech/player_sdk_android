@@ -2,9 +2,9 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.sambatech.sample.activities.MediaItemActivity"
     android:background="@color/backgroundGray">
 
@@ -44,8 +44,7 @@
         android:layout_marginRight="@dimen/activity_vertical_margin"
         android:background="@color/transparent_black_hex_8"
         android:textColor="@color/backgroundGray"
-        android:padding="@dimen/activity_horizontal_margin"
-        />
+        android:padding="@dimen/activity_horizontal_margin"/>
 
     <TextView
         android:id="@+id/description"
@@ -70,7 +69,6 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/validation_controlbar"
         android:layout_toEndOf="@id/play"
-        android:layout_toRightOf="@id/play"
         style="@android:style/Widget.DeviceDefault.Button.Small"
         android:text="Pause"/>
 
@@ -106,47 +104,57 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:text="@string/loading" />
-
-
         </LinearLayout>
-
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/validation_controlbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:visibility="invisible"
+        android:orientation="vertical"
         android:layout_above="@id/status">
 
-        <Button
-            android:id="@+id/create_session"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@android:style/Widget.DeviceDefault.Button.Small"
-            android:text="Session"/>
+            android:layout_height="wrap_content">
 
-        <Button
-            android:id="@+id/authorize"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@android:style/Widget.DeviceDefault.Button.Small"
-            android:text="Auth"/>
+            <Button
+                android:id="@+id/create_session"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.DeviceDefault.Button.Small"
+                android:text="Session"/>
 
-        <Button
-            android:id="@+id/authorize_rental"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@android:style/Widget.DeviceDefault.Button.Small"
-            android:text="Rent"/>
+            <Button
+                android:id="@+id/load"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.DeviceDefault.Button.Small"
+                android:text="Load"/>
+        </LinearLayout>
 
-        <Button
-            android:id="@+id/load"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            style="@android:style/Widget.DeviceDefault.Button.Small"
-            android:text="Load"/>
+            android:layout_height="wrap_content">
+
+            <Spinner
+                android:id="@+id/policies"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:entries="@array/policies" />
+            <Button
+                android:id="@+id/authorize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.DeviceDefault.Button.Small"
+                android:text="Auth"/>
+
+            <Button
+                android:id="@+id/deauthorize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.DeviceDefault.Button.Small"
+                android:text="Deauth"/>
+        </LinearLayout>
     </LinearLayout>
-
 </RelativeLayout>

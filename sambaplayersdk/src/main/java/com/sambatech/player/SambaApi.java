@@ -375,7 +375,7 @@ public class SambaApi {
 						media.drmRequest.addLicenseParam("SubContentType", drm.optString("subContentType", "Default"));
 						media.drmRequest.addLicenseParam("CrmId", drm.optString("crmId"));
 						media.drmRequest.addLicenseParam("AccountId", drm.optString("accountId"));
-						//media.drmRequest.addLicenseParam("ContentId", drm.optString("contentId"));
+						media.drmRequest.addLicenseParam("ContentId", drm.optString("contentId"));
 						media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
 					}
 

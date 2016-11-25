@@ -21,4 +21,12 @@
     </string>
     <string name="loading">Carregando listagem&#8230;</string>
     <string name="title_activity_menu">MenuActivity</string>
+
+    <string-array name="policies">
+        <item>Content only</item>
+        <item>Subscription</item>
+        <item>Rental</item>
+        <item>p#30</item>
+        <item>p#32</item>
+    </string-array>
 </resources>

@@ -313,7 +313,7 @@ public class MainActivity extends Activity {
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "3153f923ae18c999a01db465d50d0dac";
 		m.url = "http://107.21.208.27/vodd/_definst_/mp4:chaves3_480p.mp4/manifest_mvlist.mpd";
-		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p8_test", true, 10);
+		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p8_test");
 		m.environment = SambaMediaRequest.Environment.DEV;
 		m.type = "dash";
 		m.thumbs = thumbs;
@@ -324,7 +324,7 @@ public class MainActivity extends Activity {
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "d3c7ec784a4ff90b7c6a0e51b4657a5e";
 		m.url = "http://107.21.208.27/vodd/_definst_/mp4:agdq.mp4/manifest_mvlist.mpd";
-		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p9_test", 11);
+		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p9_test");
 		m.environment = SambaMediaRequest.Environment.DEV;
 		m.type = "dash";
 		m.thumbs = thumbs;
@@ -378,17 +378,9 @@ public class MainActivity extends Activity {
 				media.ph = phMap.get(pid);
 				media.environment = pid == 543 || pid == 562 ? SambaMediaRequest.Environment.DEV : SambaMediaRequest.Environment.STAGING;
 
-				String title = media.title.toLowerCase();
-				boolean p9 = title.contains("policy 9");
-				boolean p8 = title.contains("policy 8");
-
-				// WORKAROUND: to identify which policy to apply
-				if (pid == 5952 || pid == 6050 || pid == 5719 || p8 || p9) {
-					// policy 8
-					if (pid == 5952 || p8)
-						media.entitlementScheme = new LiquidMedia.EntitlementScheme(media.id, true, 10);
-					else media.entitlementScheme = new LiquidMedia.EntitlementScheme(media.id, 11);
-				}
+				// WORKAROUND: to identify which project has DRM
+				if (pid == 5952 || pid == 6050 || pid == 5719)
+					media.entitlementScheme = new LiquidMedia.EntitlementScheme();
 			}
 
 		}

@@ -52,22 +52,14 @@ public class LiquidMedia implements Cloneable {
     }
 
     public static class EntitlementScheme {
-        public final int[] policyIdList;
         public final String contentId;
-        public final boolean policyOnly;
 
-        public EntitlementScheme(int ... policyIdList) {
-            this(null, policyIdList);
+        public EntitlementScheme() {
+            this(null);
         }
 
-        public EntitlementScheme(String contentId, int ... policyIdList) {
-            this(contentId, false, policyIdList);
-        }
-
-        public EntitlementScheme(String contentId, boolean policyOnly, int ... policyIdList) {
+        public EntitlementScheme(String contentId) {
             this.contentId = contentId;
-            this.policyOnly = policyOnly;
-            this.policyIdList = policyIdList;
         }
     }
 }

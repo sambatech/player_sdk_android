@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +35,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnItemSelected;
 import de.greenrobot.event.EventBus;
 
 public class MediaItemActivity extends Activity {
@@ -60,6 +62,9 @@ public class MediaItemActivity extends Activity {
 
 	@Bind(R.id.validation_controlbar)
 	View validationControlbar;
+
+	@Bind(R.id.policies)
+	Spinner policySpinner;
 
 	private boolean _autoPlay;
 	private LiquidMedia.EntitlementScheme entitlementScheme;
@@ -188,10 +193,6 @@ public class MediaItemActivity extends Activity {
 				    titleView.setVisibility(View.VISIBLE);
 				    titleView.setText(media.title);
 
-				    // if rental auth not present hide button
-				    if (entitlementScheme.policyIdList.length < 2)
-					    validationControlbar.findViewById(R.id.authorize_rental).setVisibility(View.GONE);
-
 				    validationControlbar.setVisibility(View.VISIBLE);
 				    return;
 			    }
@@ -317,7 +318,10 @@ public class MediaItemActivity extends Activity {
 
 						drmRequest.addLicenseParam("SessionId", sessionId);
 						drmRequest.addLicenseParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
-						drmRequest.addLicenseParam("ContentId", entitlementScheme.contentId);
+
+						// for manually injected DRM media
+						if (entitlementScheme.contentId != null)
+							drmRequest.addLicenseParam("ContentId", entitlementScheme.contentId);
 
 						status.setText(String.format("Session: %s", sessionId));
 					}
@@ -332,78 +336,72 @@ public class MediaItemActivity extends Activity {
 		}
 	}
 
-	@OnClick(R.id.authorize) public void authorizeHandler() {
-		if (media == null || media.drmRequest == null ||
-				entitlementScheme == null)
-			return;
-
-		int[] policyIdList = entitlementScheme.policyIdList;
-		String contentId = entitlementScheme.policyOnly ? null : entitlementScheme.contentId;
-
-		if (policyIdList.length == 0 && contentId == null)
-			return;
-
-		final DrmRequest drmRequest = media.drmRequest;
-
-		status.setText("Authorizing...");
-
-		try {
-			String url = String.format("http://sambatech.stage.ott.irdeto.com/services/Authorize?CrmId=sambatech&AccountId=sambatech&SessionId=%s%s",
-					drmRequest.getLicenseParam("SessionId"),
-					(policyIdList.length > 0 ?
-							(contentId != null ? "&OptionId=" : "&PackageId=") + policyIdList[0] : "") +
-					(contentId != null ? "&ContentId=" + contentId : ""));
-			HttpURLConnection con = (HttpURLConnection)new URL(url).openConnection();
-
-			con.setRequestMethod("POST");
-			con.addRequestProperty("MAN-user-id", "app@sambatech.com");
-			con.addRequestProperty("MAN-user-password", "c5kU6DCTmomi9fU");
-
-			Helpers.requestUrl(con, new Helpers.Callback() {
-				@Override
-				public void call(String response) {
-					status.setText(String.format("Authorized"));
-				}
-			});
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
+	@OnClick(R.id.authorize) void authorizeHandler() {
+		authorize();
 	}
 
-	@OnClick(R.id.authorize_rental) public void authorizeRentalHandler() {
-		if (media == null || media.drmRequest == null ||
-				entitlementScheme == null || entitlementScheme.policyIdList.length < 2)
-			return;
-
-		final DrmRequest drmRequest = media.drmRequest;
-
-		status.setText("Authorizing rental...");
-
-		try {
-			String url = String.format("http://sambatech.stage.ott.irdeto.com/services/Authorize?CrmId=sambatech&AccountId=sambatech&ContentId=%s&OptionId=%s&SessionId=%s",
-					entitlementScheme.contentId, entitlementScheme.policyIdList[1], drmRequest.getLicenseParam("SessionId"));
-			HttpURLConnection con = (HttpURLConnection)new URL(url).openConnection();
-
-			con.setRequestMethod("POST");
-			con.addRequestProperty("MAN-user-id", "app@sambatech.com");
-			con.addRequestProperty("MAN-user-password", "c5kU6DCTmomi9fU");
-
-			Helpers.requestUrl(con, new Helpers.Callback() {
-				@Override
-				public void call(String response) {
-					status.setText(String.format("Auth: %s", response));
-				}
-			});
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
+	@OnClick(R.id.deauthorize) void deauthorizeHandler() {
+		authorize(true);
 	}
 
 	@OnClick(R.id.load) public void loadHandler() {
 		loadPlayer(media);
 	}
+
+	void authorize(final boolean deauth) {
+		if (media == null || media.drmRequest == null ||
+				entitlementScheme == null)
+			return;
+
+		final DrmRequest drmRequest = media.drmRequest;
+
+		status.setText(deauth ? "Deauthorizing..." : "Authorizing...");
+
+		String url = String.format("http://sambatech.stage.ott.irdeto.com/services/%s?CrmId=sambatech&AccountId=sambatech&SessionId=%s",
+				deauth ? "Deauthorize" : "Authorize", drmRequest.getLicenseParam("SessionId"));
+
+		switch ((int)policySpinner.getSelectedItemId()) {
+			case 0:
+				url += "&ContentId=" + media.id;
+				break;
+
+			case 1:
+				url += "&PackageId=10";
+				break;
+
+			case 2:
+				url += "&OptionId=11&ContentId=" + media.id;
+				break;
+
+			case 3:
+				url += "&PackageId=30";
+				break;
+
+			case 4:
+				url += "&PackageId=32";
+				break;
+		}
+
+		try {
+			HttpURLConnection con = (HttpURLConnection)new URL(url).openConnection();
+
+			con.setRequestMethod("POST");
+			con.addRequestProperty("MAN-user-id", "app@sambatech.com");
+			con.addRequestProperty("MAN-user-password", "c5kU6DCTmomi9fU");
+
+			Helpers.requestUrl(con, new Helpers.Callback() {
+				@Override
+				public void call(String response) {
+					status.setText(String.format("%s: %s", deauth ? "Deauthorized" : "Authorized", policySpinner.getSelectedItem()));
+				}
+			});
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	void authorize() { authorize(false); }
 
 	private void destroy() {
 		SambaEventBus.unsubscribe(playerListener);
