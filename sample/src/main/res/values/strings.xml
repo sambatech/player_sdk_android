@@ -23,10 +23,9 @@
     <string name="title_activity_menu">MenuActivity</string>
 
     <string-array name="policies">
-        <item>Content only</item>
-        <item>Subscription</item>
-        <item>Rental</item>
-        <item>p#30</item>
-        <item>p#32</item>
+        <item>Policy 5 / Aluguel 48 horas</item>
+        <item>Policy 6 / Assinatura mensal</item>
+        <item>Policy 7 / Aluguel 48 horas, somente Brasil</item>
+        <item>Policy 8 / Assinatura mensal, somente Brasil</item>
     </string-array>
 </resources>

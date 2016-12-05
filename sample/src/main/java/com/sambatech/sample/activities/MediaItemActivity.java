@@ -362,23 +362,19 @@ public class MediaItemActivity extends Activity {
 
 		switch ((int)policySpinner.getSelectedItemId()) {
 			case 0:
-				url += "&ContentId=" + media.id;
+				url += "&OptionId=6&ContentId=" + media.id;
 				break;
 
 			case 1:
-				url += "&PackageId=10";
+				url += "&PackageId=2";
 				break;
 
 			case 2:
-				url += "&OptionId=11&ContentId=" + media.id;
+				url += "&OptionId=7&ContentId=" + media.id;
 				break;
 
 			case 3:
-				url += "&PackageId=30";
-				break;
-
-			case 4:
-				url += "&PackageId=32";
+				url += "&PackageId=3";
 				break;
 		}
 
