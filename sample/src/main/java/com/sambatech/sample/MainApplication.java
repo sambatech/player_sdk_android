@@ -3,25 +3,35 @@ package com.sambatech.sample;
 import android.app.Application;
 import android.content.Context;
 
+import com.sambatech.sample.utils.Helpers;
+
 public class MainApplication extends Application {
-    private static MainApplication mInstance;
-    private static Context mAppContext;
+    private static MainApplication _instance;
+	private static String _externalIp = "";
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mInstance = this;
 
-        this.setAppContext(getApplicationContext());
+        _instance = this;
+
+	    loadIp();
     }
 
-    public static MainApplication getInstance(){
-        return mInstance;
-    }
     public static Context getAppContext() {
-        return mAppContext;
+        return _instance.getApplicationContext();
     }
-    public void setAppContext(Context mAppContext) {
-        this.mAppContext = mAppContext;
-    }
+
+	public static String getExternalIp() {
+		return _externalIp;
+	}
+
+	private void loadIp() {
+		Helpers.requestUrl("https://api.ipify.org", new Helpers.Callback() {
+			@Override
+			public void call(String response) {
+				_externalIp = response.trim();
+			}
+		});
+	}
 }

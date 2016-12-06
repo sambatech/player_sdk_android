@@ -379,7 +379,7 @@ public class MainActivity extends Activity {
 				media.environment = pid == 543 || pid == 562 ? SambaMediaRequest.Environment.DEV : SambaMediaRequest.Environment.STAGING;
 
 				// WORKAROUND: to identify which project has DRM
-				if (pid == 5952 || pid == 6050 || pid == 5719)
+				if (pid == 5952 || pid == 6050 || pid == 5719 || pid == 543 || pid == 562)
 					media.entitlementScheme = new LiquidMedia.EntitlementScheme();
 			}
 

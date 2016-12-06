@@ -18,6 +18,7 @@ import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
+import com.sambatech.sample.MainApplication;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
 import com.sambatech.sample.utils.Helpers;
@@ -357,8 +358,8 @@ public class MediaItemActivity extends Activity {
 
 		status.setText(deauth ? "Deauthorizing..." : "Authorizing...");
 
-		String url = String.format("http://sambatech.stage.ott.irdeto.com/services/%s?CrmId=sambatech&AccountId=sambatech&SessionId=%s",
-				deauth ? "Deauthorize" : "Authorize", drmRequest.getLicenseParam("SessionId"));
+		String url = String.format("http://sambatech.stage.ott.irdeto.com/services/%s?CrmId=sambatech&AccountId=sambatech&SessionId=%s&UserIp=%s",
+				deauth ? "Deauthorize" : "Authorize", drmRequest.getLicenseParam("SessionId"), MainApplication.getExternalIp());
 
 		switch ((int)policySpinner.getSelectedItemId()) {
 			case 0:
