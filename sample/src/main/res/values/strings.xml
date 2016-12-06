@@ -22,9 +22,9 @@
     <string name="drm_url">http://sambatech.live.ott.irdeto.com/</string>
 
     <string-array name="policies">
-        <item>Policy 5 / Aluguel 48 horas</item>
-        <item>Policy 6 / Assinatura mensal</item>
-        <item>Policy 7 / Aluguel 48 horas, somente Brasil</item>
-        <item>Policy 8 / Assinatura mensal, somente Brasil</item>
+        <item>Aluguel 48h (p5)</item>
+        <item>Ass. mensal (p6)</item>
+        <item>Aluguel 48h/BR (p7)</item>
+        <item>Ass. mensal/BR (p8)</item>
     </string-array>
 </resources>

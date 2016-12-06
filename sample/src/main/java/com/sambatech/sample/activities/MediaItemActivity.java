@@ -303,7 +303,7 @@ public class MediaItemActivity extends Activity {
 		status.setText("Creating session...");
 
 		try {
-			HttpURLConnection con = (HttpURLConnection)new URL(String.format("%sservices/CreateSession?CrmId=sambatech&UserId=smbUserTest",
+			HttpURLConnection con = (HttpURLConnection)new URL(String.format("%sservices/CreateSession?CrmId=sambatech&UserId=samba",
 					getString(R.string.drm_url))).openConnection();
 
 			con.setRequestMethod("POST");
