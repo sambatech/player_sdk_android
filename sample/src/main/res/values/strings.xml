@@ -16,11 +16,10 @@
     <string name="title_activity_main_menu">MainMenu</string>
     <string name="title_activity_splash">SplashActivity</string>
     <string name="title_activity_about">AboutActivity</string>
-    <string name="about_text">Sample App criada pelo time do Player da Sambatech - Leandro Zanol,
-        Priscila Magalhães e Thiago Miranda
-    </string>
+    <string name="about_text">Sample App criada pelo time do Player da Sambatech - Leandro Zanol, Priscila Magalhães e Thiago Miranda</string>
     <string name="loading">Carregando listagem&#8230;</string>
     <string name="title_activity_menu">MenuActivity</string>
+    <string name="drm_url">http://sambatech.live.ott.irdeto.com/</string>
 
     <string-array name="policies">
         <item>Policy 5 / Aluguel 48 horas</item>

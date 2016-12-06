@@ -303,7 +303,8 @@ public class MediaItemActivity extends Activity {
 		status.setText("Creating session...");
 
 		try {
-			HttpURLConnection con = (HttpURLConnection)new URL("http://sambatech.stage.ott.irdeto.com/services/CreateSession?CrmId=sambatech&UserId=smbUserTest").openConnection();
+			HttpURLConnection con = (HttpURLConnection)new URL(String.format("%sservices/CreateSession?CrmId=sambatech&UserId=smbUserTest",
+					getString(R.string.drm_url))).openConnection();
 
 			con.setRequestMethod("POST");
 			con.addRequestProperty("MAN-user-id", "app@sambatech.com");
@@ -358,7 +359,7 @@ public class MediaItemActivity extends Activity {
 
 		status.setText(deauth ? "Deauthorizing..." : "Authorizing...");
 
-		String url = String.format("http://sambatech.stage.ott.irdeto.com/services/%s?CrmId=sambatech&AccountId=sambatech&SessionId=%s&UserIp=%s",
+		String url = String.format("%sservices/%s?CrmId=sambatech&AccountId=sambatech&SessionId=%s&UserIp=%s", getString(R.string.drm_url),
 				deauth ? "Deauthorize" : "Authorize", drmRequest.getLicenseParam("SessionId"), MainApplication.getExternalIp());
 
 		switch ((int)policySpinner.getSelectedItemId()) {

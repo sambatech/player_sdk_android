@@ -15,7 +15,7 @@ public class MainApplication extends Application {
 
         _instance = this;
 
-	    loadIp();
+	    loadExternalIp();
     }
 
     public static Context getAppContext() {
@@ -26,7 +26,7 @@ public class MainApplication extends Application {
 		return _externalIp;
 	}
 
-	private void loadIp() {
+	private void loadExternalIp() {
 		Helpers.requestUrl("https://api.ipify.org", new Helpers.Callback() {
 			@Override
 			public void call(String response) {
