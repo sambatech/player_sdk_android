@@ -18,6 +18,7 @@ package com.google.android.libraries.mediaframework.layeredvideo;
 
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.widget.FrameLayout;
 
 import com.google.android.libraries.mediaframework.R;
@@ -130,6 +131,14 @@ public class VideoSurfaceLayer implements Layer {
   @Override
   public void onLayerDisplayed(LayerManager layerManager) {
 
+  }
+
+  /**
+   * Returns the SurfaceView inside layer layout.
+   * @return The SurfaceView instance
+   */
+  public SurfaceView getSurfaceView() {
+    return surfaceView;
   }
 
   /**

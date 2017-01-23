@@ -1,5 +1,6 @@
 package com.sambatech.player.model;
 
+import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.utils.Helpers;
 
 import java.lang.reflect.Field;
@@ -20,6 +21,8 @@ public class SambaMediaConfig extends SambaMedia {
 	public int themeColor = 0xFF72BE44;
 	public String sttmUrl;
 	public String sttmKey;
+	public DrmRequest drmRequest;
+	public boolean blockIfRooted;
 
 	public SambaMediaConfig() {}
 
@@ -37,6 +40,7 @@ public class SambaMediaConfig extends SambaMedia {
 			themeColor = m.themeColor;
 			sttmKey = m.sttmKey;
 			sttmUrl = m.sttmUrl;
+			drmRequest = m.drmRequest;
 		}
 	}
 

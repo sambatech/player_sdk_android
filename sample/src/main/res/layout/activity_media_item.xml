@@ -2,9 +2,9 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.sambatech.sample.activities.MediaItemActivity"
     android:background="@color/backgroundGray">
 
@@ -19,7 +19,6 @@
         android:layout_width="match_parent"
         android:layout_height="250dp"
         app:autoFullscreenMode="true"
-
         android:layout_below="@+id/samba_player"
         android:visibility="gone"/>
 
@@ -30,7 +29,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/samba_player2"
         android:padding="@dimen/activity_vertical_margin"
-        android:textSize="30sp"/>
+        android:maxLines="2"
+        android:textSize="16sp"/>
 
     <TextView
         android:id="@+id/duration"
@@ -44,34 +44,32 @@
         android:layout_marginRight="@dimen/activity_vertical_margin"
         android:background="@color/transparent_black_hex_8"
         android:textColor="@color/backgroundGray"
-        android:padding="@dimen/activity_horizontal_margin"
-        />
+        android:padding="@dimen/activity_horizontal_margin"/>
 
     <TextView
         android:id="@+id/description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/title"
-        android:text=""
+        android:maxLength="100"
         android:paddingLeft="@dimen/activity_vertical_margin"
-        android:textSize="20sp"/>
+        android:textSize="12sp"/>
 
     <Button
         android:id="@+id/play"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/description"
-        style="@android:style/Widget.Holo.Button.Borderless"
+        android:layout_above="@+id/validation_controlbar"
+        style="@android:style/Widget.DeviceDefault.Button.Small"
         android:text="Play"/>
 
     <Button
         android:id="@+id/pause"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/description"
+        android:layout_above="@+id/validation_controlbar"
         android:layout_toEndOf="@id/play"
-        android:layout_toRightOf="@id/play"
-        style="@android:style/Widget.Holo.Button.Borderless"
+        style="@android:style/Widget.DeviceDefault.Button.Small"
         android:text="Pause"/>
 
     <TextView
@@ -106,10 +104,57 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|center_horizontal"
                 android:text="@string/loading" />
-
-
         </LinearLayout>
-
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/validation_controlbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_above="@id/status">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/create_session"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.DeviceDefault.Button.Small"
+                android:text="Session"/>
+
+            <Button
+                android:id="@+id/load"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.DeviceDefault.Button.Small"
+                android:text="Load"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Spinner
+                android:id="@+id/policies"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:entries="@array/policies" />
+            <Button
+                android:id="@+id/authorize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.DeviceDefault.Button.Small"
+                android:text="Auth"/>
+
+            <Button
+                android:id="@+id/deauthorize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@android:style/Widget.DeviceDefault.Button.Small"
+                android:text="Deauth"/>
+        </LinearLayout>
+    </LinearLayout>
 </RelativeLayout>

@@ -2,6 +2,7 @@ package com.sambatech.player;
 
 import android.app.Activity;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.OrientationEventListener;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import com.google.android.exoplayer.ExoPlayer;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
+import com.google.android.libraries.mediaframework.exoplayerextensions.UnsupportedDrmException;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
@@ -23,6 +25,8 @@ import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
+import com.sambatech.player.model.SambaPlayerError;
+import com.sambatech.player.utils.Helpers;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,6 +39,7 @@ import java.util.TimerTask;
 public class SambaPlayerController implements SambaPlayer {
 
 	private SimpleVideoPlayer player;
+	private View _currentScreen;
 	private SambaMediaConfig media = new SambaMediaConfig();
 	private Timer progressTimer;
 	private boolean _hasStarted;
@@ -45,11 +50,12 @@ public class SambaPlayerController implements SambaPlayer {
     private View captionMenu;
 	private boolean autoFsMode;
 	private boolean enableControls;
+	private boolean _disabled;
 
 	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
 		public void onStateChanged(boolean playWhenReady, int playbackState) {
-			Log.i("player", "state: " + playWhenReady + " " + playbackState);
+			Log.i("SambaPlayer", "state: " + playWhenReady + " " + playbackState);
 
 			switch (playbackState) {
 				case ExoPlayer.STATE_READY:
@@ -85,13 +91,15 @@ public class SambaPlayerController implements SambaPlayer {
 
 		@Override
 		public void onError(Exception e) {
-			Log.i("player", "Error: " + media, e);
-			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, e.getMessage()));
+			Log.i("SambaPlayer", "Error: " + media, e);
+			String msg = e.getCause() instanceof UnsupportedDrmException ? "You're not allowed to " +
+					(media != null && media.isAudioOnly ? "listen to this audio" : "watch this video") : e.getMessage();
+			dispatchError(SambaPlayerError.unknown.setMessage(msg));
 		}
 
 		@Override
 		public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
-			//Log.i("asdfg", unappliedRotationDegrees+" "+width + " " + height);
+			//Log.i("SambaPlayer", unappliedRotationDegrees+" "+width + " " + height);
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.RESIZE, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
 		}
 	};
@@ -145,15 +153,20 @@ public class SambaPlayerController implements SambaPlayer {
 		this.view = view;
 	}
 
-	public void setMedia(SambaMedia media) {
-		if (media == null)
-			throw new IllegalArgumentException("Media data is null");
+	public void setMedia(@NonNull SambaMedia media) {
+		SambaMediaConfig m = new SambaMediaConfig(media);
 
-		this.media = new SambaMediaConfig(media);
+		this.media = m;
+
+		if (m.blockIfRooted && Helpers.isDeviceRooted()) {
+			_disabled = true;
+			dispatchError(SambaPlayerError.rootedDevice);
+			return;
+		}
 
 		destroy();
 
-		// TODO: thumbnail
+		// TODO: create thumbnail or create audio player
 	}
 
 	public SambaMedia getMedia() {
@@ -163,7 +176,8 @@ public class SambaPlayerController implements SambaPlayer {
 	public void play() {
 		if (player != null)
 			player.play();
-		else create();
+		else if (!_disabled)
+			create();
 	}
 
 	public void pause() {
@@ -229,16 +243,29 @@ public class SambaPlayerController implements SambaPlayer {
 	}
 
 	public void destroy() {
+		destroy(null);
+	}
+
+	public void destroy(SambaPlayerError error) {
 		destroyInternal();
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
+
+		if (error != null)
+			showError(error);
+		else destroyScreen();
 	}
 
 	public void changeOutput(SambaMedia.Output output) {
 		int currentPosition = player.getCurrentPosition();
-		for(SambaMedia.Output o : media.outputs) {
+
+		for (SambaMedia.Output o : media.outputs)
 			o.current = o.label.equals(output.label);
-		}
+
 		media.url = output.url;
+
+		if (media.url == null || media.url.isEmpty())
+			dispatchError(SambaPlayerError.emptyUrl);
+
 		destroyInternal();
 		create(false);
 		player.seek(currentPosition);
@@ -259,13 +286,13 @@ public class SambaPlayerController implements SambaPlayer {
 
 	private void create(boolean notify) {
 		if (player != null) {
-			Log.e("player", "Player already created!");
+			Log.i("SambaPlayer", "Player already created!");
 			return;
 		}
 
-        if (media.url == null || media.url.isEmpty()) {
-			Log.e("player", "Media data is null!");
-	        return;
+		if (media.url == null || media.url.isEmpty()) {
+			dispatchError(SambaPlayerError.emptyUrl);
+			return;
 		}
 
 		Video.VideoType videoType = Video.VideoType.OTHER;
@@ -279,9 +306,12 @@ public class SambaPlayerController implements SambaPlayer {
 				break;
 		}
 
+		/*if (media.drmRequest != null)
+			activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);*/
+
 		// no autoplay if there's ad because ImaWrapper takes control of the player
-        player = new SimpleVideoPlayer((Activity) view.getContext(), view,
-                new Video(media.url, videoType), media.title,
+        player = new SimpleVideoPlayer((Activity)view.getContext(), view,
+                new Video(media.url, videoType, media.drmRequest), media.title,
 		        media.adUrl == null || media.adUrl.isEmpty(), media.isAudioOnly);
 
 		player.setSeekbarColor(media.themeColor);
@@ -350,7 +380,7 @@ public class SambaPlayerController implements SambaPlayer {
 		}
 
 		// Output Menu
-		// TODO it might not be here
+		// TODO: it might not be here
 		if (media.outputs != null && media.outputs.size() > 1 && !media.isAudioOnly) {
 			outputMenu = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
 
@@ -430,6 +460,25 @@ public class SambaPlayerController implements SambaPlayer {
 		player = null;
 		_hasStarted = false;
 		_hasFinished = false;
+		_disabled = false;
+	}
+
+	private void showError(@NonNull SambaPlayerError error) {
+		_currentScreen = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.error_screen, view, false);
+		TextView msg = (TextView)_currentScreen.findViewById(R.id.error_message);
+
+		msg.setText(error.toString());
+
+		// removes images if audio player
+		if (media != null && media.isAudioOnly)
+			msg.setCompoundDrawables(null, null, null, null);
+
+		view.addView(_currentScreen);
+	}
+
+	private void destroyScreen() {
+		if (_currentScreen == null) return;
+		view.removeView(_currentScreen);
 	}
 
     private void startProgressTimer() {
@@ -452,5 +501,11 @@ public class SambaPlayerController implements SambaPlayer {
 		progressTimer.cancel();
 		progressTimer.purge();
 		progressTimer = null;
+	}
+
+	private void dispatchError(SambaPlayerError error) {
+		// give user the chance to customize error message before showing it
+		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, error));
+		destroy(error);
 	}
 }

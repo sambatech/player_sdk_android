@@ -1,6 +1,7 @@
 package com.sambatech.player;
 
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaPlayerError;
 
 /**
  * Represents the player front-end API.
@@ -87,7 +88,7 @@ public interface SambaPlayer {
 	float getCurrentTime();
 
 	/**
-	 * Gets the total duration of the video
+	 * Gets the total duration of the video.
 	 * @return Float total duration
 	 */
 	float getDuration();
@@ -108,13 +109,19 @@ public interface SambaPlayer {
 	boolean hasStarted();
 
 	/**
-	 * Changes the current output
+	 * Changes the current output.
 	 * @param output SambaMedia.Output indicating the new output
 	 */
 	void changeOutput(SambaMedia.Output output);
 
 	/**
-	 * Destroys the player and it's events
+	 * Destroys the player and it's events.
 	 */
 	void destroy();
+
+	/**
+	 * Destroys the player and it's events and shows an error screen.
+	 * @param error Error type to show
+	 */
+	void destroy(SambaPlayerError error);
 }

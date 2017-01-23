@@ -5,10 +5,10 @@ android {
     buildToolsVersion "23.0.3"
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 23
-        versionCode 12
-        versionName "v0.2.5-beta"
+        versionCode 13
+        versionName "v0.5.0-beta"
     }
     buildTypes {
         release {
@@ -20,19 +20,18 @@ android {
 
 dependencies {
     // DEV
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    //compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':googlemediaframework')
 
     // PROD
-    /**
-    compile('com.sambatech.player:gmf:0.2.0-2') {
+    /*compile('com.sambatech.player:gmf:0.2.0-2') {
         // DEPLOY
         transitive=true
-    }
+    }*/
     compile('com.sambatech.player.3rd:ima-android-sdk:3.1.3') {
         // DEPLOY
-        transitive=true
-    }**/
+        //transitive=true
+    }
 
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.3.0'

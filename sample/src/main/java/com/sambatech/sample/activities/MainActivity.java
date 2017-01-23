@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasAdapter;
 import com.sambatech.sample.model.LiquidMedia;
@@ -42,9 +43,11 @@ public class MainActivity extends Activity {
 	@Bind(R.id.progressbar_view) LinearLayout loading;
 
 	//Samba api and Json Tag endpoints
-	@BindString(R.string.sambaapi_endpoint) String api_endpoint;
+	@BindString(R.string.svapi_stage) String svapi_stage;
+	@BindString(R.string.svapi_dev) String svapi_dev;
 	@BindString(R.string.mysjon_endpoint) String tag_endpoint;
-	@BindString(R.string.access_token) String access_token;
+	@BindString(R.string.svapi_token_prod) String svapi_token_prod;
+	@BindString(R.string.svapi_token_dev) String svapi_token_dev;
 
 	MediasAdapter mAdapter;
 	Menu menu;
@@ -84,9 +87,15 @@ public class MainActivity extends Activity {
 		ButterKnife.bind(this);
 
 		phMap = new HashMap<>();
+		// PROD
 		phMap.put(4421, "bc6a17435f3f389f37a514c171039b75");
-		phMap.put(4460, "36098808ae444ca5de4acf231949e312");
-		//phMap.put(562, "b00772b75e3677dba5a59e09598b7a0d");
+		phMap.put(6050, "2893ae96e3f2fade7391695553400f80");
+		phMap.put(5952, "1190b8e6d5e846c0c749e3db38ed0dcf");
+		phMap.put(5719, "2dcbb8a0463215c2833dd7b178bc05da");
+		//phMap.put(4460, "36098808ae444ca5de4acf231949e312");
+		// DEV
+		phMap.put(543, "664a1791fa5d4b0861416d0059da8cda");
+		phMap.put(562, "b00772b75e3677dba5a59e09598b7a0d");
 
 		callCommonList();
 	}
@@ -103,10 +112,10 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main_menu, menu);
 		this.menu = menu;
 
-		SearchView addTag = (SearchView) menu.findItem(R.id.addTag).getActionView();
-		addTag.setQueryHint("myjson id ( ex: 26dyf )");
+		SearchView adTag = (SearchView) menu.findItem(R.id.adTag).getActionView();
+		adTag.setQueryHint("myjson id ( ex: 26dyf )");
 
-		addTag.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+		adTag.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
 			@Override
 			public boolean onQueryTextSubmit(String query) {
@@ -121,8 +130,8 @@ public class MainActivity extends Activity {
 		});
 
 		// Clean magnifier
-		int searchCloseButtonId = addTag.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
-		ImageView magIcon = (ImageView) addTag.findViewById(searchCloseButtonId);
+		int searchCloseButtonId = adTag.getContext().getResources().getIdentifier("android:id/search_mag_icon", null, null);
+		ImageView magIcon = (ImageView) adTag.findViewById(searchCloseButtonId);
 		magIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
 		magIcon.setVisibility(View.INVISIBLE);
 
@@ -187,11 +196,12 @@ public class MainActivity extends Activity {
 
 	/**
 	 * Make the request to the Samba Api ( see also http://dev.sambatech.com/documentation/sambavideos/index.html )
-	 * @param token - Api token
 	 * @param pid - Project ID
 	 */
-	private void makeMediasCall(final String token, final int pid) {
-		Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(api_endpoint).getMedias(token, pid, true, "VIDEO,AUDIO");
+	private void makeMediasCall(final int pid) {
+		boolean isDev = pid == 543 || pid == 562;
+		Call<ArrayList<LiquidMedia>> call = LiquidApi.getApi(isDev ? svapi_dev : svapi_stage).
+				getMedias(isDev ? svapi_token_dev : svapi_token_prod, pid, true, "VIDEO,AUDIO");
 		loadingFlag = true;
 		call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
 			@Override
@@ -210,7 +220,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onFailure(Throwable t) {
 				loadingFlag = false;
-				makeMediasCall(token, pid);
+				makeMediasCall(pid);
 			}
 		});
 	}
@@ -232,11 +242,10 @@ public class MainActivity extends Activity {
 				if (response.code() == 200) {
 					ArrayList<LiquidMedia.AdTag> tags = response.body();
 					try {
-						ArrayList<LiquidMedia> mediasModified = mediasWithTags(mediaList, tags);
-						adMediaList = mediasModified;
+						adMediaList = mediasWithTags(mediaList, tags);
 						showMediasList(adMediaList);
-					} catch (CloneNotSupportedException e) {
 					}
+					catch (CloneNotSupportedException e) {}
 				} else {
 					Toast.makeText(MainActivity.this, "Tags não achadas no id: " + jsonId, Toast.LENGTH_SHORT).show();
 				}
@@ -259,32 +268,88 @@ public class MainActivity extends Activity {
 			mediaList = new ArrayList<>();
 		}
 
-		// INJECTED MEDIA
+		// Injected medias
 
-		// Injected media sample (SambaVideos)
-		//LiquidMedia m = new LiquidMedia();
-		//m.ph = "project_hash";
-		//m.id = "media_hash";
-		//m.title = "Media title";
-		//LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
-		//thumb.url = "thumb_url";
-		//ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
-		//m.thumbs = thumbs;
-		//mediaList.add(m);
+		LiquidMedia m;
+		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+		thumb.url = "http://pcgamingwiki.com/images/thumb/b/b3/DRM-free_icon.svg/120px-DRM-free_icon.svg.png";
+		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
 
-		// Injected media sample 2 (external URL)
-		//LiquidMedia m = new LiquidMedia();
-		//m.url = "media_url";
-		//m.title = "Media title";
-		//mediaList.add(m);
+		// AXINOM
+		/*m = new LiquidMedia();
+		m.url = "https://media.axprod.net/TestVectors/v6-MultiDRM/Manifest_1080p.mpd";
+		m.validationRequest = getDrmAxinom();
+		m.title = "Dash DRM (Axinom)";
+		m.type = "dash";
+		m.thumbs = thumbs;
+		mediaList.add(m);*/
+
+		// IRDETO
+		//b00772b75e3677dba5a59e09598b7a0d be4a12397143caf9ec41c9acb98728bf
+		m = new LiquidMedia();
+		m.title = "DRM Irdeto (p#7)";
+		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
+		m.id = "eec9fa7ab62032a377cff462522f69dc";
+		m.url = "http://52.32.88.36/sambatech/stage/MrPoppersPenguins.ism/manifest_mvlist.mpd";
+		m.entitlementScheme = new LiquidMedia.EntitlementScheme("MrPoppersPenguins");
+		m.environment = SambaMediaRequest.Environment.DEV;
+		m.type = "dash";
+		m.thumbs = thumbs;
+		mediaList.add(m);
+
+		m = new LiquidMedia();
+		m.title = "DRM Samba (p#7)";
+		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
+		m.id = "eec9fa7ab62032a377cff462522f69dc";
+		m.url = "http://107.21.208.27/vodd/_definst_/mp4:myMovie.mp4/manifest_mvlist.mpd";
+		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p7_test");
+		m.environment = SambaMediaRequest.Environment.DEV;
+		m.type = "dash";
+		m.thumbs = thumbs;
+		mediaList.add(m);
+
+		m = new LiquidMedia();
+		m.title = "DRM Samba (p#8)";
+		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
+		m.id = "3153f923ae18c999a01db465d50d0dac";
+		m.url = "http://107.21.208.27/vodd/_definst_/mp4:chaves3_480p.mp4/manifest_mvlist.mpd";
+		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p8_test");
+		m.environment = SambaMediaRequest.Environment.DEV;
+		m.type = "dash";
+		m.thumbs = thumbs;
+		mediaList.add(m);
+
+		m = new LiquidMedia();
+		m.title = "DRM Samba (p#9)";
+		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
+		m.id = "d3c7ec784a4ff90b7c6a0e51b4657a5e";
+		m.url = "http://107.21.208.27/vodd/_definst_/mp4:agdq.mp4/manifest_mvlist.mpd";
+		m.entitlementScheme = new LiquidMedia.EntitlementScheme("samba_p9_test");
+		m.environment = SambaMediaRequest.Environment.DEV;
+		m.type = "dash";
+		m.thumbs = thumbs;
+		mediaList.add(m);
 
 		loading.setVisibility(View.VISIBLE);
 		list.setAdapter(null);
 
 		// making the call to projects
 		for (Map.Entry<Integer, String> kv : phMap.entrySet())
-			makeMediasCall(access_token, kv.getKey());
+			makeMediasCall(kv.getKey());
 	}
+
+	/*private LiquidMedia.ValidationRequest getValidationRequestAxinom() {
+		if (validationRequestAxinom != null) return validationRequestAxinom;
+
+		return validationRequestAxinom = new LiquidMedia.ValidationRequest("https://drmIrdeto-quick-start.azurewebsites.net/api/authorization/Axinom%20demo%20video", new LiquidMedia.DrmCallback() {
+			public void call(SambaMediaConfig media, String response) {
+				if (response == null) return;
+
+				media.drmRequest = new DrmRequest("https://drmIrdeto-widevine-licensing.axtest.net/AcquireLicense");
+				media.drmRequest.addHeaderParam("X-AxDRM-Message", response.substring(1, response.length() - 1));
+			}
+		});
+	}*/
 
 	/**
 	 * Populates the MediaItem with the given medias
@@ -311,6 +376,11 @@ public class MainActivity extends Activity {
 
 			for(LiquidMedia media : medias) {
 				media.ph = phMap.get(pid);
+				media.environment = pid == 543 || pid == 562 ? SambaMediaRequest.Environment.DEV : SambaMediaRequest.Environment.STAGING;
+
+				// WORKAROUND: to identify which project has DRM
+				if (pid == 5952 || pid == 6050 || pid == 5719 || pid == 543 || pid == 562)
+					media.entitlementScheme = new LiquidMedia.EntitlementScheme();
 			}
 
 		}
@@ -329,14 +399,7 @@ public class MainActivity extends Activity {
 		ArrayList<LiquidMedia> newMedias = new ArrayList<LiquidMedia>();
 
 		for(int i = 0; i < tags.size(); i++) {
-			//LiquidMedia m = (LiquidMedia) (i < medias.size() ? medias.get(i).clone() : newMedias.get(mIndex++).clone());
-			LiquidMedia m = new LiquidMedia();
-			if(i < medias.size()) {
-				m = (LiquidMedia) medias.get(i).clone();
-			}else {
-				m = (LiquidMedia) newMedias.get(mIndex).clone();
-				mIndex = mIndex++;
-			}
+			LiquidMedia m = (LiquidMedia) (i < medias.size() ? medias.get(i).clone() : newMedias.get(mIndex++).clone());
 			m.adTag = new LiquidMedia.AdTag();
 			m.adTag.name = tags.get(i).name;
 			m.adTag.url = tags.get(i).url;
@@ -352,53 +415,62 @@ public class MainActivity extends Activity {
 	 */
 	private ArrayList<LiquidMedia> populateLiveMedias() {
 
-			ArrayList<LiquidMedia> medias = new ArrayList<>();
+		ArrayList<LiquidMedia> medias = new ArrayList<>();
 
-			LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
-			thumb.url = "http://www.impactmobile.com/files/2012/09/icon64-broadcasts.png";
-			ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
+		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+		thumb.url = "http://www.impactmobile.com/files/2012/09/icon64-broadcasts.png";
+		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
 
-			LiquidMedia media = new LiquidMedia();
-			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://gbbrlive2.sambatech.com.br/liveevent/sbt3_8fcdc5f0f8df8d4de56b22a2c6660470/livestream/manifest.m3u8";
-			media.title = "Live SBT (HLS)";
-			media.description = "Transmissão ao vivo do SBT.";
-			media.thumbs = thumbs;
-			medias.add(media);
+		LiquidMedia media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbt.m3u8";
+		media.title = "Live SBT (HLS)";
+		media.description = "Transmissão ao vivo do SBT.";
+		media.thumbs = thumbs;
+		medias.add(media);
 
-			media = new LiquidMedia();
-			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8";
-			media.title = "Live VEVO (HLS)";
-			media.description = "Transmissão ao vivo do VEVO.";
-			media.thumbs = thumbs;
-			medias.add(media);
+		media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8";
+		media.title = "Live VEVO (HLS)";
+		media.description = "Transmissão ao vivo do VEVO.";
+		media.thumbs = thumbs;
+		medias.add(media);
 
-			media = new LiquidMedia();
-			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/playlist.m3u8";
-			media.title = "Live Denmark channel (HLS)";
-			media.description = "Transmissão ao vivo TV-DN.";
-			media.thumbs = thumbs;
-			medias.add(media);
+		media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/playlist.m3u8";
+		media.title = "Live Denmark channel (HLS)";
+		media.description = "Transmissão ao vivo TV-DN.";
+		media.thumbs = thumbs;
+		medias.add(media);
 
-			media = new LiquidMedia();
-			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/manifest.f4m";
-			media.title = "Live Denmark channel (HDS: erro!)";
-			media.description = "Transmissão ao vivo inválida.";
-			media.thumbs = thumbs;
-			medias.add(media);
+		media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/manifest.f4m";
+		media.title = "Live Denmark channel (HDS: erro!)";
+		media.description = "Transmissão ao vivo inválida.";
+		media.thumbs = thumbs;
+		medias.add(media);
 
-			media = new LiquidMedia();
-			media.ph = "bc6a17435f3f389f37a514c171039b75";
-			media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/tvdiario_7a683b067e5eee5c8d45e1e1883f69b9/livestream/playlist.m3u8";
-			media.title = "Tv Diário";
-			media.description = "Transmissão ao vivo TV Diário";
-			media.thumbs = thumbs;
-			medias.add(media);
+		media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/tvdiario_7a683b067e5eee5c8d45e1e1883f69b9/livestream/playlist.m3u8";
+		media.title = "Tv Diário";
+		media.description = "Transmissão ao vivo TV Diário";
+		media.thumbs = thumbs;
+		medias.add(media);
 
-			return medias;
+		media = new LiquidMedia();
+		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.streamUrl = "http://slrp.sambavideos.sambatech.com/radio/pajucara4_7fbed8aac5d5d915877e6ec61e3cf0db/livestream/playlist.m3u8";
+		media.qualifier = "AUDIO";
+		media.title = "Audio Live";
+		media.description = "Live de audio.";
+		media.thumbs = thumbs;
+		medias.add(media);
+
+		return medias;
 	}
 
 }

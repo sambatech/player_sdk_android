@@ -17,7 +17,7 @@ public class LiquidMedia implements Cloneable {
     public ArrayList<File> files;
     public ArrayList<Thumb> thumbs;
     public String streamUrl;
-	public String qualifier;
+	public String qualifier = "VIDEO";
     public String url;
     public String type = "";
 
@@ -26,6 +26,7 @@ public class LiquidMedia implements Cloneable {
     public String ad_program;
     public AdTag adTag;
     public SambaMediaRequest.Environment environment;
+    public EntitlementScheme entitlementScheme;
 
     public Object clone() throws CloneNotSupportedException {
 		return super.clone();
@@ -49,5 +50,16 @@ public class LiquidMedia implements Cloneable {
         public String name;
         public String url;
     }
-}
 
+    public static class EntitlementScheme {
+        public final String contentId;
+
+        public EntitlementScheme() {
+            this(null);
+        }
+
+        public EntitlementScheme(String contentId) {
+            this.contentId = contentId;
+        }
+    }
+}

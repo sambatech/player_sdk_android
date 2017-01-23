@@ -6,6 +6,7 @@ import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.player.plugins.Plugin;
 import com.sambatech.player.plugins.PluginManager;
 import com.sambatech.player.plugins.PluginManagerImpl;
@@ -33,7 +34,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer, PluginM
 		controllerReal.setAutoFullscreenMode(autoFsMode);
 		controllerReal.setEnableControls(enableControls);
 
-		(new PluginManagerImpl()).onLoad(this);
+		PluginManagerImpl.getCurrentInstance().onLoad(this);
 	}
 
 	public SambaMedia getMedia() {
@@ -106,6 +107,10 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer, PluginM
 	}
 
 	public void destroy() {
+		destroy(null);
+	}
+
+	public void destroy(SambaPlayerError error) {
 		PluginManagerImpl.getCurrentInstance().onDestroy();
 		controller.destroy();
 
@@ -113,6 +118,7 @@ public class SambaPlayerView extends FrameLayout implements SambaPlayer, PluginM
 		controller = SambaPlayerControllerNull.getInstance();
 		pendingPlay = false;
 
+		// TODO: migrar para "reset()"
 		// rearming player
 		setMedia(getMedia());
 	}

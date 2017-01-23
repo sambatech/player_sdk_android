@@ -2,9 +2,12 @@
 <resources>
     <string name="app_name">SBPlayer</string>
 
-    <string name="sambaapi_endpoint">http://api.sambavideos.sambatech.com/v1/</string>
+    <string name="svapi_prod">http://api.sambavideos.sambatech.com/v1/</string>
+    <string name="svapi_stage">http://staging.sambavideos.sambatech.com/v1/</string>
+    <string name="svapi_dev">http://52.2.166.124:8091/v1/</string>
+    <string name="svapi_token_prod">ec8f5393-8e54-4ef2-842e-3f6cf0ea6287</string>
+    <string name="svapi_token_dev">08008acb-c9b8-4452-af78-2d36d83db640</string>
     <string name="mysjon_endpoint">https://api.myjson.com/bins/</string>
-    <string name="access_token">ec8f5393-8e54-4ef2-842e-3f6cf0ea6287</string>
     <string name="ad_program">Ad Tags</string>
     <string name="common">VOD</string>
     <string name="live">Live</string>
@@ -13,9 +16,15 @@
     <string name="title_activity_main_menu">MainMenu</string>
     <string name="title_activity_splash">SplashActivity</string>
     <string name="title_activity_about">AboutActivity</string>
-    <string name="about_text">Sample App criada pelo time do Player da Sambatech - Leandro Zanol,
-        Priscila Magalhães e Thiago Miranda
-    </string>
+    <string name="about_text">Sample App criada pelo time do Player da Sambatech - Leandro Zanol, Priscila Magalhães e Thiago Miranda</string>
     <string name="loading">Carregando listagem&#8230;</string>
     <string name="title_activity_menu">MenuActivity</string>
+    <string name="drm_url">http://sambatech.live.ott.irdeto.com/</string>
+
+    <string-array name="policies">
+        <item>Aluguel 48h (p5)</item>
+        <item>Ass. mensal (p6)</item>
+        <item>Aluguel 48h/BR (p7)</item>
+        <item>Ass. mensal/BR (p8)</item>
+    </string-array>
 </resources>
