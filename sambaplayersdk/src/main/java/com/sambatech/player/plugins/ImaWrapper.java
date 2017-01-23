@@ -112,7 +112,7 @@ public class ImaWrapper implements Plugin {
 	/**
 	 * Last recorded progress in ad playback. Occasionally the ad pauses when it needs to buffer (and
 	 * progress stops), so it must be resumed. We detect this situation by noting if the difference
-	 * "current progress" - "last recorded progress" = 0. If this occurs, then we can pause the
+	 * "isDefault progress" - "last recorded progress" = 0. If this occurs, then we can pause the
 	 * video and replay it. This causes the ad to continue playback again.
 	 */
 	private VideoProgressUpdate oldVpu;

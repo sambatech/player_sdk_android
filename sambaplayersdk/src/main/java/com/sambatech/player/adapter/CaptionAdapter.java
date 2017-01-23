@@ -14,13 +14,12 @@ import com.sambatech.player.model.SambaMedia;
 import java.util.ArrayList;
 
 /**
- * Created by thiagomir on 12/01/17.
+ * @author tmiranda - 12/01/17
  */
-
 public class CaptionAdapter extends BaseAdapter {
 
-    private ArrayList<SambaMedia.Caption> captions;
     private Context cContext;
+    private ArrayList<SambaMedia.Caption> captions;
 
     public CaptionAdapter(Context context, ArrayList<SambaMedia.Caption> cList) {
         this.cContext = context;
@@ -44,33 +43,28 @@ public class CaptionAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) cContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
         CaptionItem holder;
 
-        if(convertView == null) {
-            convertView = inflater.inflate(R.layout.menu_item, parent, false);
+        if (convertView == null) {
+            convertView = ((LayoutInflater) cContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+		            .inflate(R.layout.menu_item, parent, false);
 
             holder = new CaptionItem(convertView);
             convertView.setTag(holder);
-        }else {
+        }
+        else {
             holder = (CaptionItem) convertView.getTag();
         }
 
         SambaMedia.Caption caption = (SambaMedia.Caption) getItem(position);
 
-        holder.label.setText(caption.language);
-
-        if(caption.current) {
-            holder.radio.setChecked(true);
-        }else {
-            holder.radio.setChecked(false);
-        }
+        holder.label.setText(caption.label);
+        holder.radio.setChecked(caption.isDefault);
 
         return convertView;
     }
 
-    static class CaptionItem {
+    private static class CaptionItem {
         TextView label;
         RadioButton radio;
 

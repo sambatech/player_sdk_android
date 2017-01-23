@@ -30,7 +30,7 @@ public class SambaEvent {
 
 
 	/**
-	 * Get the current event type
+	 * Get the isDefault event type
 	 * @return {@link SambaPlayerListener.EventType}
 	 */
 	public SambaEventType getType() {
@@ -38,7 +38,7 @@ public class SambaEvent {
 	}
 
 	/**
-	 * Get the current data
+	 * Get the isDefault data
 	 * @return Object
 	 */
 	public Object getData() {

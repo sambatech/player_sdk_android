@@ -412,7 +412,9 @@ public class SimpleVideoPlayer {
     /** Sets the adapter for the caption menu
      * @param view The view for the caption menu
      */
-    public void setCaptionMenu(View view) { playbackControlLayer.setCaptionMenu(view); }
+    public void setCaptionMenu(View view) {
+	    playbackControlLayer.setCaptionMenu(view);
+    }
 
     /**
      * Closes caption menu.

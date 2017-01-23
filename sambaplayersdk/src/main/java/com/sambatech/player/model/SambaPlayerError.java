@@ -36,7 +36,7 @@ public enum SambaPlayerError {
 	}
 
 	/**
-	 * Replaces default error message for current instance.
+	 * Replaces default error message for isDefault instance.
 	 * @param msg The message to be replaced
 	 * @return The same instance reference
 	 */

@@ -53,7 +53,7 @@ public class SambaApi {
 	/**
 	 * SambaApi constructor
 	 *
-	 * @param activity Reference to the current Activity
+	 * @param activity Reference to the isDefault Activity
 	 * @param accessToken Configured SambaTech access token (ignored for now, pass an empty string or null)
 	 */
 	public SambaApi(Activity activity, String accessToken) {
@@ -313,7 +313,7 @@ public class SambaApi {
 							if (!label.equalsIgnoreCase("_raw") && !output.isNull("url")) {
 								if (label.startsWith(defaultOutputCurrent)) {
 									media.url = output.getString("url");
-									cOutput.current = true;
+									cOutput.isDefault = true;
 								}
 
 								mediaOutputs.add(cOutput);
@@ -358,16 +358,35 @@ public class SambaApi {
                 JSONArray captions = json.optJSONArray("captions");
 
                 if (captions != null && captions.length() > 0) {
+	                HashMap<String, String> langLookup = new HashMap<>();
                     JSONObject caption;
-                    //captionArray
+	                String lang;
+
+	                // TODO: localization
+	                langLookup.put("pt-br", "Português");
+	                langLookup.put("en-us", "Inglês");
+	                langLookup.put("es-es", "Espanhol");
+					langLookup.put("it-it", "Italiano");
+					langLookup.put("fr-fr", "Francês");
+					langLookup.put("disable", "Desativar");
+
+                    // captionArray
                     for (int j = captions.length(); j-- > 0;) {
                         caption = captions.getJSONObject(j);
-                        SambaMedia.Caption cp = new SambaMedia.Caption();
-                        cp.url = caption.getString("url");
-                        cp.language = caption.getJSONObject("fileInfo").getString("captionLanguage");
-                        cp.cc = caption.getJSONObject("fileInfo").getBoolean("closedCaption");
-                        captionArray.add(cp);
+	                    lang = caption.getJSONObject("fileInfo").getString("captionLanguage").toLowerCase().replace('_', '-');
+
+	                    captionArray.add(new SambaMedia.Caption(
+		                        caption.getString("url"),
+			                    langLookup.get(lang),
+			                    lang,
+		                        caption.getJSONObject("fileInfo").getBoolean("closedCaption"),
+			                    false
+                        ));
                     }
+
+	                // disable option (as default)
+	                captionArray.add(new SambaMedia.Caption("", langLookup.get("disable"), "", false, true));
+
                     media.captions = captionArray;
                 }
 

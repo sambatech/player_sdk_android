@@ -29,6 +29,6 @@ limitations under the License.
     <string name="output">Qualidade</string>
     <string name="output_default">240p</string>
     <string name="captions">Legendas</string>
-    <string name="caption_default">Português ( Brasil )</string>
+    <string name="caption_default">Português (Brasil)</string>
     <string name="cancel">Cancelar</string>
 </resources>

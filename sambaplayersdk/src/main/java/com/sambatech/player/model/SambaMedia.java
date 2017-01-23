@@ -20,6 +20,7 @@ public class SambaMedia {
 	public boolean isLive;
 	public boolean isAudioOnly;
 	public ArrayList<Output> outputs;
+	public ArrayList<Caption> captions;
 	public String drmToken;
 
 	public SambaMedia() {}
@@ -33,20 +34,30 @@ public class SambaMedia {
 		isAudioOnly = media.isAudioOnly;
 		outputs = media.outputs;
 		thumb = media.thumb;
+		captions = media.captions;
 		drmToken = media.drmToken;
 	}
 
 	public static class Output {
 		public String url;
 		public String label;
-		public Boolean current = false;
+		public boolean isDefault = false;
 		public int position;
 	}
 
     public static class Caption {
-        public String url;
-        public boolean cc;
-        public String language;
-        public Boolean current = false;
+        public final String url;
+	    public final String label;
+	    public final String language;
+	    public final boolean cc;
+        public final boolean isDefault;
+
+	    public Caption(String url, String label, String language, boolean cc, boolean isDefault) {
+		    this.url = url;
+		    this.label = label;
+		    this.language = language;
+		    this.cc = cc;
+		    this.isDefault = isDefault;
+	    }
     }
 }

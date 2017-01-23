@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.sambatech.player.BuildConfig;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -12,7 +11,6 @@ import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMediaConfig;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;

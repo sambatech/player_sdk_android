@@ -259,7 +259,7 @@ public class SambaPlayerController implements SambaPlayer {
 		int currentPosition = player.getCurrentPosition();
 
 		for (SambaMedia.Output o : media.outputs)
-			o.current = o.label.equals(output.label);
+			o.isDefault = o.label.equals(output.label);
 
 		media.url = output.url;
 
@@ -273,9 +273,7 @@ public class SambaPlayerController implements SambaPlayer {
 
     //Captions
     public void changeCaption(SambaMedia.Caption caption) {
-        for(SambaMedia.Caption c : media.captions ) {
-            c.current = c.language.equals(caption.language);
-        }
+
     }
 
 	/**	End Player API **/
@@ -379,57 +377,59 @@ public class SambaPlayerController implements SambaPlayer {
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, view));
 		}
 
-		// Output Menu
-		// TODO: it might not be here
-		if (media.outputs != null && media.outputs.size() > 1 && !media.isAudioOnly) {
-			outputMenu = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
+		if (!media.isAudioOnly) {
+			// Output Menu
+			// TODO: it might not be here
+			if (media.outputs != null && media.outputs.size() > 1) {
+				outputMenu = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
 
-			TextView cancelButton = (TextView)outputMenu.findViewById(R.id.menu_cancel_button);
-			//cancelButton.setTextColor(media.themeColor);
+				TextView cancelButton = (TextView) outputMenu.findViewById(R.id.menu_cancel_button);
+				//cancelButton.setTextColor(media.themeColor);
 
-			cancelButton.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					player.closeOutputMenu();
-				}
-			});
+				cancelButton.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						player.closeOutputMenu();
+					}
+				});
 
-			OutputAdapter outputAdapter = new OutputAdapter(view.getContext(), media.outputs);
-			ListView outputMenuList = (ListView) outputMenu.findViewById(R.id.menu_list);
+				OutputAdapter outputAdapter = new OutputAdapter(view.getContext(), media.outputs);
+				ListView outputMenuList = (ListView) outputMenu.findViewById(R.id.menu_list);
 
-			outputMenuList.setAdapter(outputAdapter);
-			outputMenuList.setOnItemClickListener(outputMenuItemListener);
-			outputAdapter.notifyDataSetChanged();
-			player.setOutputMenu(outputMenu);
-		}
+				outputMenuList.setAdapter(outputAdapter);
+				outputMenuList.setOnItemClickListener(outputMenuItemListener);
+				outputAdapter.notifyDataSetChanged();
+				player.setOutputMenu(outputMenu);
+			}
 
-        //Captions
-        if(media.captions != null && media.captions.size() > 0 ) {
-            captionMenu = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
-            TextView captionCancelButton = (TextView) captionMenu.findViewById(R.id.menu_cancel_button);
-            TextView captionTitle = (TextView)captionMenu.findViewById(R.id.menu_label);
-            captionTitle.setText(view.getContext().getString(R.string.captions));
+			//Captions
+			if (media.captions != null && media.captions.size() > 0) {
+				captionMenu = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
 
-            captionCancelButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    player.closeCaptionMenu();
-                }
-            });
+				TextView captionCancelButton = (TextView) captionMenu.findViewById(R.id.menu_cancel_button);
+				TextView captionTitle = (TextView) captionMenu.findViewById(R.id.menu_label);
+				captionTitle.setText(view.getContext().getString(R.string.captions));
 
-            CaptionAdapter captionAdapter = new CaptionAdapter(view.getContext(), media.captions);
-            ListView captionMenuList = (ListView) captionMenu.findViewById(R.id.menu_list);
+				captionCancelButton.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						player.closeCaptionMenu();
+					}
+				});
 
-            captionMenuList.setAdapter(captionAdapter);
-            captionMenuList.setOnItemClickListener(captionMenuItemListener);
-            captionMenuList.deferNotifyDataSetChanged();
+				CaptionAdapter captionAdapter = new CaptionAdapter(view.getContext(), media.captions);
+				ListView captionMenuList = (ListView) captionMenu.findViewById(R.id.menu_list);
 
-            player.setCaptionMenu(captionMenu);
-        }
+				captionMenuList.setAdapter(captionAdapter);
+				captionMenuList.setOnItemClickListener(captionMenuItemListener);
+				captionMenuList.deferNotifyDataSetChanged();
 
+				player.setCaptionMenu(captionMenu);
+			}
 
-		if(!enableControls && !media.isAudioOnly) {
-			player.disableControls();
+			if (!enableControls) {
+				player.disableControls();
+			}
 		}
 	}
 

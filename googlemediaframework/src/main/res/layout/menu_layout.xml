@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="@string/output"
+        android:text="Title..."
         android:textSize="24sp"
         android:textColor="#333333"/>
 

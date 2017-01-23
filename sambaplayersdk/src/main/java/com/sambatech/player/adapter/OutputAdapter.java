@@ -64,7 +64,7 @@ public class OutputAdapter extends BaseAdapter {
 
 		holder.label.setText(output.label);
 
-		if(output.current) {
+		if(output.isDefault) {
 			holder.radio.setChecked(true);
 		}else {
 			holder.radio.setChecked(false);

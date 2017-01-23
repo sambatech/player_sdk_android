@@ -28,7 +28,7 @@ public class PluginManagerImpl implements Plugin, PluginManager {
 		plugins = new Plugin[] {
 				new ImaWrapper(),
 				new Tracking(),
-				new Drm()
+				new Captions()
 		};
 
 		for (Plugin plugin : plugins)

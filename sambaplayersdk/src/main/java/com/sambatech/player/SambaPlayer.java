@@ -11,13 +11,13 @@ import com.sambatech.player.model.SambaPlayerError;
 public interface SambaPlayer {
 
 	/**
-	 * Defines/overwrites current media.
+	 * Defines/overwrites isDefault media.
 	 * @param media The media to be played.
 	 */
 	void setMedia(SambaMedia media);
 
 	/**
-	 * Retrieves the current media data in use.
+	 * Retrieves the isDefault media data in use.
 	 *
 	 * Always returns a non null media data after LOAD event has been dispatched,
 	 * but before its dispatch null checks must be made.
@@ -82,8 +82,8 @@ public interface SambaPlayer {
 	void setAutoFullscreenMode(boolean flag);
 
 	/**
-	 * Gets the current time on the video.
-	 * @return Float current time
+	 * Gets the isDefault time on the video.
+	 * @return Float isDefault time
 	 */
 	float getCurrentTime();
 
@@ -109,7 +109,7 @@ public interface SambaPlayer {
 	boolean hasStarted();
 
 	/**
-	 * Changes the current output.
+	 * Changes the isDefault output.
 	 * @param output SambaMedia.Output indicating the new output
 	 */
 	void changeOutput(SambaMedia.Output output);
