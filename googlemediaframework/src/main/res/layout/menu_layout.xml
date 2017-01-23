@@ -8,7 +8,7 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/quality_label"
+        android:id="@+id/menu_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
@@ -22,10 +22,10 @@
         android:layout_weight="1"
         android:layout_marginBottom="16dp"
         android:divider="#00000000"
-        android:id="@+id/output_menu_list"/>
+        android:id="@+id/menu_list"/>
 
     <Button
-        android:id="@+id/output_menu_cancel_button"
+        android:id="@+id/menu_cancel_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"

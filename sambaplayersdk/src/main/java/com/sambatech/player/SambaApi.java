@@ -232,6 +232,7 @@ public class SambaApi {
 
 				SambaMediaConfig media = new SambaMediaConfig();
 				ArrayList<SambaMedia.Output> outputArray = new ArrayList<>();
+                ArrayList<SambaMedia.Caption> captionArray = new ArrayList<>();
 
 				JSONObject playerConfig = json.getJSONObject("playerConfig");
 				JSONObject apiConfig = json.getJSONObject("apiConfig");
@@ -298,6 +299,9 @@ public class SambaApi {
 							cOutput.label = output.getString("outputName").startsWith("abr") ? "Auto" : output.getString("outputName");
 							cOutput.position = outputMap.get(output.getString("outputName").toLowerCase());
 
+                            //Duration
+                            media.duration = output.getJSONObject("fileInfo").getLong("duration")/1000f;
+
 							if (media.isAudioOnly) {
 								if (!isStreaming || !cOutput.url.contains(".mp3"))
 									mediaOutputs.add(cOutput);
@@ -348,6 +352,24 @@ public class SambaApi {
 					media.thumb = new BitmapDrawable(activity.getResources(), bmp);*/
 					media.thumb = Drawable.createFromStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream(), "Thumbnail");
 				}
+
+                //Captions
+                JSONArray captions = json.optJSONArray("captions");
+
+                if (captions != null && captions.length() > 0) {
+                    JSONObject caption;
+                    //captionArray
+                    for (int j = captions.length(); j-- > 0;) {
+                        caption = captions.getJSONObject(j);
+                        SambaMedia.Caption cp = new SambaMedia.Caption();
+                        cp.url = caption.getString("url");
+                        cp.language = caption.getJSONObject("fileInfo").getString("captionLanguage");
+                        cp.cc = caption.getJSONObject("fileInfo").getBoolean("closedCaption");
+                        captionArray.add(cp);
+                    }
+                    media.captions = captionArray;
+                }
+
 				//else media.thumb = ContextCompat.getDrawable(activity, R.drawable.thumb);
 
 				if (playerConfig.has("theme") && !playerConfig.getString("theme").toLowerCase().equals("default"))

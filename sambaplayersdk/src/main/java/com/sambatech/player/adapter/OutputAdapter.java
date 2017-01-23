@@ -1,7 +1,6 @@
 package com.sambatech.player.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,6 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.sambatech.player.R;
-import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.model.SambaMedia;
 
 import java.util.ArrayList;
@@ -25,8 +23,8 @@ public class OutputAdapter extends BaseAdapter {
 
 
 	public OutputAdapter(Context context, ArrayList<SambaMedia.Output> oList) {
-		this.outputs = oList;
 		this.oContext = context;
+		this.outputs = oList;
 	}
 
 	@Override
@@ -41,7 +39,7 @@ public class OutputAdapter extends BaseAdapter {
 
 	@Override
 	public long getItemId(int position) {
-		return 0    ;
+		return 0;
 	}
 
 	//TODO melhorar a renderizacao para nao ser duplicada
@@ -54,7 +52,7 @@ public class OutputAdapter extends BaseAdapter {
 		OutputItem holder;
 
 		if(convertView == null) {
-			convertView = inflater.inflate(R.layout.output_menu_item, parent, false);
+			convertView = inflater.inflate(R.layout.menu_item, parent, false);
 
 			holder = new OutputItem(convertView);
 			convertView.setTag(holder);
@@ -88,7 +86,7 @@ public class OutputAdapter extends BaseAdapter {
 
 		OutputItem(View view) {
 			this.radio = (RadioButton) view.findViewById(R.id.output_radio);
-			this.label = (TextView) view.findViewById(R.id.output_label);
+			this.label = (TextView) view.findViewById(R.id.menu_item_label);
 		}
 	}
 }

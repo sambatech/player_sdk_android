@@ -252,7 +252,12 @@ public class SimpleVideoPlayer {
 		videoSurfaceLayer.moveSurfaceToForeground();
 	}
 
-	/**
+    /**
+     * Getting the subtitleLayer externaly
+     */
+    public SubtitleLayer getSubtitleLayer() { return subtitleLayer; }
+
+    /**
 	 * Pause video playback.
 	 */
 	public void pause() {
@@ -404,7 +409,19 @@ public class SimpleVideoPlayer {
 		playbackControlLayer.closeOutputMenu();
 	}
 
-	/**
+    /** Sets the adapter for the caption menu
+     * @param view The view for the caption menu
+     */
+    public void setCaptionMenu(View view) { playbackControlLayer.setCaptionMenu(view); }
+
+    /**
+     * Closes caption menu.
+     */
+    public void closeCaptionMenu() {
+        playbackControlLayer.closeCaptionMenu();
+    }
+
+    /**
 	 * When you are finished using this {@link SimpleVideoPlayer}, make sure to call this method.
 	 */
 	public void release() {

@@ -292,6 +292,11 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	private ImageButton outputButton;
 
+    /**
+     * Shows a menu for changing caption.
+     */
+    private ImageButton captionButton;
+
 	/**
 	 * This callback is triggered when going to fullscreen and returning from fullscreen.
 	 */
@@ -414,10 +419,15 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	private Dialog outputMenu;
 
-	/**
+    /**
+     * The caption menu
+     */
+    private Dialog captionMenu;
+
+    /**
 	 * Indicates playback last state before the output menu has open.
 	 */
-	private boolean outputMenuWasPlaying;
+	private boolean menuWasPlaying;
 
 	/**
 	 * Whether it should auto hide controls or not.
@@ -932,13 +942,34 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		outputMenu.setOnDismissListener(new DialogInterface.OnDismissListener() {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
-				if (outputMenuWasPlaying)
+				if (menuWasPlaying)
 					playerControl.start();
 			}
 		});
 
 		outputButton.setVisibility(View.VISIBLE);
 	}
+
+	/**
+	 * Sets the adapter for the caption menu
+	 * @param view The view for the caption menu
+	 */
+	public void setCaptionMenu(View view) {
+        captionMenu = new Dialog(getLayerManager().getActivity());
+        captionMenu.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        captionMenu.setContentView(view);
+        captionMenu.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        captionMenu.setOnDismissListener(new DialogInterface.OnDismissListener(){
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                if(menuWasPlaying)
+                    playerControl.start();
+            }
+        });
+
+        captionButton.setVisibility(View.VISIBLE);
+    }
 
 	// TODO it might not be here
 	/**
@@ -947,6 +978,13 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	public void closeOutputMenu() {
 		outputMenu.dismiss();
 	}
+
+    /**
+     * Closes the caption menu.
+     */
+    public void closeCaptionMenu() {
+        captionMenu.dismiss();
+    }
 
 	/**
 	 * Enables/Disables the specified controls.
@@ -1007,6 +1045,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		pausePlayButton = (ImageButton) view.findViewById(R.id.pause);
 		fullscreenButton = (ImageButton) view.findViewById((R.id.fullscreen));
 		outputButton = (ImageButton) view.findViewById(R.id.output_button);
+        captionButton = (ImageButton) view.findViewById(R.id.caption_button);
 		seekBar = (SeekBar) view.findViewById(R.id.mediacontroller_progress);
 		videoTitleView = (TextView) view.findViewById(R.id.video_title);
 		endTime = (TextView) view.findViewById(R.id.time_duration);
@@ -1023,7 +1062,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				if (outputMenu == null)
 					return;
 
-				outputMenuWasPlaying = playerControl.isPlaying();
+				menuWasPlaying = playerControl.isPlaying();
 				playerControl.pause();
 				outputMenu.show();
 			}
@@ -1033,6 +1072,22 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			// hidden by default
 			outputButton.setVisibility(View.GONE);
 		}
+
+        //Caption
+        captionButton.setOnClickListener(new View.OnClickListener() {
+           @Override
+            public void onClick(View v) {
+               if(captionMenu == null) return;
+
+               menuWasPlaying = playerControl.isPlaying();
+               playerControl.pause();
+               captionMenu.show();
+           }
+        });
+
+        if (captionMenu == null) {
+           captionButton.setVisibility(View.GONE);
+        }
 
 		// The play button should toggle play/pause when the play/pause button is clicked.
 		pausePlayLargeButton.setOnClickListener(new View.OnClickListener() {

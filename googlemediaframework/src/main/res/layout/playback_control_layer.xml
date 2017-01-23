@@ -156,6 +156,13 @@
                 style="@style/control" />
 
             <ImageButton
+                android:contentDescription="@string/captions"
+                android:id="@+id/caption_button"
+                android:src="@drawable/share"
+                android:background="@android:color/transparent"
+                style="@style/control" />
+
+            <ImageButton
                 android:contentDescription="@string/fullscreen"
                 android:id="@+id/fullscreen"
                 android:src="@drawable/fullscreen"

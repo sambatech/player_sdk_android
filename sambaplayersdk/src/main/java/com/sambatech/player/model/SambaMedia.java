@@ -15,10 +15,13 @@ public class SambaMedia {
 	public String url;
 	public String type = "";
 	public String adUrl;
-	public Drawable thumb;
+    public Drawable thumb;
+    public float duration;
 	public boolean isLive;
 	public boolean isAudioOnly;
 	public ArrayList<Output> outputs;
+    public ArrayList<Caption> captions;
+
 
 	public SambaMedia() {}
 
@@ -31,6 +34,7 @@ public class SambaMedia {
 		isAudioOnly = media.isAudioOnly;
 		outputs = media.outputs;
 		thumb = media.thumb;
+        captions = media.captions;
 	}
 
 	public static class Output {
@@ -39,4 +43,11 @@ public class SambaMedia {
 		public Boolean current = false;
 		public int position;
 	}
+
+    public static class Caption {
+        public String url;
+        public boolean cc;
+        public String language;
+        public Boolean current = false;
+    }
 }

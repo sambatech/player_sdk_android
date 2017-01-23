@@ -16,6 +16,7 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Exoplayer
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
+import com.sambatech.player.adapter.CaptionAdapter;
 import com.sambatech.player.adapter.OutputAdapter;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -41,6 +42,7 @@ public class SambaPlayerController implements SambaPlayer {
 	private FrameLayout view;
 	private OrientationEventListener orientationEventListener;
 	private View outputMenu;
+    private View captionMenu;
 	private boolean autoFsMode;
 	private boolean enableControls;
 
@@ -114,13 +116,22 @@ public class SambaPlayerController implements SambaPlayer {
 		}
 	};
 
-	private final AdapterView.OnItemClickListener menuItemListener = new AdapterView.OnItemClickListener() {
+	private final AdapterView.OnItemClickListener outputMenuItemListener = new AdapterView.OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			player.closeOutputMenu();
 			changeOutput((SambaMedia.Output) parent.getItemAtPosition(position));
 		}
 	};
+
+    private final AdapterView.OnItemClickListener captionMenuItemListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            player.closeCaptionMenu();
+            changeCaption((SambaMedia.Caption) parent.getItemAtPosition(position));
+        }
+    };
+
 	private final Runnable progressDispatcher = new Runnable() {
 		@Override
 		public void run() {
@@ -233,6 +244,13 @@ public class SambaPlayerController implements SambaPlayer {
 		player.seek(currentPosition);
 	}
 
+    //Captions
+    public void changeCaption(SambaMedia.Caption caption) {
+        for(SambaMedia.Caption c : media.captions ) {
+            c.current = c.language.equals(caption.language);
+        }
+    }
+
 	/**	End Player API **/
 
 	private void create() {
@@ -267,6 +285,7 @@ public class SambaPlayerController implements SambaPlayer {
 		        media.adUrl == null || media.adUrl.isEmpty(), media.isAudioOnly);
 
 		player.setSeekbarColor(media.themeColor);
+
 
 		// Move the content player's surface layer to the background so that the ad player's surface
 		// layer can be overlaid on top of it during ad playback.
@@ -333,9 +352,9 @@ public class SambaPlayerController implements SambaPlayer {
 		// Output Menu
 		// TODO it might not be here
 		if (media.outputs != null && media.outputs.size() > 1 && !media.isAudioOnly) {
-			outputMenu = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.output_menu_layout, null);
+			outputMenu = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
 
-			TextView cancelButton = (TextView)outputMenu.findViewById(R.id.output_menu_cancel_button);
+			TextView cancelButton = (TextView)outputMenu.findViewById(R.id.menu_cancel_button);
 			//cancelButton.setTextColor(media.themeColor);
 
 			cancelButton.setOnClickListener(new View.OnClickListener() {
@@ -346,13 +365,38 @@ public class SambaPlayerController implements SambaPlayer {
 			});
 
 			OutputAdapter outputAdapter = new OutputAdapter(view.getContext(), media.outputs);
-			ListView outputMenuList = (ListView) outputMenu.findViewById(R.id.output_menu_list);
+			ListView outputMenuList = (ListView) outputMenu.findViewById(R.id.menu_list);
 
 			outputMenuList.setAdapter(outputAdapter);
-			outputMenuList.setOnItemClickListener(menuItemListener);
+			outputMenuList.setOnItemClickListener(outputMenuItemListener);
 			outputAdapter.notifyDataSetChanged();
 			player.setOutputMenu(outputMenu);
 		}
+
+        //Captions
+        if(media.captions != null && media.captions.size() > 0 ) {
+            captionMenu = ((Activity) view.getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
+            TextView captionCancelButton = (TextView) captionMenu.findViewById(R.id.menu_cancel_button);
+            TextView captionTitle = (TextView)captionMenu.findViewById(R.id.menu_label);
+            captionTitle.setText(view.getContext().getString(R.string.captions));
+
+            captionCancelButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    player.closeCaptionMenu();
+                }
+            });
+
+            CaptionAdapter captionAdapter = new CaptionAdapter(view.getContext(), media.captions);
+            ListView captionMenuList = (ListView) captionMenu.findViewById(R.id.menu_list);
+
+            captionMenuList.setAdapter(captionAdapter);
+            captionMenuList.setOnItemClickListener(captionMenuItemListener);
+            captionMenuList.deferNotifyDataSetChanged();
+
+            player.setCaptionMenu(captionMenu);
+        }
+
 
 		if(!enableControls && !media.isAudioOnly) {
 			player.disableControls();
@@ -367,9 +411,14 @@ public class SambaPlayerController implements SambaPlayer {
 		stop();
 
 		if (outputMenu != null) {
-			((ListView)outputMenu.findViewById(R.id.output_menu_list)).setOnItemClickListener(null);
-			outputMenu.findViewById(R.id.output_menu_cancel_button).setOnClickListener(null);
+			((ListView)outputMenu.findViewById(R.id.menu_list)).setOnItemClickListener(null);
+			outputMenu.findViewById(R.id.menu_cancel_button).setOnClickListener(null);
 		}
+
+        if(captionMenu != null) {
+            ((ListView)captionMenu.findViewById(R.id.menu_list)).setOnItemClickListener(null);
+            captionMenu.findViewById(R.id.menu_cancel_button).setOnClickListener(null);
+        }
 
 		orientationEventListener.disable();
 		player.setPlayCallback(null);

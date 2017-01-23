@@ -19,7 +19,7 @@
         android:layout_marginStart="16dp"
         android:layout_gravity="center_vertical"
         android:text="@string/output_default"
-        android:id="@+id/output_label"
+        android:id="@+id/menu_item_label"
         android:textColor="#666666"
         android:textAppearance="?android:attr/textAppearanceMedium"/>
 
