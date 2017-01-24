@@ -8,6 +8,9 @@ import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
+import com.sambatech.player.model.SambaMedia;
+
+import java.util.ArrayList;
 
 /**
  * Plugin responsible for managing captions.
@@ -16,9 +19,21 @@ import com.sambatech.player.event.SambaPlayerListener;
  */
 final class Captions extends SambaPlayerListener implements Plugin {
 
+	private ArrayList<SambaMedia.Caption> _captionsRequest;
+
 	@Override
 	public void onLoad(@NonNull SambaPlayer player) {
-		SambaEventBus.subscribe(this);
+		SambaMedia media = player.getMedia();
+
+		if (media != null) {
+			_captionsRequest = media.captions;
+
+			if (_captionsRequest != null && _captionsRequest.size() > 0) {
+				changeCaption(0);
+				SambaEventBus.subscribe(this);
+			}
+		}
+
 		PluginManager.getInstance().notifyPluginLoaded(this);
 	}
 
@@ -38,6 +53,10 @@ final class Captions extends SambaPlayerListener implements Plugin {
 
 	@Override
 	public void onProgress(SambaEvent event) {
+
+	}
+
+	public void changeCaption(int index) {
 
 	}
 }

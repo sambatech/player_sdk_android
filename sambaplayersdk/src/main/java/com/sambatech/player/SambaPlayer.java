@@ -499,6 +499,8 @@ public class SambaPlayer extends FrameLayout {
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 		}
 
+		PluginManager.getInstance().onInternalPlayerCreated(player);
+
 		if (!media.isAudioOnly) {
 			// Output Menu
 			// TODO: it might not be here
@@ -553,8 +555,6 @@ public class SambaPlayer extends FrameLayout {
 				player.disableControls();
 			}
 		}
-
-		PluginManager.getInstance().onInternalPlayerCreated(player);
 	}
 
 	private void destroyInternal() {

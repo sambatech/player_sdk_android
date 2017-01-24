@@ -28,5 +28,6 @@ limitations under the License.
         android:paddingBottom="32dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
+        android:textColor="@android:color/holo_orange_light"
         android:textSize="20sp" />
 </FrameLayout>

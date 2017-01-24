@@ -102,10 +102,14 @@ public class SambaEventBus {
 				postponedUnsubscribes = new ArrayList<>();
 
                 Object listener;
+				Method m;
 
 				for (ListIterator<Object> iterator = listeners.get(k).listIterator(); iterator.hasNext();) {
                     listener = iterator.next();
-					listener.getClass().getDeclaredMethod("on" + t, SambaEvent.class).invoke(listener, e);
+					m = listener.getClass().getDeclaredMethod("on" + t, SambaEvent.class);
+
+					if (m != null)
+						m.invoke(listener, e);
                 }
 
 				List<Object> unsubs = postponedUnsubscribes;
@@ -121,7 +125,8 @@ public class SambaEventBus {
 				}
 			}
 			catch (Exception exp) {
-				Log.e(getClass().getSimpleName(), "Error trying to lookup or invoke method.", exp);
+				// it's okay not finding the methods in current class instance (getDeclaredMethod())
+				Log.i(getClass().getSimpleName(), "Error trying to lookup or invoke method.", exp);
 			}
 		}
 	}
