@@ -36,9 +36,9 @@ dependencies {
 }
 ```
 
-2) Instanciar o SambaPlayer (*interface* de SambaPlayerView) em um View:
+2) Instanciar o SambaPlayer em um View:
 ```xml
-<com.sambatech.player.SambaPlayerView
+<com.sambatech.player.SambaPlayer
     android:id="@+id/samba_player"/>
 ```
 

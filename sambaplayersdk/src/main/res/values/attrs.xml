@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="SambaPlayerView">
+    <declare-styleable name="SambaPlayer">
         <attr name="autoFullscreenMode" format="boolean" />
         <attr name="enableControls" format="boolean" />
     </declare-styleable>

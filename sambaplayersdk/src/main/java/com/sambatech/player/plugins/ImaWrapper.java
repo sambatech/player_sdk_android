@@ -3,6 +3,7 @@ package com.sambatech.player.plugins;
 import android.app.Activity;
 import android.graphics.Color;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.ViewGroup;
@@ -347,12 +348,12 @@ public class ImaWrapper implements Plugin {
 		}
 	};
 
-	public void onLoad(SambaPlayer player) {
+	public void onLoad(@NonNull SambaPlayer player) {
 		Log.i("ima", "load");
 		SambaMedia media = player.getMedia();
 
 		if (media.adUrl == null || media.adUrl.isEmpty()) {
-			PluginManagerImpl.getCurrentInstance().notifyPluginLoaded(this);
+			PluginManager.getInstance().notifyPluginLoaded(this);
 			return;
 		}
 
@@ -390,8 +391,10 @@ public class ImaWrapper implements Plugin {
 		};
 
 		SambaEventBus.subscribe(playerListener);
-		PluginManagerImpl.getCurrentInstance().notifyPluginLoaded(this);
+		PluginManager.getInstance().notifyPluginLoaded(this);
 	}
+
+	public void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer) {}
 
 	public void onDestroy() {
 		Log.i("ima:", String.valueOf(adsLoader == null));

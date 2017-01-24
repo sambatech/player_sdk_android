@@ -1,9 +1,11 @@
 package com.sambatech.player.plugins;
 
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -26,7 +28,7 @@ import java.util.TreeSet;
  *
  * @author Leandro Zanol - 28/12/15
  */
-public class Tracking implements Plugin {
+class Tracking implements Plugin {
 
 	private SambaMediaConfig media;
 	private Sttm sttm;
@@ -54,15 +56,17 @@ public class Tracking implements Plugin {
 		}
 	};
 
-	public void onLoad(SambaPlayer player) {
+	public void onLoad(@NonNull SambaPlayer player) {
 		Log.i("track", "load");
 		media = (SambaMediaConfig)player.getMedia();
 
 		if (media.projectHash != null && media.id != null)
 			SambaEventBus.subscribe(playerListener);
 
-		PluginManagerImpl.getCurrentInstance().notifyPluginLoaded(this);
+		PluginManager.getInstance().notifyPluginLoaded(this);
 	}
+
+	public void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer) {}
 
 	public void onDestroy() {
 		Log.i("track", "destroy");
@@ -110,7 +114,7 @@ public class Tracking implements Plugin {
 		private TreeSet<String> progresses = new TreeSet<>();
 		private HashSet<Integer> trackedRetentions = new HashSet<>();
 
-		public Sttm() {
+		Sttm() {
 			sttmTimer = new Timer();
 			sttmTimer.scheduleAtFixedRate(this, 0, 5000);
 		}
@@ -129,16 +133,16 @@ public class Tracking implements Plugin {
 			targets.clear();
 		}
 
-		public void trackStart() {
+		void trackStart() {
 			targets.add("play");
 		}
 
-		public void trackComplete() {
+		void trackComplete() {
 			collectProgress();
 			targets.add("complete");
 		}
 
-		public void trackProgress(float time, float duration) {
+		void trackProgress(float time, float duration) {
 			int p = (int)(100*time/duration);
 
 			if (p > 99)
@@ -155,7 +159,7 @@ public class Tracking implements Plugin {
 				collectProgress();
 		}
 
-		public void destroy() {
+		void destroy() {
 			if (sttmTimer != null) {
 				sttmTimer.cancel();
 				sttmTimer.purge();
