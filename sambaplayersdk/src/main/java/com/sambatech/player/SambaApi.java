@@ -232,8 +232,6 @@ public class SambaApi {
 					return null;
 
 				SambaMediaConfig media = new SambaMediaConfig();
-				ArrayList<SambaMedia.Output> outputArray = new ArrayList<>();
-                ArrayList<SambaMedia.Caption> captionArray = new ArrayList<>();
 
 				JSONObject playerConfig = json.getJSONObject("playerConfig");
 				JSONObject apiConfig = json.getJSONObject("apiConfig");
@@ -358,6 +356,7 @@ public class SambaApi {
                 JSONArray captions = json.optJSONArray("captions");
 
                 if (captions != null && captions.length() > 0) {
+	                ArrayList<SambaMedia.Caption> captionArray = new ArrayList<>();
 	                HashMap<String, String> langLookup = new HashMap<>();
                     JSONObject caption;
 	                String lang;

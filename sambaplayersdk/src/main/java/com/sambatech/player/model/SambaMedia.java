@@ -1,6 +1,7 @@
 package com.sambatech.player.model;
 
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 

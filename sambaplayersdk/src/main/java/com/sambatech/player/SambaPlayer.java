@@ -43,7 +43,7 @@ import java.util.TimerTask;
 public class SambaPlayer extends FrameLayout {
 
 	private SimpleVideoPlayer player;
-	private View _currentScreen;
+	private View _errorScreen;
 	private SambaMediaConfig media = new SambaMediaConfig();
 	private Timer progressTimer;
 	private boolean _hasStarted;
@@ -339,7 +339,13 @@ public class SambaPlayer extends FrameLayout {
 	 * Changes the isDefault output.
 	 * @param output SambaMedia.Output indicating the new output
 	 */
-	public void changeOutput(SambaMedia.Output output) {
+	public void changeOutput(@NonNull SambaMedia.Output output) {
+		if (output.url == null || output.url.isEmpty()) {
+			//dispatchError(SambaPlayerError.emptyUrl);
+			Log.e("SambaPlayer", "URL not found for output \"" + output.label + "\".");
+			return;
+		}
+
 		int currentPosition = player.getCurrentPosition();
 
 		for (SambaMedia.Output o : media.outputs)
@@ -347,21 +353,18 @@ public class SambaPlayer extends FrameLayout {
 
 		media.url = output.url;
 
-		if (media.url == null || media.url.isEmpty())
-			dispatchError(SambaPlayerError.emptyUrl);
-
 		destroyInternal();
 		create(false);
 		player.seek(currentPosition);
 	}
 
-	/**
+	/*
 	 * Changes the current output.
 	 * @param index The index in the outputs array.
 	 */
-	public void changeOutput(int index) {
+	/*public void changeOutput(int index) {
 
-	}
+	}*/
 
 	/**
 	 * Changes the current caption.
@@ -588,8 +591,8 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void showError(@NonNull SambaPlayerError error) {
-		_currentScreen = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
-		TextView msg = (TextView)_currentScreen.findViewById(R.id.error_message);
+		_errorScreen = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
+		TextView msg = (TextView) _errorScreen.findViewById(R.id.error_message);
 
 		msg.setText(error.toString());
 
@@ -597,12 +600,12 @@ public class SambaPlayer extends FrameLayout {
 		if (media != null && media.isAudioOnly)
 			msg.setCompoundDrawables(null, null, null, null);
 
-		addView(_currentScreen);
+		addView(_errorScreen);
 	}
 
 	private void destroyScreen() {
-		if (_currentScreen == null) return;
-		removeView(_currentScreen);
+		if (_errorScreen == null) return;
+		removeView(_errorScreen);
 	}
 
     private void startProgressTimer() {
