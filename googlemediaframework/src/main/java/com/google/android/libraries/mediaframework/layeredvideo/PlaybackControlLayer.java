@@ -991,6 +991,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
      */
     public void closeCaptionMenu() {
         captionMenu.dismiss();
+	    hide();
     }
 
 	/**

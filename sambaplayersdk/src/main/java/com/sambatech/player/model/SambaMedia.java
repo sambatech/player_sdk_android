@@ -22,6 +22,7 @@ public class SambaMedia {
 	public boolean isAudioOnly;
 	public ArrayList<Output> outputs;
 	public ArrayList<Caption> captions;
+	public @NonNull CaptionsConfig captionsConfig = new CaptionsConfig();
 	public String drmToken;
 
 	public SambaMedia() {}
@@ -61,4 +62,28 @@ public class SambaMedia {
 		    this.isDefault = isDefault;
 	    }
     }
+
+	public static class CaptionsConfig {
+		public final int color;
+		public final float size;
+		public final String language;
+
+		public CaptionsConfig(int color, float size, String language) {
+			this.color = color;
+			this.size = size;
+			this.language = language;
+		}
+
+		public CaptionsConfig(int color, float size) {
+			this(color, size, null);
+		}
+
+		public CaptionsConfig(int color) {
+			this(color, 20f);
+		}
+
+		public CaptionsConfig() {
+			this(0xFFFFCC00);
+		}
+	}
 }

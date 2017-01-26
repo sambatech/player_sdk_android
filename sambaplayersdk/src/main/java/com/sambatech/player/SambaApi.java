@@ -384,7 +384,7 @@ public class SambaApi {
                     }
 
 	                // disable option (as default)
-	                captionArray.add(new SambaMedia.Caption("", langLookup.get("disable"), "", false, true));
+	                captionArray.add(new SambaMedia.Caption(null, langLookup.get("disable"), null, false, true));
 
                     media.captions = captionArray;
                 }

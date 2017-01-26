@@ -504,12 +504,6 @@ public class SambaPlayer extends FrameLayout {
 			}
 		};
 
-		if (notify) {
-			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
-		}
-
-		PluginManager.getInstance().onInternalPlayerCreated(player);
-
 		if (!media.isAudioOnly) {
 			// Output Menu
 			// TODO: it might not be here
@@ -563,6 +557,12 @@ public class SambaPlayer extends FrameLayout {
 
 			if (!enableControls) {
 				player.disableControls();
+			}
+
+			PluginManager.getInstance().onInternalPlayerCreated(player);
+
+			if (notify) {
+				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 			}
 		}
 	}

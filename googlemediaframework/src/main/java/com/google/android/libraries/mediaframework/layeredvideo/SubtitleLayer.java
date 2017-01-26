@@ -71,4 +71,12 @@ public class SubtitleLayer implements Layer, ExoplayerWrapper.TextListener {
   public void setVisibility(int visibility) {
     view.setVisibility(visibility);
   }
+
+  /**
+   * Retrieves the subtitle TextView.
+   * @return The TextView instance
+   */
+  public TextView getTextView() {
+    return subtitles;
+  }
 }

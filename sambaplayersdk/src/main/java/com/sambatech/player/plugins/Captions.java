@@ -30,6 +30,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 	private SubtitleLayer _subtitleLayer;
 	private SambaPlayer _player;
 	private @NonNull ArrayList<SambaMedia.Caption> _captionsRequest = new ArrayList<>();
+	private SambaMedia.CaptionsConfig _config;
 	private HashMap<Integer, Caption[]> _captionsMap;
 	private Caption _currentCaption;
 	private int _currentIndex = -1;
@@ -70,7 +71,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 		SambaMedia.Caption captionRequest = _captionsRequest.get(index);
 
 		// disabled
-		if (captionRequest.url.isEmpty()) return;
+		if (captionRequest.url == null || captionRequest.url.isEmpty()) return;
 
 		// some caption
 		Helpers.requestUrl(captionRequest.url, new Helpers.RequestCallback() {
@@ -100,7 +101,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 					|| media.captions.size() == 0) return;
 
 			_captionsRequest = media.captions;
-			//_config = media.captionsConfig
+			_config = media.captionsConfig;
 
 			SambaEventBus.subscribe(this);
 		}
@@ -117,10 +118,17 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 
 		if (_captionsRequest.size() == 0) return;
 
-		int index = -1;
+		int index = 0;
 
-		// look for default caption
-		while (++index < _captionsRequest.size() && !_captionsRequest.get(index).isDefault);
+		// look for default caption from user config or API
+		for (SambaMedia.Caption c : _captionsRequest) {
+			if (_config.language != null && c.language.toLowerCase().replace('_', '-').equals(_config.language)) break;
+			if (c.isDefault) break;
+			++index;
+		}
+
+		_subtitleLayer.getTextView().setTextColor(_config.color);
+		_subtitleLayer.getTextView().setTextSize(_config.size);
 
 		changeCaption(index);
 	}
