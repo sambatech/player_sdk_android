@@ -62,10 +62,19 @@ public class PluginManager implements Plugin {
 		pendingPlay = value;
 	}
 
+	public Plugin getPlugin(Class PluginRef) {
+		for (Plugin plugin : plugins)
+			if (plugin.getClass() == PluginRef)
+				return plugin;
+
+		return null;
+		//return plugins.get(classRef);
+	}
+
 	/**
 	 * Notifies plugin load to player.
 	 */
-	public void notifyPluginLoaded(Plugin plugin) {
+	void notifyPluginLoaded(Plugin plugin) {
 		if (++pluginsLoaded >= plugins.length) {
 			isLoaded = true;
 
