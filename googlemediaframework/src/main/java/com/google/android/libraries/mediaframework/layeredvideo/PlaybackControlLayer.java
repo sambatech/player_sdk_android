@@ -646,7 +646,16 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * container.
 	 */
 	public void hide() {
-		if (isFadingOut || !getLayerManager().getControl().isPlaying()) {
+		hide(false);
+	}
+
+	/**
+	 * Fades the playback control layer out and then removes it from the {@link LayerManager}'s
+	 * container.
+	 * @param ignoreState Should it ignore player state and hide anyway?
+	 */
+	public void hide(boolean ignoreState) {
+		if (isFadingOut || !ignoreState && !getLayerManager().getControl().isPlaying()) {
 			return;
 		}
 		final FrameLayout container = getLayerManager().getContainer();
@@ -991,7 +1000,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
      */
     public void closeCaptionMenu() {
         captionMenu.dismiss();
-	    hide();
+	    hide(true);
     }
 
 	/**

@@ -376,7 +376,6 @@ public class SambaPlayer extends FrameLayout {
 
 		if (plugin == null) return;
 
-		// caption
 		plugin.changeCaption(index);
 	}
 
