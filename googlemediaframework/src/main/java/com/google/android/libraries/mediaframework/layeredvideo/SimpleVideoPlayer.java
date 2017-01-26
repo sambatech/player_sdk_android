@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.FrameLayout;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
@@ -409,12 +410,19 @@ public class SimpleVideoPlayer {
 		playbackControlLayer.closeOutputMenu();
 	}
 
-    /** Sets the adapter for the caption menu
+    /** Sets the adapter for the caption menu.
      * @param view The view for the caption menu
      */
     public void setCaptionMenu(View view) {
 	    playbackControlLayer.setCaptionMenu(view);
     }
+
+	/** Gets the caption menu view.
+	 * @return The caption menu view
+	 */
+	public View getCaptionMenu() {
+		return playbackControlLayer.getCaptionMenu();
+	}
 
     /**
      * Closes caption menu.

@@ -21,7 +21,7 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Unsupport
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
-import com.sambatech.player.adapter.CaptionAdapter;
+import com.sambatech.player.adapter.CaptionsAdapter;
 import com.sambatech.player.adapter.OutputAdapter;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -37,7 +37,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Controller for SambaPlayer view.
+ * SambaPlayer controller.
  *
  * @author Leandro Zanol - 7/12/15
  */
@@ -376,6 +376,7 @@ public class SambaPlayer extends FrameLayout {
 
 		if (plugin == null) return;
 
+		// caption
 		plugin.changeCaption(index);
 	}
 
@@ -531,6 +532,7 @@ public class SambaPlayer extends FrameLayout {
 				outputMenuList.setAdapter(outputAdapter);
 				outputMenuList.setOnItemClickListener(outputMenuItemListener);
 				outputAdapter.notifyDataSetChanged();
+
 				player.setOutputMenu(outputMenu);
 			}
 
@@ -549,10 +551,10 @@ public class SambaPlayer extends FrameLayout {
 					}
 				});
 
-				CaptionAdapter captionAdapter = new CaptionAdapter(getContext(), media.captions);
+				CaptionsAdapter captionsAdapter = new CaptionsAdapter(getContext(), media.captions);
 				ListView captionMenuList = (ListView) captionMenu.findViewById(R.id.menu_list);
 
-				captionMenuList.setAdapter(captionAdapter);
+				captionMenuList.setAdapter(captionsAdapter);
 				captionMenuList.setOnItemClickListener(captionMenuItemListener);
 				captionMenuList.deferNotifyDataSetChanged();
 

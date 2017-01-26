@@ -16,12 +16,14 @@ import java.util.ArrayList;
 /**
  * @author tmiranda - 12/01/17
  */
-public class CaptionAdapter extends BaseAdapter {
+public class CaptionsAdapter extends BaseAdapter {
+
+    public int currentIndex = -1;
 
     private Context cContext;
     private ArrayList<SambaMedia.Caption> captions;
 
-    public CaptionAdapter(Context context, ArrayList<SambaMedia.Caption> cList) {
+    public CaptionsAdapter(Context context, ArrayList<SambaMedia.Caption> cList) {
         this.cContext = context;
         this.captions = cList;
     }
@@ -59,7 +61,7 @@ public class CaptionAdapter extends BaseAdapter {
         SambaMedia.Caption caption = (SambaMedia.Caption) getItem(position);
 
         holder.label.setText(caption.label);
-        holder.radio.setChecked(caption.isDefault);
+        holder.radio.setChecked(currentIndex != -1 ? currentIndex == position : caption.isDefault);
 
         return convertView;
     }

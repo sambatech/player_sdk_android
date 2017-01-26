@@ -1,11 +1,16 @@
 package com.sambatech.player.plugins;
 
+import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
+import android.widget.ListView;
 
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SubtitleLayer;
+import com.sambatech.player.R;
 import com.sambatech.player.SambaPlayer;
+import com.sambatech.player.adapter.CaptionsAdapter;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
@@ -29,6 +34,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 	private Caption _currentCaption;
 	private int _currentIndex = -1;
 	private boolean _parsed;
+	private SimpleVideoPlayer _internalPlayer;
 
 	private static final class Caption {
 		final int index;
@@ -49,15 +55,25 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 			return;
 
 		_currentIndex = index;
+
+		// select menu item
+		final View captionsMenu = _internalPlayer.getCaptionMenu();
+
+		if (captionsMenu != null)
+			((CaptionsAdapter)((ListView)captionsMenu.findViewById(R.id.menu_list)).getAdapter()).currentIndex = index;
+
 		// clean up
+		_parsed = false;
 		_currentCaption = null;
 		_subtitleLayer.onText("");
 
-		SambaMedia.Caption caption = _captionsRequest.get(index);
+		SambaMedia.Caption captionRequest = _captionsRequest.get(index);
 
-		if (caption.url.isEmpty()) return;
+		// disabled
+		if (captionRequest.url.isEmpty()) return;
 
-		Helpers.requestUrl(caption.url, new Helpers.RequestCallback() {
+		// some caption
+		Helpers.requestUrl(captionRequest.url, new Helpers.RequestCallback() {
 			@Override
 			public void onSuccess(String response) {
 				Log.i("SambaPlayer::captions", "parsing...");
@@ -96,6 +112,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 	// on view available
 	@Override
 	public void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer) {
+		_internalPlayer = internalPlayer;
 		_subtitleLayer = internalPlayer.getSubtitleLayer();
 
 		if (_captionsRequest.size() == 0) return;
@@ -126,16 +143,17 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 		boolean notFound = true;
 
 		for (Caption caption : captions) {
-			if (time >= caption.startTime && time <= caption.endTime) {
-				notFound = false;
+			if (time < caption.startTime || time > caption.endTime) continue;
 
-				if (_currentCaption == null || _currentCaption.index != caption.index) {
-					_subtitleLayer.onText(caption.text);
-					_currentCaption = caption;
-				}
+			notFound = false;
 
-				break;
+			// if caption has changed
+			if (_currentCaption == null || _currentCaption.index != caption.index) {
+				_subtitleLayer.onText(caption.text);
+				_currentCaption = caption;
 			}
+
+			break;
 		}
 
 		if (notFound) {
@@ -181,7 +199,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 				endTime = 0f;
 				text = "";
 				count = 1;
-				System.out.println(index);
+				//System.out.println(index);
 				continue;
 			}
 
@@ -191,12 +209,12 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 					time = s.split("\\D+");
 					startTime = extractTime(time);
 					endTime = extractTime(time, 4);
-					System.out.println(startTime + " >> " + endTime);
+					//System.out.println(startTime + " >> " + endTime);
 					break;
 				// text
 				default:
 					text += (count > 2 ? " " : "") + s;
-					System.out.println(text);
+					//System.out.println(text);
 			}
 
 			++count;

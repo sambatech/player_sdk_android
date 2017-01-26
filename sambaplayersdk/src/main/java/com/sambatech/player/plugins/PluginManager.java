@@ -68,7 +68,6 @@ public class PluginManager implements Plugin {
 				return plugin;
 
 		return null;
-		//return plugins.get(classRef);
 	}
 
 	/**

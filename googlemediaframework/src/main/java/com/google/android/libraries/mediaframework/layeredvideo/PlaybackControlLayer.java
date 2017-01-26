@@ -33,6 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.Adapter;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -437,6 +438,8 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private List<Callback> preInitCallbacks = new ArrayList<>();
 
 	private HashMap<String, View> controlsMap;
+
+	private View _captionMenuView;
 
 	public PlaybackControlLayer(String videoTitle) {
 		this(videoTitle, null, true);
@@ -957,7 +960,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	public void setCaptionMenu(View view) {
         captionMenu = new Dialog(getLayerManager().getActivity());
         captionMenu.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        captionMenu.setContentView(view);
+        captionMenu.setContentView(_captionMenuView = view);
         captionMenu.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
         captionMenu.setOnDismissListener(new DialogInterface.OnDismissListener(){
@@ -970,6 +973,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
         captionButton.setVisibility(View.VISIBLE);
     }
+
+	public View getCaptionMenu() {
+		return _captionMenuView;
+	}
 
 	// TODO it might not be here
 	/**
