@@ -29,6 +29,7 @@ import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaPlayerError;
+import com.sambatech.player.plugins.Captions;
 import com.sambatech.player.plugins.PluginManager;
 import com.sambatech.player.utils.Helpers;
 
@@ -371,7 +372,11 @@ public class SambaPlayer extends FrameLayout {
 	 * @param index The index in the captions array
 	 */
 	public void changeCaption(int index) {
+		Captions plugin = (Captions)PluginManager.getInstance().getPlugin(Captions.class);
 
+		if (plugin == null) return;
+
+		plugin.changeCaption(index);
 	}
 
 	/**

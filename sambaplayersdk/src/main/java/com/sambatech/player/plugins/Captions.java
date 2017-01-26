@@ -13,22 +13,21 @@ import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.utils.Helpers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Plugin responsible for managing captions.
  *
  * @author Leandro Zanol - 23/1/2017
  */
-final class Captions extends SambaPlayerListener implements Plugin {
+public final class Captions extends SambaPlayerListener implements Plugin {
 
-	private @NonNull ArrayList<SambaMedia.Caption> _captionsRequest = new ArrayList<>();
 	private SubtitleLayer _subtitleLayer;
 	private SambaPlayer _player;
+	private @NonNull ArrayList<SambaMedia.Caption> _captionsRequest = new ArrayList<>();
+	private HashMap<Integer, Caption[]> _captionsMap;
+	private Caption _currentCaption;
 	private int _currentIndex = -1;
-	private SambaMedia.Caption _currentCaption;
 	private boolean _parsed;
 
 	private static final class Caption {
@@ -45,7 +44,35 @@ final class Captions extends SambaPlayerListener implements Plugin {
 		}
 	}
 
-	// when data available
+	public void changeCaption(int index) {
+		if (index == _currentIndex || index >= _captionsRequest.size())
+			return;
+
+		_currentIndex = index;
+		// clean up
+		_currentCaption = null;
+		_subtitleLayer.onText("");
+
+		SambaMedia.Caption caption = _captionsRequest.get(index);
+
+		if (caption.url.isEmpty()) return;
+
+		Helpers.requestUrl(caption.url, new Helpers.RequestCallback() {
+			@Override
+			public void onSuccess(String response) {
+				Log.i("SambaPlayer::captions", "parsing...");
+				// skip BOM UTF-8 markers
+				parse(response.substring(1));
+			}
+
+			@Override
+			public void onError(Exception e, String response) {
+				Log.e("SambaPlayer::captions", response, e);
+			}
+		});
+	}
+
+	// on data available
 	@Override
 	public void onLoad(@NonNull SambaPlayer player) {
 		_player = player;
@@ -66,10 +93,12 @@ final class Captions extends SambaPlayerListener implements Plugin {
 		}
 	}
 
-	// when view available
+	// on view available
 	@Override
 	public void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer) {
 		_subtitleLayer = internalPlayer.getSubtitleLayer();
+
+		if (_captionsRequest.size() == 0) return;
 
 		int index = -1;
 
@@ -86,65 +115,63 @@ final class Captions extends SambaPlayerListener implements Plugin {
 
 	@Override
 	public void onProgress(SambaEvent event) {
-		if (_subtitleLayer == null) return;
+		if (_subtitleLayer == null || !_parsed) return;
 
-		_subtitleLayer.onText(">> " + _player.getCurrentTime());
-	}
+		final float time = _player.getCurrentTime();
+		final int m = (int)(time/60f);
 
-	public void changeCaption(int index) {
-		if (index == _currentIndex || index >= _captionsRequest.size())
-			return;
+		if (!_captionsMap.containsKey(m)) return;
 
-		_currentIndex = index;
-		// clean up
-		_currentCaption = null;
-		_subtitleLayer.onText("");
+		final Caption[] captions = _captionsMap.get(m);
+		boolean notFound = true;
 
-		SambaMedia.Caption caption = _captionsRequest.get(index);
+		for (Caption caption : captions) {
+			if (time >= caption.startTime && time <= caption.endTime) {
+				notFound = false;
 
-		if (caption.url.isEmpty()) return;
+				if (_currentCaption == null || _currentCaption.index != caption.index) {
+					_subtitleLayer.onText(caption.text);
+					_currentCaption = caption;
+				}
 
-		Helpers.requestUrl(caption.url, new Helpers.RequestCallback() {
-			@Override
-			public void onSuccess(String response) {
-				Log.i("SambaPlayer", response.substring(1));
+				break;
 			}
+		}
 
-			@Override
-			public void onError(Exception e, String response) {
-				Log.e("SambaPlayer", response, e);
-			}
-		});
+		if (notFound) {
+			_subtitleLayer.onText("");
+			_currentCaption = null;
+		}
 	}
 
 	private void parse(String captionsText) {
 		_parsed = false;
+		_captionsMap = new HashMap<>();
 
-		ArrayList<Caption> _captions = new ArrayList<>();
-		HashMap<Integer, Caption[]> _captionsMap = new HashMap<>();
-
+		ArrayList<Caption> captions = new ArrayList<>();
 		int index = -1;
 		float startTime = 0f;
 		float endTime = 0f;
 		String text = "";
 		int count = 0;
-		int m = 0;
 		int mLast = 0;
+		int m;
 		String[] time;
 
 		for (String s : captionsText.split("[\\r\\n]+")) {
+			// matches caption index
 			if (s.matches("^\\d+$")) {
 				// skip first time or wrong index
 				if (index != -1) {
 					m = (int)(startTime/60);
 
 					if (m != mLast) {
-						_captionsMap.put(mLast, _captions.toArray(new Caption[_captions.size()]));
-						_captions = new ArrayList<>();
+						_captionsMap.put(mLast, captions.toArray(new Caption[captions.size()]));
+						captions = new ArrayList<>();
 						mLast = m;
 					}
 
-					_captions.add(new Caption(index, startTime, endTime, text));
+					captions.add(new Caption(index, startTime, endTime, text));
 				}
 
 				try { index = Integer.parseInt(s); }
@@ -159,12 +186,14 @@ final class Captions extends SambaPlayerListener implements Plugin {
 			}
 
 			switch (count) {
+				// time interval
 				case 1:
 					time = s.split("\\D+");
-					startTime = extractTime(time, 0);
+					startTime = extractTime(time);
 					endTime = extractTime(time, 4);
 					System.out.println(startTime + " >> " + endTime);
 					break;
+				// text
 				default:
 					text += (count > 2 ? " " : "") + s;
 					System.out.println(text);
@@ -175,17 +204,9 @@ final class Captions extends SambaPlayerListener implements Plugin {
 
 		// adding last caption entry
 		if (index != -1) {
-			_captions.add(new Caption(index, startTime, endTime, text));
-			_captionsMap.put(mLast, _captions.toArray(new Caption[_captions.size()]));
+			captions.add(new Caption(index, startTime, endTime, text));
+			_captionsMap.put(mLast, captions.toArray(new Caption[captions.size()]));
 		}
-
-		/*for (Map.Entry<Integer, Caption[]> kv : _captionsMap.entrySet()) {
-			System.out.println(kv.getKey());
-
-			for (Caption c : kv.getValue()) {
-				System.out.println(c.index + ": " + c.startTime + "/" + c.endTime);
-			}
-		}*/
 
 		_parsed = true;
 	}
@@ -195,7 +216,7 @@ final class Captions extends SambaPlayerListener implements Plugin {
 			return 0f;
 
 		try {
-			// parse and convert all to seconds
+			// parse time
 			int h = Integer.parseInt(timeInterval[offset]);
 			int m = Integer.parseInt(timeInterval[1 + offset]);
 			int s = Integer.parseInt(timeInterval[2 + offset]);
@@ -206,5 +227,10 @@ final class Captions extends SambaPlayerListener implements Plugin {
 		catch(Exception e) {
 			return 0f;
 		}
+	}
+
+	// convenience method
+	private Float extractTime(String[] timeInterval) {
+		return extractTime(timeInterval, 0);
 	}
 }
