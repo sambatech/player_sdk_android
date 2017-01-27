@@ -23,7 +23,7 @@ fi
 
 v=$(cat sambaplayersdk/build.gradle | grep 'versionName' | sed $'s/^[^"\']*//' | sed 's/"*//g')
 # tags must be of annotated type otherwise git cannot get the latest correctly
-t=$(git describe --tags --abbrev=0 2> /dev/null)
+t=$(git describe --tags $(git rev-list --tags --max-count=1) 2> /dev/null)
 
 # if exists some tagged version
 if [[ ${#t} -gt 0 ]]; then
