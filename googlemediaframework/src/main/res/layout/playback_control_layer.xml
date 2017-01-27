@@ -149,16 +149,16 @@
                 style="@style/control" />
 
             <ImageButton
-                android:contentDescription="@string/output"
-                android:id="@+id/output_button"
-                android:src="@drawable/output"
+                android:contentDescription="@string/captions"
+                android:id="@+id/caption_button"
+                android:src="@drawable/caption"
                 android:background="@android:color/transparent"
                 style="@style/control" />
 
             <ImageButton
-                android:contentDescription="@string/captions"
-                android:id="@+id/caption_button"
-                android:src="@drawable/caption"
+                android:contentDescription="@string/output"
+                android:id="@+id/output_button"
+                android:src="@drawable/output"
                 android:background="@android:color/transparent"
                 style="@style/control" />
 
