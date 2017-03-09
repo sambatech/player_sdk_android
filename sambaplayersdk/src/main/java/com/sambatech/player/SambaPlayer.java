@@ -60,7 +60,7 @@ public class SambaPlayer extends FrameLayout {
 	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
 		public void onStateChanged(boolean playWhenReady, int playbackState) {
-			Log.i("SambaPlayer", "state: " + playWhenReady + " " + playbackState);
+			Log.i("SambaPlayer", "state: " + playWhenReady + " " + playbackState + "; playing: " + isPlaying());
 
 			switch (playbackState) {
 				case ExoPlayer.STATE_READY:
@@ -336,8 +336,16 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	/**
+	 * Indicates whether media is being reproduced.
+	 * @return The state of media playback
+	 */
+	public boolean isPlaying() {
+		return player != null && player.shouldBePlaying();
+	}
+
+	/**
 	 * Indicates whether media has already started playing.
-	 * @return True if media has started playing.
+	 * @return True if media has started playing
 	 */
 	public boolean hasStarted() {
 		return _hasStarted;
@@ -346,7 +354,7 @@ public class SambaPlayer extends FrameLayout {
 	/**
 	 * Indicates whether media has finished at least once.
 	 * Does not imply playing it thoroughly without seeking.
-	 * @return True once media hits the end.
+	 * @return True once media hits the end
 	 */
 	public boolean hasFinished() {
 		return _hasFinished;
@@ -614,6 +622,7 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void showError(@NonNull SambaPlayerError error) {
+		destroyScreen();
 		_errorScreen = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
 		TextView msg = (TextView) _errorScreen.findViewById(R.id.error_message);
 
@@ -629,6 +638,7 @@ public class SambaPlayer extends FrameLayout {
 	private void destroyScreen() {
 		if (_errorScreen == null) return;
 		removeView(_errorScreen);
+		_errorScreen = null;
 	}
 
     private void startProgressTimer() {
