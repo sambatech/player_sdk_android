@@ -14,6 +14,7 @@ public class SambaMedia {
 
 	public String title = "";
 	public String url;
+	public @NonNull String[] backupUrls = new String[]{};
 	public String type = "";
 	public String adUrl;
     public Drawable thumb;
@@ -31,6 +32,7 @@ public class SambaMedia {
 		type = media.type;
 		title = media.title;
 		url = media.url;
+		backupUrls = media.backupUrls;
 		adUrl = media.adUrl;
 		isLive = media.isLive;
 		isAudioOnly = media.isAudioOnly;

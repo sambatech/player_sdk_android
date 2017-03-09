@@ -415,22 +415,28 @@ public class MainActivity extends Activity {
 	 */
 	private ArrayList<LiquidMedia> populateLiveMedias() {
 
+		final String ph = "bc6a17435f3f389f37a514c171039b75";
 		ArrayList<LiquidMedia> medias = new ArrayList<>();
-
 		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+
 		thumb.url = "http://www.impactmobile.com/files/2012/09/icon64-broadcasts.png";
+
 		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
 
 		LiquidMedia media = new LiquidMedia();
-		media.ph = "bc6a17435f3f389f37a514c171039b75";
-		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbt.m3u8";
+		media.ph = ph;
+		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url.m3u8";
+		media.backupUrls = new String[]{
+				"http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url2.m3u8",
+				"http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbt.m3u8"
+		};
 		media.title = "Live SBT (HLS)";
 		media.description = "Transmissão ao vivo do SBT.";
 		media.thumbs = thumbs;
 		medias.add(media);
 
 		media = new LiquidMedia();
-		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.ph = ph;
 		media.streamUrl = "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8";
 		media.title = "Live VEVO (HLS)";
 		media.description = "Transmissão ao vivo do VEVO.";
@@ -438,7 +444,7 @@ public class MainActivity extends Activity {
 		medias.add(media);
 
 		media = new LiquidMedia();
-		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.ph = ph;
 		media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/playlist.m3u8";
 		media.title = "Live Denmark channel (HLS)";
 		media.description = "Transmissão ao vivo TV-DN.";
@@ -446,7 +452,7 @@ public class MainActivity extends Activity {
 		medias.add(media);
 
 		media = new LiquidMedia();
-		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.ph = ph;
 		media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/manifest.f4m";
 		media.title = "Live Denmark channel (HDS: erro!)";
 		media.description = "Transmissão ao vivo inválida.";
@@ -454,7 +460,7 @@ public class MainActivity extends Activity {
 		medias.add(media);
 
 		media = new LiquidMedia();
-		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.ph = ph;
 		media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/tvdiario_7a683b067e5eee5c8d45e1e1883f69b9/livestream/playlist.m3u8";
 		media.title = "Tv Diário";
 		media.description = "Transmissão ao vivo TV Diário";
@@ -462,7 +468,7 @@ public class MainActivity extends Activity {
 		medias.add(media);
 
 		media = new LiquidMedia();
-		media.ph = "bc6a17435f3f389f37a514c171039b75";
+		media.ph = ph;
 		media.streamUrl = "http://slrp.sambavideos.sambatech.com/radio/pajucara4_7fbed8aac5d5d915877e6ec61e3cf0db/livestream/playlist.m3u8";
 		media.qualifier = "AUDIO";
 		media.title = "Audio Live";

@@ -144,7 +144,7 @@ public class SambaApi {
 			}
 
 			String url = endpoint + request.projectHash + (request.mediaId != null ? "/" + request.mediaId : "?" +
-					(request.streamUrls.length > 0 ? "alternateLive=" + request.streamUrls[0] : "streamName=" + request.streamName));
+					(request.streamUrl != null ? "alternateLive=" + request.streamUrl : "streamName=" + request.streamName));
 
 			InputStream inputStream = null;
 			Scanner scanner = null;
@@ -178,7 +178,7 @@ public class SambaApi {
 					String jsonString = new String(tokenBytes);
 					JSONObject json = new JSONObject(jsonString);
 
-					return parseMedia(json);
+					return parseMedia(json, request);
 				}
 			}
 			catch (Exception e) {
@@ -224,7 +224,7 @@ public class SambaApi {
 		 * @param json Json Response
 		 * @return Samba Media object
 		 */
-		private SambaMedia parseMedia(JSONObject json) {
+		private SambaMedia parseMedia(JSONObject json, SambaMediaRequest request) {
 			try {
 				String qualifier = json.getString("qualifier").toLowerCase();
 
@@ -334,6 +334,7 @@ public class SambaApi {
 				}
 				else if (json.has("liveOutput")) {
 					media.url = json.getJSONObject("liveOutput").getString("baseUrl");
+					media.backupUrls = request.backupUrls;
 					media.isLive = true;
 
 					// media type relies on URL

@@ -147,6 +147,10 @@ public class SimpleVideoPlayer {
 		layerManager.getExoplayerWrapper().addListener(listener);
 	}
 
+	public void removePlaybackListener(ExoplayerWrapper.PlaybackListener listener) {
+		layerManager.getExoplayerWrapper().removeListener(listener);
+	}
+
 	public int getPlaybackState() {
 		return layerManager.getExoplayerWrapper().getPlaybackState();
 	}

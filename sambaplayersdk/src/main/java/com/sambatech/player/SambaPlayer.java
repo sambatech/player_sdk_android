@@ -37,7 +37,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * SambaPlayer controller.
+ * Represents the player, responsible for managing media playback.
  *
  * @author Leandro Zanol - 7/12/15
  */
@@ -45,7 +45,7 @@ public class SambaPlayer extends FrameLayout {
 
 	private SimpleVideoPlayer player;
 	private View _errorScreen;
-	private SambaMediaConfig media = new SambaMediaConfig();
+	private @NonNull SambaMediaConfig media = new SambaMediaConfig();
 	private Timer progressTimer;
 	private boolean _hasStarted;
 	private boolean _hasFinished;
@@ -55,6 +55,7 @@ public class SambaPlayer extends FrameLayout {
 	private boolean autoFsMode;
 	private boolean enableControls;
 	private boolean _disabled;
+	private int _currentBackupIndex;
 
 	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
@@ -96,9 +97,24 @@ public class SambaPlayer extends FrameLayout {
 		@Override
 		public void onError(Exception e) {
 			Log.i("SambaPlayer", "Error: " + media, e);
-			String msg = e.getCause() instanceof UnsupportedDrmException ? "You're not allowed to " +
-					(media != null && media.isAudioOnly ? "listen to this audio" : "watch this video") : e.getMessage();
-			dispatchError(SambaPlayerError.unknown.setMessage(msg));
+
+			String msg = e.getCause() instanceof UnsupportedDrmException ? "You're not allowed to "
+					+ (media.isAudioOnly ? "listen to this audio" : "watch this video")
+					: e.getMessage();
+			final boolean canFallback =  media.backupUrls.length - _currentBackupIndex > 0;
+
+			// check whether it can fallback or fail (changes error criticity) otherwise
+			if (canFallback) {
+				final String url = media.backupUrls[_currentBackupIndex++];
+
+				msg = String.format("Failed to load %s, falling back to %s", media.url, url);
+				media.url = url;
+
+				destroyInternal();
+				create(false);
+			}
+
+			dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(), msg, !canFallback));
 		}
 
 		@Override
@@ -584,6 +600,7 @@ public class SambaPlayer extends FrameLayout {
         }
 
 		orientationEventListener.disable();
+		player.removePlaybackListener(playbackListener);
 		player.setPlayCallback(null);
 		player.setFullscreenCallback(null);
 		player.release();
@@ -637,8 +654,10 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void dispatchError(@NonNull SambaPlayerError error) {
-		// give user the chance to customize error message before showing it
+		// give user the chance to customize error message before showing it (in case of critical)
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, error));
-		destroy(error);
+
+		if (error.isCritical())
+			destroy(error);
 	}
 }

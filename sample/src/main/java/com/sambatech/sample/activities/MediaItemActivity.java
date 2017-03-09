@@ -2,6 +2,7 @@ package com.sambatech.sample.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -125,7 +126,9 @@ public class MediaItemActivity extends Activity {
 
 		@Override
 		public void onError(SambaEvent e) {
-			status.setText(String.format("Status: %s", e.getType() + " " + e.getData()));
+			String msg = String.format("%s", e.getType() + " - " + e.getData());
+			status.setText(msg);
+			Log.e("MediaItemActivity", msg);
 		}
 
 		@Override
@@ -222,7 +225,7 @@ public class MediaItemActivity extends Activity {
         SambaApi api = new SambaApi(this, "token");
 
 	    //Instantiate a unique request. Params: playerHash, mediaId, streamName, streamUrl ( alternateLive on our browser version )
-        SambaMediaRequest sbRequest = new SambaMediaRequest(liquidMedia.ph, liquidMedia.id, null, liquidMedia.streamUrl);
+        SambaMediaRequest sbRequest = new SambaMediaRequest(liquidMedia.ph, liquidMedia.id, null, liquidMedia.streamUrl, liquidMedia.backupUrls);
 
 	    if (liquidMedia.environment != null)
 		    sbRequest.environment = liquidMedia.environment;

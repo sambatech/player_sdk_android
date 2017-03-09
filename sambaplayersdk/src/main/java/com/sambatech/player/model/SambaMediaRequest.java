@@ -1,5 +1,7 @@
 package com.sambatech.player.model;
 
+import android.support.annotation.NonNull;
+
 /**
  * Data entity that represents a request media request to the server.
  *
@@ -10,7 +12,8 @@ public class SambaMediaRequest {
 	public String projectHash;
 	public String mediaId;
 	public String streamName;
-	public String[] streamUrls;
+	public String streamUrl;
+	public @NonNull String[] backupUrls = new String[]{};
 	public Environment environment = Environment.PROD;
 
 	/**
@@ -20,22 +23,22 @@ public class SambaMediaRequest {
 	 * @param mediaId Hash code of the media
 	 */
 	public SambaMediaRequest(String projectHash, String mediaId) {
-		this(projectHash, mediaId, null, (String)null);
+		this(projectHash, mediaId, null);
 	}
 
 	/**
-	 * Represents a live stream request (with stream name).
+	 * Represents a live stream request (by stream name).
 	 *
 	 * @param projectHash Hash code of the project
 	 * @param mediaId Hash code of the media
 	 * @param streamName Name of the stream (live only)
 	 */
 	public SambaMediaRequest(String projectHash, String mediaId, String streamName) {
-		this(projectHash, mediaId, streamName, (String)null);
+		this(projectHash, mediaId, streamName, null);
 	}
 
 	/**
-	 * Represents a direct live stream request (via URL).
+	 * Represents a direct live stream request (by URL).
 	 *
 	 * @param projectHash Hash code of the project
 	 * @param mediaId Hash code of the media
@@ -43,27 +46,29 @@ public class SambaMediaRequest {
 	 * @param streamUrl URL for stream (`streamName` will be ignored)
 	 */
 	public SambaMediaRequest(String projectHash, String mediaId, String streamName, String streamUrl) {
-		this(projectHash, mediaId, streamName, streamUrl != null ? new String[]{streamUrl} : null);
+		this(projectHash, mediaId, streamName, streamUrl, null);
 	}
 
 	/**
-	 * Represents a direct live stream request (via URL) with other backup URLs.
+	 * Represents a direct live stream request (by URL) with other backup URLs.
 	 *
 	 * @param projectHash Hash code of the project
 	 * @param mediaId Hash code of the media
 	 * @param streamName Name of the stream (live only)
-	 * @param streamUrls Alternative URLs for stream (`streamName` will be ignored)
+	 * @param streamUrl URL for stream (`streamName` will be ignored)
+	 * @param backupUrls URL list for fallback purposes
 	 */
-	public SambaMediaRequest(String projectHash, String mediaId, String streamName, String[] streamUrls) {
+	public SambaMediaRequest(String projectHash, String mediaId, String streamName, String streamUrl, String[] backupUrls) {
 		this.projectHash = projectHash;
 		this.mediaId = mediaId;
 		this.streamName = streamName;
-		this.streamUrls = streamUrls != null ? streamUrls : new String[]{};
+		this.streamUrl = streamUrl;
+		this.backupUrls = backupUrls != null ? backupUrls : new String[]{};
 	}
 
 	@Override
 	public String toString() {
-		return String.format("projectHash: %s, id: %s, streamName: %s, streamUrls: %s", projectHash, mediaId, streamName, streamUrls.length > 0 ? streamUrls[0] : null);
+		return String.format("projectHash: %s, id: %s, streamName: %s, streamUrls: %s, backupUrls (count): %s", projectHash, mediaId, streamName, streamUrl, backupUrls.length);
 	}
 
 	public enum Environment {
