@@ -333,7 +333,14 @@ public class SambaApi {
 
 				}
 				else if (json.has("liveOutput")) {
-					media.url = json.getJSONObject("liveOutput").getString("baseUrl");
+					final String reHds = "[\\w]+\\.f4m$";
+
+					// tries to fallback from HDS
+					media.url = json.getJSONObject("liveOutput").getString("baseUrl").replaceAll(reHds, "playlist.m3u8");
+
+					for (int i = 0; i < request.backupUrls.length; ++i)
+						request.backupUrls[i] = request.backupUrls[i].replaceAll(reHds, "playlist.m3u8");
+
 					media.backupUrls = request.backupUrls;
 					media.isLive = true;
 

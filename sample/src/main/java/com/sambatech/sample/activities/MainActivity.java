@@ -423,50 +423,70 @@ public class MainActivity extends Activity {
 
 		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
 
+		// regular
 		LiquidMedia media = new LiquidMedia();
+		media.ph = ph;
+		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbt.m3u8";
+		media.title = "Live SBT (HLS)";
+		media.description = "SBT";
+		media.thumbs = thumbs;
+		medias.add(media);
+
+		// regular
+		media = new LiquidMedia();
+		media.ph = ph;
+		media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/tvdiario_7a683b067e5eee5c8d45e1e1883f69b9/livestream/playlist.m3u8";
+		media.title = "TV Diário";
+		media.description = "TV Diário";
+		media.thumbs = thumbs;
+		medias.add(media);
+
+		// fallback
+		media = new LiquidMedia();
 		media.ph = ph;
 		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url.m3u8";
 		media.backupUrls = new String[]{
 				"http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url2.m3u8",
-				"http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbt.m3u8"
+				"http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbtbkp.m3u8"
 		};
-		media.title = "Live SBT (HLS)";
-		media.description = "Transmissão ao vivo do SBT.";
+		media.title = "Fallback";
+		media.description = "Fallback";
 		media.thumbs = thumbs;
 		medias.add(media);
 
+		// fallback (HDS)
 		media = new LiquidMedia();
-		media.ph = ph;
-		media.streamUrl = "http://vevoplaylist-live.hls.adaptive.level3.net/vevo/ch1/appleman.m3u8";
-		media.title = "Live VEVO (HLS)";
-		media.description = "Transmissão ao vivo do VEVO.";
+		media.environment = SambaMediaRequest.Environment.DEV;
+		media.ph = "90fe205bd667e40036dd56619d69359f";
+		media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/pajucara3_7fbed8aac5d5d915877e6ec61e3cf0db/livestream/manifest.f4m";
+		media.title = "Fallback (HDS)";
+		media.description = "Fallback (HDS)";
 		media.thumbs = thumbs;
 		medias.add(media);
 
+		// fallback error
 		media = new LiquidMedia();
 		media.ph = ph;
-		media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/playlist.m3u8";
-		media.title = "Live Denmark channel (HLS)";
-		media.description = "Transmissão ao vivo TV-DN.";
+		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url.m3u8";
+		media.backupUrls = new String[]{
+				"http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url2.m3u8"
+		};
+		media.title = "Fallback (erro)";
+		media.description = "Fallback (erro)";
 		media.thumbs = thumbs;
 		medias.add(media);
 
+		// geo-blocking
 		media = new LiquidMedia();
-		media.ph = ph;
-		media.streamUrl = "http://itv08.digizuite.dk/tv2b/ngrp:ch1_all/manifest.f4m";
-		media.title = "Live Denmark channel (HDS: erro!)";
-		media.description = "Transmissão ao vivo inválida.";
-		media.thumbs = thumbs;
-		medias.add(media);
-
-		media = new LiquidMedia();
-		media.ph = ph;
+		media.environment = SambaMediaRequest.Environment.DEV;
+		media.ph = "90fe205bd667e40036dd56619d69359f";
 		media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/tvdiario_7a683b067e5eee5c8d45e1e1883f69b9/livestream/playlist.m3u8";
-		media.title = "Tv Diário";
-		media.description = "Transmissão ao vivo TV Diário";
+		media.title = "Geo-blocking";
+		media.description = "Geo-blocking";
 		media.thumbs = thumbs;
 		medias.add(media);
 
+		// audio
 		media = new LiquidMedia();
 		media.ph = ph;
 		media.streamUrl = "http://slrp.sambavideos.sambatech.com/radio/pajucara4_7fbed8aac5d5d915877e6ec61e3cf0db/livestream/playlist.m3u8";
