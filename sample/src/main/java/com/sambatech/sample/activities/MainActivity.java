@@ -423,25 +423,25 @@ public class MainActivity extends Activity {
 
 		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
 
-		// regular
+		// HLS 1
 		LiquidMedia media = new LiquidMedia();
 		media.ph = ph;
 		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbt.m3u8";
-		media.title = "Live SBT (HLS)";
-		media.description = "SBT";
+		media.title = "HLS 1";
+		media.description = "HLS 1";
 		media.thumbs = thumbs;
 		medias.add(media);
 
-		// regular
+		// HLS 2
 		media = new LiquidMedia();
 		media.ph = ph;
 		media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/tvdiario_7a683b067e5eee5c8d45e1e1883f69b9/livestream/playlist.m3u8";
-		media.title = "TV Diário";
-		media.description = "TV Diário";
+		media.title = "HLS 2";
+		media.description = "HLS 2";
 		media.thumbs = thumbs;
 		medias.add(media);
 
-		// fallback
+		// URL fallback
 		media = new LiquidMedia();
 		media.ph = ph;
 		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url.m3u8";
@@ -449,8 +449,8 @@ public class MainActivity extends Activity {
 				"http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url2.m3u8",
 				"http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbtbkp.m3u8"
 		};
-		media.title = "Fallback";
-		media.description = "Fallback";
+		media.title = "Fallback URL";
+		media.description = "Fallback URL";
 		media.thumbs = thumbs;
 		medias.add(media);
 
@@ -471,8 +471,8 @@ public class MainActivity extends Activity {
 		media.backupUrls = new String[]{
 				"http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url2.m3u8"
 		};
-		media.title = "Fallback (erro)";
-		media.description = "Fallback (erro)";
+		media.title = "Fallback com erro";
+		media.description = "Fallback com erro";
 		media.thumbs = thumbs;
 		medias.add(media);
 
