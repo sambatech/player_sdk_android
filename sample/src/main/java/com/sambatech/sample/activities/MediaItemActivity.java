@@ -201,6 +201,8 @@ public class MediaItemActivity extends Activity {
 				    return;
 			    }
 
+			    media.isAudioOnly = liquidMedia.qualifier.toLowerCase().equals("audio");
+
 			    loadPlayer(media);
 		    }
 
@@ -217,6 +219,7 @@ public class MediaItemActivity extends Activity {
 		    m.url = liquidMedia.url;
 		    m.title = liquidMedia.title;
 		    m.type = liquidMedia.type;
+		    m.isAudioOnly = liquidMedia.qualifier.toLowerCase().equals("audio");
 		    callback.onMediaResponse(m);
 		    return;
 	    }

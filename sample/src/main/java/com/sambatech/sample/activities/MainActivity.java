@@ -270,10 +270,10 @@ public class MainActivity extends Activity {
 
 		// Injected medias
 
-		LiquidMedia m;
+		/*LiquidMedia m;
 		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
 		thumb.url = "http://pcgamingwiki.com/images/thumb/b/b3/DRM-free_icon.svg/120px-DRM-free_icon.svg.png";
-		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
+		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));*/
 
 		// AXINOM
 		/*m = new LiquidMedia();
@@ -286,7 +286,7 @@ public class MainActivity extends Activity {
 
 		// IRDETO
 		//b00772b75e3677dba5a59e09598b7a0d be4a12397143caf9ec41c9acb98728bf
-		m = new LiquidMedia();
+		/*m = new LiquidMedia();
 		m.title = "DRM Irdeto (p#7)";
 		m.ph = "b00772b75e3677dba5a59e09598b7a0d";
 		m.id = "eec9fa7ab62032a377cff462522f69dc";
@@ -328,7 +328,7 @@ public class MainActivity extends Activity {
 		m.environment = SambaMediaRequest.Environment.DEV;
 		m.type = "dash";
 		m.thumbs = thumbs;
-		mediaList.add(m);
+		mediaList.add(m);*/
 
 		loading.setVisibility(View.VISIBLE);
 		list.setAdapter(null);
@@ -441,7 +441,7 @@ public class MainActivity extends Activity {
 		media.thumbs = thumbs;
 		medias.add(media);
 
-		// URL fallback
+		// fallback URL
 		media = new LiquidMedia();
 		media.ph = ph;
 		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url.m3u8";
@@ -454,13 +454,13 @@ public class MainActivity extends Activity {
 		media.thumbs = thumbs;
 		medias.add(media);
 
-		// fallback (HDS)
+		// fallback HDS
 		media = new LiquidMedia();
 		media.environment = SambaMediaRequest.Environment.DEV;
 		media.ph = "90fe205bd667e40036dd56619d69359f";
 		media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/pajucara3_7fbed8aac5d5d915877e6ec61e3cf0db/livestream/manifest.f4m";
-		media.title = "Fallback (HDS)";
-		media.description = "Fallback (HDS)";
+		media.title = "Fallback HDS";
+		media.description = "Fallback HDS";
 		media.thumbs = thumbs;
 		medias.add(media);
 
@@ -492,7 +492,7 @@ public class MainActivity extends Activity {
 		media.streamUrl = "http://slrp.sambavideos.sambatech.com/radio/pajucara4_7fbed8aac5d5d915877e6ec61e3cf0db/livestream/playlist.m3u8";
 		media.qualifier = "AUDIO";
 		media.title = "Audio Live";
-		media.description = "Live de audio.";
+		media.description = "Live de audio";
 		media.thumbs = thumbs;
 		medias.add(media);
 
