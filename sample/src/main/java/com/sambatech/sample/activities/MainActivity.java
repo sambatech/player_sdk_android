@@ -379,7 +379,7 @@ public class MainActivity extends Activity {
 				media.environment = pid == 543 || pid == 562 ? SambaMediaRequest.Environment.DEV : SambaMediaRequest.Environment.STAGING;
 
 				// WORKAROUND: to identify which project has DRM
-				if (pid == 5952 || pid == 6050 || pid == 5719 || pid == 543 || pid == 562)
+				if (pid == 5952 || pid == 6050 || pid == 5719 || pid == 562)
 					media.entitlementScheme = new LiquidMedia.EntitlementScheme();
 			}
 
@@ -426,7 +426,7 @@ public class MainActivity extends Activity {
 		// HLS 1
 		LiquidMedia media = new LiquidMedia();
 		media.ph = ph;
-		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbt.m3u8";
+		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbtbkp.m3u8";
 		media.title = "HLS 1";
 		media.description = "HLS 1";
 		media.thumbs = thumbs;
