@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 23
-        versionCode 15
-        versionName "v0.7.0-beta"
+        versionCode 16
+        versionName "v0.7.1-beta"
     }
     buildTypes {
         release {
@@ -24,7 +24,7 @@ dependencies {
     compile project(':googlemediaframework')
 
     // PROD
-    /*compile('com.sambatech.player:gmf:0.2.0-2') {
+    /*compile('com.sambatech.player:gmf:0.2.0-5') {
         // DEPLOY
         transitive=true
     }*/
