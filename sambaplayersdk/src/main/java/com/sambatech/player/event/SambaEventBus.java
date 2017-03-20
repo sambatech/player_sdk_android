@@ -54,7 +54,7 @@ public class SambaEventBus {
 				if (!Modifier.isPublic(m.getModifiers()))
 					continue;
 
-				k = String.format("%s:%s", type, m.getName().substring(2).toLowerCase());
+				k = String.format("%s:%s", type, m.getName().substring(2)); // rm "on"
 
 				if (!listeners.containsKey(k))
 					listeners.put(k, new ArrayList<>());
@@ -74,7 +74,7 @@ public class SambaEventBus {
 			List<Object> ltnList;
 
 			for (Method m : listener.getClass().getDeclaredMethods()) {
-				k = String.format("%s:%s", type, m.getName().substring(2).toLowerCase());
+				k = String.format("%s:%s", type, m.getName().substring(2));
 
 				if (listeners.containsKey(k)) {
 					ltnList = listeners.get(k);
@@ -89,10 +89,13 @@ public class SambaEventBus {
 		}
 
 		public void post(SambaEvent e) {
-			String t = e.getType().toString().toLowerCase();
-			String k = String.format("%s:%s", e.getType().getClass().getEnclosingClass().getSimpleName(), t);
+			final String[] types = e.getType().toString().toLowerCase().split("_");
+			String t = "";
 
-			t = t.substring(0, 1).toUpperCase() + t.substring(1);
+			for (String type : types)
+				t += type.substring(0, 1).toUpperCase() + type.substring(1);
+
+			final String k = String.format("%s:%s", e.getType().getClass().getEnclosingClass().getSimpleName(), t);
 
 			if (!listeners.containsKey(k))
 				return;
