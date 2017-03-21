@@ -18,6 +18,13 @@ limitations under the License.
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.google.android.libraries.mediaframework" >
 
-    <application />
+    <application>
+
+        <!-- Chromecast -->
+        <meta-data
+            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+            android:value="com.sambatech.player"/>
+
+    </application>
 
 </manifest>
