@@ -1,6 +1,7 @@
 package com.sambatech.player;
 
 import android.app.Activity;
+import android.app.MediaRouteButton;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.provider.Settings;
@@ -16,6 +17,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer.ExoPlayer;
+import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.UnsupportedDrmException;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
@@ -489,6 +491,12 @@ public class SambaPlayer extends FrameLayout {
 				Toast.makeText(view.getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
 			}
 		});*/
+
+		// cast
+		CastContext cast = CastContext.getSharedInstance(getContext());
+		MediaRouteButton castButton = new MediaRouteButton(getContext());
+		//castButton.setRouteTypes();
+		player.addActionButton(castButton);
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);

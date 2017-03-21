@@ -214,7 +214,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	/**
 	 * List of image buttons which are displayed in the right side of the top chrome.
 	 */
-	private List<ImageButton> actionButtons;
+	private List<View> actionButtons;
 
 	/**
 	 * Whether the playback control layer is visible.
@@ -451,11 +451,11 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		this.fullscreenCallback = fullscreenCallback;
 		this.shouldBePlaying = false;
 		this.autoHide = autoHide;
-		actionButtons = new ArrayList<ImageButton>();
+		actionButtons = new ArrayList<>();
 	}
 
 	/**
-	 * Creates a button to put in the set of action buttons at the right of the top chrome.
+	 * Creates an image based button to put in the set of action buttons at the right of the top chrome.
 	 * @param activity The activity that contains the video player.
 	 * @param icon The image of the action (ex. trash can).
 	 * @param contentDescription The text description this action. This is used in case the
@@ -474,6 +474,15 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		button.setImageDrawable(icon);
 		button.setOnClickListener(onClickListener);
 
+		addActionButton(activity, button);
+	}
+
+	/**
+	 * Creates a button to put in the set of action buttons at the right of the top chrome.
+	 * @param activity The activity that contains the video player.
+	 * @param button The button to be put.
+	 */
+	public void addActionButton(Activity activity, View button) {
 		FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT
@@ -537,7 +546,8 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 		// Make the view hidden initially. It will be made visible again in the show(timeout) method.
 		playbackControlRootView.setVisibility(View.INVISIBLE);
-			playerControl = getLayerManager().getControl();
+		playerControl = getLayerManager().getControl();
+
 		return view;
 	}
 
@@ -1243,8 +1253,8 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		actionButtonsContainer.removeAllViews();
 
 		//if (isFullscreen) {
-			for (ImageButton imageButton : actionButtons) {
-				actionButtonsContainer.addView(imageButton);
+			for (View button : actionButtons) {
+				actionButtonsContainer.addView(button);
 			}
 		/*} else {
 			ImageButton overflowButton = new ImageButton(getLayerManager().getActivity());

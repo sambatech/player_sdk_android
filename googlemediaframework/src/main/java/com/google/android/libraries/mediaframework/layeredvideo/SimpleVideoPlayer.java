@@ -18,9 +18,7 @@ package com.google.android.libraries.mediaframework.layeredvideo;
 
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.FrameLayout;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
@@ -108,7 +106,7 @@ public class SimpleVideoPlayer {
 		videoSurfaceLayer = new VideoSurfaceLayer(autoplay);
 		this.autoplay = autoplay;
 
-		List<Layer> layers = new ArrayList<Layer>();
+		List<Layer> layers = new ArrayList<>();
 		layers.add(videoSurfaceLayer);
 		layers.add(playbackControlLayer);
 		layers.add(subtitleLayer);
@@ -124,7 +122,7 @@ public class SimpleVideoPlayer {
 	}
 
 	/**
-	 * Creates a button to put in the top right of the video player.
+	 * Creates an image based button to put in the top right of the video player.
 	 *
 	 * @param icon The image of the action (ex. trash can).
 	 * @param contentDescription The text description this action. This is used in case the
@@ -137,6 +135,15 @@ public class SimpleVideoPlayer {
 								String contentDescription,
 								View.OnClickListener onClickListener) {
 		playbackControlLayer.addActionButton(activity, icon, contentDescription, onClickListener);
+	}
+
+	/**
+	 * Creates a button to put in the top right of the video player.
+	 *
+	 * @param button The button to be put.
+	 */
+	public void addActionButton(View button) {
+		playbackControlLayer.addActionButton(activity, button);
 	}
 
 	/**
