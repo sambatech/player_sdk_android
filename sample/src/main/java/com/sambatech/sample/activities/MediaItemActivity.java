@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.SambaApi;
+import com.sambatech.player.SambaCast;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
@@ -70,6 +71,7 @@ public class MediaItemActivity extends Activity {
 	private boolean _autoPlay;
 	private LiquidMedia.EntitlementScheme entitlementScheme;
 	private SambaMediaConfig media;
+	private SambaCast sambaCast;
 	//private long ti; // benchmark
 
 	/**
@@ -154,7 +156,7 @@ public class MediaItemActivity extends Activity {
 		    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
 	    }
 
-	    player.enableCast();
+		sambaCast = new SambaCast(this);
 		SambaEventBus.subscribe(playerListener);
 		requestMedia(activityMedia);
 	}
@@ -165,9 +167,16 @@ public class MediaItemActivity extends Activity {
 		destroy();
     }
 
-    @Override
+	@Override
+	protected void onResume() {
+		super.onResume();
+		sambaCast.notifyActivityResume();
+	}
+
+	@Override
     protected void onPause() {
         super.onPause();
+		sambaCast.notifyActivityPause();
 
         if (player != null && player.hasStarted())
             player.pause();

@@ -3,14 +3,11 @@ package com.sambatech.player;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.media.MediaRouter;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.MediaRouteButton;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,11 +17,9 @@ import android.widget.TextView;
 
 import com.google.android.exoplayer.ExoPlayer;
 import com.google.android.gms.cast.framework.AppVisibilityListener;
-import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.CastStateListener;
-import com.google.android.gms.cast.framework.Session;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.SessionManagerListener;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
@@ -67,6 +62,7 @@ public class SambaPlayer extends FrameLayout {
 	private boolean enableControls;
 	private boolean _disabled;
 	private int _currentBackupIndex;
+	private SambaCast sambaCast;
 
 	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
@@ -305,6 +301,14 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	/**
+	 * 
+	 * @param cast
+	 */
+	public void setSambaCast(@NonNull SambaCast cast) {
+		this.sambaCast = sambaCast;
+	}
+
+	/**
 	 * Shows player controls.
 	 */
 	public void show() {
@@ -407,7 +411,7 @@ public class SambaPlayer extends FrameLayout {
 	 * @param index The index in the captions array
 	 */
 	public void changeCaption(int index) {
-		Captions plugin = (Captions)PluginManager.getInstance().getPlugin(Captions.class);
+		Captions plugin = (Captions) PluginManager.getInstance().getPlugin(Captions.class);
 
 		if (plugin == null) return;
 
@@ -496,16 +500,12 @@ public class SambaPlayer extends FrameLayout {
 		/*player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.share),
 		        getContext().getString(R.string.share_facebook), new OnClickListener() {
 			@Override
-			public void onClick(View v) {
-				Toast.makeText(view.getContext(), "Share Facebook", Toast.LENGTH_SHORT).show();
-			}
+			public void onClick(View v) {}
 		});*/
 
 		// cast
-		LayoutInflater inflater = LayoutInflater.from(getContext());
-		MediaRouteButton castButton = (MediaRouteButton)inflater.inflate(R.layout.media_router_button);
-		player.addActionButton(castButton);
-		CastButtonFactory.setUpMediaRouteButton(getContext(), castButton);
+		if (sambaCast != null)
+			player.addActionButton(sambaCast.getButton());
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
@@ -686,74 +686,5 @@ public class SambaPlayer extends FrameLayout {
 
 		if (error.isCritical())
 			destroy(error);
-	}
-
-	public void enableCast() {
-		CastContext castContext = CastContext.getSharedInstance(getContext());
-		castContext.addCastStateListener(new CastStateListener() {
-			@Override
-			public void onCastStateChanged(int i) {
-				Log.i("cast", "state: " + i);
-			}
-		});
-		castContext.addAppVisibilityListener(new AppVisibilityListener() {
-			@Override
-			public void onAppEnteredForeground() {
-				Log.i("cast", "foreground");
-			}
-
-			@Override
-			public void onAppEnteredBackground() {
-				Log.i("cast", "background");
-			}
-		});
-
-		SessionManager sessionManager = castContext.getSessionManager();
-		sessionManager.addSessionManagerListener(new SessionManagerListener<CastSession>() {
-			@Override
-			public void onSessionStarting(CastSession castSession) {
-				Log.i("cast", "starting");
-			}
-
-			@Override
-			public void onSessionStarted(CastSession castSession, String s) {
-				Log.i("cast", "started " + s);
-			}
-
-			@Override
-			public void onSessionStartFailed(CastSession castSession, int i) {
-				Log.i("cast", "start failed " + i);
-			}
-
-			@Override
-			public void onSessionEnding(CastSession castSession) {
-				Log.i("cast", "ending");
-			}
-
-			@Override
-			public void onSessionEnded(CastSession castSession, int i) {
-				Log.i("cast", "ended");
-			}
-
-			@Override
-			public void onSessionResuming(CastSession castSession, String s) {
-				Log.i("cast", "resuming " + s);
-			}
-
-			@Override
-			public void onSessionResumed(CastSession castSession, boolean b) {
-				Log.i("cast", "resumed " + b);
-			}
-
-			@Override
-			public void onSessionResumeFailed(CastSession castSession, int i) {
-				Log.i("cast", "resume failed " + i);
-			}
-
-			@Override
-			public void onSessionSuspended(CastSession castSession, int i) {
-				Log.i("cast", "suspended " + i);
-			}
-		}, CastSession.class);
 	}
 }

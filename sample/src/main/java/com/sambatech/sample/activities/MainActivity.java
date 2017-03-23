@@ -220,7 +220,6 @@ public class MainActivity extends Activity {
 			@Override
 			public void onFailure(Throwable t) {
 				loadingFlag = false;
-				makeMediasCall(pid);
 			}
 		});
 	}
