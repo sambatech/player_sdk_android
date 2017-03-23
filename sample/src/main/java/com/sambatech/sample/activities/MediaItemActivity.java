@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.SambaApi;
-import com.sambatech.player.SambaPlayerView;
+import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -37,7 +37,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.OnItemSelected;
 import de.greenrobot.event.EventBus;
 
 public class MediaItemActivity extends Activity {
@@ -54,7 +53,7 @@ public class MediaItemActivity extends Activity {
     TextView status;
 
     @Bind(R.id.samba_player)
-    SambaPlayerView player;
+    SambaPlayer player;
 
 	@Bind(R.id.progressbar_view)
 	LinearLayout loading;
@@ -155,6 +154,7 @@ public class MediaItemActivity extends Activity {
 		    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
 	    }
 
+	    player.enableCast();
 		SambaEventBus.subscribe(playerListener);
 		requestMedia(activityMedia);
 	}

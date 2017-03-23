@@ -8,13 +8,13 @@
     tools:context="com.sambatech.sample.activities.MediaItemActivity"
     android:background="@color/backgroundGray">
 
-    <com.sambatech.player.SambaPlayerView
+    <com.sambatech.player.SambaPlayer
         android:id="@+id/samba_player"
         android:layout_width="match_parent"
         android:layout_height="250dp"
         app:autoFullscreenMode="true"/>
 
-    <com.sambatech.player.SambaPlayerView
+    <com.sambatech.player.SambaPlayer
         android:id="@+id/samba_player2"
         android:layout_width="match_parent"
         android:layout_height="250dp"

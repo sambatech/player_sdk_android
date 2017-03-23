@@ -2,6 +2,7 @@ package com.sambatech.player.cast;
 
 import android.content.Context;
 
+import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.framework.CastOptions;
 import com.google.android.gms.cast.framework.OptionsProvider;
 import com.google.android.gms.cast.framework.SessionProvider;
@@ -21,8 +22,9 @@ public final class CastOptionsProvider implements OptionsProvider {
 	@Override
 	public CastOptions getCastOptions(Context context) {
 		return new CastOptions.Builder()
-				.setReceiverApplicationId(context.getString(R.string.cast_app_id))
-				.setSupportedNamespaces(new ArrayList<>(Collections.singletonList(CUSTOM_NAMESPACE)))
+				.setReceiverApplicationId(CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID)
+				//.setReceiverApplicationId(context.getString(R.string.cast_app_id))
+				//.setSupportedNamespaces(new ArrayList<>(Collections.singletonList(CUSTOM_NAMESPACE)))
 				.build();
 	}
 
