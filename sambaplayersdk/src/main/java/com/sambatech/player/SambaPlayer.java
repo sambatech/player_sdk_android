@@ -62,7 +62,6 @@ public class SambaPlayer extends FrameLayout {
 	private boolean enableControls;
 	private boolean _disabled;
 	private int _currentBackupIndex;
-	private SambaCast sambaCast;
 
 	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
 		@Override
@@ -301,14 +300,6 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	/**
-	 * 
-	 * @param cast
-	 */
-	public void setSambaCast(@NonNull SambaCast cast) {
-		this.sambaCast = sambaCast;
-	}
-
-	/**
 	 * Shows player controls.
 	 */
 	public void show() {
@@ -504,8 +495,8 @@ public class SambaPlayer extends FrameLayout {
 		});*/
 
 		// cast
-		if (sambaCast != null)
-			player.addActionButton(sambaCast.getButton());
+		if (media.castButton != null)
+			player.addActionButton(media.castButton);
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);

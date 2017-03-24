@@ -156,7 +156,9 @@ public class MediaItemActivity extends Activity {
 		    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
 	    }
 
+	    // cast
 		sambaCast = new SambaCast(this);
+
 		SambaEventBus.subscribe(playerListener);
 		requestMedia(activityMedia);
 	}
@@ -263,11 +265,14 @@ public class MediaItemActivity extends Activity {
 		titleView.setVisibility(View.VISIBLE);
 		titleView.setText(media.title);
 
-		/** If audio, we recommend you to customize the player's height**/
+		// If audio, we recommend you to customize the player's height
 		if (media.isAudioOnly) {
 			player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
 			player.setLayoutParams(player.getLayoutParams());
 		}
+
+		// enabling Chromecast support
+		media.setSambaCast(sambaCast);
 
 	    player.setMedia(media);
 

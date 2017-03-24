@@ -2,6 +2,7 @@ package com.sambatech.player;
 
 import android.app.MediaRouteButton;
 import android.content.Context;
+import android.media.session.PlaybackState;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -54,11 +55,13 @@ public final class SambaCast {
 		@Override
 		public void onSessionStarted(CastSession castSession, String s) {
 			Log.i("cast", "started " + s);
+			onApplicationConnected(castSession);
 		}
 
 		@Override
 		public void onSessionStartFailed(CastSession castSession, int i) {
 			Log.i("cast", "start failed " + i);
+			onApplicationDisconnected();
 		}
 
 		@Override
@@ -69,6 +72,7 @@ public final class SambaCast {
 		@Override
 		public void onSessionEnded(CastSession castSession, int i) {
 			Log.i("cast", "ended");
+			onApplicationDisconnected();
 		}
 
 		@Override
@@ -79,11 +83,13 @@ public final class SambaCast {
 		@Override
 		public void onSessionResumed(CastSession castSession, boolean b) {
 			Log.i("cast", "resumed " + b);
+			onApplicationConnected(castSession);
 		}
 
 		@Override
 		public void onSessionResumeFailed(CastSession castSession, int i) {
 			Log.i("cast", "resume failed " + i);
+			onApplicationDisconnected();
 		}
 
 		@Override
@@ -92,27 +98,16 @@ public final class SambaCast {
 		}
 	};
 
-	private boolean enabledOnPlayer;
 	private MediaRouteButton castButton;
 	private SessionManager sessionManager;
 	private CastContext castContext;
+	private CastSession castSession;
 
 	/**
 	 * Initializes Chromecast SDK.
 	 * Must be called inside "Activity.onCreate".
 	 */
 	public SambaCast(@NonNull Context context) {
-		this(context, true);
-	}
-
-	/**
-	 * Initializes Chromecast SDK and informs whether to enable support for the player itself.
-	 * Must be called inside "Activity.onCreate".
-	 * @param enabledOnPlayer Whether to enable Chromecast support in the player view
-	 */
-	public SambaCast(@NonNull Context context, boolean enabledOnPlayer) {
-		this.enabledOnPlayer = enabledOnPlayer;
-
 		LayoutInflater inflater = LayoutInflater.from(context);
 		castButton = (MediaRouteButton)inflater.inflate(R.layout.cast_button, null);
 		castContext = CastContext.getSharedInstance(context);
@@ -139,5 +134,31 @@ public final class SambaCast {
 		castContext.removeCastStateListener(stateListener);
 		castContext.removeAppVisibilityListener(appVisibilityListener);
 		sessionManager.removeSessionManagerListener(sessionManagerListener, CastSession.class);
+	}
+
+	private void onApplicationConnected(CastSession castSession) {
+		this.castSession = castSession;
+
+		/*if (mSelectedMedia != null) {
+
+			if (mPlaybackState == PlaybackState.PLAYING) {
+				mVideoView.pause();
+				loadRemoteMedia(mSeekbar.getProgress(), true);
+				return;
+			} else {
+				mPlaybackState = PlaybackState.IDLE;
+				updatePlaybackLocation(PlaybackLocation.REMOTE);
+			}
+		}
+		updatePlayButton(mPlaybackState);
+		invalidateOptionsMenu();*/
+	}
+
+	private void onApplicationDisconnected() {
+		/*updatePlaybackLocation(PlaybackLocation.LOCAL);
+		mPlaybackState = PlaybackState.IDLE;
+		mLocation = PlaybackLocation.LOCAL;
+		updatePlayButton(mPlaybackState);
+		invalidateOptionsMenu();*/
 	}
 }
