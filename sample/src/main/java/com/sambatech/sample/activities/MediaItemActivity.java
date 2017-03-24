@@ -271,8 +271,8 @@ public class MediaItemActivity extends Activity {
 			player.setLayoutParams(player.getLayoutParams());
 		}
 
-		// enabling Chromecast support
-		media.setSambaCast(sambaCast);
+		// enabling Chromecast on player
+		player.setSambaCast(sambaCast);
 
 	    player.setMedia(media);
 

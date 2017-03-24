@@ -147,6 +147,15 @@ public class SimpleVideoPlayer {
 	}
 
 	/**
+	 * Checks whether a button has already been added to action bar.
+	 * @param button The button instance
+	 * @return Whether the specified button has already been added to action bar
+	 */
+	public boolean hasActionButton(View button) {
+		return playbackControlLayer.hasActionButton(button);
+	}
+
+	/**
 	 * Set a listener which reacts to state changes, video size changes, and errors.
 	 * @param listener Listens to playback events.
 	 */

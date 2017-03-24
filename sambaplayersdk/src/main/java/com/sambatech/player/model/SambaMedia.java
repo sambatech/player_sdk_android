@@ -28,7 +28,6 @@ public class SambaMedia {
 	public ArrayList<Caption> captions;
 	public @NonNull CaptionsConfig captionsConfig = new CaptionsConfig();
 	public String drmToken;
-	public View castButton;
 
 	public SambaMedia() {}
 
@@ -44,15 +43,6 @@ public class SambaMedia {
 		thumb = media.thumb;
 		captions = media.captions;
 		drmToken = media.drmToken;
-		castButton = media.castButton;
-	}
-
-	/**
-	 * If set, Chromecast support will be enabled inside player view.
-	 * @param cast The SambaCast instance
-	 */
-	public void setSambaCast(@NonNull SambaCast cast) {
-		castButton = cast.getButton();
 	}
 
 	public static class Output {

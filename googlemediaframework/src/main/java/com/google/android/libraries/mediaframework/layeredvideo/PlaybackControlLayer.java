@@ -482,6 +482,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * @param button The button to be put.
 	 */
 	public void addActionButton(Activity activity, View button) {
+		// avoid re-adding the same button
+		if (hasActionButton(button)) return;
+
 		FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT
@@ -501,6 +504,15 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			updateActionButtons();
 			updateColors();
 		}
+	}
+
+	/**
+	 * Checks whether a button has already been added to action bar.
+	 * @param button The button instance
+	 * @return Whether the specified button has already been added to action bar
+	 */
+	public boolean hasActionButton(View button) {
+		return actionButtons.contains(button);
 	}
 
 	@Override
@@ -930,9 +942,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		}
 
 		if (shouldPlay) {
-			playerControl.start();
+			start();
 		} else {
-			playerControl.pause();
+			pause();
 		}
 
 		updatePlayPauseButton();
@@ -964,7 +976,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
 				if (menuWasPlaying)
-					playerControl.start();
+					start();
 			}
 		});
 
@@ -985,7 +997,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 if(menuWasPlaying)
-                    playerControl.start();
+                    start();
             }
         });
 
@@ -1205,6 +1217,22 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 			preInitCallbacks.clear();
 		}
+	}
+
+	/**
+	 * Intercepts start action to allow external control.
+	 */
+	private void start() {
+		if (listener.start())
+			playerControl.start();
+	}
+
+	/**
+	 * Intercepts pause action to allow external control.
+	 */
+	private void pause() {
+		if (listener.pause())
+			playerControl.pause();
 	}
 
 	/**

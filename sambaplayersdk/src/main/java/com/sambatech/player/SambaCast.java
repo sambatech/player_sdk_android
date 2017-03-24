@@ -2,7 +2,6 @@ package com.sambatech.player;
 
 import android.app.MediaRouteButton;
 import android.content.Context;
-import android.media.session.PlaybackState;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,17 +12,20 @@ import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.CastStateListener;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.SessionManagerListener;
+import com.sambatech.player.event.SambaCastListener;
 
 /**
  * It must have a 1-to-1 relationship with activities.
+ * It cannot, for instance, be a Singleton to avoid memory leakage.
  *
  * There are some steps to integrate:
  *
  * 1. Initialize inside "onCreate" state
  * 2. Notify "onResume" state
  * 3. Notify "onPause" state
+ * 4. Pass the instance to the SambaPlayer
  *
- * @author Leandro Zanol on 23/03/17.
+ * @author Leandro Zanol on 23/03/17
  */
 public final class SambaCast {
 
@@ -96,12 +98,20 @@ public final class SambaCast {
 		public void onSessionSuspended(CastSession castSession, int i) {
 			Log.i("cast", "suspended " + i);
 		}
+
+		private void onApplicationConnected(CastSession castSession) {
+			listener.onConnected(castSession);
+		}
+
+		private void onApplicationDisconnected() {
+			listener.onDisconnected();
+		}
 	};
 
 	private MediaRouteButton castButton;
 	private SessionManager sessionManager;
 	private CastContext castContext;
-	private CastSession castSession;
+	private SambaCastListener listener;
 
 	/**
 	 * Initializes Chromecast SDK.
@@ -114,8 +124,21 @@ public final class SambaCast {
 		sessionManager = castContext.getSessionManager();
 	}
 
+	/**
+	 * Returns the cast button to be added on some view.
+	 * @return The cast button instance
+	 */
 	public MediaRouteButton getButton() {
 		return castButton;
+	}
+
+	/**
+	 * Sets the listener to handle cast events.
+	 * To remove pass null.
+	 * @param listener The instance of the listener
+	 */
+	public void setEventListener(SambaCastListener listener) {
+		this.listener = listener;
 	}
 
 	/**
@@ -134,31 +157,5 @@ public final class SambaCast {
 		castContext.removeCastStateListener(stateListener);
 		castContext.removeAppVisibilityListener(appVisibilityListener);
 		sessionManager.removeSessionManagerListener(sessionManagerListener, CastSession.class);
-	}
-
-	private void onApplicationConnected(CastSession castSession) {
-		this.castSession = castSession;
-
-		/*if (mSelectedMedia != null) {
-
-			if (mPlaybackState == PlaybackState.PLAYING) {
-				mVideoView.pause();
-				loadRemoteMedia(mSeekbar.getProgress(), true);
-				return;
-			} else {
-				mPlaybackState = PlaybackState.IDLE;
-				updatePlaybackLocation(PlaybackLocation.REMOTE);
-			}
-		}
-		updatePlayButton(mPlaybackState);
-		invalidateOptionsMenu();*/
-	}
-
-	private void onApplicationDisconnected() {
-		/*updatePlaybackLocation(PlaybackLocation.LOCAL);
-		mPlaybackState = PlaybackState.IDLE;
-		mLocation = PlaybackLocation.LOCAL;
-		updatePlayButton(mPlaybackState);
-		invalidateOptionsMenu();*/
 	}
 }
