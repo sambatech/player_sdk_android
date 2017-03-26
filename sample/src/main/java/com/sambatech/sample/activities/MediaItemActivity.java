@@ -11,7 +11,7 @@ import android.widget.Toast;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.SambaApi;
-import com.sambatech.player.SambaCast;
+import com.sambatech.player.cast.SambaCast;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;

@@ -122,6 +122,42 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		public void onPlay();
 	}
 
+	/**
+	 * Represents a listener that might intercept and cancel both API calls and user actions.
+	 */
+	public interface InterceptableListener {
+
+		/**
+		 * Intercepts play actions.
+		 * @return True to intercept the action or false to cancel it
+		 */
+		boolean onPlay();
+
+		/**
+		 * Intercepts pause actions.
+		 * @return True to intercept the action or false to cancel it
+		 */
+		boolean onPause();
+
+		/**
+		 * Intercepts seek actions.
+		 * @return True to intercept the action or false to cancel it
+		 */
+		boolean onSeek();
+
+		/**
+		 * Intercepts media current time.
+		 * @return The current time
+		 */
+		int getCurrentTime();
+
+		/**
+		 * Intercepts media duration.
+		 * @return The media duration
+		 */
+		int getDuration();
+	}
+
 	private interface Callback {
 		void call();
 	}
@@ -440,6 +476,8 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 	private View _captionMenuView;
 
+	private InterceptableListener interceptableListener;
+
 	public PlaybackControlLayer(String videoTitle) {
 		this(videoTitle, null, true);
 	}
@@ -507,7 +545,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	}
 
 	/**
-	 * Checks whether a button has already been added to action bar.
+	 * Checks whether a button has already been added to the action bar.
 	 * @param button The button instance
 	 * @return Whether the specified button has already been added to action bar
 	 */
@@ -942,7 +980,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		}
 
 		if (shouldPlay) {
-			start();
+			play();
 		} else {
 			pause();
 		}
@@ -976,7 +1014,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
 				if (menuWasPlaying)
-					start();
+					play();
 			}
 		});
 
@@ -997,7 +1035,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
             @Override
             public void onDismiss(DialogInterface dialog) {
                 if(menuWasPlaying)
-                    start();
+                    play();
             }
         });
 
@@ -1220,10 +1258,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	}
 
 	/**
-	 * Intercepts start action to allow external control.
+	 * Intercepts play action to allow external control.
 	 */
-	private void start() {
-		if (listener.start())
+	private void play() {
+		if (interceptableListener == null || interceptableListener.onPlay())
 			playerControl.start();
 	}
 
@@ -1231,7 +1269,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * Intercepts pause action to allow external control.
 	 */
 	private void pause() {
-		if (listener.pause())
+		if (interceptableListener == null || interceptableListener.onPause())
 			playerControl.pause();
 	}
 
@@ -1266,7 +1304,8 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * If the player is paused, play it and if the player is playing, pause it.
 	 */
 	public void togglePlayPause() {
-		this.shouldBePlaying = !getLayerManager().getControl().isPlaying();
+		shouldBePlaying = interceptableListener == null ?
+				!getLayerManager().getControl().isPlaying() : !shouldBePlaying;
 		setPlayPause(shouldBePlaying);
 	}
 
@@ -1371,13 +1410,26 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			return;
 		}
 
-		if (playerControl.isPlaying()) {
+		if (interceptableListener != null && shouldBePlaying ||
+				interceptableListener == null && playerControl.isPlaying()) {
 			pausePlayLargeButton.setImageResource(R.drawable.ic_action_pause_large);
 			pausePlayButton.setImageResource(R.drawable.ic_action_pause);
 		} else {
 			pausePlayLargeButton.setImageResource(R.drawable.ic_action_play_large);
 			pausePlayButton.setImageResource(R.drawable.ic_action_play);
 		}
+	}
+
+	/**
+	 * Updates play/pause button based on a specific state.
+	 * @param shouldBePlaying The state
+	 */
+	public void updatePlayPauseButton(boolean shouldBePlaying) {
+		this.shouldBePlaying = shouldBePlaying;
+
+		if (shouldBePlaying)
+			onPlay();
+		else onPause();
 	}
 
 	/**
@@ -1417,5 +1469,13 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	public void setPlayCallback(PlayCallback playCallback) {
 		this.playCallback = playCallback;
+	}
+
+	/**
+	 * Sets a interceptable listener able to cancel both API and user actions.
+	 * @param interceptableListener The listener instance
+	 */
+	public void setInterceptableListener(InterceptableListener interceptableListener) {
+		this.interceptableListener = interceptableListener;
 	}
 }

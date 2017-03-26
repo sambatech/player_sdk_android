@@ -2,9 +2,6 @@ package com.sambatech.player.model;
 
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
-import android.view.View;
-
-import com.sambatech.player.SambaCast;
 
 import java.util.ArrayList;
 

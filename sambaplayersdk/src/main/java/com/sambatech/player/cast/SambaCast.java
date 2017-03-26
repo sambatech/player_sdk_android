@@ -1,4 +1,4 @@
-package com.sambatech.player;
+package com.sambatech.player.cast;
 
 import android.app.MediaRouteButton;
 import android.content.Context;
@@ -12,11 +12,13 @@ import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.CastStateListener;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.SessionManagerListener;
+import com.sambatech.player.R;
 import com.sambatech.player.event.SambaCastListener;
 
 /**
- * It must have a 1-to-1 relationship with activities.
- * It cannot, for instance, be a Singleton to avoid memory leakage.
+ * It must have a 1-to-1 relationship with activities to avoid memory leakage.
+ * It could not be a Singleton for instance, static objects cannot hold Context references
+ * (like widgets, resources, etc.), they must die together with their activity.
  *
  * There are some steps to integrate:
  *

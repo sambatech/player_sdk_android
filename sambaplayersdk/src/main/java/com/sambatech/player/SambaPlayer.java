@@ -27,6 +27,7 @@ import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlL
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.sambatech.player.adapter.CaptionsAdapter;
 import com.sambatech.player.adapter.OutputAdapter;
+import com.sambatech.player.cast.SambaCast;
 import com.sambatech.player.event.SambaCastListener;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -48,7 +49,8 @@ import java.util.TimerTask;
  */
 public class SambaPlayer extends FrameLayout {
 
-	private final ExoplayerWrapper.PlaybackListener playbackListener = new ExoplayerWrapper.PlaybackListener() {
+	private final ExoplayerWrapper.PlaybackListener playbackListener =
+			new ExoplayerWrapper.PlaybackListener() {
 		@Override
 		public void onStateChanged(boolean playWhenReady, int playbackState) {
 			Log.i("SambaPlayer", "state: " + playWhenReady + " " + playbackState + "; playing: " + isPlaying());
@@ -64,13 +66,9 @@ public class SambaPlayer extends FrameLayout {
 							player.show();
                         }
 
-                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
-                        startProgressTimer();
+                        dispatchPlay();
                     }
-                    else {
-						stopProgressTimer();
-						SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
-					}
+                    else dispatchPause();
 					break;
 				case ExoPlayer.STATE_ENDED:
 					if (!playWhenReady)
@@ -111,7 +109,8 @@ public class SambaPlayer extends FrameLayout {
 		@Override
 		public void onVideoSizeChanged(int width, int height, int unappliedRotationDegrees, float pixelWidthHeightRatio) {
 			//Log.i("SambaPlayer", unappliedRotationDegrees+" "+width + " " + height);
-			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.RESIZE, width, height, unappliedRotationDegrees, pixelWidthHeightRatio));
+			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.RESIZE, width, height,
+					unappliedRotationDegrees, pixelWidthHeightRatio));
 		}
 	};
 
@@ -155,12 +154,45 @@ public class SambaPlayer extends FrameLayout {
 		@Override
 		public void run() {
 			if (player == null) return;
-			
+
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PROGRESS, getCurrentTime(), getDuration()));
 		}
 	};
 
 	private final SambaCastListener castListener = new SambaCastListener() {
+
+		private final PlaybackControlLayer.InterceptableListener interceptableListener =
+				new PlaybackControlLayer.InterceptableListener() {
+			@Override
+			public boolean onPlay() {
+				dispatchPlay();
+				return false;
+			}
+
+			@Override
+			public boolean onPause() {
+				dispatchPause();
+				return false;
+			}
+
+			@Override
+			public boolean onSeek() {
+				return false;
+			}
+
+			@Override
+			public int getCurrentTime() {
+				return castPlayer != null ? (int)castPlayer.getApproximateStreamPosition() : 0;
+			}
+
+			@Override
+			public int getDuration() {
+				return castPlayer != null ? (int)castPlayer.getStreamDuration() : 0;
+			}
+		};
+
+		public RemoteMediaClient castPlayer;
+
 		@Override
 		public void onConnected(CastSession castSession) {
 			final boolean wasPlaying = isPlaying();
@@ -171,7 +203,10 @@ public class SambaPlayer extends FrameLayout {
 
 			if (remoteMediaClient == null) return;
 
-			// TODO: interceptar API GMF (play, pause...)
+			this.castPlayer = remoteMediaClient;
+
+			// enabling hook for API and user actions
+			player.setInterceptableListener(interceptableListener);
 
 			/*remoteMediaClient.addListener(new RemoteMediaClient.Listener() {
 				@Override
@@ -222,7 +257,8 @@ public class SambaPlayer extends FrameLayout {
 
 		@Override
 		public void onDisconnected() {
-			// TODO: remover interceptação API GMF (play, pause...)
+			// disabling hook for API and user actions
+			player.setInterceptableListener(null);
 
 			play();
 		}
@@ -479,7 +515,7 @@ public class SambaPlayer extends FrameLayout {
 
 	/**
 	 * If set, Chromecast support will be enabled inside player view.
-	 * @param sambaCast The Chromecast button instance
+	 * @param sambaCast The SambaCast instance
 	 */
 	public void setSambaCast(@NonNull SambaCast sambaCast) {
 		this.sambaCast = sambaCast;
@@ -575,6 +611,35 @@ public class SambaPlayer extends FrameLayout {
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
+
+		player.setInterceptableListener(new PlaybackControlLayer.InterceptableListener() {
+			@Override
+			public boolean onPlay() {
+				dispatchPlay();
+				return false;
+			}
+
+			@Override
+			public boolean onPause() {
+				dispatchPause();
+				return false;
+			}
+
+			@Override
+			public boolean onSeek() {
+				return false;
+			}
+
+			@Override
+			public int getCurrentTime() {
+				return 50;
+			}
+
+			@Override
+			public int getDuration() {
+				return 100;
+			}
+		});
 
 		if (media.isAudioOnly) {
 			player.setControlsVisible(true, "play");
@@ -745,6 +810,16 @@ public class SambaPlayer extends FrameLayout {
 		progressTimer.cancel();
 		progressTimer.purge();
 		progressTimer = null;
+	}
+
+	private void dispatchPlay() {
+		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
+		startProgressTimer();
+	}
+
+	private void dispatchPause() {
+		stopProgressTimer();
+		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
 	}
 
 	private void dispatchError(@NonNull SambaPlayerError error) {

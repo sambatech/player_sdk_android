@@ -67,6 +67,11 @@ public class SimpleVideoPlayer {
 	private boolean autoplay;
 
 	/**
+	 * Interceptable listener able to cancel both API and user actions.
+	 */
+	private PlaybackControlLayer.InterceptableListener interceptableListener;
+
+	/**
 	 * @param activity The activity that will contain the video player.
 	 * @param container The {@link FrameLayout} which will contain the video player.
 	 * @param video The video that should be played.
@@ -144,15 +149,6 @@ public class SimpleVideoPlayer {
 	 */
 	public void addActionButton(View button) {
 		playbackControlLayer.addActionButton(activity, button);
-	}
-
-	/**
-	 * Checks whether a button has already been added to action bar.
-	 * @param button The button instance
-	 * @return Whether the specified button has already been added to action bar
-	 */
-	public boolean hasActionButton(View button) {
-		return playbackControlLayer.hasActionButton(button);
 	}
 
 	/**
@@ -282,6 +278,11 @@ public class SimpleVideoPlayer {
 	 * Pause video playback.
 	 */
 	public void pause() {
+		if (interceptableListener != null && !interceptableListener.onPause()) {
+			playbackControlLayer.updatePlayPauseButton(false);
+			return;
+		}
+
 		// Set the autoplay for the video surface layer in case the surface hasn't been created yet.
 		// This way, when the surface is created, it won't start playing.
 		videoSurfaceLayer.setAutoplay(false);
@@ -293,6 +294,11 @@ public class SimpleVideoPlayer {
 	 * Resume video playback.
 	 */
 	public void play() {
+		if (interceptableListener != null && !interceptableListener.onPlay()) {
+			playbackControlLayer.updatePlayPauseButton(true);
+			return;
+		}
+
 		// Set the autoplay for the video surface layer in case the surface hasn't been created yet.
 		// This way, when the surface is created, it will automatically start playing.
 		videoSurfaceLayer.setAutoplay(autoplay);
@@ -467,5 +473,13 @@ public class SimpleVideoPlayer {
 	 */
 	public void setInfoListener(ExoplayerWrapper.InfoListener listener) {
 		layerManager.getExoplayerWrapper().setInfoListener(listener);
+	}
+
+	/**
+	 * Sets a interceptable listener able to cancel both API and user actions.
+	 * @param interceptableListener The listener instance
+	 */
+	public void setInterceptableListener(PlaybackControlLayer.InterceptableListener interceptableListener) {
+		playbackControlLayer.setInterceptableListener(this.interceptableListener = interceptableListener);
 	}
 }
