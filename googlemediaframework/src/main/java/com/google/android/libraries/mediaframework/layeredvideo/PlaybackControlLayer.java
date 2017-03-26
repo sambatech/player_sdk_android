@@ -808,9 +808,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 	public void setAutoHide(boolean state) {
 		autoHide = state;
-
-		if (state)
-			show();
+		show();
 	}
 
 	/**

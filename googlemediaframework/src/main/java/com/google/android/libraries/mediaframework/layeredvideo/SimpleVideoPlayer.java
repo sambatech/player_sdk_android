@@ -242,6 +242,10 @@ public class SimpleVideoPlayer {
 		playbackControlLayer.showBottomChrome();
 	}
 
+	public void setAutoHide(boolean state) {
+		playbackControlLayer.setAutoHide(state);
+	}
+
 	/**
 	 * Make the player enter or leave fullscreen mode.
 	 * @param shouldBeFullscreen If true, the player is put into fullscreen mode. If false, the player

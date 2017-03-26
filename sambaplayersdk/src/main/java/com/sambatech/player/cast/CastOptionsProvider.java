@@ -8,6 +8,8 @@ import com.google.android.gms.cast.framework.OptionsProvider;
 import com.google.android.gms.cast.framework.SessionProvider;
 import com.sambatech.player.R;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -25,7 +27,7 @@ public final class CastOptionsProvider implements OptionsProvider {
 		return new CastOptions.Builder()
 				.setReceiverApplicationId(applicationId)
 				//.setReceiverApplicationId(context.getString(R.string.cast_app_id))
-				//.setSupportedNamespaces(new ArrayList<>(Collections.singletonList(CUSTOM_NAMESPACE)))
+				//.setSupportedNamespaces(Collections.singletonList(CUSTOM_NAMESPACE))
 				.build();
 	}
 

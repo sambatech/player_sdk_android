@@ -102,11 +102,13 @@ public final class SambaCast {
 		}
 
 		private void onApplicationConnected(CastSession castSession) {
-			listener.onConnected(castSession);
+			if (listener != null)
+				listener.onConnected(castSession);
 		}
 
 		private void onApplicationDisconnected() {
-			listener.onDisconnected();
+			if (listener != null)
+				listener.onDisconnected();
 		}
 	};
 

@@ -207,6 +207,8 @@ public class SambaPlayer extends FrameLayout {
 
 			// enabling hook for API and user actions
 			player.setInterceptableListener(interceptableListener);
+			player.setAutoHide(false);
+			player.setControlsVisible(false, "seekbar");
 
 			/*remoteMediaClient.addListener(new RemoteMediaClient.Listener() {
 				@Override
@@ -244,11 +246,12 @@ public class SambaPlayer extends FrameLayout {
 			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
 			movieMetadata.putString(MediaMetadata.KEY_TITLE, media.title);
 
+			// TODO: trocar media.url por "{ph:...,m:...}"
 			MediaInfo mediaInfo = new MediaInfo.Builder(media.url)
 					.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
 					.setContentType("video/mp4")
 					.setMetadata(movieMetadata)
-					.setStreamDuration((long)(media.duration * 1000))
+					.setStreamDuration((long)(getDuration() * 1000))
 					//.setCustomData(jsonObj)
 					.build();
 
@@ -257,6 +260,8 @@ public class SambaPlayer extends FrameLayout {
 
 		@Override
 		public void onDisconnected() {
+			player.setControlsVisible(true, "seekbar");
+			player.setAutoHide(true);
 			// disabling hook for API and user actions
 			player.setInterceptableListener(null);
 
@@ -442,7 +447,7 @@ public class SambaPlayer extends FrameLayout {
 	 * @return Float total duration
 	 */
 	public float getDuration() {
-		return player != null ? player.getDuration()/1000f : 0;
+		return player != null ? player.getDuration()/1000f : media.duration;
 	}
 
 	/**
@@ -611,35 +616,6 @@ public class SambaPlayer extends FrameLayout {
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
-
-		player.setInterceptableListener(new PlaybackControlLayer.InterceptableListener() {
-			@Override
-			public boolean onPlay() {
-				dispatchPlay();
-				return false;
-			}
-
-			@Override
-			public boolean onPause() {
-				dispatchPause();
-				return false;
-			}
-
-			@Override
-			public boolean onSeek() {
-				return false;
-			}
-
-			@Override
-			public int getCurrentTime() {
-				return 50;
-			}
-
-			@Override
-			public int getDuration() {
-				return 100;
-			}
-		});
 
 		if (media.isAudioOnly) {
 			player.setControlsVisible(true, "play");
