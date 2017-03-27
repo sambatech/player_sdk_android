@@ -25,9 +25,9 @@ public final class CastOptionsProvider implements OptionsProvider {
 	@Override
 	public CastOptions getCastOptions(Context context) {
 		return new CastOptions.Builder()
-				.setReceiverApplicationId(applicationId)
-				//.setReceiverApplicationId(context.getString(R.string.cast_app_id))
-				//.setSupportedNamespaces(Collections.singletonList(CUSTOM_NAMESPACE))
+				//.setReceiverApplicationId(applicationId)
+				.setReceiverApplicationId(context.getString(R.string.cast_app_id))
+				.setSupportedNamespaces(Collections.singletonList(CUSTOM_NAMESPACE))
 				.build();
 	}
 

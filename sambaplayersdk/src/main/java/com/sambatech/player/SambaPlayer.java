@@ -246,9 +246,16 @@ public class SambaPlayer extends FrameLayout {
 			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
 			movieMetadata.putString(MediaMetadata.KEY_TITLE, media.title);
 
-			// TODO: trocar media.url por "{ph:...,m:...}"
-			MediaInfo mediaInfo = new MediaInfo.Builder(media.url)
-					.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+			String s = "{"
+					+ String.format("\"ph\":\"%s\",", media.projectHash)
+					+ String.format("\"m\":\"%s\",", media.id)
+					+ String.format("\"duration\":%s,", (long)(getDuration() * 1000))
+					+ String.format("\"title\":\"%s\"", media.title)
+					+ "}";
+
+			//MediaInfo mediaInfo = new MediaInfo.Builder(media.url) // default receiver
+			MediaInfo mediaInfo = new MediaInfo.Builder(s)
+					//.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
 					.setContentType("video/mp4")
 					.setMetadata(movieMetadata)
 					.setStreamDuration((long)(getDuration() * 1000))
