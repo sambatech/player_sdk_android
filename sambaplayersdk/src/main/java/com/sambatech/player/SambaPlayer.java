@@ -16,10 +16,18 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer.ExoPlayer;
+import com.google.android.gms.cast.Cast;
+import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.gms.cast.MediaQueueItem;
+import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.ResultCallbacks;
+import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.UnsupportedDrmException;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
@@ -27,6 +35,7 @@ import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlL
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.sambatech.player.adapter.CaptionsAdapter;
 import com.sambatech.player.adapter.OutputAdapter;
+import com.sambatech.player.cast.CastOptionsProvider;
 import com.sambatech.player.cast.SambaCast;
 import com.sambatech.player.event.SambaCastListener;
 import com.sambatech.player.event.SambaEvent;
@@ -39,8 +48,15 @@ import com.sambatech.player.plugins.Captions;
 import com.sambatech.player.plugins.PluginManager;
 import com.sambatech.player.utils.Helpers;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static android.content.ContentValues.TAG;
+import static com.google.android.gms.cast.MediaStatus.REPEAT_MODE_REPEAT_SINGLE;
 
 /**
  * Represents the player, responsible for managing media playback.
@@ -160,23 +176,26 @@ public class SambaPlayer extends FrameLayout {
 	};
 
 	private final SambaCastListener castListener = new SambaCastListener() {
+		public RemoteMediaClient castPlayer;
 
-		private final PlaybackControlLayer.InterceptableListener interceptableListener =
-				new PlaybackControlLayer.InterceptableListener() {
+		private final PlaybackControlLayer.InterceptableListener interceptableListener = new PlaybackControlLayer.InterceptableListener() {
 			@Override
 			public boolean onPlay() {
 				dispatchPlay();
+				sambaCast.playCast();
 				return false;
 			}
 
 			@Override
 			public boolean onPause() {
 				dispatchPause();
+				sambaCast.pauseCast();
 				return false;
 			}
 
 			@Override
-			public boolean onSeek() {
+			public boolean onSeek(int position) {
+				sambaCast.seekTo(position);
 				return false;
 			}
 
@@ -191,26 +210,36 @@ public class SambaPlayer extends FrameLayout {
 			}
 		};
 
-		public RemoteMediaClient castPlayer;
-
 		@Override
 		public void onConnected(CastSession castSession) {
 			final boolean wasPlaying = isPlaying();
 
+			 String MEDIA_NAMESPACE = "urn:x-cast:com.sambatech.player";
+
+			 Cast.MessageReceivedCallback messageReceivedCallback = new Cast.MessageReceivedCallback() {
+				@Override
+				public void onMessageReceived(CastDevice castDevice, String namespace, String message) {
+					Log.d(TAG, "Received message (" + namespace + "): " + message);
+				}
+			};
 			pause();
+
+			try {
+				castSession.setMessageReceivedCallbacks(MEDIA_NAMESPACE, messageReceivedCallback);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
 			final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
 
 			if (remoteMediaClient == null) return;
 
-			this.castPlayer = remoteMediaClient;
-
 			// enabling hook for API and user actions
 			player.setInterceptableListener(interceptableListener);
 			player.setAutoHide(false);
-			player.setControlsVisible(false, "seekbar");
+			player.setControlsVisible(true, "seekbar");
 
-			/*remoteMediaClient.addListener(new RemoteMediaClient.Listener() {
+			remoteMediaClient.addListener(new RemoteMediaClient.Listener() {
 				@Override
 				public void onStatusUpdated() {
 					remoteMediaClient.removeListener(this);
@@ -240,29 +269,72 @@ public class SambaPlayer extends FrameLayout {
 				public void onAdBreakStatusUpdated() {
 
 				}
-			});*/
+			});
 
 			// converting SambaMedia to MediaInfo
 			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
-			movieMetadata.putString(MediaMetadata.KEY_TITLE, media.title);
+			movieMetadata.putString(MediaMetadata.KEY_TITLE,"t%C3%A9st%C3%A9_%2Ct%C3%8DtULO_g%C3%81%2C_31_07");
 
-			String s = "{"
-					+ String.format("\"ph\":\"%s\",", media.projectHash)
-					+ String.format("\"m\":\"%s\",", media.id)
-					+ String.format("\"duration\":%s,", (long)(getDuration() * 1000))
-					+ String.format("\"title\":\"%s\"", media.title)
-					+ "}";
+			String s = "{" +
+					"\"ph\": \"e6830262e5a287446c7d5631455879c7\"," +
+					"\"m\": \"52bfc77a846cebfe47b95dc735f0e7d1\"," +
+					"\"qs\": {" +
+					"\"scriptURL\": \"http://192.168.0.65:8000/sb.proxy.pt.js\"," +
+					"\"castApi\": \"web4-7091\"," +
+					"\"castAppId\": \"4E9CBD30\"," +
+					"\"logger\": \"cast:true\"," +
+					"\"html5\": true," +
+					"\"initialTime\": 0" +
+					"}," +
+					"\"title\": \"t%C3%A9st%C3%A9_%2Ct%C3%8DtULO_g%C3%81%2C_31_07\"," +
+					"\"duration\": 125," +
+					//"\"thumbURL\": \"http://test-pv-s1-sambavideos.akamaized.net/account/100209/1/2012-05-04/thu…5e872c794a003e9d80ed20e52914c99c/Rango_-_Trailer__HD_1080p_mp4_640x360.jpg\"," +
+					"\"theme\": \"#72BE44\"," +
+					"\"baseURL\": \"192.168.0.65:8000/\"" +
+					"}";
 
-			//MediaInfo mediaInfo = new MediaInfo.Builder(media.url) // default receiver
 			MediaInfo mediaInfo = new MediaInfo.Builder(s)
-					//.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+					.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
 					.setContentType("video/mp4")
-					.setMetadata(movieMetadata)
-					.setStreamDuration((long)(getDuration() * 1000))
-					//.setCustomData(jsonObj)
+					//.setMetadata(movieMetadata)
+					//.setStreamDuration(125)
+					//.setCustomData(jsonObject)
 					.build();
 
-			remoteMediaClient.load(mediaInfo, wasPlaying, 0);
+
+			try {
+				castSession.setMessageReceivedCallbacks(CastOptionsProvider.CUSTOM_NAMESPACE, new Cast.MessageReceivedCallback() {
+                    @Override
+                    public void onMessageReceived(CastDevice castDevice, String s, String s1) {
+                        Log.i("Message Recived", castDevice.toString() + s + s1);
+                    }
+                });
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+
+			remoteMediaClient.load(mediaInfo, false, 0).setResultCallback(new ResultCallbacks<RemoteMediaClient.MediaChannelResult>() {
+				@Override
+				public void onSuccess(@NonNull RemoteMediaClient.MediaChannelResult mediaChannelResult) {
+					Log.d("load", mediaChannelResult.getStatus().toString());
+				}
+
+				@Override
+				public void onFailure(@NonNull Status status) {
+					Log.d("load", status.toString());
+				}
+			});
+
+			remoteMediaClient.addProgressListener(new RemoteMediaClient.ProgressListener() {
+				@Override
+				public void onProgressUpdated(long l, long l1) {
+					Log.d(TAG, "onProgressUpdated:" + String.valueOf(l)+"/"+String.valueOf(l1));
+				}
+			},1);
+
+
+			this.castPlayer = remoteMediaClient;
 		}
 
 		@Override
@@ -271,7 +343,6 @@ public class SambaPlayer extends FrameLayout {
 			player.setAutoHide(true);
 			// disabling hook for API and user actions
 			player.setInterceptableListener(null);
-
 			play();
 		}
 	};
@@ -821,5 +892,6 @@ public class SambaPlayer extends FrameLayout {
 
 		if (player != null)
 			player.addActionButton(sambaCast.getButton());
+
 	}
 }

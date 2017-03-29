@@ -10,10 +10,18 @@ import com.google.android.gms.cast.framework.AppVisibilityListener;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.CastStateListener;
+import com.google.android.gms.cast.framework.OptionsProvider;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.SessionManagerListener;
+import com.google.android.gms.cast.framework.media.RemoteMediaClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.ResultCallbacks;
+import com.google.android.gms.common.api.Status;
 import com.sambatech.player.R;
 import com.sambatech.player.event.SambaCastListener;
+
+import java.io.IOException;
 
 /**
  * It must have a 1-to-1 relationship with activities to avoid memory leakage.
@@ -162,4 +170,90 @@ public final class SambaCast {
 		castContext.removeAppVisibilityListener(appVisibilityListener);
 		sessionManager.removeSessionManagerListener(sessionManagerListener, CastSession.class);
 	}
+
+
+	public void pauseCast(){
+		if(hasMediaSession(true)) {
+			sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, "{\"type\": \"pause\"}").setResultCallback(new ResultCallbacks<Status>() {
+				@Override
+				public void onSuccess(@NonNull Status status) {
+					Log.i("message", "Message Sent OK: namespace:" + CastOptionsProvider.CUSTOM_NAMESPACE + " message:" + CastOptionsProvider.CUSTOM_NAMESPACE);
+				}
+
+				@Override
+				public void onFailure(@NonNull Status status) {
+					Log.i("message", "Sending message failed");
+				}
+			});
+		}
+	}
+
+	public void playCast(){
+		if(hasMediaSession(true)) {
+			sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, "{\"type\": \"play\"}").setResultCallback(new ResultCallbacks<Status>() {
+				@Override
+				public void onSuccess(@NonNull Status status) {
+					Log.i("message", "Message Sent OK: namespace:" + CastOptionsProvider.CUSTOM_NAMESPACE + " message:" + CastOptionsProvider.CUSTOM_NAMESPACE);
+				}
+
+				@Override
+				public void onFailure(@NonNull Status status) {
+					Log.i("message", "Sending message failed");
+				}
+			});
+		}
+
+		//seekTo(0);
+	}
+	public void seekTo(int posisiton){
+		String seekRequest = String.format("{\"type\": \"seek\", \"data\": %d }", posisiton/1000);
+		if(hasMediaSession(true)) {
+			if(hasMediaSession(true)) {
+				sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, seekRequest).setResultCallback(new ResultCallbacks<Status>() {
+					@Override
+					public void onSuccess(@NonNull Status status) {
+						Log.i("message", "Message Sent OK: namespace:" + CastOptionsProvider.CUSTOM_NAMESPACE + " message:" + CastOptionsProvider.CUSTOM_NAMESPACE);
+					}
+
+					@Override
+					public void onFailure(@NonNull Status status) {
+						Log.i("message", "Sending message failed");
+					}
+				});
+			}
+		}
+	}
+
+
+	public void setMute(boolean mute){
+		try {
+			sessionManager.getCurrentCastSession().setMute(mute);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void setVolume(double volume){
+		//sessionManager.getCurrentCastSession().getRemoteMediaClient().setStreamVolume(volume);
+		try {
+			sessionManager.getCurrentCastSession().setVolume(volume);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public boolean hasMediaSession(boolean validateCastConnectingState) {
+		if (sessionManager.getCurrentCastSession() == null) {
+			return false;
+		}
+		boolean isCastSessionValid = sessionManager.getCurrentCastSession().isConnected();
+		if (validateCastConnectingState) {
+			boolean isCastSessionInConnectingMode = sessionManager.getCurrentCastSession().isConnecting();
+			if (isCastSessionInConnectingMode) {
+				return false; // no session to work with
+			}
+		}
+		return isCastSessionValid;
+	}
+
 }

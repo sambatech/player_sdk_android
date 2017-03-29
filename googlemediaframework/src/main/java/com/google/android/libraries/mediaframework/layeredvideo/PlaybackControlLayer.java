@@ -143,7 +143,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		 * Intercepts seek actions.
 		 * @return True to intercept the action or false to cancel it
 		 */
-		boolean onSeek();
+		boolean onSeek(int position);
 
 		/**
 		 * Intercepts media current time.
@@ -1228,6 +1228,14 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				updatePlayPauseButton();
 				show(DEFAULT_TIMEOUT_MS);
 
+				int currentposition;
+				try {
+					currentposition = playerControl.getCurrentPosition();
+				} catch (NullPointerException e){
+					currentposition = 0;
+				}
+
+				if(interceptableListener!=null)interceptableListener.onSeek(currentposition);
 				handler.sendEmptyMessage(SHOW_PROGRESS);
 			}
 		});
