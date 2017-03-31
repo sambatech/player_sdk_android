@@ -34,25 +34,13 @@ public final class CastOptionsProvider implements OptionsProvider {
 		List<String> supportedNamespaces = new ArrayList<>();
 		supportedNamespaces.add(CUSTOM_NAMESPACE);
 
-
-		NotificationOptions notificationOptions = new NotificationOptions.Builder()
-				.setActions(Arrays.asList(MediaIntentReceiver.ACTION_SKIP_NEXT,
-						MediaIntentReceiver.ACTION_TOGGLE_PLAYBACK,
-						MediaIntentReceiver.ACTION_STOP_CASTING), new int[]{1, 2})
-				.setTargetActivityClassName(ExpandedControlsActivity.class.getName())
-				.build();
-
-		CastMediaOptions mediaOptions = new CastMediaOptions.Builder()
-				.setImagePicker(new ImagePickerImpl())
-				.setNotificationOptions(notificationOptions)
-				.setExpandedControllerActivityClassName(ExpandedControlsActivity.class.getName())
-				.build();
-
-
 		return new CastOptions.Builder()
 				//.setReceiverApplicationId(applicationId)
 				.setReceiverApplicationId(context.getString(R.string.cast_app_id))
-				.setCastMediaOptions(mediaOptions)
+				//.setCastMediaOptions(mediaOptions)
+				.setResumeSavedSession(true)
+				.setStopReceiverApplicationWhenEndingSession(true)
+				.setEnableReconnectionService(true)
 				//.setSupportedNamespaces(supportedNamespaces)
 				.build();
 	}

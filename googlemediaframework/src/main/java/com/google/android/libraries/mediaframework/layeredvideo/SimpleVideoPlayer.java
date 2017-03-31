@@ -486,4 +486,12 @@ public class SimpleVideoPlayer {
 	public void setInterceptableListener(PlaybackControlLayer.InterceptableListener interceptableListener) {
 		playbackControlLayer.setInterceptableListener(this.interceptableListener = interceptableListener);
 	}
+
+	public boolean hasInterceptableListener(){
+		return interceptableListener==null ? false : true;
+	}
+
+	public void setCurrentTime(float currentTime, float duration){
+		playbackControlLayer.setCurrentTime(currentTime,duration);
+	}
 }

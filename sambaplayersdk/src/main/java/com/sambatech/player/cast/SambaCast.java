@@ -224,6 +224,25 @@ public final class SambaCast {
 		}
 	}
 
+	public void registerDeviceForProgress(boolean register){
+		String resgiterRequest = String.format("{\"type\": \"registerForProgressUpdate\", \"data\": %s }", register==true? "true" : "false");
+		if(hasMediaSession(true)) {
+			if(hasMediaSession(true)) {
+				sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, resgiterRequest).setResultCallback(new ResultCallbacks<Status>() {
+					@Override
+					public void onSuccess(@NonNull Status status) {
+						Log.i("message", "Message Sent OK: namespace:" + CastOptionsProvider.CUSTOM_NAMESPACE + " message:" + CastOptionsProvider.CUSTOM_NAMESPACE);
+					}
+
+					@Override
+					public void onFailure(@NonNull Status status) {
+						Log.i("message", "Sending message failed");
+					}
+				});
+			}
+		}
+	}
+
 
 	public void setMute(boolean mute){
 		try {

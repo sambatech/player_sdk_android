@@ -21,6 +21,7 @@ import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
+import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
@@ -47,13 +48,16 @@ import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.player.plugins.Captions;
 import com.sambatech.player.plugins.PluginManager;
 import com.sambatech.player.utils.Helpers;
-
+import org.jose4j.json.internal.json_simple.parser.JSONParser;
+import org.jose4j.json.internal.json_simple.parser.ParseException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 import static android.content.ContentValues.TAG;
 import static com.google.android.gms.cast.MediaStatus.REPEAT_MODE_REPEAT_SINGLE;
@@ -211,27 +215,11 @@ public class SambaPlayer extends FrameLayout {
 		};
 
 		@Override
-		public void onConnected(CastSession castSession) {
-			final boolean wasPlaying = isPlaying();
+		public void onConnected(final CastSession castSession) {
 
-			 String MEDIA_NAMESPACE = "urn:x-cast:com.sambatech.player";
-
-			 Cast.MessageReceivedCallback messageReceivedCallback = new Cast.MessageReceivedCallback() {
-				@Override
-				public void onMessageReceived(CastDevice castDevice, String namespace, String message) {
-					Log.d(TAG, "Received message (" + namespace + "): " + message);
-				}
-			};
 			pause();
 
-			try {
-				castSession.setMessageReceivedCallbacks(MEDIA_NAMESPACE, messageReceivedCallback);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
 			final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
-
 			if (remoteMediaClient == null) return;
 
 			// enabling hook for API and user actions
@@ -239,43 +227,12 @@ public class SambaPlayer extends FrameLayout {
 			player.setAutoHide(false);
 			player.setControlsVisible(true, "seekbar");
 
-			remoteMediaClient.addListener(new RemoteMediaClient.Listener() {
-				@Override
-				public void onStatusUpdated() {
-					remoteMediaClient.removeListener(this);
-				}
-
-				@Override
-				public void onMetadataUpdated() {
-
-				}
-
-				@Override
-				public void onQueueStatusUpdated() {
-
-				}
-
-				@Override
-				public void onPreloadStatusUpdated() {
-
-				}
-
-				@Override
-				public void onSendingRemoteMediaRequest() {
-
-				}
-
-				@Override
-				public void onAdBreakStatusUpdated() {
-
-				}
-			});
-
 			// converting SambaMedia to MediaInfo
 			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
-			movieMetadata.putString(MediaMetadata.KEY_TITLE,"t%C3%A9st%C3%A9_%2Ct%C3%8DtULO_g%C3%81%2C_31_07");
+			movieMetadata.putString(MediaMetadata.KEY_TITLE,media.title);
+			movieMetadata.putString(MediaMetadata.KEY_SUBTITLE,media.title);
 
-			String s = "{" +
+			String videoTeste = "{" +
 					"\"ph\": \"e6830262e5a287446c7d5631455879c7\"," +
 					"\"m\": \"52bfc77a846cebfe47b95dc735f0e7d1\"," +
 					"\"qs\": {" +
@@ -293,26 +250,31 @@ public class SambaPlayer extends FrameLayout {
 					"\"baseURL\": \"192.168.0.65:8000/\"" +
 					"}";
 
-			MediaInfo mediaInfo = new MediaInfo.Builder(s)
+			String mediaInfoString = "{"
+					+ String.format("\"ph\":\"%s\",", media.projectHash)
+					+ String.format("\"m\":\"%s\",", media.id)
+					+ "\"qs\": {"
+					+ String.format("\"scriptURL\":\"%s\",", "http://192.168.0.65:8000/sb.proxy.pt.js")
+					+ String.format("\"castApi\":\"%s\",", "web4-7091")
+					+ String.format("\"castAppId\":\"%s\",", "4E9CBD30")
+					+ String.format("\"logger\":\"%s\",", "cast:true")
+					+ String.format("\"html5\":%s,", "true")
+					+ String.format("\"initialTime\":%d", 0)
+					+ "},"
+					+ String.format("\"title\":\"%s\",", media.title)
+					+ String.format("\"duration\":%d,", (int)getDuration())
+					//+ String.format("\"thumbURL\":\"%s\",", media.thumb)
+					+ String.format("\"theme\":\"%s\",", "#72BE44")
+					+ String.format("\"baseURL\":\"%s\"", "192.168.0.65:8000/")
+					+ "}";
+
+			MediaInfo mediaInfo = new MediaInfo.Builder(videoTeste)
 					.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
 					.setContentType("video/mp4")
-					//.setMetadata(movieMetadata)
+					.setMetadata(movieMetadata)
 					//.setStreamDuration(125)
 					//.setCustomData(jsonObject)
 					.build();
-
-
-			try {
-				castSession.setMessageReceivedCallbacks(CastOptionsProvider.CUSTOM_NAMESPACE, new Cast.MessageReceivedCallback() {
-                    @Override
-                    public void onMessageReceived(CastDevice castDevice, String s, String s1) {
-                        Log.i("Message Recived", castDevice.toString() + s + s1);
-                    }
-                });
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
 
 			remoteMediaClient.load(mediaInfo, false, 0).setResultCallback(new ResultCallbacks<RemoteMediaClient.MediaChannelResult>() {
 				@Override
@@ -326,13 +288,29 @@ public class SambaPlayer extends FrameLayout {
 				}
 			});
 
-			remoteMediaClient.addProgressListener(new RemoteMediaClient.ProgressListener() {
-				@Override
-				public void onProgressUpdated(long l, long l1) {
-					Log.d(TAG, "onProgressUpdated:" + String.valueOf(l)+"/"+String.valueOf(l1));
-				}
-			},1);
+			sambaCast.registerDeviceForProgress(true);
 
+			Cast.MessageReceivedCallback messageReceived = new Cast.MessageReceivedCallback() {
+				@Override
+				public void onMessageReceived(CastDevice castDevice, String namespace, String message)  {
+					Log.i("Message Received", castDevice.toString() + namespace + message);
+					JSONObject jsonObject = null;
+					try {
+						jsonObject = new JSONObject(message);
+						float progress = jsonObject.getInt("progress");
+						float duration = jsonObject.getInt("duration");
+						if(player!=null)player.setCurrentTime(progress,duration);
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+			};
+
+			try {
+				castSession.setMessageReceivedCallbacks(CastOptionsProvider.CUSTOM_NAMESPACE,messageReceived);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
 			this.castPlayer = remoteMediaClient;
 		}
