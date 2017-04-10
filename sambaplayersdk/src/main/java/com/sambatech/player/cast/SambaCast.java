@@ -227,7 +227,6 @@ public final class SambaCast {
 	public void registerDeviceForProgress(boolean register){
 		String resgiterRequest = String.format("{\"type\": \"registerForProgressUpdate\", \"data\": %s }", register==true? "true" : "false");
 		if(hasMediaSession(true)) {
-			if(hasMediaSession(true)) {
 				sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, resgiterRequest).setResultCallback(new ResultCallbacks<Status>() {
 					@Override
 					public void onSuccess(@NonNull Status status) {
@@ -239,7 +238,6 @@ public final class SambaCast {
 						Log.i("message", "Sending message failed");
 					}
 				});
-			}
 		}
 	}
 
