@@ -1502,4 +1502,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			}
 		}
 	}
+
+	public void setPlayingOnCast(){
+		pausePlayLargeButton.setImageResource(R.drawable.ic_action_pause_large);
+		pausePlayButton.setImageResource(R.drawable.ic_action_pause);
+	}
 }

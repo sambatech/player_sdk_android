@@ -241,6 +241,18 @@ public final class SambaCast {
 		}
 	}
 
+	public void stopCasting(){
+        sessionManager.endCurrentSession(true);
+    }
+
+    public boolean isCasting(){
+		if(sessionManager!=null&&sessionManager.getCurrentCastSession()!=null) {
+			return sessionManager.getCurrentCastSession().isConnected() || sessionManager.getCurrentCastSession().isConnecting();
+		} else {
+			return false;
+		}
+	}
+
 
 	public void setMute(boolean mute){
 		try {
@@ -271,6 +283,10 @@ public final class SambaCast {
 			}
 		}
 		return isCastSessionValid;
+	}
+
+	public CastSession getCastSession(){
+		return sessionManager.getCurrentCastSession();
 	}
 
 }

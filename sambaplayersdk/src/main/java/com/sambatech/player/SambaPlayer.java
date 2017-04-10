@@ -36,7 +36,9 @@ import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlL
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.sambatech.player.adapter.CaptionsAdapter;
 import com.sambatech.player.adapter.OutputAdapter;
+import com.sambatech.player.cast.CastObject;
 import com.sambatech.player.cast.CastOptionsProvider;
+import com.sambatech.player.cast.CastQuery;
 import com.sambatech.player.cast.SambaCast;
 import com.sambatech.player.event.SambaCastListener;
 import com.sambatech.player.event.SambaEvent;
@@ -218,6 +220,7 @@ public class SambaPlayer extends FrameLayout {
 		public void onConnected(final CastSession castSession) {
 
 			pause();
+			player.setPlayingOnCast();
 
 			final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
 			if (remoteMediaClient == null) return;
@@ -231,6 +234,12 @@ public class SambaPlayer extends FrameLayout {
 			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
 			movieMetadata.putString(MediaMetadata.KEY_TITLE,media.title);
 			movieMetadata.putString(MediaMetadata.KEY_SUBTITLE,media.title);
+
+
+			CastQuery qs = new CastQuery(true,"http://192.168.0.65:8000/sb.proxy.pt.js","web4-7091","4E9CBD30","cast:true",0);
+			CastObject 	castObject = new CastObject("t%C3%A9st%C3%A9_%2Ct%C3%8DtULO_g%C3%81%2C_31_07","52bfc77a846cebfe47b95dc735f0e7d1", 125,  "#72BE44", "e6830262e5a287446c7d5631455879c7", qs, "", "192.168.0.65:8000/") ;
+
+			/*String videoTeste = castObject.toString();*/
 
 			String videoTeste = "{" +
 					"\"ph\": \"e6830262e5a287446c7d5631455879c7\"," +
@@ -268,7 +277,9 @@ public class SambaPlayer extends FrameLayout {
 					+ String.format("\"baseURL\":\"%s\"", "192.168.0.65:8000/")
 					+ "}";
 
-			MediaInfo mediaInfo = new MediaInfo.Builder(videoTeste)
+			String s = castObject.toString();
+
+			MediaInfo mediaInfo = new MediaInfo.Builder(s)
 					.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
 					.setContentType("video/mp4")
 					.setMetadata(movieMetadata)
@@ -643,9 +654,19 @@ public class SambaPlayer extends FrameLayout {
 		}
 
 		// no autoplay if there's ad because ImaWrapper takes control of the player
-        player = new SimpleVideoPlayer((Activity)getContext(), this,
-                new Video(media.url, videoType, media.drmRequest), media.title,
-		        media.adUrl == null || media.adUrl.isEmpty(), media.isAudioOnly);
+		if(sambaCast!=null && sambaCast.isCasting()){
+			player = new SimpleVideoPlayer((Activity)getContext(), this,
+					new Video(media.url, videoType, media.drmRequest), media.title,
+					false, media.isAudioOnly);
+
+			setupCast();
+			castListener.onConnected(sambaCast.getCastSession());
+		}else{
+			player = new SimpleVideoPlayer((Activity)getContext(), this,
+					new Video(media.url, videoType, media.drmRequest), media.title,
+					media.adUrl == null || media.adUrl.isEmpty(), media.isAudioOnly);
+		}
+
 
 		player.setSeekbarColor(media.themeColor);
 
@@ -667,8 +688,6 @@ public class SambaPlayer extends FrameLayout {
 			@Override
 			public void onClick(View v) {}
 		});*/
-
-		setupCast();
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
@@ -800,6 +819,8 @@ public class SambaPlayer extends FrameLayout {
 		_hasStarted = false;
 		_hasFinished = false;
 		_disabled = false;
+
+		if(sambaCast!=null) sambaCast.stopCasting();
 	}
 
 	private void showError(@NonNull SambaPlayerError error) {

@@ -180,8 +180,11 @@ public class MediaItemActivity extends Activity {
         super.onPause();
 		sambaCast.notifyActivityPause();
 
-        if (player != null && player.hasStarted())
-            player.pause();
+
+		if(!sambaCast.isCasting()) {
+			if (player != null && player.hasStarted())
+				player.pause();
+		}
     }
 
 	/**
@@ -305,8 +308,9 @@ public class MediaItemActivity extends Activity {
 	}
 
 	@OnClick(R.id.play) public void playHandler() {
-		if (player != null)
-			player.play();
+/*		if (player != null)
+			player.play();*/
+sambaCast.stopCasting();
 	}
 
 	@OnClick(R.id.pause) public void pauseHandler() {
@@ -422,8 +426,10 @@ public class MediaItemActivity extends Activity {
 	void authorize() { authorize(false); }
 
 	private void destroy() {
-		SambaEventBus.unsubscribe(playerListener);
-		player.destroy();
-		finish();
+		if (!sambaCast.isCasting()){
+			SambaEventBus.unsubscribe(playerListener);
+			player.destroy();
+			finish();
+		}
 	}
 }

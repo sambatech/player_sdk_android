@@ -494,4 +494,8 @@ public class SimpleVideoPlayer {
 	public void setCurrentTime(float currentTime, float duration){
 		playbackControlLayer.setCurrentTime(currentTime,duration);
 	}
+
+	public void setPlayingOnCast(){
+		playbackControlLayer.setPlayingOnCast();
+	}
 }
