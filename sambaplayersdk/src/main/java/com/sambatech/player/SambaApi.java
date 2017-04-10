@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 /**
  * Manages media data request from server.
@@ -35,6 +36,7 @@ public class SambaApi {
 
 	private Activity activity;
 	private String accessToken;
+    private Boolean https = true;
 
 	/**
 	 * Output map
@@ -135,12 +137,12 @@ public class SambaApi {
 					break;
 
 				case STAGING:
-					endpoint = activity.getString(R.string.player_endpoint_staging);
+					endpoint = normalizeDomain(activity.getString(R.string.player_endpoint_staging));
 					break;
 
 				case PROD:
 				default:
-					endpoint = activity.getString(R.string.player_endpoint_prod);
+					endpoint = normalizeDomain(activity.getString(R.string.player_endpoint_prod));
 			}
 
 			String url = endpoint + request.projectHash + (request.mediaId != null ? "/" + request.mediaId : "?" +
@@ -294,7 +296,7 @@ public class SambaApi {
 							String label = output.getString("outputName");
 
 							SambaMedia.Output cOutput = new SambaMedia.Output();
-							cOutput.url = output.getString("url");
+							cOutput.url = normalizeDomain(output.getString("url"));
 							cOutput.label = output.getString("outputName").startsWith("abr") ? "Auto" : output.getString("outputName");
 							cOutput.position = outputMap.get(output.getString("outputName").toLowerCase());
 
@@ -310,7 +312,7 @@ public class SambaApi {
 							// TODO: checar comportamento de projeto sem default output
 							if (!label.equalsIgnoreCase("_raw") && !output.isNull("url")) {
 								if (label.startsWith(defaultOutputCurrent)) {
-									media.url = output.getString("url");
+									media.url = normalizeDomain(output.getString("url"));
 									cOutput.isDefault = true;
 								}
 
@@ -321,7 +323,7 @@ public class SambaApi {
 						// was it a valid iteration?
 						if (mediaOutputs.size() > 0) {
 							if (media.url == null)
-								media.url = mediaOutputs.get(0).url;
+								media.url = normalizeDomain(mediaOutputs.get(0).url);
 
 							media.outputs = mediaOutputs;
 							filledRules.add(media.type);
@@ -336,10 +338,10 @@ public class SambaApi {
 					final String reHds = "[\\w]+\\.f4m$";
 
 					// tries to fallback from HDS
-					media.url = json.getJSONObject("liveOutput").getString("baseUrl").replaceAll(reHds, "playlist.m3u8");
+					media.url = normalizeDomain(json.getJSONObject("liveOutput").getString("baseUrl").replaceAll(reHds, "playlist.m3u8"));
 
 					for (int i = 0; i < request.backupUrls.length; ++i)
-						request.backupUrls[i] = request.backupUrls[i].replaceAll(reHds, "playlist.m3u8");
+						request.backupUrls[i] = normalizeDomain(request.backupUrls[i].replaceAll(reHds, "playlist.m3u8"));
 
 					media.backupUrls = request.backupUrls;
 					media.isLive = true;
@@ -357,7 +359,7 @@ public class SambaApi {
 					/*Bitmap bmp = BitmapFactory.decodeStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream());
 					bmp.setDensity(Bitmap.DENSITY_NONE);
 					media.thumb = new BitmapDrawable(activity.getResources(), bmp);*/
-					media.thumb = Drawable.createFromStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream(), "Thumbnail");
+					media.thumb = Drawable.createFromStream(new URL(normalizeDomain(thumbs.getJSONObject(0).getString("url"))).openStream(), "Thumbnail");
 				}
 
                 //Captions
@@ -383,7 +385,7 @@ public class SambaApi {
 	                    lang = caption.getJSONObject("fileInfo").getString("captionLanguage").toLowerCase().replace('_', '-');
 
 	                    captionArray.add(new SambaMedia.Caption(
-		                        caption.getString("url"),
+		                        normalizeDomain(caption.getString("url")),
 			                    langLookup.get(lang),
 			                    lang,
 		                        caption.getJSONObject("fileInfo").getBoolean("closedCaption"),
@@ -404,7 +406,7 @@ public class SambaApi {
 
 				if (apiConfig.has("sttm")) {
 					JSONObject sttm = apiConfig.getJSONObject("sttm");
-					media.sttmUrl = sttm.optString("url", "http://sttm.sambatech.com.br/collector/__sttm.gif");
+					media.sttmUrl = normalizeDomain(sttm.optString("url", "http://sttm.sambatech.com.br/collector/__sttm.gif"));
 					media.sttmKey = sttm.optString("key", "ae810ebc7f0654c4fadc50935adcf5ec");
 				}
 
@@ -446,5 +448,12 @@ public class SambaApi {
 		private void sortOutputs(ArrayList<SambaMedia.Output> outputs) {
 			Collections.sort(outputs, new Helpers.CustomSorter());
 		}
+
+        /**
+         * Replace http for https
+         */
+        private String normalizeDomain(String url) {
+            return url.replaceAll("(https?)", request.protocol);
+        }
 	}
 }

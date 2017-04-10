@@ -239,6 +239,7 @@ public class MediaItemActivity extends Activity {
 	    }
 
 		//Make the media request
+		sbRequest.protocol = "http";
         api.requestMedia(sbRequest, callback);
     }
 
