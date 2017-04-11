@@ -276,10 +276,16 @@ public class SambaPlayer extends FrameLayout {
 					JSONObject jsonObject = null;
 					try {
 						jsonObject = new JSONObject(message);
-						float progress = jsonObject.getInt("progress");
-						float duration = jsonObject.getInt("duration");
-						lastPosition = (int)progress;
-						if(player!=null)player.setCurrentTime(progress,duration);
+						if(jsonObject.has("progress")&&jsonObject.has("duration")) {
+							float progress = jsonObject.getInt("progress");
+							float duration = jsonObject.getInt("duration");
+							lastPosition = (int) progress;
+							if (player != null) player.setCurrentTime(progress, duration);
+						}else if(jsonObject.has("type")) {
+							jsonObject = new JSONObject(message);
+							String type = jsonObject.getString("type");
+							if (type.equalsIgnoreCase("finish")) sambaCast.stopCasting();
+						}
 					} catch (JSONException e) {
 						e.printStackTrace();
 					}
