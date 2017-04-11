@@ -15,7 +15,7 @@ public class SambaMediaRequest {
 	public String streamUrl;
 	public @NonNull String[] backupUrls = new String[]{};
 	public Environment environment = Environment.PROD;
-	public String protocol = "https";
+	public Protocol protocol = Protocol.HTTPS;
 
 	/**
 	 * Represents a VOD media request.
@@ -77,5 +77,10 @@ public class SambaMediaRequest {
 		DEV,
 		STAGING,
 		PROD
+	}
+
+	public enum Protocol {
+		HTTP,
+		HTTPS
 	}
 }

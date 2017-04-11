@@ -233,13 +233,14 @@ public class MediaItemActivity extends Activity {
 	    if (liquidMedia.environment != null)
 		    sbRequest.environment = liquidMedia.environment;
 
+
+
 	    if (liquidMedia.description != null || liquidMedia.shortDescription != null) {
 		    descView.setText(((liquidMedia.description != null) ? liquidMedia.description : "") +
 				    "\n " + ((liquidMedia.shortDescription != null) ? liquidMedia.shortDescription : ""));
 	    }
 
-		//Make the media request
-		sbRequest.protocol = "http";
+        sbRequest.protocol = SambaMediaRequest.Protocol.HTTP;
         api.requestMedia(sbRequest, callback);
     }
 
