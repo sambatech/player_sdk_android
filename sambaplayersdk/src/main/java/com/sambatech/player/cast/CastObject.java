@@ -13,8 +13,9 @@ public class CastObject {
     private CastQuery qs;
     private String thumbURL;
     private String baseURL;
-    
-    
+    private CastDRM drm;
+
+
 	public CastObject () {
 		
 	}	
@@ -107,18 +108,28 @@ public class CastObject {
         this.baseURL = baseURL;
     }
 
+    public void setDrm(CastDRM drm) {
+        this.drm = drm;
+    }
+
+    public CastDRM getDrm() {
+        return drm;
+    }
+
+
 
     @Override
     public String toString() {
         return "{" +
-                "title='" + title + '\'' +
-                ", m='" + m + '\'' +
-                ", duration=" + duration +
-                ", theme='" + theme + '\'' +
-                ", ph='" + ph + '\'' +
-                ", qs=" + qs +
-                ", thumbURL='" + thumbURL + '\'' +
-                ", baseURL='" + baseURL + '\'' +
+                "\"title\":\"" + title + '\"' +
+                ", \"m\":\"" + m + '\"' +
+                ", \"duration\":" + duration +
+                ", \"theme\":\"" + theme + '\"' +
+                ", \"ph\":\"" + ph + '\"' +
+                ", \"qs\":" + qs +
+                ", \"thumbURL\":\"" + thumbURL + '\"' +
+                ", \"baseURL\":\"" + baseURL + '\"' +
+                ", \"drm\":" + drm +
                 '}';
     }
 }

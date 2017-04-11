@@ -1488,7 +1488,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	public void setCurrentTime(float time, float duration){
 		if(!isSeekbarDragging) {
 			if (seekBar != null) {
-				if (time > 0) {
+				if (time >= 0 && duration > 0 ) {
 					long pos = 1000 * (long) time / (long) duration;
 					seekBar.setProgress((int) pos);
 				}
@@ -1506,5 +1506,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	public void setPlayingOnCast(){
 		pausePlayLargeButton.setImageResource(R.drawable.ic_action_pause_large);
 		pausePlayButton.setImageResource(R.drawable.ic_action_pause);
+		shouldBePlaying=true;
 	}
 }

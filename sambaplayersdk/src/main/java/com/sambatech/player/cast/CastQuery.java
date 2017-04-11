@@ -11,7 +11,7 @@ public class CastQuery {
     private String castAppId;
     private String logger;
     private double initialTime;
-    
+
 
 	public CastQuery() {
 		
@@ -80,17 +80,17 @@ public class CastQuery {
     public String toString() {
         return "{" +
                 "\"html5\":" + html5 +
-                ",\"scriptURL\":\"" + scriptURL + '\"' +
+                /*",\"scriptURL\":\"" + scriptURL + '\"' +*/
                 ",\"castApi\":\"" + castApi + '\"' +
                 ",\"castAppId\":\"" + castAppId + '\"' +
                 ",\"logger\":\"" + logger + '\"' +
-                ",\"initialTime\":\"" + initialTime +
+                ",\"initialTime\":" + initialTime +
                 '}';
     }
 
-    public CastQuery(boolean html5, String scriptURL, String castApi, String castAppId, String logger, double initialTime) {
+    public CastQuery(boolean html5, /*String scriptURL,*/ String castApi, String castAppId, String logger, double initialTime) {
         this.html5 = html5;
-        this.scriptURL = scriptURL;
+        //this.scriptURL = scriptURL;
         this.castApi = castApi;
         this.castAppId = castAppId;
         this.logger = logger;

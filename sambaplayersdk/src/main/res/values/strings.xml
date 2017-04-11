@@ -9,4 +9,5 @@
     <string name="captions">Legendas</string>
     <!--string name="cast_app_id">E9CFA23D</string-->
     <string name="cast_app_id">4E9CBD30</string>
+    <string name="base_url">192.168.0.65:8000/</string>
 </resources>

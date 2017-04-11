@@ -36,6 +36,7 @@ import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlL
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.sambatech.player.adapter.CaptionsAdapter;
 import com.sambatech.player.adapter.OutputAdapter;
+import com.sambatech.player.cast.CastDRM;
 import com.sambatech.player.cast.CastObject;
 import com.sambatech.player.cast.CastOptionsProvider;
 import com.sambatech.player.cast.CastQuery;
@@ -46,6 +47,7 @@ import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
+import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.player.plugins.Captions;
 import com.sambatech.player.plugins.PluginManager;
@@ -183,6 +185,7 @@ public class SambaPlayer extends FrameLayout {
 
 	private final SambaCastListener castListener = new SambaCastListener() {
 		public RemoteMediaClient castPlayer;
+		private int lastPosition =0;
 
 		private final PlaybackControlLayer.InterceptableListener interceptableListener = new PlaybackControlLayer.InterceptableListener() {
 			@Override
@@ -220,7 +223,6 @@ public class SambaPlayer extends FrameLayout {
 		public void onConnected(final CastSession castSession) {
 
 			pause();
-			player.setPlayingOnCast();
 
 			final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
 			if (remoteMediaClient == null) return;
@@ -236,55 +238,20 @@ public class SambaPlayer extends FrameLayout {
 			movieMetadata.putString(MediaMetadata.KEY_SUBTITLE,media.title);
 
 
-			CastQuery qs = new CastQuery(true,"http://192.168.0.65:8000/sb.proxy.pt.js","web4-7091","4E9CBD30","cast:true",0);
-			CastObject 	castObject = new CastObject("t%C3%A9st%C3%A9_%2Ct%C3%8DtULO_g%C3%81%2C_31_07","52bfc77a846cebfe47b95dc735f0e7d1", 125,  "#72BE44", "e6830262e5a287446c7d5631455879c7", qs, "", "192.168.0.65:8000/") ;
+			int currenttime = (int)getCurrentTime();
+			CastQuery qs = new CastQuery(true,environment.toString().toLowerCase(),getContext().getString(R.string.cast_app_id),"cast:true",currenttime); //R.string.cast_app_id change url para prod ()eviroment.to string
+			CastObject 	castObject = new CastObject(media.title,media.id, (int) getDuration(),  "#72BE44", media.projectHash, qs, "", getContext().getString(R.string.base_url)) ;
 
-			/*String videoTeste = castObject.toString();*/
+			if(media.drmRequest!=null){
+				String drmSessionId = media.drmRequest.getLicenseParam("SessionId");
+				String drmTicket = media.drmRequest.getLicenseParam("Ticket");
+				castObject.setDrm(new CastDRM(drmSessionId,drmTicket));
+			}
 
-			String videoTeste = "{" +
-					"\"ph\": \"e6830262e5a287446c7d5631455879c7\"," +
-					"\"m\": \"52bfc77a846cebfe47b95dc735f0e7d1\"," +
-					"\"qs\": {" +
-					"\"scriptURL\": \"http://192.168.0.65:8000/sb.proxy.pt.js\"," +
-					"\"castApi\": \"web4-7091\"," +
-					"\"castAppId\": \"4E9CBD30\"," +
-					"\"logger\": \"cast:true\"," +
-					"\"html5\": true," +
-					"\"initialTime\": 0" +
-					"}," +
-					"\"title\": \"t%C3%A9st%C3%A9_%2Ct%C3%8DtULO_g%C3%81%2C_31_07\"," +
-					"\"duration\": 125," +
-					//"\"thumbURL\": \"http://test-pv-s1-sambavideos.akamaized.net/account/100209/1/2012-05-04/thu…5e872c794a003e9d80ed20e52914c99c/Rango_-_Trailer__HD_1080p_mp4_640x360.jpg\"," +
-					"\"theme\": \"#72BE44\"," +
-					"\"baseURL\": \"192.168.0.65:8000/\"" +
-					"}";
-
-			String mediaInfoString = "{"
-					+ String.format("\"ph\":\"%s\",", media.projectHash)
-					+ String.format("\"m\":\"%s\",", media.id)
-					+ "\"qs\": {"
-					+ String.format("\"scriptURL\":\"%s\",", "http://192.168.0.65:8000/sb.proxy.pt.js")
-					+ String.format("\"castApi\":\"%s\",", "web4-7091")
-					+ String.format("\"castAppId\":\"%s\",", "4E9CBD30")
-					+ String.format("\"logger\":\"%s\",", "cast:true")
-					+ String.format("\"html5\":%s,", "true")
-					+ String.format("\"initialTime\":%d", 0)
-					+ "},"
-					+ String.format("\"title\":\"%s\",", media.title)
-					+ String.format("\"duration\":%d,", (int)getDuration())
-					//+ String.format("\"thumbURL\":\"%s\",", media.thumb)
-					+ String.format("\"theme\":\"%s\",", "#72BE44")
-					+ String.format("\"baseURL\":\"%s\"", "192.168.0.65:8000/")
-					+ "}";
-
-			String s = castObject.toString();
-
-			MediaInfo mediaInfo = new MediaInfo.Builder(s)
+			MediaInfo mediaInfo = new MediaInfo.Builder(castObject.toString())
 					.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
 					.setContentType("video/mp4")
 					.setMetadata(movieMetadata)
-					//.setStreamDuration(125)
-					//.setCustomData(jsonObject)
 					.build();
 
 			remoteMediaClient.load(mediaInfo, false, 0).setResultCallback(new ResultCallbacks<RemoteMediaClient.MediaChannelResult>() {
@@ -301,6 +268,7 @@ public class SambaPlayer extends FrameLayout {
 
 			sambaCast.registerDeviceForProgress(true);
 
+			lastPosition=0;
 			Cast.MessageReceivedCallback messageReceived = new Cast.MessageReceivedCallback() {
 				@Override
 				public void onMessageReceived(CastDevice castDevice, String namespace, String message)  {
@@ -310,6 +278,7 @@ public class SambaPlayer extends FrameLayout {
 						jsonObject = new JSONObject(message);
 						float progress = jsonObject.getInt("progress");
 						float duration = jsonObject.getInt("duration");
+						lastPosition = (int)progress;
 						if(player!=null)player.setCurrentTime(progress,duration);
 					} catch (JSONException e) {
 						e.printStackTrace();
@@ -324,12 +293,15 @@ public class SambaPlayer extends FrameLayout {
 			}
 
 			this.castPlayer = remoteMediaClient;
+			player.setPlayingOnCast();
 		}
 
 		@Override
 		public void onDisconnected() {
 			player.setControlsVisible(true, "seekbar");
 			player.setAutoHide(true);
+			player.seek(lastPosition*1000);
+			lastPosition=0;
 			// disabling hook for API and user actions
 			player.setInterceptableListener(null);
 			play();
@@ -350,6 +322,8 @@ public class SambaPlayer extends FrameLayout {
 	private boolean enableControls;
 	private boolean _disabled;
 	private int _currentBackupIndex;
+
+	private SambaMediaRequest.Environment environment = SambaMediaRequest.Environment.PROD;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -665,6 +639,7 @@ public class SambaPlayer extends FrameLayout {
 			player = new SimpleVideoPlayer((Activity)getContext(), this,
 					new Video(media.url, videoType, media.drmRequest), media.title,
 					media.adUrl == null || media.adUrl.isEmpty(), media.isAudioOnly);
+			setupCast();
 		}
 
 
@@ -892,5 +867,9 @@ public class SambaPlayer extends FrameLayout {
 		if (player != null)
 			player.addActionButton(sambaCast.getButton());
 
+	}
+
+	public void setEnvironment(SambaMediaRequest.Environment environment) {
+		this.environment = environment;
 	}
 }

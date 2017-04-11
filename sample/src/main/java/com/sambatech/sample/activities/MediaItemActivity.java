@@ -276,6 +276,7 @@ public class MediaItemActivity extends Activity {
 
 		// enabling Chromecast on player
 		player.setSambaCast(sambaCast);
+		if(activityMedia.environment!=null)player.setEnvironment(activityMedia.environment);
 
 	    player.setMedia(media);
 
@@ -308,9 +309,8 @@ public class MediaItemActivity extends Activity {
 	}
 
 	@OnClick(R.id.play) public void playHandler() {
-/*		if (player != null)
-			player.play();*/
-sambaCast.stopCasting();
+		if (player != null)
+			player.play();
 	}
 
 	@OnClick(R.id.pause) public void pauseHandler() {
