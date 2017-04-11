@@ -240,7 +240,7 @@ public class SambaPlayer extends FrameLayout {
 
 			int currenttime = (int)getCurrentTime();
 			CastQuery qs = new CastQuery(true,environment.toString().toLowerCase(),getContext().getString(R.string.cast_app_id),"cast:true",currenttime); //R.string.cast_app_id change url para prod ()eviroment.to string
-			CastObject 	castObject = new CastObject(media.title,media.id, (int) getDuration(),  "#72BE44", media.projectHash, qs, "", getContext().getString(R.string.base_url)) ;
+			CastObject 	castObject = new CastObject(media.title,media.id, (int) getDuration(),  media.themeColorHex, media.projectHash, qs, "", getContext().getString(R.string.base_url)) ;
 
 			if(media.drmRequest!=null){
 				String drmSessionId = media.drmRequest.getLicenseParam("SessionId");

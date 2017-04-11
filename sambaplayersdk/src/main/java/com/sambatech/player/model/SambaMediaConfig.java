@@ -19,6 +19,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public int categoryId;
 	public String sessionId = Helpers.getSessionId();
 	public int themeColor = 0xFF72BE44;
+	public String themeColorHex = "#72BE44";
 	public String sttmUrl;
 	public String sttmKey;
 	public DrmRequest drmRequest;
@@ -38,6 +39,7 @@ public class SambaMediaConfig extends SambaMedia {
 			categoryId = m.categoryId;
 			sessionId = m.sessionId;
 			themeColor = m.themeColor;
+			themeColorHex = m.themeColorHex;
 			sttmKey = m.sttmKey;
 			sttmUrl = m.sttmUrl;
 			drmRequest = m.drmRequest;
