@@ -85,7 +85,7 @@ public class MediasAdapter extends BaseAdapter {
 		    if (media.thumbs != null && media.thumbs.size() > 0)
 			    holder.thumb.setImageUrl(getIdealThumb(media.thumbs), mImageLoader);
 		    else if (media.qualifier.toLowerCase().equals("audio"))
-			    holder.thumb.setImageUrl("https://cdn4.iconfinder.com/data/icons/defaulticon/icons/png/256x256/media-volume-2.png", mImageLoader);
+			    holder.thumb.setImageUrl("https://cdn3.iconfinder.com/data/icons/buttons-1/512/Notes.png", mImageLoader);
 
 	        holder.title.setText(media.title.split("\\.", 2)[0]);
 
