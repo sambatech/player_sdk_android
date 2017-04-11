@@ -68,6 +68,13 @@ public class MediaItemActivity extends Activity {
 	@Bind(R.id.policies)
 	Spinner policySpinner;
 
+    @Bind(R.id.session_controls)
+    LinearLayout sessionControls;
+
+    @Bind(R.id.auth_controls)
+    LinearLayout authControls;
+
+
 	private boolean _autoPlay;
 	private LiquidMedia.EntitlementScheme entitlementScheme;
 	private SambaMediaConfig media;
@@ -212,12 +219,19 @@ public class MediaItemActivity extends Activity {
 				    titleView.setText(media.title);
 
 				    validationControlbar.setVisibility(View.VISIBLE);
+
+                    //DRM controls
+                    if(((SambaMediaConfig) media).drmRequest != null ) {
+                        sessionControls.setVisibility(View.VISIBLE);
+                        authControls.setVisibility(View.VISIBLE);
+                    }
 				    return;
 			    }
 
 			    media.isAudioOnly = liquidMedia.qualifier.toLowerCase().equals("audio");
 
 			    loadPlayer(media);
+
 		    }
 
 		    //Response error

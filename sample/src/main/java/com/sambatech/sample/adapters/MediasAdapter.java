@@ -96,6 +96,22 @@ public class MediasAdapter extends BaseAdapter {
 		        holder.description.setText("");
 	        }
 
+
+	        switch (media.environment) {
+				case LOCAL:
+					holder.thumb.setBackgroundColor(Color.parseColor("#488e44"));
+					break;
+				case DEV:
+					holder.thumb.setBackgroundColor(Color.parseColor("#993a2d"));
+					break;
+				case STAGING:
+					holder.thumb.setBackgroundColor(Color.parseColor("#c48a2d"));
+					break;
+				case PROD:
+					holder.thumb.setBackgroundColor(Color.parseColor("#33419b"));
+					break;
+			}
+
 		    //Cores
 		    if (position % 2 == 0) {
 			    view.setBackgroundColor(Color.parseColor("#EEEEEE"));

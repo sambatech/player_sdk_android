@@ -88,14 +88,14 @@ public class MainActivity extends Activity {
 
 		phMap = new HashMap<>();
 		// PROD
-		phMap.put(4421, "bc6a17435f3f389f37a514c171039b75");
-		phMap.put(6050, "2893ae96e3f2fade7391695553400f80");
-		phMap.put(5952, "1190b8e6d5e846c0c749e3db38ed0dcf");
-		phMap.put(5719, "2dcbb8a0463215c2833dd7b178bc05da");
-		//phMap.put(4460, "36098808ae444ca5de4acf231949e312");
+		phMap.put(4421, "bc6a17435f3f389f37a514c171039b75"); //Hls com AES128
+		phMap.put(6050, "2893ae96e3f2fade7391695553400f80"); //DRM com token
+		phMap.put(5952, "1190b8e6d5e846c0c749e3db38ed0dcf"); //DRM
+		phMap.put(5719, "2dcbb8a0463215c2833dd7b178bc05da"); //DASH
+
 		// DEV
-		phMap.put(543, "664a1791fa5d4b0861416d0059da8cda");
-		phMap.put(562, "b00772b75e3677dba5a59e09598b7a0d");
+		phMap.put(543, "664a1791fa5d4b0861416d0059da8cda"); //1080p
+		phMap.put(562, "b00772b75e3677dba5a59e09598b7a0d"); //DASH
 
 		callCommonList();
 	}
@@ -375,7 +375,8 @@ public class MainActivity extends Activity {
 
 			for(LiquidMedia media : medias) {
 				media.ph = phMap.get(pid);
-				media.environment = pid == 543 || pid == 562 ? SambaMediaRequest.Environment.DEV : SambaMediaRequest.Environment.STAGING;
+				media.environment = pid == 543 || pid == 562 ? SambaMediaRequest.Environment.DEV
+						: pid == 6050 ? SambaMediaRequest.Environment.PROD : SambaMediaRequest.Environment.STAGING;
 
 				// WORKAROUND: to identify which project has DRM
 				if (pid == 5952 || pid == 6050 || pid == 5719 || pid == 562)
@@ -418,30 +419,37 @@ public class MainActivity extends Activity {
 		ArrayList<LiquidMedia> medias = new ArrayList<>();
 		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
 
-		thumb.url = "http://www.impactmobile.com/files/2012/09/icon64-broadcasts.png";
+		thumb.url = "http://d2wfckeh0j530f.cloudfront.net/wordpress/wp-content/uploads/2015/07/Industry-Broadcast1.png";
 
 		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
 
 		// HLS 1
 		LiquidMedia media = new LiquidMedia();
+		media.environment = SambaMediaRequest.Environment.STAGING;
 		media.ph = ph;
 		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b22a2c6660470/livestreamabrsbtbkp.m3u8";
 		media.title = "HLS 1";
 		media.description = "HLS 1";
 		media.thumbs = thumbs;
+		media.environment = SambaMediaRequest.Environment.DEV;
+
 		medias.add(media);
 
 		// HLS 2
 		media = new LiquidMedia();
+		media.environment = SambaMediaRequest.Environment.PROD;
 		media.ph = ph;
 		media.streamUrl = "http://slrp.sambavideos.sambatech.com/liveevent/tvdiario_7a683b067e5eee5c8d45e1e1883f69b9/livestream/playlist.m3u8";
 		media.title = "HLS 2";
 		media.description = "HLS 2";
 		media.thumbs = thumbs;
+
+
 		medias.add(media);
 
 		// fallback URL
 		media = new LiquidMedia();
+		media.environment = SambaMediaRequest.Environment.STAGING;
 		media.ph = ph;
 		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url.m3u8";
 		media.backupUrls = new String[]{
@@ -451,6 +459,8 @@ public class MainActivity extends Activity {
 		media.title = "Fallback URL";
 		media.description = "Fallback URL";
 		media.thumbs = thumbs;
+
+
 		medias.add(media);
 
 		// fallback HDS
@@ -461,10 +471,12 @@ public class MainActivity extends Activity {
 		media.title = "Fallback HDS";
 		media.description = "Fallback HDS";
 		media.thumbs = thumbs;
+
 		medias.add(media);
 
 		// fallback error
 		media = new LiquidMedia();
+		media.environment = SambaMediaRequest.Environment.STAGING;
 		media.ph = ph;
 		media.streamUrl = "http://liveabr2.sambatech.com.br/abr/sbtabr_8fcdc5f0f8df8d4de56b26660470/wrong_url.m3u8";
 		media.backupUrls = new String[]{
@@ -473,6 +485,7 @@ public class MainActivity extends Activity {
 		media.title = "Fallback com erro";
 		media.description = "Fallback com erro";
 		media.thumbs = thumbs;
+
 		medias.add(media);
 
 		// geo-blocking
@@ -483,16 +496,20 @@ public class MainActivity extends Activity {
 		media.title = "Geo-blocking";
 		media.description = "Geo-blocking";
 		media.thumbs = thumbs;
+		media.environment = SambaMediaRequest.Environment.STAGING;
+
 		medias.add(media);
 
 		// audio
 		media = new LiquidMedia();
+		media.environment = SambaMediaRequest.Environment.PROD;
 		media.ph = ph;
 		media.streamUrl = "http://slrp.sambavideos.sambatech.com/radio/pajucara4_7fbed8aac5d5d915877e6ec61e3cf0db/livestream/playlist.m3u8";
 		media.qualifier = "AUDIO";
 		media.title = "Audio Live";
 		media.description = "Live de audio";
 		media.thumbs = thumbs;
+
 		medias.add(media);
 
 		return medias;
