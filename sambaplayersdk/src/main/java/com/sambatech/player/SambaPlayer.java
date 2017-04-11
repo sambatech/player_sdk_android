@@ -228,31 +228,35 @@ public class SambaPlayer extends FrameLayout {
 
             //Chromecast
             String castAppId = "";
-            String baseCastURL = "";
+            String castBaseURL = "";
+			String castApi = "";
 
             switch (environment) {
                 case DEV:
+					castApi = "web-7091";
                     castAppId = getContext().getString(R.string.cast_app_id_dev);
-                    baseCastURL = getContext().getString(R.string.base_url_dev);
+                    castBaseURL = getContext().getString(R.string.base_url_dev);
                     break;
                 case STAGING:
+					castApi = "staging";
                     castAppId = getContext().getString(R.string.cast_app_id_staging);
-                    baseCastURL = getContext().getString(R.string.base_url_staging);
+                    castBaseURL = getContext().getString(R.string.base_url_staging);
                     break;
                 case PROD:
+					castApi = "prod";
                     castAppId = getContext().getString(R.string.cast_app_id);
-                    baseCastURL = getContext().getString(R.string.base_url);
+                    castBaseURL = getContext().getString(R.string.base_url);
                     break;
             }
 
 			int currentTime = (int)getCurrentTime();
-			CastQuery qs = new CastQuery(true, environment.toString().toLowerCase()
+			CastQuery qs = new CastQuery(true, castApi
 					, castAppId
                     , currentTime); 
 
 			CastObject castObject = new CastObject(media.title, media.id,
 					(int) getDuration(),media.themeColorHex,
-					media.projectHash, qs, "", baseCastURL) ;
+					media.projectHash, qs, "", castBaseURL) ;
 
 			if(media.drmRequest!=null){
 				String drmSessionId = media.drmRequest.getLicenseParam("SessionId");
