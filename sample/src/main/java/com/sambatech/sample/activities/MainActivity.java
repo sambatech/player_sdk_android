@@ -431,7 +431,6 @@ public class MainActivity extends Activity {
 		media.title = "HLS 1";
 		media.description = "HLS 1";
 		media.thumbs = thumbs;
-		media.environment = SambaMediaRequest.Environment.DEV;
 
 		medias.add(media);
 
@@ -443,7 +442,6 @@ public class MainActivity extends Activity {
 		media.title = "HLS 2";
 		media.description = "HLS 2";
 		media.thumbs = thumbs;
-
 
 		medias.add(media);
 
