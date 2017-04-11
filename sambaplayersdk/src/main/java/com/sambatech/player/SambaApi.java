@@ -399,8 +399,10 @@ public class SambaApi {
 
 				//else media.thumb = ContextCompat.getDrawable(activity, R.drawable.thumb);
 
-				if (playerConfig.has("theme") && !playerConfig.getString("theme").toLowerCase().equals("default"))
-					media.themeColor = (int)Long.parseLong("FF" + playerConfig.getString("theme").replaceAll("^#*", ""), 16);
+				if (playerConfig.has("theme") && !playerConfig.getString("theme").toLowerCase().equals("default")) {
+					media.themeColorHex = "#" + playerConfig.getString("theme");
+					media.themeColor = (int) Long.parseLong("FF" + playerConfig.getString("theme").replaceAll("^#*", ""), 16);
+				}
 
 				if (apiConfig.has("sttm")) {
 					JSONObject sttm = apiConfig.getJSONObject("sttm");

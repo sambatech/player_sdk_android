@@ -240,7 +240,7 @@ public class SambaPlayer extends FrameLayout {
 
 			int currenttime = (int)getCurrentTime();
 			CastQuery qs = new CastQuery(true,environment.toString().toLowerCase(),getContext().getString(R.string.cast_app_id),"cast:true",currenttime); //R.string.cast_app_id change url para prod ()eviroment.to string
-			CastObject 	castObject = new CastObject(media.title,media.id, (int) getDuration(),  "#72BE44", media.projectHash, qs, "", getContext().getString(R.string.base_url)) ;
+			CastObject 	castObject = new CastObject(media.title,media.id, (int) getDuration(),  media.themeColorHex, media.projectHash, qs, "", getContext().getString(R.string.base_url)) ;
 
 			if(media.drmRequest!=null){
 				String drmSessionId = media.drmRequest.getLicenseParam("SessionId");
@@ -276,10 +276,16 @@ public class SambaPlayer extends FrameLayout {
 					JSONObject jsonObject = null;
 					try {
 						jsonObject = new JSONObject(message);
-						float progress = jsonObject.getInt("progress");
-						float duration = jsonObject.getInt("duration");
-						lastPosition = (int)progress;
-						if(player!=null)player.setCurrentTime(progress,duration);
+						if(jsonObject.has("progress")&&jsonObject.has("duration")) {
+							float progress = jsonObject.getInt("progress");
+							float duration = jsonObject.getInt("duration");
+							lastPosition = (int) progress;
+							if (player != null) player.setCurrentTime(progress, duration);
+						}else if(jsonObject.has("type")) {
+							jsonObject = new JSONObject(message);
+							String type = jsonObject.getString("type");
+							if (type.equalsIgnoreCase("finish")) sambaCast.stopCasting();
+						}
 					} catch (JSONException e) {
 						e.printStackTrace();
 					}
@@ -785,7 +791,7 @@ public class SambaPlayer extends FrameLayout {
 		player.removePlaybackListener(playbackListener);
 		player.setPlayCallback(null);
 		player.setFullscreenCallback(null);
-		sambaCast.setEventListener(null);
+		if(sambaCast!=null)sambaCast.setEventListener(null);
 		player.release();
 
 		outputMenu = null;
