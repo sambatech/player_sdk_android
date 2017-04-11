@@ -1,5 +1,8 @@
 package com.sambatech.player.cast;
 
+import com.sambatech.player.R;
+import com.sambatech.player.model.SambaMediaRequest;
+
 import org.json.*;
 
 

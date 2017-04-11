@@ -1,6 +1,6 @@
 package com.sambatech.player.cast;
 
-import org.json.*;
+import org.json.JSONObject;
 
 
 public class CastQuery {
@@ -83,17 +83,15 @@ public class CastQuery {
                 /*",\"scriptURL\":\"" + scriptURL + '\"' +*/
                 ",\"castApi\":\"" + castApi + '\"' +
                 ",\"castAppId\":\"" + castAppId + '\"' +
-                ",\"logger\":\"" + logger + '\"' +
                 ",\"initialTime\":" + initialTime +
                 '}';
     }
 
-    public CastQuery(boolean html5, /*String scriptURL,*/ String castApi, String castAppId, String logger, double initialTime) {
+    public CastQuery(boolean html5, /*String scriptURL,*/ String castApi, String castAppId, double initialTime) {
         this.html5 = html5;
         //this.scriptURL = scriptURL;
         this.castApi = castApi;
         this.castAppId = castAppId;
-        this.logger = logger;
         this.initialTime = initialTime;
     }
 }

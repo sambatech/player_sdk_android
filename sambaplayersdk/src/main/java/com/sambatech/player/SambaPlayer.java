@@ -20,13 +20,8 @@ import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaMetadata;
-import com.google.android.gms.cast.MediaQueueItem;
-import com.google.android.gms.cast.MediaStatus;
-import com.google.android.gms.cast.framework.CastContext;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.ResultCallbacks;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
@@ -52,19 +47,13 @@ import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.player.plugins.Captions;
 import com.sambatech.player.plugins.PluginManager;
 import com.sambatech.player.utils.Helpers;
-import org.jose4j.json.internal.json_simple.parser.JSONParser;
-import org.jose4j.json.internal.json_simple.parser.ParseException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-
-import static android.content.ContentValues.TAG;
-import static com.google.android.gms.cast.MediaStatus.REPEAT_MODE_REPEAT_SINGLE;
 
 /**
  * Represents the player, responsible for managing media playback.
@@ -237,10 +226,33 @@ public class SambaPlayer extends FrameLayout {
 			movieMetadata.putString(MediaMetadata.KEY_TITLE,media.title);
 			movieMetadata.putString(MediaMetadata.KEY_SUBTITLE,media.title);
 
+            //Chromecast
+            String castAppId = "";
+            String baseCastURL = "";
 
-			int currenttime = (int)getCurrentTime();
-			CastQuery qs = new CastQuery(true,environment.toString().toLowerCase(),getContext().getString(R.string.cast_app_id),"cast:true",currenttime); //R.string.cast_app_id change url para prod ()eviroment.to string
-			CastObject 	castObject = new CastObject(media.title,media.id, (int) getDuration(),  media.themeColorHex, media.projectHash, qs, "", getContext().getString(R.string.base_url)) ;
+            switch (environment) {
+                case DEV:
+                    castAppId = getContext().getString(R.string.cast_app_id_dev);
+                    baseCastURL = getContext().getString(R.string.base_url_dev);
+                    break;
+                case STAGING:
+                    castAppId = getContext().getString(R.string.cast_app_id_staging);
+                    baseCastURL = getContext().getString(R.string.base_url_staging);
+                    break;
+                case PROD:
+                    castAppId = getContext().getString(R.string.cast_app_id);
+                    baseCastURL = getContext().getString(R.string.base_url);
+                    break;
+            }
+
+			int currentTime = (int)getCurrentTime();
+			CastQuery qs = new CastQuery(true, environment.toString().toLowerCase()
+					, castAppId
+                    , currentTime); 
+
+			CastObject castObject = new CastObject(media.title, media.id,
+					(int) getDuration(),media.themeColorHex,
+					media.projectHash, qs, "", baseCastURL) ;
 
 			if(media.drmRequest!=null){
 				String drmSessionId = media.drmRequest.getLicenseParam("SessionId");
