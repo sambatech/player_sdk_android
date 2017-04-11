@@ -791,7 +791,7 @@ public class SambaPlayer extends FrameLayout {
 		player.removePlaybackListener(playbackListener);
 		player.setPlayCallback(null);
 		player.setFullscreenCallback(null);
-		sambaCast.setEventListener(null);
+		if(sambaCast!=null)sambaCast.setEventListener(null);
 		player.release();
 
 		outputMenu = null;
