@@ -76,7 +76,17 @@ public class SambaMediaRequest {
 		LOCAL,
 		DEV,
 		STAGING,
-		PROD
+		PROD;
+
+
+		public static Environment stringToEnviroment (String string) {
+			try {
+				return valueOf(string);
+			} catch (Exception ex) {
+				// For error cases
+				return PROD;
+			}
+		}
 	}
 
 	public enum Protocol {

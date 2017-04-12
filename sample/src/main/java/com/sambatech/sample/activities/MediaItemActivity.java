@@ -1,7 +1,9 @@
 package com.sambatech.sample.activities;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -11,6 +13,7 @@ import android.widget.Toast;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.SambaApi;
+import com.sambatech.player.cast.CastOptionsProvider;
 import com.sambatech.player.cast.SambaCast;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaApiCallback;
@@ -162,6 +165,12 @@ public class MediaItemActivity extends Activity {
 		    activityMedia = EventBus.getDefault().removeStickyEvent(LiquidMedia.class);
 		    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
 	    }
+
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		SharedPreferences.Editor editor = sharedPreferences.edit();
+		editor.putString(CastOptionsProvider.CAST_APP_ID_ENVIROMENT_KEY, String.valueOf(SambaMediaRequest.Environment.STAGING));
+		editor.commit();
 
 	    // cast
 		sambaCast = new SambaCast(this);
