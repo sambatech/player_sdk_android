@@ -6,7 +6,7 @@
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/thumbPreview"
         android:layout_width="100dp"
-        android:layout_height="match_parent"
+        android:layout_height="80dp"
         android:layout_alignParentLeft="true"
         android:background="#488e44"
         android:padding="5dp"
@@ -23,9 +23,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="20sp"
+            android:fontFamily="sans-serif"
             android:text="Testando o título"
             android:textColor="@android:color/secondary_text_light"
-            android:layout_gravity="center"
+            android:layout_gravity="left"
+            android:textStyle="bold"
             android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
 
         <TextView
@@ -34,6 +36,8 @@
             android:layout_height="wrap_content"
             android:textSize="15sp"
             android:text="testando subtitulo"
+            android:layout_gravity="left"
+            android:fontFamily="sans-serif"
             android:textColor="@android:color/tertiary_text_light"
             android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
 

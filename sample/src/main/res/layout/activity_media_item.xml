@@ -30,6 +30,7 @@
         android:layout_below="@id/samba_player2"
         android:padding="@dimen/activity_vertical_margin"
         android:maxLines="2"
+        android:textStyle="bold"
         android:textSize="16sp"/>
 
     <TextView

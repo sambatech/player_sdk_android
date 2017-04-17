@@ -439,7 +439,7 @@ public class MediaItemActivity extends Activity {
 			Helpers.requestUrl(con, new Helpers.Callback() {
 				@Override
 				public void call(String response) {
-					status.setText(String.format("%s: %s", deauth ? "Deauthorized" : "Authorized", policySpinner.getSelectedItem()));
+                    status.setText(String.format("%s: %s", deauth ? "Deauthorized" : "Authorized", policySpinner.getSelectedItem()));
 				}
 			});
 		}
