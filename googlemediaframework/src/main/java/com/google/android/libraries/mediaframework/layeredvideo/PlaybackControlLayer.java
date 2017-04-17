@@ -1228,14 +1228,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				updatePlayPauseButton();
 				show(DEFAULT_TIMEOUT_MS);
 
-				int currentposition;
-				try {
-					currentposition = playerControl.getCurrentPosition();
-				} catch (NullPointerException e){
-					currentposition = 0;
-				}
+				if (interceptableListener != null)
+					interceptableListener.onSeek(playerControl != null ? playerControl.getCurrentPosition() : 0);
 
-				if(interceptableListener!=null)interceptableListener.onSeek(currentposition);
 				handler.sendEmptyMessage(SHOW_PROGRESS);
 			}
 		});

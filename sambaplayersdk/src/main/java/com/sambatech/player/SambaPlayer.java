@@ -227,9 +227,9 @@ public class SambaPlayer extends FrameLayout {
 			movieMetadata.putString(MediaMetadata.KEY_SUBTITLE,media.title);
 
             //Chromecast
-            String castAppId = "";
-            String castBaseURL = "";
-			String castApi = "";
+            String castAppId;
+            String castBaseURL;
+			String castApi;
 
             switch (environment) {
                 case DEV:
@@ -243,6 +243,7 @@ public class SambaPlayer extends FrameLayout {
                     castBaseURL = getContext().getString(R.string.base_url_staging);
                     break;
                 case PROD:
+	            default:
 					castApi = "prod";
                     castAppId = getContext().getString(R.string.cast_app_id);
                     castBaseURL = getContext().getString(R.string.base_url);
