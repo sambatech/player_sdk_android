@@ -11,6 +11,7 @@ public class CastQuery {
     private String castAppId;
     private String logger;
     private double initialTime;
+    private String captionTheme;
 
 
 	public CastQuery() {
@@ -25,7 +26,7 @@ public class CastQuery {
         this.castAppId = json.optString("castAppId");
         this.logger = json.optString("logger");
         this.initialTime = json.optDouble("initialTime");
-
+        this.captionTheme = json.optString("captionTheme");
     }
     
     public boolean getHtml5() {
@@ -76,6 +77,15 @@ public class CastQuery {
         this.initialTime = initialTime;
     }
 
+
+    public String getCaptionTheme() {
+        return captionTheme;
+    }
+
+    public void setCaptionTheme(String captionTheme) {
+        this.captionTheme = captionTheme;
+    }
+
     @Override
     public String toString() {
         return "{" +
@@ -83,15 +93,17 @@ public class CastQuery {
                 /*",\"scriptURL\":\"" + scriptURL + '\"' +*/
                 ",\"castApi\":\"" + castApi + '\"' +
                 ",\"castAppId\":\"" + castAppId + '\"' +
+                ",\"captionTheme\":\"" + captionTheme + '\"' +
                 ",\"initialTime\":" + initialTime +
                 '}';
     }
 
-    public CastQuery(boolean html5, /*String scriptURL,*/ String castApi, String castAppId, double initialTime) {
+    public CastQuery(boolean html5, /*String scriptURL,*/ String castApi, String castAppId, double initialTime, String captionTheme) {
         this.html5 = html5;
         //this.scriptURL = scriptURL;
         this.castApi = castApi;
         this.castAppId = castAppId;
         this.initialTime = initialTime;
+        this.captionTheme = captionTheme;
     }
 }

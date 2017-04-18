@@ -165,11 +165,11 @@ public class MediaItemActivity extends Activity {
 	    }
 
 	    // cast
-		CastOptionsProvider.configProfile(activityMedia.environment, this);
+		CastOptionsProvider.configProfile(this, activityMedia.environment);
 
 		// testing...
-		CastOptionsProvider.appId = "34817CC0";
-		CastOptionsProvider.playerUrl = "192.168.0.89:8000/";
+		CastOptionsProvider.appId = "411C092F";
+		CastOptionsProvider.playerUrl = "192.168.0.113:8000/";
 
 		sambaCast = new SambaCast(this);
 

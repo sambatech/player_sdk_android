@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringDef;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -234,7 +235,7 @@ public class SambaPlayer extends FrameLayout {
 			int currentTime = (int)getCurrentTime();
 
 			CastQuery qs = new CastQuery(true, CastOptionsProvider.environment.toString(),
-					CastOptionsProvider.appId, currentTime);
+					CastOptionsProvider.appId, currentTime, SambaPlayer.this.getCaption());
 
 			CastObject castObject = new CastObject(media.title, media.id,
 					(int) getDuration(),media.themeColorHex,
@@ -570,6 +571,16 @@ public class SambaPlayer extends FrameLayout {
 		if (plugin == null) return;
 
 		plugin.changeCaption(index);
+	}
+
+	public String getCaption() {
+		if (captionMenu == null) return null;
+
+		CaptionsAdapter adapter = (CaptionsAdapter) ((ListView) captionMenu.findViewById(R.id.menu_list)).getAdapter();
+		SambaMedia.Caption caption = (SambaMedia.Caption) adapter.getItem(adapter.currentIndex);
+
+		return String.format("[%s,ffcc00,42]", caption.language);
+
 	}
 
 	/**

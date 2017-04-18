@@ -29,7 +29,7 @@ public final class CastOptionsProvider implements OptionsProvider {
 
 	@Override
 	public CastOptions getCastOptions(Context context) {
-		configProfile(context, SambaMediaRequest.Environment.PROD);
+		configProfile(context, SambaMediaRequest.Environment.PROD, false);
 		/*List<String> supportedNamespaces = new ArrayList<>();
 		supportedNamespaces.add(CUSTOM_NAMESPACE);*/
 

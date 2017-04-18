@@ -89,6 +89,10 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 		});
 	}
 
+	public int getCurrentIndex() {
+		return _currentIndex;
+	}
+
 	// on data available
 	@Override
 	public void onLoad(@NonNull SambaPlayer player) {
