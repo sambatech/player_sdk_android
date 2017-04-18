@@ -1,25 +1,18 @@
 package com.sambatech.player.cast;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.framework.CastOptions;
 import com.google.android.gms.cast.framework.OptionsProvider;
 import com.google.android.gms.cast.framework.SessionProvider;
-import com.google.android.gms.cast.framework.media.CastMediaOptions;
 import com.google.android.gms.cast.framework.media.ImagePicker;
-import com.google.android.gms.cast.framework.media.MediaIntentReceiver;
-import com.google.android.gms.cast.framework.media.NotificationOptions;
 import com.google.android.gms.common.images.WebImage;
 import com.sambatech.player.R;
 import com.sambatech.player.model.SambaMediaRequest;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -28,37 +21,21 @@ import java.util.List;
 public final class CastOptionsProvider implements OptionsProvider {
 
 	public static final String CUSTOM_NAMESPACE = "urn:x-cast:com.sambatech.player";
-	public static final String CAST_APP_ID_ENVIROMENT_KEY = "CAST_APP_ID_ENVIROMENT_KEY";
 
 	// It can be configured before instantiating "SambaCast"
-	public static String applicationId = CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID;
+	public static String appId;
+	public static String playerUrl;
+	public static SambaMediaRequest.Environment environment;
 
 	@Override
 	public CastOptions getCastOptions(Context context) {
-		List<String> supportedNamespaces = new ArrayList<>();
-		supportedNamespaces.add(CUSTOM_NAMESPACE);
-
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
-		String enviromentString = sharedPreferences.getString(CAST_APP_ID_ENVIROMENT_KEY, SambaMediaRequest.Environment.PROD.toString());
-		SambaMediaRequest.Environment environment =  SambaMediaRequest.Environment.stringToEnviroment(enviromentString);
-
-		String castApplicationID;
-		switch (environment) {
-			case DEV:
-				castApplicationID = context.getString(R.string.cast_app_id_dev);
-				break;
-			case STAGING:
-				castApplicationID = context.getString(R.string.cast_app_id_staging);
-				break;
-			case PROD:
-			default:
-				castApplicationID = context.getString(R.string.cast_app_id);
-				break;
-		}
+		configProfile(context, SambaMediaRequest.Environment.PROD);
+		/*List<String> supportedNamespaces = new ArrayList<>();
+		supportedNamespaces.add(CUSTOM_NAMESPACE);*/
 
 		return new CastOptions.Builder()
-				//.setReceiverApplicationId(applicationId)
-				.setReceiverApplicationId(castApplicationID)
+				//.setReceiverApplicationId(appId)
+				.setReceiverApplicationId(appId)
 				//.setCastMediaOptions(mediaOptions)
 				.setResumeSavedSession(true)
 				.setStopReceiverApplicationWhenEndingSession(true)
@@ -72,7 +49,30 @@ public final class CastOptionsProvider implements OptionsProvider {
 		return null;
 	}
 
-	private static class ImagePickerImpl extends ImagePicker {
+	public static void configProfile(@NonNull Context context, @NonNull SambaMediaRequest.Environment environment) {
+		configProfile(context, environment, true);
+	}
+
+	public static void configProfile(@NonNull Context context, @NonNull SambaMediaRequest.Environment environment, boolean overwrite) {
+		if (CastOptionsProvider.environment == null || overwrite) CastOptionsProvider.environment = environment;
+
+		switch (environment) {
+			case DEV:
+				if (appId == null || overwrite) appId = context.getString(R.string.cast_app_id_dev);
+				if (playerUrl == null || overwrite) playerUrl = context.getString(R.string.base_url_dev);
+				break;
+			case STAGING:
+				if (appId == null || overwrite) appId = context.getString(R.string.cast_app_id_staging);
+				if (playerUrl == null || overwrite) playerUrl = context.getString(R.string.base_url_staging);
+				break;
+			case PROD:
+				if (appId == null || overwrite) appId = context.getString(R.string.cast_app_id_prod);
+				if (playerUrl == null || overwrite) playerUrl = context.getString(R.string.base_url_prod);
+				break;
+		}
+	}
+
+	/*private static class ImagePickerImpl extends ImagePicker {
 
 		@Override
 		public WebImage onPickImage(MediaMetadata mediaMetadata, int type) {
@@ -90,5 +90,5 @@ public final class CastOptionsProvider implements OptionsProvider {
 				}
 			}
 		}
-	}
+	}*/
 }

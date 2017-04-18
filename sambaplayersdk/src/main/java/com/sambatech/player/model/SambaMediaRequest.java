@@ -14,8 +14,8 @@ public class SambaMediaRequest {
 	public String streamName;
 	public String streamUrl;
 	public @NonNull String[] backupUrls = new String[]{};
-	public Environment environment = Environment.PROD;
-	public Protocol protocol = Protocol.HTTPS;
+	public @NonNull Environment environment = Environment.PROD;
+	public @NonNull Protocol protocol = Protocol.HTTPS;
 
 	/**
 	 * Represents a VOD media request.
@@ -73,19 +73,29 @@ public class SambaMediaRequest {
 	}
 
 	public enum Environment {
-		LOCAL,
-		DEV,
-		STAGING,
-		PROD;
+		LOCAL("localhost-8080"),
+		DEV("web4-7091"),
+		STAGING("staging"),
+		PROD("prod");
 
+		private final String value;
 
-		public static Environment stringToEnviroment (String string) {
+		Environment(String value) {
+			this.value = value;
+		}
+
+		public static Environment stringToEnvironment(String string) {
 			try {
 				return valueOf(string);
 			} catch (Exception ex) {
 				// For error cases
 				return PROD;
 			}
+		}
+
+		@Override
+		public String toString() {
+			return value;
 		}
 	}
 

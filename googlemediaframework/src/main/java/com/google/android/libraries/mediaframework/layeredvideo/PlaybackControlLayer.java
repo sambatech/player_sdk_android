@@ -1063,7 +1063,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	/**
 	 * Enables/Disables the specified controls.
 	 * @param state Whether to enable or disable the listed controls
-	 * @param names Controls names: "play", "playLarge", "fullscreen", "outputMenu", "seekbar", "time"
+	 * @param names Controls names: "play", "playLarge", "fullscreen", "outputMenu", "captionMenu", "seekbar", "time"
 	 */
 	public void setControlsVisible(final boolean state, final String ... names) {
 		if (controlsMap == null) {
@@ -1077,7 +1077,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 		int visibility = state ? View.VISIBLE : View.GONE;
 
-		// specific
+		// specifics
 		if (names.length > 0) {
 			for (String name : names)
 				if (controlsMap.containsKey(name))
@@ -1245,6 +1245,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		controlsMap.put("play", pausePlayButton);
 		controlsMap.put("fullscreen", fullscreenButton);
 		controlsMap.put("outputMenu", outputButton);
+		controlsMap.put("captionMenu", captionButton);
 		controlsMap.put("seekbar", seekBar);
 		controlsMap.put("topChrome", topChrome);
 		controlsMap.put("bottomChrome", bottomChrome);
@@ -1496,11 +1497,5 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				currentTime.setText(stringForTime((int) time * 1000));
 			}
 		}
-	}
-
-	public void setPlayingOnCast(){
-		pausePlayLargeButton.setImageResource(R.drawable.ic_action_pause_large);
-		pausePlayButton.setImageResource(R.drawable.ic_action_pause);
-		shouldBePlaying=true;
 	}
 }

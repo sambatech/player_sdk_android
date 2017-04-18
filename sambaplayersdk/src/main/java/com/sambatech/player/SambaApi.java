@@ -110,11 +110,11 @@ public class SambaApi {
 	 * Asynchronous request to the Samba Player API. Retrieves the media.
 	 */
 	private class RequestMediaTask extends AsyncTask<SambaMediaRequest, Void, SambaMedia> {
-		private SambaApiCallback listener;
+		private final SambaApiCallback listener;
 		private SambaMediaRequest request;
 		private String errorMsg;
 
-		public RequestMediaTask(SambaApiCallback listener) {
+		RequestMediaTask(SambaApiCallback listener) {
 			this.listener = listener;
 		}
 
@@ -135,12 +135,12 @@ public class SambaApi {
 					break;
 
 				case STAGING:
-					endpoint = normalizeProtocol(activity.getString(R.string.player_endpoint_staging));
+					endpoint = normalizeProtocol(activity.getString(R.string.player_endpoint_staging), request.protocol);
 					break;
 
 				case PROD:
 				default:
-					endpoint = normalizeProtocol(activity.getString(R.string.player_endpoint_prod));
+					endpoint = normalizeProtocol(activity.getString(R.string.player_endpoint_prod), request.protocol);
 			}
 
 			String url = endpoint + request.projectHash + (request.mediaId != null ? "/" + request.mediaId : "?" +
@@ -160,7 +160,7 @@ public class SambaApi {
 				if (scannerDelimited.hasNext()) {
 					String token = scannerDelimited.next();
 
-					token = token.substring(delimiter, token.length() - delimiter).replaceAll("\\-", "+").replaceAll("_", "/");
+					token = token.substring(delimiter, token.length() - delimiter).replaceAll("-", "+").replaceAll("_", "/");
 
 					switch (token.length()%4) {
 						case 0:
@@ -239,6 +239,7 @@ public class SambaApi {
 				JSONObject projectConfig = json.getJSONObject("project");
 				JSONArray ads = json.optJSONArray("advertisings");
 
+				media.request = request;
 				media.projectHash = projectConfig.getString("playerHash");
 				media.projectId = projectConfig.getInt("id");
 				media.title = json.getString("title");
@@ -294,7 +295,7 @@ public class SambaApi {
 							String label = output.getString("outputName");
 
 							SambaMedia.Output cOutput = new SambaMedia.Output();
-							cOutput.url = normalizeProtocol(output.getString("url"));
+							cOutput.url = normalizeProtocol(output.getString("url"), request.protocol);
 							cOutput.label = output.getString("outputName").startsWith("abr") ? "Auto" : output.getString("outputName");
 							cOutput.position = outputMap.get(output.getString("outputName").toLowerCase());
 
@@ -310,7 +311,7 @@ public class SambaApi {
 							// TODO: checar comportamento de projeto sem default output
 							if (!label.equalsIgnoreCase("_raw") && !output.isNull("url")) {
 								if (label.startsWith(defaultOutputCurrent)) {
-									media.url = normalizeProtocol(output.getString("url"));
+									media.url = normalizeProtocol(output.getString("url"), request.protocol);
 									cOutput.isDefault = true;
 								}
 
@@ -321,7 +322,7 @@ public class SambaApi {
 						// was it a valid iteration?
 						if (mediaOutputs.size() > 0) {
 							if (media.url == null)
-								media.url = normalizeProtocol(mediaOutputs.get(0).url);
+								media.url = normalizeProtocol(mediaOutputs.get(0).url, request.protocol);
 
 							media.outputs = mediaOutputs;
 							filledRules.add(media.type);
@@ -336,10 +337,10 @@ public class SambaApi {
 					final String reHds = "[\\w]+\\.f4m$";
 
 					// tries to fallback from HDS
-					media.url = normalizeProtocol(json.getJSONObject("liveOutput").getString("baseUrl").replaceAll(reHds, "playlist.m3u8"));
+					media.url = normalizeProtocol(json.getJSONObject("liveOutput").getString("baseUrl").replaceAll(reHds, "playlist.m3u8"), request.protocol);
 
 					for (int i = 0; i < request.backupUrls.length; ++i)
-						request.backupUrls[i] = normalizeProtocol(request.backupUrls[i].replaceAll(reHds, "playlist.m3u8"));
+						request.backupUrls[i] = normalizeProtocol(request.backupUrls[i].replaceAll(reHds, "playlist.m3u8"), request.protocol);
 
 					media.backupUrls = request.backupUrls;
 					media.isLive = true;
@@ -357,7 +358,7 @@ public class SambaApi {
 					/*Bitmap bmp = BitmapFactory.decodeStream(new URL(thumbs.getJSONObject(0).getString("url")).openStream());
 					bmp.setDensity(Bitmap.DENSITY_NONE);
 					media.thumb = new BitmapDrawable(activity.getResources(), bmp);*/
-					media.thumb = Drawable.createFromStream(new URL(normalizeProtocol(thumbs.getJSONObject(0).getString("url"))).openStream(), "Thumbnail");
+					media.thumb = Drawable.createFromStream(new URL(normalizeProtocol(thumbs.getJSONObject(0).getString("url"), request.protocol)).openStream(), "Thumbnail");
 				}
 
                 //Captions
@@ -383,7 +384,7 @@ public class SambaApi {
 	                    lang = caption.getJSONObject("fileInfo").getString("captionLanguage").toLowerCase().replace('_', '-');
 
 	                    captionArray.add(new SambaMedia.Caption(
-		                        normalizeProtocol(caption.getString("url")),
+		                        normalizeProtocol(caption.getString("url"), request.protocol),
 			                    langLookup.get(lang),
 			                    lang,
 		                        caption.getJSONObject("fileInfo").getBoolean("closedCaption"),
@@ -406,7 +407,7 @@ public class SambaApi {
 
 				if (apiConfig.has("sttm")) {
 					JSONObject sttm = apiConfig.getJSONObject("sttm");
-					media.sttmUrl = normalizeProtocol(sttm.optString("url", "http://sttm.sambatech.com.br/collector/__sttm.gif"));
+					media.sttmUrl = normalizeProtocol(sttm.optString("url", "http://sttm.sambatech.com.br/collector/__sttm.gif"), request.protocol);
 					media.sttmKey = sttm.optString("key", "ae810ebc7f0654c4fadc50935adcf5ec");
 				}
 
@@ -450,11 +451,10 @@ public class SambaApi {
 		}
 
         /**
-         * Replace http for https
+         * Replaces URL protocol with the informed one.
          */
-        private String normalizeProtocol(String url) {
-			String x = url.replaceAll("(https?)", request.protocol.toString().toLowerCase());
-            return url.replaceAll("(https?)", request.protocol.toString().toLowerCase());
+        private String normalizeProtocol(String url, SambaMediaRequest.Protocol protocol) {
+            return url.replaceAll("(https?)", protocol.toString().toLowerCase());
         }
 	}
 }

@@ -274,6 +274,13 @@ public class MainActivity extends Activity {
 		thumb.url = "http://pcgamingwiki.com/images/thumb/b/b3/DRM-free_icon.svg/120px-DRM-free_icon.svg.png";
 		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));*/
 
+		/*LiquidMedia m = new LiquidMedia();
+		m.title = "asdf!!";
+		m.ph = "daf83e859b6a2dbea51dc25215c64210";
+		m.id = "55cfc8cb2ca69d2a9596717bad2c2802";
+		m.environment = SambaMediaRequest.Environment.PROD;
+		mediaList.add(m);*/
+
 		// AXINOM
 		/*m = new LiquidMedia();
 		m.url = "https://media.axprod.net/TestVectors/v6-MultiDRM/Manifest_1080p.mpd";

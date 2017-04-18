@@ -10,8 +10,8 @@
     <string name="captions">Legendas</string>
     <string name="cast_app_id_dev">51DEA4E2</string>
     <string name="cast_app_id_staging">4D431E24</string>
-    <string name="cast_app_id">E9CFA23D</string>
+    <string name="cast_app_id_prod">E9CFA23D</string>
     <string name="base_url_dev">player.sambatech.com.br/v3_dev/</string>
     <string name="base_url_staging">player.sambatech.com.br/v3_staging/</string>
-    <string name="base_url">player.sambatech.com.br/v3/</string>
+    <string name="base_url_prod">player.sambatech.com.br/v3/</string>
 </resources>

@@ -495,7 +495,7 @@ public class SimpleVideoPlayer {
 		playbackControlLayer.setCurrentTime(currentTime,duration);
 	}
 
-	public void setPlayingOnCast(){
-		playbackControlLayer.setPlayingOnCast();
+	public void updatePlayPauseButton(boolean shouldBePlaying){
+		playbackControlLayer.updatePlayPauseButton(shouldBePlaying);
 	}
 }

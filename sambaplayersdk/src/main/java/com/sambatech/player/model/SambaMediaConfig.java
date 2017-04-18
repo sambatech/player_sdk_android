@@ -22,6 +22,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public String themeColorHex = "#72BE44";
 	public String sttmUrl;
 	public String sttmKey;
+	public SambaMediaRequest request;
 	public DrmRequest drmRequest;
 	public boolean blockIfRooted;
 
@@ -42,6 +43,7 @@ public class SambaMediaConfig extends SambaMedia {
 			themeColorHex = m.themeColorHex;
 			sttmKey = m.sttmKey;
 			sttmUrl = m.sttmUrl;
+			request = m.request;
 			drmRequest = m.drmRequest;
 		}
 	}

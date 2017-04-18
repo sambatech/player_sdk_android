@@ -1,9 +1,7 @@
 package com.sambatech.sample.activities;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -166,14 +164,13 @@ public class MediaItemActivity extends Activity {
 		    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
 	    }
 
-
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		SharedPreferences.Editor editor = sharedPreferences.edit();
-
-		editor.putString(CastOptionsProvider.CAST_APP_ID_ENVIROMENT_KEY, String.valueOf(activityMedia.environment));
-		editor.commit();
-
 	    // cast
+		CastOptionsProvider.configProfile(activityMedia.environment, this);
+
+		// testing...
+		CastOptionsProvider.appId = "34817CC0";
+		CastOptionsProvider.playerUrl = "192.168.0.89:8000/";
+
 		sambaCast = new SambaCast(this);
 
 		SambaEventBus.subscribe(playerListener);
@@ -267,11 +264,7 @@ public class MediaItemActivity extends Activity {
 
 	    //Instantiate a unique request. Params: playerHash, mediaId, streamName, streamUrl ( alternateLive on our browser version )
         SambaMediaRequest sbRequest = new SambaMediaRequest(liquidMedia.ph, liquidMedia.id, null, liquidMedia.streamUrl, liquidMedia.backupUrls);
-
-	    if (liquidMedia.environment != null)
-		    sbRequest.environment = liquidMedia.environment;
-
-
+		sbRequest.environment = liquidMedia.environment;
 
 	    if (liquidMedia.description != null || liquidMedia.shortDescription != null) {
 		    descView.setText(((liquidMedia.description != null) ? liquidMedia.description : "") +
@@ -302,8 +295,6 @@ public class MediaItemActivity extends Activity {
 
 		// enabling Chromecast on player
 		player.setSambaCast(sambaCast);
-		if(activityMedia.environment!=null)player.setEnvironment(activityMedia.environment);
-
 	    player.setMedia(media);
 
 		/*//Disable controls randomically
@@ -452,10 +443,8 @@ public class MediaItemActivity extends Activity {
 	void authorize() { authorize(false); }
 
 	private void destroy() {
-		if (!sambaCast.isCasting()){
-			SambaEventBus.unsubscribe(playerListener);
-			player.destroy();
-			finish();
-		}
+		SambaEventBus.unsubscribe(playerListener);
+		player.destroy();
+		finish();
 	}
 }
