@@ -169,7 +169,8 @@ public class MediaItemActivity extends Activity {
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		SharedPreferences.Editor editor = sharedPreferences.edit();
-		editor.putString(CastOptionsProvider.CAST_APP_ID_ENVIROMENT_KEY, String.valueOf(SambaMediaRequest.Environment.STAGING));
+
+		editor.putString(CastOptionsProvider.CAST_APP_ID_ENVIROMENT_KEY, String.valueOf(activityMedia.environment));
 		editor.commit();
 
 	    // cast

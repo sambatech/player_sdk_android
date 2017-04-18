@@ -233,7 +233,7 @@ public class SambaPlayer extends FrameLayout {
 
             switch (environment) {
                 case DEV:
-					castApi = "web-7091";
+					castApi = "web4-7091";
                     castAppId = getContext().getString(R.string.cast_app_id_dev);
                     castBaseURL = getContext().getString(R.string.base_url_dev);
                     break;

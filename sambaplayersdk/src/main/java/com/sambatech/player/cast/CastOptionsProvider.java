@@ -51,8 +51,6 @@ public final class CastOptionsProvider implements OptionsProvider {
 				castApplicationID = context.getString(R.string.cast_app_id_staging);
 				break;
 			case PROD:
-				castApplicationID = context.getString(R.string.cast_app_id);
-				break;
 			default:
 				castApplicationID = context.getString(R.string.cast_app_id);
 				break;
