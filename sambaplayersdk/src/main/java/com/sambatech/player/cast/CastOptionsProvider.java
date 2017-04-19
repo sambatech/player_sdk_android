@@ -3,13 +3,9 @@ package com.sambatech.player.cast;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.google.android.gms.cast.CastMediaControlIntent;
-import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.framework.CastOptions;
 import com.google.android.gms.cast.framework.OptionsProvider;
 import com.google.android.gms.cast.framework.SessionProvider;
-import com.google.android.gms.cast.framework.media.ImagePicker;
-import com.google.android.gms.common.images.WebImage;
 import com.sambatech.player.R;
 import com.sambatech.player.model.SambaMediaRequest;
 
@@ -49,10 +45,23 @@ public final class CastOptionsProvider implements OptionsProvider {
 		return null;
 	}
 
+	/**
+	 * Configures cast params according to a predefined profile.
+	 * Must be called BEFORE SambaCast is initialized.
+	 * @param context The activity context
+	 * @param environment The environment to match the profile values
+	 */
 	public static void configProfile(@NonNull Context context, @NonNull SambaMediaRequest.Environment environment) {
 		configProfile(context, environment, true);
 	}
 
+	/**
+	 * Configures cast params according to a predefined profile.
+	 * Must be called BEFORE SambaCast is initialized.
+	 * @param context The activity context
+	 * @param environment The environment to match the profile values
+	 * @param overwrite Overwrite existing configured values?
+	 */
 	public static void configProfile(@NonNull Context context, @NonNull SambaMediaRequest.Environment environment, boolean overwrite) {
 		if (CastOptionsProvider.environment == null || overwrite) CastOptionsProvider.environment = environment;
 

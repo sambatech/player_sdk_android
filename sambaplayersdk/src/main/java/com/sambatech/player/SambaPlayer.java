@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringDef;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -225,27 +224,23 @@ public class SambaPlayer extends FrameLayout {
 			// enabling hook for API and user actions
 			player.setInterceptableListener(interceptableListener);
 			player.setAutoHide(false);
-			player.setControlsVisible(false, "outputMenu", "captionMenu", "fullscreen");
+			player.setControlsVisible(false, "outputMenu", "captionMenu");
 
 			// converting SambaMedia to MediaInfo
 			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
 			movieMetadata.putString(MediaMetadata.KEY_TITLE, media.title);
 			movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, media.title);
 
-			int currentTime = (int)getCurrentTime();
-
 			CastQuery qs = new CastQuery(true, CastOptionsProvider.environment.toString(),
-					CastOptionsProvider.appId, currentTime, SambaPlayer.this.getCaption());
+					CastOptionsProvider.appId, (int)getCurrentTime(), SambaPlayer.this.getCaption());
 
 			CastObject castObject = new CastObject(media.title, media.id,
 					(int) getDuration(),media.themeColorHex,
 					media.projectHash, qs, "", CastOptionsProvider.playerUrl);
 
-			if(media.drmRequest!=null){
-				String drmSessionId = media.drmRequest.getLicenseParam("SessionId");
-				String drmTicket = media.drmRequest.getLicenseParam("Ticket");
-				castObject.setDrm(new CastDRM(drmSessionId,drmTicket));
-			}
+			if (media.drmRequest != null)
+				castObject.setDrm(new CastDRM(media.drmRequest.getLicenseParam("SessionId"),
+						media.drmRequest.getLicenseParam("Ticket")));
 
 			MediaInfo mediaInfo = new MediaInfo.Builder(castObject.toString())
 					.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
@@ -311,7 +306,9 @@ public class SambaPlayer extends FrameLayout {
 
 		@Override
 		public void onDisconnected() {
-			player.setControlsVisible(true, "outputMenu", "captionMenu", "fullscreen");
+			player.setControlsVisible(true,
+					outputMenu != null ? "outputMenu" : null,
+					captionMenu != null ? "captionMenu" : null);
 			player.setAutoHide(true);
 			player.seek(lastPosition*1000);
 			lastPosition = 0;
@@ -336,8 +333,6 @@ public class SambaPlayer extends FrameLayout {
 	private boolean enableControls;
 	private boolean _disabled;
 	private int _currentBackupIndex;
-
-	private SambaMediaRequest.Environment environment = SambaMediaRequest.Environment.PROD;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -652,20 +647,10 @@ public class SambaPlayer extends FrameLayout {
 		}
 
 		// no autoplay if there's ad because ImaWrapper takes control of the player
-		if(sambaCast!=null && sambaCast.isCasting()){
-			player = new SimpleVideoPlayer((Activity)getContext(), this,
-					new Video(media.url, videoType, media.drmRequest), media.title,
-					false, media.isAudioOnly);
-
-			setupCast();
-			castListener.onConnected(sambaCast.getCastSession());
-		}else{
-			player = new SimpleVideoPlayer((Activity)getContext(), this,
-					new Video(media.url, videoType, media.drmRequest), media.title,
-					media.adUrl == null || media.adUrl.isEmpty(), media.isAudioOnly);
-			setupCast();
-		}
-
+		player = new SimpleVideoPlayer((Activity)getContext(), this,
+				new Video(media.url, videoType, media.drmRequest), media.title,
+				(sambaCast == null || !sambaCast.isCasting()) && (media.adUrl == null || media.adUrl.isEmpty()),
+				media.isAudioOnly);
 
 		player.setSeekbarColor(media.themeColor);
 
@@ -681,12 +666,6 @@ public class SambaPlayer extends FrameLayout {
 			player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.ic_live),
 					getContext().getString(R.string.live), null);
 		}
-
-		/*player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.share),
-		        getContext().getString(R.string.share_facebook), new OnClickListener() {
-			@Override
-			public void onClick(View v) {}
-		});*/
 
 		player.addPlaybackListener(playbackListener);
 		player.setPlayCallback(playListener);
@@ -706,7 +685,7 @@ public class SambaPlayer extends FrameLayout {
 			{ enable(); }
 
 			@Override
-			public void onOrientationChanged( int orientation) {
+			public void onOrientationChanged(int orientation) {
 				if (Settings.System.getInt(getContext().getContentResolver(),
 						Settings.System.ACCELEROMETER_ROTATION, 0) == 0 || !autoFsMode || player == null)
 					return;
@@ -786,6 +765,17 @@ public class SambaPlayer extends FrameLayout {
 				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
 			}
 		}
+
+		/*player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.share),
+		        getContext().getString(R.string.share_facebook), new OnClickListener() {
+			@Override
+			public void onClick(View v) {}
+		});*/
+
+		setupCast();
+
+		if (sambaCast != null && sambaCast.isCasting())
+			castListener.onConnected(sambaCast.getCastSession());
 	}
 
 	private void destroyInternal() {
@@ -816,6 +806,7 @@ public class SambaPlayer extends FrameLayout {
 		player.release();
 
 		outputMenu = null;
+		captionMenu = null;
 		orientationEventListener = null;
 		player = null;
 		_hasStarted = false;
@@ -884,7 +875,7 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void setupCast() {
-		// if Chromecast is supported
+		// if Chromecast support is enabled
 		if (sambaCast == null || media.isLive || media.isAudioOnly) return;
 
 		sambaCast.setEventListener(castListener);

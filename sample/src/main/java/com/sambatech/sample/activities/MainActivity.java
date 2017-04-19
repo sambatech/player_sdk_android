@@ -275,10 +275,9 @@ public class MainActivity extends Activity {
 		ArrayList<LiquidMedia.Thumb> thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));*/
 
 		/*LiquidMedia m = new LiquidMedia();
-		m.title = "asdf!!";
-		m.ph = "daf83e859b6a2dbea51dc25215c64210";
-		m.id = "55cfc8cb2ca69d2a9596717bad2c2802";
-		m.environment = SambaMediaRequest.Environment.PROD;
+		m.title = "Test!";
+		m.url = "http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8";
+		m.type = "hls";
 		mediaList.add(m);*/
 
 		// AXINOM

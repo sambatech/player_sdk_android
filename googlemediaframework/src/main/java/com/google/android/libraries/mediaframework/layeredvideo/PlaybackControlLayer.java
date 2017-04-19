@@ -523,13 +523,12 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		// avoid re-adding the same button
 		if (hasActionButton(button)) return;
 
-		FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+		LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
 				ViewGroup.LayoutParams.WRAP_CONTENT,
-				ViewGroup.LayoutParams.WRAP_CONTENT
-		);
+				ViewGroup.LayoutParams.WRAP_CONTENT);
 
-		int margin = activity.getResources().getDisplayMetrics().densityDpi * 5;
-		layoutParams.setMargins(margin, 0, margin, 100);
+		int margin = (int)(activity.getResources().getDisplayMetrics().density*2);
+		layoutParams.setMargins(margin, 0, margin, 0);
 
 		button.setBackgroundColor(Color.TRANSPARENT);
 		button.setLayoutParams(layoutParams);
