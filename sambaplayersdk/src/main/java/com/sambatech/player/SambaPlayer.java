@@ -885,7 +885,7 @@ public class SambaPlayer extends FrameLayout {
 
 	private void setupCast() {
 		// if Chromecast is supported
-		if (sambaCast == null) return;
+		if (sambaCast == null || media.isLive || media.isAudioOnly) return;
 
 		sambaCast.setEventListener(castListener);
 
