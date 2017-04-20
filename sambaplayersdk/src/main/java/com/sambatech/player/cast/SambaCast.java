@@ -21,7 +21,7 @@ import java.io.IOException;
 
 /**
  * It must have a 1-to-1 relationship with activities to avoid memory leakage.
- * It could not be a Singleton for instance, static objects cannot hold Context references
+ * It could not be a Singleton, for example, static objects cannot hold Context references
  * (like widgets, resources, etc.), they must die together with their activity.
  *
  * There are some steps to integrate:
@@ -167,7 +167,9 @@ public final class SambaCast {
 		sessionManager.removeSessionManagerListener(sessionManagerListener, CastSession.class);
 	}
 
-
+	/**
+	 * Sends a pause message to the remote player.
+	 */
 	public void pauseCast(){
 		if(hasMediaSession(true)) {
 			sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, "{\"type\": \"pause\"}").setResultCallback(new ResultCallbacks<Status>() {
@@ -184,6 +186,9 @@ public final class SambaCast {
 		}
 	}
 
+	/**
+	 * Sends a play message to the remote player.
+	 */
 	public void playCast(){
 		if(hasMediaSession(true)) {
 			sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, "{\"type\": \"play\"}").setResultCallback(new ResultCallbacks<Status>() {
@@ -201,8 +206,12 @@ public final class SambaCast {
 
 		//seekTo(0);
 	}
+
+	/**
+	 * Sends a seek message to the remote player.
+	 */
 	public void seekTo(int posisiton){
-		String seekRequest = String.format("{\"type\": \"seek\", \"data\": %d }", posisiton/1000);
+		String seekRequest = String.format("{\"type\": \"seek\", \"data\": %s }", posisiton/1000);
 		if(hasMediaSession(true)) {
 			if(hasMediaSession(true)) {
 				sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, seekRequest).setResultCallback(new ResultCallbacks<Status>() {
@@ -220,10 +229,13 @@ public final class SambaCast {
 		}
 	}
 
+	/**
+	 * Enables/Disables listening for remote progress event.
+	 */
 	public void registerDeviceForProgress(boolean register){
-		String resgiterRequest = String.format("{\"type\": \"registerForProgressUpdate\", \"data\": %s }", register==true? "true" : "false");
+		String registerRequest = String.format("{\"type\": \"registerForProgressUpdate\", \"data\": %s }", register);
 		if(hasMediaSession(true)) {
-				sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, resgiterRequest).setResultCallback(new ResultCallbacks<Status>() {
+				sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, registerRequest).setResultCallback(new ResultCallbacks<Status>() {
 					@Override
 					public void onSuccess(@NonNull Status status) {
 						Log.i("message", "Message Sent OK: namespace:" + CastOptionsProvider.CUSTOM_NAMESPACE + " message:" + CastOptionsProvider.CUSTOM_NAMESPACE);
@@ -237,10 +249,16 @@ public final class SambaCast {
 		}
 	}
 
+	/**
+	 * Sends a stop message to the remote player.
+	 */
 	public void stopCasting(){
         sessionManager.endCurrentSession(true);
     }
 
+	/**
+	 * Whether remote player is casting content or not.
+	 */
     public boolean isCasting(){
 		if(sessionManager!=null&&sessionManager.getCurrentCastSession()!=null) {
 			return sessionManager.getCurrentCastSession().isConnected() || sessionManager.getCurrentCastSession().isConnecting();
@@ -249,7 +267,9 @@ public final class SambaCast {
 		}
 	}
 
-
+	/**
+	 * Sends a mute setup message to the remote player.
+	 */
 	public void setMute(boolean mute){
 		try {
 			sessionManager.getCurrentCastSession().setMute(mute);
@@ -258,6 +278,9 @@ public final class SambaCast {
 		}
 	}
 
+	/**
+	 * Sends a volume setup message to the remote player.
+	 */
 	public void setVolume(double volume){
 		//sessionManager.getCurrentCastSession().getRemoteMediaClient().setStreamVolume(volume);
 		try {
@@ -267,7 +290,17 @@ public final class SambaCast {
 		}
 	}
 
-	public boolean hasMediaSession(boolean validateCastConnectingState) {
+	/**
+	 * Returns a cast session.
+	 */
+	public CastSession getCastSession(){
+		return sessionManager.getCurrentCastSession();
+	}
+
+	/**
+	 * Whether a session exists or not.
+	 */
+	private boolean hasMediaSession(boolean validateCastConnectingState) {
 		if (sessionManager.getCurrentCastSession() == null) {
 			return false;
 		}
@@ -279,10 +312,6 @@ public final class SambaCast {
 			}
 		}
 		return isCastSessionValid;
-	}
-
-	public CastSession getCastSession(){
-		return sessionManager.getCurrentCastSession();
 	}
 
 }
