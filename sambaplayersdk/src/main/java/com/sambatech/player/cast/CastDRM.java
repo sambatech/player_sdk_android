@@ -2,10 +2,6 @@ package com.sambatech.player.cast;
 
 import org.json.JSONObject;
 
-/**
- * Created by luizbyrro on 11/04/17.
- */
-
 public class CastDRM {
 
     private String sessionId;

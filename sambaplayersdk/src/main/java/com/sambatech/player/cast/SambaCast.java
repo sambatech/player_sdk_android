@@ -20,15 +20,17 @@ import com.sambatech.player.event.SambaCastListener;
 import java.io.IOException;
 
 /**
+ * Manages Chromecast integration.
+ *
  * It must have a 1-to-1 relationship with activities to avoid memory leakage.
  * It could not be a Singleton, for example, static objects cannot hold Context references
- * (like widgets, resources, etc.), they must die together with their activity.
+ * (like widgets, resources, etc.), they must die together with their activity.<br><br>
  *
- * There are some steps to integrate:
+ * There are some steps to integrate:<br><br>
  *
- * 1. Initialize inside "onCreate" state
- * 2. Notify "onResume" state
- * 3. Notify "onPause" state
+ * 1. Initialize inside "onCreate" state<br>
+ * 2. Notify "onResume" state<br>
+ * 3. Notify "onPause" state<br>
  * 4. Pass the instance to the SambaPlayer
  *
  * @author Leandro Zanol on 23/03/17

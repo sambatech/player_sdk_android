@@ -44,7 +44,6 @@ import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
-import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.player.plugins.Captions;
 import com.sambatech.player.plugins.PluginManager;
@@ -340,7 +339,7 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	/**
-	 * Defines/overwrites isDefault media.
+	 * Defines/overwrites current media.
 	 * @param media The media to be played.
 	 */
 	public void setMedia(@NonNull SambaMedia media) {
@@ -362,7 +361,7 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	/**
-	 * Retrieves the isDefault media data in use.
+	 * Retrieves the current media in use.
 	 *
 	 * Always returns a non null media data after LOAD event has been dispatched,
 	 * but before its dispatch null checks must be made.
@@ -485,8 +484,8 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	/**
-	 * Gets the isDefault time on the video.
-	 * @return Float isDefault time
+	 * Gets the current time on the video.
+	 * @return Float Current time
 	 */
 	public float getCurrentTime() {
 		return player != null ? player.getCurrentPosition()/1000f : 0;
@@ -526,7 +525,7 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	/**
-	 * Changes the isDefault output.
+	 * Changes the current output.
 	 * @param output SambaMedia.Output indicating the new output
 	 */
 	public void changeOutput(@NonNull SambaMedia.Output output) {

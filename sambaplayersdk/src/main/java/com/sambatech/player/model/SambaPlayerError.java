@@ -56,7 +56,7 @@ public enum SambaPlayerError {
 	}
 
 	/**
-	 * Replaces default exception message for isDefault instance.
+	 * Replaces default exception message for current instance.
 	 * @param code The exception code
 	 * @param message The message to be replaced
 	 * @param critical Whether exception is critical (destroys player) or not
@@ -72,7 +72,7 @@ public enum SambaPlayerError {
 	}
 
 	/**
-	 * Replaces default exception message for isDefault instance.
+	 * Replaces default exception message for current instance.
 	 * @param code The exception code
 	 * @param message The message to be replaced
 	 * @param critical Whether exception is critical (destroys player) or not
@@ -83,7 +83,7 @@ public enum SambaPlayerError {
 	}
 
 	/**
-	 * Replaces default exception message for isDefault instance.
+	 * Replaces default exception message for current instance.
 	 * @param code The exception code
 	 * @param message The message to be replaced
 	 * @return The same instance reference

@@ -5,7 +5,7 @@ import android.util.AttributeSet;
 
 /**
  * Alias for new player class.
- * @deprecated Please use <code>SambaPlayer</code> class.
+ * @deprecated Please use <code>SambaPlayer</code> class instead.
  */
 public class SambaPlayerView extends SambaPlayer {
 

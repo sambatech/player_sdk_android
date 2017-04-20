@@ -53,7 +53,7 @@ public class SambaApi {
 	/**
 	 * SambaApi constructor
 	 *
-	 * @param activity Reference to the isDefault Activity
+	 * @param activity Reference to the current Activity
 	 * @param accessToken Configured SambaTech access token (ignored for now, pass an empty string or null)
 	 */
 	public SambaApi(Activity activity, String accessToken) {
