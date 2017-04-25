@@ -37,6 +37,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -334,9 +335,15 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
     private ImageButton captionButton;
 
 	/**
+	 * Loading Progress bar
+	 */
+	private ProgressBar loadingProgress;
+
+	/**
 	 * This callback is triggered when going to fullscreen and returning from fullscreen.
 	 */
 	private FullscreenCallback fullscreenCallback;
+
 
 	private PlayCallback playCallback;
 	/**
@@ -451,6 +458,11 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private FrameLayout view;
 
 	/**
+	 * Loading layout
+	 */
+	private FrameLayout loadingSpinner;
+
+	/**
 	 * The output menu.
 	 */
 	private Dialog outputMenu;
@@ -559,6 +571,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		LayoutInflater inflater = layerManager.getActivity().getLayoutInflater();
 
 		view = (FrameLayout) inflater.inflate(R.layout.playback_control_layer, null);
+
+		loadingSpinner = (FrameLayout) inflater.inflate(R.layout.loading_spinner, null);
+        layerManager.getContainer().addView(loadingSpinner);
+
 		setupView();
 
 		originalContainerLayoutParams = layerManager
@@ -830,6 +846,13 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	public void hideMainControls() {
 		pausePlayLargeButton.setVisibility(View.GONE);
 	}
+
+    /**
+     * Shows the bottom chrome ( play, seekbar, output, fullscreen )
+     */
+    public void showMainControls() {
+        pausePlayLargeButton.setVisibility(View.VISIBLE);
+    }
 
 	/**
 	 * Shows the top chrome (which displays the logo, title, and action buttons).
@@ -1128,6 +1151,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		topChrome = (LinearLayout) view.findViewById(R.id.top_chrome);
 		bottomChrome = (LinearLayout) view.findViewById(R.id.bottom_chrome);
 		actionButtonsContainer = (LinearLayout) view.findViewById(R.id.actions_container);
+		loadingProgress = (ProgressBar) loadingSpinner.findViewById(R.id.loadingLarge);
 
 		outputButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -1496,5 +1520,13 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				currentTime.setText(stringForTime((int) time * 1000));
 			}
 		}
+	}
+
+	public void setLoadingProgressTheme(int color) {
+        loadingProgress.getIndeterminateDrawable().setColorFilter(color, android.graphics.PorterDuff.Mode.MULTIPLY);
+    }
+
+	public void setLoadingProgress(int visibility) {
+		loadingProgress.setVisibility(visibility);
 	}
 }

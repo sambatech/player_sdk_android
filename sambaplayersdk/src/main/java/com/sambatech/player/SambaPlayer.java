@@ -83,6 +83,7 @@ public class SambaPlayer extends FrameLayout {
                         dispatchPlay();
                     }
                     else dispatchPause();
+					player.hideLoading();
 					break;
 				case ExoPlayer.STATE_ENDED:
 					if (!playWhenReady)
@@ -93,7 +94,12 @@ public class SambaPlayer extends FrameLayout {
 					seek(0);
 					SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
 					_hasFinished = true;
+					player.hideLoading();
 					break;
+				case ExoPlayer.STATE_BUFFERING:
+					player.showLoading();
+					break;
+
 			}
 		}
 
@@ -652,6 +658,7 @@ public class SambaPlayer extends FrameLayout {
 				media.isAudioOnly);
 
 		player.setSeekbarColor(media.themeColor);
+		player.setLoadingTheme(media.themeColor);
 
 		// Move the content player's surface layer to the background so that the ad player's surface
 		// layer can be overlaid on top of it during ad playback.

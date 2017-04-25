@@ -498,4 +498,21 @@ public class SimpleVideoPlayer {
 	public void updatePlayPauseButton(boolean shouldBePlaying){
 		playbackControlLayer.updatePlayPauseButton(shouldBePlaying);
 	}
+
+	/**
+	 * Progress
+	 */
+	public void setLoadingTheme(int color) {
+		playbackControlLayer.setLoadingProgressTheme(color);
+	}
+
+	public void showLoading() {
+		playbackControlLayer.hideMainControls();
+		playbackControlLayer.setLoadingProgress(View.VISIBLE);
+	}
+
+	public void hideLoading() {
+		playbackControlLayer.showMainControls();
+		playbackControlLayer.setLoadingProgress(View.GONE);
+	}
 }
