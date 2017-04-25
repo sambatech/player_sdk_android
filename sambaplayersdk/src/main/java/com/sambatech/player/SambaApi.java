@@ -331,7 +331,6 @@ public class SambaApi {
 
 					if (media.outputs != null)
 						sortOutputs(media.outputs);
-
 				}
 				else if (json.has("liveOutput")) {
 					final String reHds = "[\\w]+\\.f4m$";
@@ -350,6 +349,14 @@ public class SambaApi {
 						media.type = "hls";
 					else if (media.url.contains(".mpd"))
 						media.type = "dash";
+				}
+
+				// adding default retries
+				if (media.backupUrls.length == 0) {
+					media.backupUrls = new String[Integer.parseInt(activity.getString(R.string.retries))];
+
+					for (int i = media.backupUrls.length; i-- > 0; )
+						media.backupUrls[i] = media.url;
 				}
 
 				JSONArray thumbs = json.optJSONArray("thumbnails");

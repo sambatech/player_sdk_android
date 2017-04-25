@@ -14,13 +14,14 @@ public class SambaMedia {
 
 	public String title = "";
 	public String url;
-	public @NonNull String[] backupUrls = new String[]{};
 	public String type = "";
 	public String adUrl;
-    public Drawable thumb;
-    public float duration = 0f;
+	public Drawable thumb;
+	public float initialTime = 0f;
+	public float duration = 0f;
 	public boolean isLive;
 	public boolean isAudioOnly;
+	public @NonNull String[] backupUrls = new String[]{};
 	public ArrayList<Output> outputs;
 	public ArrayList<Caption> captions;
 	public @NonNull CaptionsConfig captionsConfig = new CaptionsConfig();
@@ -32,13 +33,16 @@ public class SambaMedia {
 		type = media.type;
 		title = media.title;
 		url = media.url;
-		backupUrls = media.backupUrls;
 		adUrl = media.adUrl;
+		thumb = media.thumb;
+		initialTime = media.initialTime;
+		duration = media.duration;
 		isLive = media.isLive;
 		isAudioOnly = media.isAudioOnly;
+		backupUrls = media.backupUrls;
 		outputs = media.outputs;
-		thumb = media.thumb;
 		captions = media.captions;
+		captionsConfig = media.captionsConfig;
 		drmToken = media.drmToken;
 	}
 

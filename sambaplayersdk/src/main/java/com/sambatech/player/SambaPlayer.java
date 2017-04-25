@@ -55,6 +55,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Represents the player, responsible for managing media playback.
@@ -74,10 +75,16 @@ public class SambaPlayer extends FrameLayout {
 					if (playWhenReady) {
                         if (!_hasStarted) {
                             _hasStarted = true;
+	                        _currentBackupIndex = 0;
+
+	                        destroyError();
                             SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
 
 	                        //Show controls
 							player.show();
+
+	                        if (media.initialTime > 0)
+	                        	seek(media.initialTime);
                         }
 
                         dispatchPlay();
@@ -98,26 +105,50 @@ public class SambaPlayer extends FrameLayout {
 		}
 
 		@Override
-		public void onError(Exception e) {
-			Log.i("SambaPlayer", "Error: " + media, e);
-
-			String msg = e.getCause() instanceof UnsupportedDrmException ? "You're not allowed to "
-					+ (media.isAudioOnly ? "listen to this audio" : "watch this video")
-					: e.getMessage();
-			final boolean canFallback =  media.backupUrls.length - _currentBackupIndex > 0;
+		public void onError(final Exception e) {
+			Log.d("SambaPlayer", "Error: " + media, e);
 
 			// check whether it can fallback or fail (changes error criticity) otherwise
-			if (canFallback) {
+			if (_currentBackupIndex < media.backupUrls.length) {
 				final String url = media.backupUrls[_currentBackupIndex++];
+				final AtomicInteger secs = new AtomicInteger(8);
+				final Timer timer = new Timer();
 
-				msg = String.format("Failed to load %s, falling back to %s", media.url, url);
+				if (media.initialTime == 0f)
+					media.initialTime = getCurrentTime();
+
 				media.url = url;
 
 				destroyInternal();
-				create(false);
+
+				timer.scheduleAtFixedRate(new TimerTask() {
+					@Override
+					public void run() {
+						((Activity)SambaPlayer.this.getContext()).runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								if (secs.get() == 0) {
+									timer.cancel();
+									timer.purge();
+									create(false);
+								}
+
+								dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
+										secs.get() > 0 ? String.format("Reconnecting in %ss", secs) : "Connecting...",
+										false, e));
+
+								secs.decrementAndGet();
+							}
+						});
+					}
+				}, 0, 1000);
+				return;
 			}
 
-			dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(), msg, !canFallback));
+			dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
+					e.getCause() instanceof UnsupportedDrmException ? "You're not allowed to "
+						+ (media.isAudioOnly ? "listen to this audio" : "watch this video")
+						: "Oops! Please try again later..."));
 		}
 
 		@Override
@@ -488,7 +519,7 @@ public class SambaPlayer extends FrameLayout {
 	 * @return Float Current time
 	 */
 	public float getCurrentTime() {
-		return player != null ? player.getCurrentPosition()/1000f : 0;
+		return player != null ? player.getCurrentPosition()/1000f : 0f;
 	}
 
 	/**
@@ -604,7 +635,7 @@ public class SambaPlayer extends FrameLayout {
 
 		if (error != null)
 			showError(error);
-		else destroyScreen();
+		else destroyError();
 	}
 
 	/* End Player API */
@@ -814,20 +845,22 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void showError(@NonNull SambaPlayerError error) {
-		destroyScreen();
-		_errorScreen = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
-		TextView msg = (TextView) _errorScreen.findViewById(R.id.error_message);
+		if (_errorScreen == null)
+			_errorScreen = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
 
-		msg.setText(error.toString());
+		TextView textView = (TextView) _errorScreen.findViewById(R.id.error_message);
+		textView.setText(error.toString());
 
-		// removes images if audio player
-		if (media.isAudioOnly)
-			msg.setCompoundDrawables(null, null, null, null);
+		if (_errorScreen.getParent() == null) {
+			// removes images if audio player
+			if (media.isAudioOnly)
+				textView.setCompoundDrawables(null, null, null, null);
 
-		addView(_errorScreen);
+			addView(_errorScreen);
+		}
 	}
 
-	private void destroyScreen() {
+	private void destroyError() {
 		if (_errorScreen == null) return;
 		removeView(_errorScreen);
 		_errorScreen = null;
@@ -871,6 +904,7 @@ public class SambaPlayer extends FrameLayout {
 
 		if (error.isCritical())
 			destroy(error);
+		else showError(error);
 	}
 
 	private void setupCast() {
