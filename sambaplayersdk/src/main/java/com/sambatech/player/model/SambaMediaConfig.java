@@ -25,6 +25,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public SambaMediaRequest request;
 	public DrmRequest drmRequest;
 	public boolean blockIfRooted;
+	public int retriesTotal = 3;
 
 	public SambaMediaConfig() {}
 
@@ -41,10 +42,13 @@ public class SambaMediaConfig extends SambaMedia {
 			sessionId = m.sessionId;
 			themeColor = m.themeColor;
 			themeColorHex = m.themeColorHex;
-			sttmKey = m.sttmKey;
 			sttmUrl = m.sttmUrl;
+			sttmKey = m.sttmKey;
 			request = m.request;
 			drmRequest = m.drmRequest;
+			// TODO: Reabilitar após correção (https://github.com/sambatech-desenv/player/issues/589)
+			//blockIfRooted = m.blockIfRooted;
+			retriesTotal = m.retriesTotal;
 		}
 	}
 

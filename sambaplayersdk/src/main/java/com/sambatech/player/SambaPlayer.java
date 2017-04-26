@@ -75,7 +75,7 @@ public class SambaPlayer extends FrameLayout {
 					if (playWhenReady) {
                         if (!_hasStarted) {
                             _hasStarted = true;
-	                        _currentBackupIndex = 0;
+	                        _currentRetryIndex = 0;
 
 	                        destroyError();
                             SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
@@ -114,23 +114,37 @@ public class SambaPlayer extends FrameLayout {
 		public void onError(final Exception e) {
 			Log.d("SambaPlayer", "Error: " + media, e);
 
-			// check whether it can fallback or fail (changes error criticity) otherwise
-			if (_currentBackupIndex < media.backupUrls.length) {
-				final String url = media.backupUrls[_currentBackupIndex++];
+			// URL not found (or cannot reach server)
+			if (Helpers.isNetworkAvailable(getContext())) {
+				// check whether it can fallback (changes error criticity) or fail otherwise
+				if (_currentBackupIndex < media.backupUrls.length) {
+					final String url = media.backupUrls[_currentBackupIndex++];
+
+					if (media.initialTime == 0f)
+						media.initialTime = getCurrentTime();
+
+					media.url = url;
+
+					destroyInternal();
+					create(false);
+					dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(), "Connecting...", false, e));
+					return;
+				}
+			}
+			// no network connection
+			else if (_currentRetryIndex++ < media.retriesTotal) {
 				final AtomicInteger secs = new AtomicInteger(8);
 				final Timer timer = new Timer();
 
 				if (media.initialTime == 0f)
 					media.initialTime = getCurrentTime();
 
-				media.url = url;
-
 				destroyInternal();
 
 				timer.scheduleAtFixedRate(new TimerTask() {
 					@Override
 					public void run() {
-						((Activity)SambaPlayer.this.getContext()).runOnUiThread(new Runnable() {
+						((Activity) SambaPlayer.this.getContext()).runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
 								if (secs.get() == 0) {
@@ -369,6 +383,7 @@ public class SambaPlayer extends FrameLayout {
 	private boolean enableControls;
 	private boolean _disabled;
 	private int _currentBackupIndex;
+	private int _currentRetryIndex;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
 		super(context, attrs);

@@ -1,5 +1,8 @@
 package com.sambatech.player.utils;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 
 import com.sambatech.player.model.SambaMedia;
@@ -40,12 +43,19 @@ public final class Helpers {
 		return s.toString();
 	}
 
-	private static String getSessionComponent() {
-		return Integer.toHexString((int)((Math.random() + 1) * 0x10000)).substring(1);
-	}
-
 	public static boolean isDeviceRooted() {
 		return RootUtil.isDeviceRooted();
+	}
+
+	public static boolean isNetworkAvailable(Context context) {
+		ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+
+		return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+	}
+
+	private static String getSessionComponent() {
+		return Integer.toHexString((int)((Math.random() + 1) * 0x10000)).substring(1);
 	}
 
 	//Order outputs

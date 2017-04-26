@@ -311,7 +311,7 @@ public class SambaApi {
 							// TODO: checar comportamento de projeto sem default output
 							if (!label.equalsIgnoreCase("_raw") && !output.isNull("url")) {
 								if (label.startsWith(defaultOutputCurrent)) {
-									media.url = normalizeProtocol(output.getString("url"), request.protocol);
+									media.url = "https://asdfoijwe.asdfoij.com/sdf.m3u8";//normalizeProtocol(output.getString("url"), request.protocol);
 									cOutput.isDefault = true;
 								}
 
@@ -349,14 +349,6 @@ public class SambaApi {
 						media.type = "hls";
 					else if (media.url.contains(".mpd"))
 						media.type = "dash";
-				}
-
-				// adding default retries
-				if (media.backupUrls.length == 0) {
-					media.backupUrls = new String[Integer.parseInt(activity.getString(R.string.retries))];
-
-					for (int i = media.backupUrls.length; i-- > 0; )
-						media.backupUrls[i] = media.url;
 				}
 
 				JSONArray thumbs = json.optJSONArray("thumbnails");

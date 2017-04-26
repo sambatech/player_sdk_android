@@ -14,5 +14,4 @@
     <string name="base_url_dev">player.sambatech.com.br/v3_dev/</string>
     <string name="base_url_staging">player.sambatech.com.br/v3_staging/</string>
     <string name="base_url_prod">player.sambatech.com.br/v3/</string>
-    <string name="retries">3</string>
 </resources>
