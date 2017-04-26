@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
@@ -306,7 +307,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * Derived from the {@link Color} class (ex {@link Color#RED}), this is the color of the seekbar_progress
 	 * track and thumb.
 	 */
-	private int seekbarColor;
+	private int themeColor;
 
 	/**
 	 * Displays the elapsed time into video.
@@ -588,7 +589,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		controlColor = DEFAULT_CONTROL_TINT_COLOR;
 		// Since the seek bar doens't use image assets, we can't use TRANSPARENT as the default tint
 		// because that would make it invisible, so instead we use the default text tint (White).
-		seekbarColor = DEFAULT_TEXT_COLOR;
+		themeColor = DEFAULT_TEXT_COLOR;
 
 		if (logoDrawable != null) {
 			logoImageView.setImageDrawable(logoDrawable);
@@ -942,8 +943,8 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * Sets the color of the seekbar_progress.
 	 * @param color a color derived from the @{link Color} class (ex. {@link Color#RED}).
 	 */
-	public void setSeekbarColor(int color) {
-		this.seekbarColor = color;
+	public void setThemeColor(int color) {
+		this.themeColor = color;
 		if (playbackControlRootView != null) {
 			updateColors();
 		}
@@ -1407,8 +1408,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 		fullscreenButton.setColorFilter(controlColor);
 		pausePlayLargeButton.setColorFilter(controlColor);*/
-		((LayerDrawable)seekBar.getProgressDrawable()).findDrawableByLayerId(android.R.id.progress).setColorFilter(seekbarColor, PorterDuff.Mode.ADD);
-		//seekBar.getThumb().setColorFilter(seekbarColor, PorterDuff.Mode.SRC_ATOP);
+		((LayerDrawable)seekBar.getProgressDrawable()).findDrawableByLayerId(android.R.id.progress).setColorFilter(themeColor, PorterDuff.Mode.ADD);
+		loadingProgress.getIndeterminateDrawable().mutate().setColorFilter(themeColor, PorterDuff.Mode.MULTIPLY);
+
+		//seekBar.getThumb().setColorFilter(themeColor, PorterDuff.Mode.SRC_ATOP);
 
 		// Hide the thumb drawable if the SeekBar is disabled
 		if (canSeek) {
@@ -1521,10 +1524,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			}
 		}
 	}
-
-	public void setLoadingProgressTheme(int color) {
-        loadingProgress.getIndeterminateDrawable().setColorFilter(color, android.graphics.PorterDuff.Mode.MULTIPLY);
-    }
 
 	public void setLoadingProgress(int visibility) {
 		loadingProgress.setVisibility(visibility);

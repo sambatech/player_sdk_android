@@ -379,8 +379,8 @@ public class SimpleVideoPlayer {
 	 * @param color a color derived from the @{link Color} class
 	 *              (ex. {@link android.graphics.Color#RED}).
 	 */
-	public void setSeekbarColor(int color) {
-		playbackControlLayer.setSeekbarColor(color);
+	public void setThemeColor(int color) {
+		playbackControlLayer.setThemeColor(color);
 	}
 
 	/**
@@ -502,9 +502,6 @@ public class SimpleVideoPlayer {
 	/**
 	 * Progress
 	 */
-	public void setLoadingTheme(int color) {
-		playbackControlLayer.setLoadingProgressTheme(color);
-	}
 
 	public void showLoading() {
 		playbackControlLayer.hideMainControls();

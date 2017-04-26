@@ -657,8 +657,7 @@ public class SambaPlayer extends FrameLayout {
 				(sambaCast == null || !sambaCast.isCasting()) && (media.adUrl == null || media.adUrl.isEmpty()),
 				media.isAudioOnly);
 
-		player.setSeekbarColor(media.themeColor);
-		player.setLoadingTheme(media.themeColor);
+		player.setThemeColor(media.themeColor);
 
 		// Move the content player's surface layer to the background so that the ad player's surface
 		// layer can be overlaid on top of it during ad playback.

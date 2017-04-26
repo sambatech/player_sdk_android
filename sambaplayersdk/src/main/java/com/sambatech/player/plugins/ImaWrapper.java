@@ -483,7 +483,7 @@ public class ImaWrapper implements Plugin {
 		// player's surface layer (which is in the background).
 		adPlayer.moveSurfaceToForeground();
 		adPlayer.disableSeeking();
-		adPlayer.setSeekbarColor(Color.YELLOW);
+		adPlayer.setThemeColor(Color.YELLOW);
 		adPlayer.hideTopChrome();
 		adPlayer.setFullscreen(contentPlayer.isFullscreen());
 	}
