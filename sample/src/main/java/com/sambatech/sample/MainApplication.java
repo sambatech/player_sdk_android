@@ -30,6 +30,7 @@ public class MainApplication extends Application {
 		Helpers.requestUrl("https://api.ipify.org", new Helpers.Callback() {
 			@Override
 			public void call(String response) {
+				if (response == null) return;
 				_externalIp = response.trim();
 			}
 		});

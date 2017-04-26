@@ -21,6 +21,7 @@ import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
+import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.sample.MainApplication;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.LiquidMedia;
@@ -137,6 +138,14 @@ public class MediaItemActivity extends Activity {
 		public void onError(SambaEvent e) {
 			String msg = String.format("%s", e.getType() + " - " + e.getData());
 			status.setText(msg);
+
+			if (e.getData() instanceof SambaPlayerError) {
+				final SambaPlayerError error = (SambaPlayerError)e.getData();
+
+				if (error.getException() != null)
+					msg = error.getException().getMessage();
+			}
+
 			Log.e("MediaItemActivity", msg);
 		}
 
