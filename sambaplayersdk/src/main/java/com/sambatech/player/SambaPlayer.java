@@ -83,8 +83,10 @@ public class SambaPlayer extends FrameLayout {
 	                        //Show controls
 							player.show();
 
-	                        if (media.initialTime > 0)
-	                        	seek(media.initialTime);
+	                        if (!media.isLive && _initialTime > 0) {
+		                        seek(_initialTime);
+		                        _initialTime = 0;
+	                        }
                         }
 
                         dispatchPlay();
@@ -118,12 +120,10 @@ public class SambaPlayer extends FrameLayout {
 			if (Helpers.isNetworkAvailable(getContext())) {
 				// check whether it can fallback (changes error criticity) or fail otherwise
 				if (_currentBackupIndex < media.backupUrls.length) {
-					final String url = media.backupUrls[_currentBackupIndex++];
+					if (_initialTime == 0f)
+						_initialTime = getCurrentTime();
 
-					if (media.initialTime == 0f)
-						media.initialTime = getCurrentTime();
-
-					media.url = url;
+					media.url = media.backupUrls[_currentBackupIndex++];
 
 					destroyInternal();
 					create(false);
@@ -136,8 +136,8 @@ public class SambaPlayer extends FrameLayout {
 				final AtomicInteger secs = new AtomicInteger(8);
 				final Timer timer = new Timer();
 
-				if (media.initialTime == 0f)
-					media.initialTime = getCurrentTime();
+				if (_initialTime == 0f)
+					_initialTime = getCurrentTime();
 
 				destroyInternal();
 
@@ -384,6 +384,7 @@ public class SambaPlayer extends FrameLayout {
 	private boolean _disabled;
 	private int _currentBackupIndex;
 	private int _currentRetryIndex;
+	private float _initialTime = 0f;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -398,6 +399,7 @@ public class SambaPlayer extends FrameLayout {
 		SambaMediaConfig m = new SambaMediaConfig(media);
 
 		this.media = m;
+		_initialTime = m.initialTime;
 
 		if (m.blockIfRooted && Helpers.isDeviceRooted()) {
 			_disabled = true;
