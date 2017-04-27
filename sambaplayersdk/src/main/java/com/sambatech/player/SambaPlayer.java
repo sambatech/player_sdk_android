@@ -31,6 +31,7 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Unsupport
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
+import com.google.android.libraries.mediaframework.layeredvideo.Util;
 import com.sambatech.player.adapter.CaptionsAdapter;
 import com.sambatech.player.adapter.OutputAdapter;
 import com.sambatech.player.cast.CastDRM;
@@ -155,7 +156,7 @@ public class SambaPlayer extends FrameLayout {
 
 								dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
 										secs.get() > 0 ? String.format("Reconnecting in %ss", secs) : "Connecting...",
-										false, e));
+										false, e, R.drawable.ic_nosignal_disable));
 
 								secs.decrementAndGet();
 							}
@@ -819,7 +820,7 @@ public class SambaPlayer extends FrameLayout {
 			}
 		}
 
-		/*player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.share),
+		/*player.addActionButton(ContextCompat.getDrawableRes(getContext(), R.drawable.share),
 		        getContext().getString(R.string.share_facebook), new OnClickListener() {
 			@Override
 			public void onClick(View v) {}
@@ -874,13 +875,17 @@ public class SambaPlayer extends FrameLayout {
 		TextView textView = (TextView) _errorScreen.findViewById(R.id.error_message);
 		textView.setText(error.toString());
 
-		if (_errorScreen.getParent() == null) {
-			// removes images if audio player
-			if (media.isAudioOnly)
-				textView.setCompoundDrawables(null, null, null, null);
+		// removes images if audio player
+		if (media.isAudioOnly)
+			textView.setCompoundDrawables(null, null, null, null);
+		// set custom image
+		else if (error.getDrawableRes() > 0)
+			textView.setCompoundDrawablesWithIntrinsicBounds(0, error.getDrawableRes(), 0, 0);
+		// default error image
+		else textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.error_icon, 0, 0);
 
+		if (_errorScreen.getParent() == null)
 			addView(_errorScreen);
-		}
 	}
 
 	private void destroyError() {

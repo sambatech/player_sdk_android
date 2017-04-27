@@ -1,5 +1,8 @@
 package com.sambatech.player.model;
 
+import android.graphics.drawable.Drawable;
+import android.support.annotation.DrawableRes;
+
 /**
  * Possible player errors reported through `SambaPlayerListener.onError` event.
  *
@@ -15,6 +18,7 @@ public enum SambaPlayerError {
 	private String message;
 	private boolean critical;
 	private Exception exception;
+	private @DrawableRes int drawableRes;
 
 	static {
 		invalidUrl.setValues(0, "Invalid URL format", true);
@@ -55,6 +59,28 @@ public enum SambaPlayerError {
 		return exception;
 	}
 
+	public @DrawableRes int getDrawableRes() {
+		return drawableRes;
+	}
+
+	/**
+	 * Replaces default exception message for current instance.
+	 * @param code The exception code
+	 * @param message The message to be replaced
+	 * @param critical Whether exception is critical (destroys player) or not
+	 * @param exception The exception related exception
+	 * @param drawableRes A custom error image to show with the message
+	 * @return The reference to itself
+	 */
+	public SambaPlayerError setValues(int code, String message, boolean critical, Exception exception, @DrawableRes int drawableRes) {
+		this.code = code;
+		this.message = message;
+		this.critical = critical;
+		this.exception = exception;
+		this.drawableRes = drawableRes;
+		return this;
+	}
+
 	/**
 	 * Replaces default exception message for current instance.
 	 * @param code The exception code
@@ -64,11 +90,7 @@ public enum SambaPlayerError {
 	 * @return The reference to itself
 	 */
 	public SambaPlayerError setValues(int code, String message, boolean critical, Exception exception) {
-		this.code = code;
-		this.message = message;
-		this.critical = critical;
-		this.exception = exception;
-		return this;
+		return setValues(code, message, critical, exception, 0);
 	}
 
 	/**

@@ -397,7 +397,7 @@ public class SambaApi {
                     media.captions = captionArray;
                 }
 
-				//else media.thumb = ContextCompat.getDrawable(activity, R.drawable.thumb);
+				//else media.thumb = ContextCompat.getDrawableRes(activity, R.drawable.thumb);
 
 				if (playerConfig.has("theme") && !playerConfig.getString("theme").toLowerCase().equals("default")) {
 					media.themeColorHex = "#" + playerConfig.getString("theme");
