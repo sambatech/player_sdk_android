@@ -31,7 +31,6 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Unsupport
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
-import com.google.android.libraries.mediaframework.layeredvideo.Util;
 import com.sambatech.player.adapter.CaptionsAdapter;
 import com.sambatech.player.adapter.OutputAdapter;
 import com.sambatech.player.cast.CastDRM;
@@ -169,7 +168,7 @@ public class SambaPlayer extends FrameLayout {
 			dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
 					e.getCause() instanceof UnsupportedDrmException ? "You're not allowed to "
 						+ (media.isAudioOnly ? "listen to this audio" : "watch this video")
-						: "Oops! Please try again later..."));
+						: "Oops! Please try again later...", true, e));
 		}
 
 		@Override
@@ -854,8 +853,10 @@ public class SambaPlayer extends FrameLayout {
 		player.setPlayCallback(null);
 		player.setFullscreenCallback(null);
 
-		if (sambaCast != null)
+		if (sambaCast != null) {
+			player.setInterceptableListener(null);
 			sambaCast.setEventListener(null);
+		}
 
 		player.release();
 
