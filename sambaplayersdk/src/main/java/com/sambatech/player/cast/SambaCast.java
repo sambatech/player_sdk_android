@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 
 import com.google.android.gms.cast.framework.AppVisibilityListener;
 import com.google.android.gms.cast.framework.CastContext;
@@ -129,8 +130,19 @@ public final class SambaCast {
 	 */
 	public SambaCast(@NonNull Context context) {
 		LayoutInflater inflater = LayoutInflater.from(context);
-		castButton = (MediaRouteButton)inflater.inflate(R.layout.cast_button, null);
+		View view = inflater.inflate(R.layout.cast_button, null);
+		castButton = (MediaRouteButton)view.findViewById(R.id.cast_button);
 		castContext = CastContext.getSharedInstance(context);
+
+//		Context castContextTest = new ContextThemeWrapper(context, android.support.v7.mediarouter.R.style.Theme_MediaRouter);
+//		Drawable drawable = null;
+//		TypedArray a = castContextTest.obtainStyledAttributes(null,
+//				android.support.v7.mediarouter.R.styleable.MediaRouteButton, android.support.v7.mediarouter.R.attr.mediaRouteButtonStyle, 0);
+//		drawable = a.getDrawable(android.support.v7.mediarouter.R.styleable.MediaRouteButton_externalRouteEnabledDrawable);
+//		a.recycle();
+//
+//		DrawableCompat.setTint(drawable, Color.YELLOW);
+
 		sessionManager = castContext.getSessionManager();
 	}
 

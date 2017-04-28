@@ -858,6 +858,7 @@ public class SambaPlayer extends FrameLayout {
 			sambaCast.setEventListener(null);
 		}
 
+        player.setControlsVisible(false);
 		player.release();
 
 		outputMenu = null;
