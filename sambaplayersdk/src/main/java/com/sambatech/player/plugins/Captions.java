@@ -57,11 +57,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 
 		_currentIndex = index;
 
-		// select menu item
-		final View captionsMenu = _internalPlayer.getCaptionMenu();
-
-		if (captionsMenu != null)
-			((CaptionsAdapter)((ListView)captionsMenu.findViewById(R.id.menu_list)).getAdapter()).currentIndex = index;
+		changeMenuItem(index);
 
 		// clean up
 		_parsed = false;
@@ -119,20 +115,27 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 	public void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer) {
 		_internalPlayer = internalPlayer;
 		_subtitleLayer = internalPlayer.getSubtitleLayer();
+		_subtitleLayer.getTextView().setTextColor(_config.color);
+		_subtitleLayer.getTextView().setTextSize(_config.size);
 
-		if (_captionsRequest.size() == 0) return;
+		changeMenuItem(_currentIndex);
 
-		int index = 0;
+		if (_captionsRequest.size() == 0 || _currentIndex != -1) return;
+
+		int index = -1;
+		int i = 0;
 
 		// look for default caption from user config or API
 		for (SambaMedia.Caption c : _captionsRequest) {
-			if (_config.language != null && c.language.toLowerCase().replace('_', '-').equals(_config.language)) break;
-			if (c.isDefault) break;
-			++index;
-		}
+			if (_config.language != null && c.language != null
+				&& c.language.toLowerCase().replace('_', '-').equals(_config.language))
+				index = i;
 
-		_subtitleLayer.getTextView().setTextColor(_config.color);
-		_subtitleLayer.getTextView().setTextSize(_config.size);
+			if (index == -1 && c.isDefault)
+				index = i;
+
+			++i;
+		}
 
 		changeCaption(index);
 	}
@@ -172,6 +175,16 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 			_subtitleLayer.onText("");
 			_currentCaption = null;
 		}
+	}
+
+	private void changeMenuItem(int index) {
+		if (index == -1) return;
+
+		// select menu item
+		final View captionsMenu = _internalPlayer.getCaptionMenu();
+
+		if (captionsMenu != null)
+			((CaptionsAdapter)((ListView)captionsMenu.findViewById(R.id.menu_list)).getAdapter()).currentIndex = index;
 	}
 
 	private void parse(String captionsText) {
