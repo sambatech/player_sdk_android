@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -198,22 +200,6 @@ public class SambaPlayer extends FrameLayout {
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN_EXIT));
 		}
 	};
-
-	private final AdapterView.OnItemClickListener outputMenuItemListener = new AdapterView.OnItemClickListener() {
-		@Override
-		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			player.closeOutputMenu();
-			changeOutput((SambaMedia.Output) parent.getItemAtPosition(position));
-		}
-	};
-
-    private final AdapterView.OnItemClickListener captionMenuItemListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            player.closeCaptionMenu();
-            changeCaption(position);
-        }
-    };
 
 	private final Runnable progressDispatcher = new Runnable() {
 		@Override
@@ -759,64 +745,50 @@ public class SambaPlayer extends FrameLayout {
 
 		if (!media.isAudioOnly) {
 			// Output Menu
-			// TODO: it might not be here
 			if (media.outputs != null && media.outputs.size() > 1) {
-				outputMenu = ((Activity) getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
-
-				TextView cancelButton = (TextView) outputMenu.findViewById(R.id.menu_cancel_button);
-				//cancelButton.setTextColor(media.themeColor);
-
-				cancelButton.setOnClickListener(new View.OnClickListener() {
+				outputMenu = initDialog(R.string.output, new OutputAdapter(getContext(), media.outputs),
+						new AdapterView.OnItemClickListener() {
+					@Override
+					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+						player.closeOutputMenu();
+						changeOutput((SambaMedia.Output) parent.getItemAtPosition(position));
+					}
+				}, new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						player.closeOutputMenu();
 					}
 				});
 
-				OutputAdapter outputAdapter = new OutputAdapter(getContext(), media.outputs);
-				ListView outputMenuList = (ListView) outputMenu.findViewById(R.id.menu_list);
-
-				outputMenuList.setAdapter(outputAdapter);
-				outputMenuList.setOnItemClickListener(outputMenuItemListener);
-				outputAdapter.notifyDataSetChanged();
-
 				player.setOutputMenu(outputMenu);
 			}
 
 			// Captions
 			if (media.captions != null && media.captions.size() > 0) {
-				captionMenu = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
-
-				TextView captionCancelButton = (TextView) captionMenu.findViewById(R.id.menu_cancel_button);
-				TextView captionTitle = (TextView) captionMenu.findViewById(R.id.menu_label);
-				captionTitle.setText(getContext().getString(R.string.captions));
-
-				captionCancelButton.setOnClickListener(new View.OnClickListener() {
+				captionMenu = initDialog(R.string.captions, new CaptionsAdapter(getContext(), media.captions),
+						new AdapterView.OnItemClickListener() {
+					@Override
+					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+						player.closeCaptionMenu();
+						changeCaption(position);
+					}
+				}, new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						player.closeCaptionMenu();
 					}
 				});
 
-				CaptionsAdapter captionsAdapter = new CaptionsAdapter(getContext(), media.captions);
-				ListView captionMenuList = (ListView) captionMenu.findViewById(R.id.menu_list);
-
-				captionMenuList.setAdapter(captionsAdapter);
-				captionMenuList.setOnItemClickListener(captionMenuItemListener);
-				captionMenuList.deferNotifyDataSetChanged();
-
 				player.setCaptionMenu(captionMenu);
 			}
 
-			if (!enableControls) {
+			if (!enableControls)
 				player.disableControls();
-			}
 
 			PluginManager.getInstance().onInternalPlayerCreated(player);
 
-			if (notify) {
+			if (notify)
 				SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
-			}
 		}
 
 		/*player.addActionButton(ContextCompat.getDrawableRes(getContext(), R.drawable.share),
@@ -829,6 +801,26 @@ public class SambaPlayer extends FrameLayout {
 
 		if (sambaCast != null && sambaCast.isCasting())
 			castListener.onConnected(sambaCast.getCastSession());
+	}
+
+	private View initDialog(@StringRes int titleRes, ListAdapter adapter,
+	                        AdapterView.OnItemClickListener itemListener,
+	                        OnClickListener cancelListener) {
+		View dialog = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
+
+		TextView cancelButton = (TextView) dialog.findViewById(R.id.menu_cancel_button);
+		TextView title = (TextView) dialog.findViewById(R.id.menu_label);
+		title.setText(getContext().getString(titleRes));
+
+		cancelButton.setOnClickListener(cancelListener);
+
+		ListView menuList = (ListView) dialog.findViewById(R.id.menu_list);
+
+		menuList.setAdapter(adapter);
+		menuList.setOnItemClickListener(itemListener);
+		menuList.deferNotifyDataSetChanged();
+
+		return dialog;
 	}
 
 	private void destroyInternal() {
@@ -845,7 +837,7 @@ public class SambaPlayer extends FrameLayout {
 		}
 
         if (captionMenu != null) {
-            ((ListView)captionMenu.findViewById(R.id.menu_list)).setOnItemClickListener(null);
+            ((ListView) captionMenu.findViewById(R.id.menu_list)).setOnItemClickListener(null);
             captionMenu.findViewById(R.id.menu_cancel_button).setOnClickListener(null);
         }
 
