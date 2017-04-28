@@ -1,6 +1,7 @@
 package com.sambatech.player.plugins;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -33,6 +34,7 @@ import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
+import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 
 import java.util.ArrayList;
@@ -58,11 +60,6 @@ public class ImaWrapper implements Plugin {
 	 * Url of the ad.
 	 */
 	private Uri adTagUrl;
-
-	/**
-	 * Samba Media
-	 */
-	private SambaMediaConfig media;
 
 	/**
 	 * Plays the ad.
@@ -359,7 +356,7 @@ public class ImaWrapper implements Plugin {
 
 	public void onLoad(@NonNull SambaPlayer player) {
 		Log.i("ima", "load");
-		media = new SambaMediaConfig(player.getMedia());
+		SambaMedia media = player.getMedia();
 
 		if (media.adUrl == null || media.adUrl.isEmpty()) {
 			PluginManager.getInstance().notifyPluginLoaded(this);
@@ -368,7 +365,7 @@ public class ImaWrapper implements Plugin {
 
 		adTagUrl = Uri.parse(media.adUrl);
 		contentPlayer = player;
-		container = (FrameLayout)player;
+		container = player;
 		activity = (Activity)container.getContext();
 
 		ImaSdkSettings sdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
@@ -493,7 +490,9 @@ public class ImaWrapper implements Plugin {
 		adPlayer.moveSurfaceToForeground();
 		adPlayer.disableSeeking();
 
-		adPlayer.setThemeColor(media.themeColor);
+		SambaMediaConfig m = (SambaMediaConfig)contentPlayer.getMedia();
+
+		adPlayer.setThemeColor(m != null ? m.themeColor : Color.YELLOW);
 		adPlayer.hideTopChrome();
 		adPlayer.setFullscreen(contentPlayer.isFullscreen());
 	}

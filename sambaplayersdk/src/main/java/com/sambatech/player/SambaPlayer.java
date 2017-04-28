@@ -783,7 +783,7 @@ public class SambaPlayer extends FrameLayout {
 				player.setOutputMenu(outputMenu);
 			}
 
-			//Captions
+			// Captions
 			if (media.captions != null && media.captions.size() > 0) {
 				captionMenu = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
 
@@ -837,6 +837,7 @@ public class SambaPlayer extends FrameLayout {
 
 		stopProgressTimer();
 		stop();
+		player.setFullscreen(false);
 
 		if (outputMenu != null) {
 			((ListView)outputMenu.findViewById(R.id.menu_list)).setOnItemClickListener(null);

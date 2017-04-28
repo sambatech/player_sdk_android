@@ -115,8 +115,11 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 	public void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer) {
 		_internalPlayer = internalPlayer;
 		_subtitleLayer = internalPlayer.getSubtitleLayer();
-		_subtitleLayer.getTextView().setTextColor(_config.color);
-		_subtitleLayer.getTextView().setTextSize(_config.size);
+
+		if (_config != null) {
+			_subtitleLayer.getTextView().setTextColor(_config.color);
+			_subtitleLayer.getTextView().setTextSize(_config.size);
+		}
 
 		changeMenuItem(_currentIndex);
 
