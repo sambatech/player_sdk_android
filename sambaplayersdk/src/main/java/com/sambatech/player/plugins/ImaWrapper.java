@@ -1,7 +1,6 @@
 package com.sambatech.player.plugins;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -29,12 +28,12 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.google.android.libraries.mediaframework.layeredvideo.Util;
-import com.sambatech.player.SambaPlayer;
-import com.sambatech.player.event.SambaEventBus;
-import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.R;
+import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
+import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
+import com.sambatech.player.model.SambaMediaConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +58,11 @@ public class ImaWrapper implements Plugin {
 	 * Url of the ad.
 	 */
 	private Uri adTagUrl;
+
+	/**
+	 * Samba Media
+	 */
+	private SambaMediaConfig media;
 
 	/**
 	 * Plays the ad.
@@ -222,6 +226,11 @@ public class ImaWrapper implements Plugin {
 				case ALL_ADS_COMPLETED:
 					onDestroy();
 					break;
+				case STARTED:
+					if(adPlayer != null) {
+						adPlayer.hideLoading();
+					}
+					break;
 			}
 		}
 
@@ -350,7 +359,7 @@ public class ImaWrapper implements Plugin {
 
 	public void onLoad(@NonNull SambaPlayer player) {
 		Log.i("ima", "load");
-		SambaMedia media = player.getMedia();
+		media = new SambaMediaConfig(player.getMedia());
 
 		if (media.adUrl == null || media.adUrl.isEmpty()) {
 			PluginManager.getInstance().notifyPluginLoaded(this);
@@ -483,7 +492,8 @@ public class ImaWrapper implements Plugin {
 		// player's surface layer (which is in the background).
 		adPlayer.moveSurfaceToForeground();
 		adPlayer.disableSeeking();
-		adPlayer.setThemeColor(Color.YELLOW);
+
+		adPlayer.setThemeColor(media.themeColor);
 		adPlayer.hideTopChrome();
 		adPlayer.setFullscreen(contentPlayer.isFullscreen());
 	}

@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.app.MediaRouteButton
-    xmlns:android="http://schemas.android.com/apk/res/android"
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_weight="1"
-    android:mediaRouteTypes="user" />
+    android:layout_height="match_parent">
+
+    <android.app.MediaRouteButton
+        android:id="@+id/cast_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:mediaRouteTypes="user" />
+
+</FrameLayout>

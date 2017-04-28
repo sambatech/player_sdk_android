@@ -20,4 +20,5 @@ limitations under the License.
     <color name="text_gray">#999999</color>
     <color name="white">#FFFFFF</color>
     <color name="gray">#E6E6E6</color>
+    <color name="transparent_white_hex_8">#88FFFFFF</color>
 </resources>
