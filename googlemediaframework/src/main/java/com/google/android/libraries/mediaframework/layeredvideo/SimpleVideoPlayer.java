@@ -67,6 +67,11 @@ public class SimpleVideoPlayer {
 	private boolean autoplay;
 
 	/**
+	 * Set whether media is audio only or not.
+	 */
+	private boolean audioOnly;
+
+	/**
 	 * Interceptable listener able to cancel both API and user actions.
 	 */
 	private PlaybackControlLayer.InterceptableListener interceptableListener;
@@ -110,6 +115,7 @@ public class SimpleVideoPlayer {
 		subtitleLayer = new SubtitleLayer();
 		videoSurfaceLayer = new VideoSurfaceLayer(autoplay);
 		this.autoplay = autoplay;
+		this.audioOnly = audioOnly;
 
 		List<Layer> layers = new ArrayList<>();
 		layers.add(videoSurfaceLayer);
@@ -487,10 +493,6 @@ public class SimpleVideoPlayer {
 		playbackControlLayer.setInterceptableListener(this.interceptableListener = interceptableListener);
 	}
 
-	public boolean hasInterceptableListener(){
-		return interceptableListener==null ? false : true;
-	}
-
 	public void setCurrentTime(float currentTime, float duration){
 		playbackControlLayer.setCurrentTime(currentTime,duration);
 	}
@@ -504,12 +506,16 @@ public class SimpleVideoPlayer {
 	 */
 
 	public void showLoading() {
-		playbackControlLayer.hideMainControls();
+		if (!audioOnly)
+			playbackControlLayer.hideMainControls();
+
 		playbackControlLayer.setLoadingProgress(View.VISIBLE);
 	}
 
 	public void hideLoading() {
-		playbackControlLayer.showMainControls();
+		if (!audioOnly)
+			playbackControlLayer.showMainControls();
+
 		playbackControlLayer.setLoadingProgress(View.GONE);
 	}
 }
