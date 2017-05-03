@@ -256,6 +256,16 @@ public class SimpleVideoPlayer {
 	 * Make the player enter or leave fullscreen mode.
 	 * @param shouldBeFullscreen If true, the player is put into fullscreen mode. If false, the player
 	 *                           leaves fullscreen mode.
+	 * @param isReverseLandscape Whether orientation is reverse landscape.
+	 */
+	public void setFullscreen(boolean shouldBeFullscreen, boolean isReverseLandscape) {
+		playbackControlLayer.setFullscreen(shouldBeFullscreen, isReverseLandscape);
+	}
+
+	/**
+	 * Make the player enter or leave fullscreen mode.
+	 * @param shouldBeFullscreen If true, the player is put into fullscreen mode. If false, the player
+	 *                           leaves fullscreen mode.
 	 */
 	public void setFullscreen(boolean shouldBeFullscreen) {
 		playbackControlLayer.setFullscreen(shouldBeFullscreen);

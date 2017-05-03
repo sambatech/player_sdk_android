@@ -627,6 +627,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		}
 	}
 
+
 	/**
 	 * Fullscreen mode will rotate to landscape mode, hide the action bar, hide the navigation bar,
 	 * hide the system tray, and make the video player take up the full size of the display.
@@ -639,6 +640,23 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * hidden (or made visible) when this method is called.
 	 */
 	public void doToggleFullscreen() {
+		doToggleFullscreen(false);
+	}
+
+	/**
+	 * Fullscreen mode will rotate to landscape mode, hide the action bar, hide the navigation bar,
+	 * hide the system tray, and make the video player take up the full size of the display.
+	 * The developer who is using this function must ensure the following:
+	 *
+	 * <p>1) Inside the android manifest, the activity that uses the video player has the attribute
+	 * android:configChanges="orientation".
+	 *
+	 * <p>2) Other views in the activity (or fragment) are
+	 * hidden (or made visible) when this method is called.
+	 *
+	 * @param isReverseLandscape Whether orientation is reverse landscape.
+	 */
+	public void doToggleFullscreen(boolean isReverseLandscape) {
 
 		// If there is no callback for handling fullscreen, don't do anything.
 		if (fullscreenCallback == null) {
@@ -666,7 +684,8 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			isFullscreen = false;
 		} else {
 			fullscreenCallback.onGoToFullscreen();
-			activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+			activity.setRequestedOrientation(isReverseLandscape ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE :
+					ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
 			activity.getWindow().getDecorView().setSystemUiVisibility(
 					View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
@@ -884,11 +903,21 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * Make the player enter or leave fullscreen mode.
 	 * @param shouldBeFullscreen If true, the player is put into fullscreen mode. If false, the player
 	 *                           leaves fullscreen mode.
+	 * @param isReverseLandscape Whether orientation is reverse landscape.
+	 */
+	public void setFullscreen(boolean shouldBeFullscreen, boolean isReverseLandscape) {
+		if (shouldBeFullscreen != isFullscreen) {
+			doToggleFullscreen(isReverseLandscape);
+		}
+	}
+
+	/**
+	 * Make the player enter or leave fullscreen mode.
+	 * @param shouldBeFullscreen If true, the player is put into fullscreen mode. If false, the player
+	 *                           leaves fullscreen mode.
 	 */
 	public void setFullscreen(boolean shouldBeFullscreen) {
-		if (shouldBeFullscreen != isFullscreen) {
-			doToggleFullscreen();
-		}
+		setFullscreen(shouldBeFullscreen, false);
 	}
 
 	@Override

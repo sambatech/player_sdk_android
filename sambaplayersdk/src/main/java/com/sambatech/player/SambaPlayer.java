@@ -197,6 +197,7 @@ public class SambaPlayer extends FrameLayout {
 
 		@Override
 		public void onReturnFromFullscreen() {
+			_wasAutoFS = false;
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN_EXIT));
 		}
 	};
@@ -356,7 +357,7 @@ public class SambaPlayer extends FrameLayout {
 	};
 
 	private SimpleVideoPlayer player;
-	private View _errorScreen;
+	private View errorScreen;
 	private @NonNull SambaMediaConfig media = new SambaMediaConfig();
 	private Timer progressTimer;
 	private boolean _hasStarted;
@@ -365,12 +366,14 @@ public class SambaPlayer extends FrameLayout {
 	private View outputMenu;
 	private View captionMenu;
 	private SambaCast sambaCast;
-	private boolean autoFsMode;
-	private boolean enableControls;
+	private boolean _autoFsMode;
+	private boolean _enableControls;
+	private boolean _wasAutoFS;
 	private boolean _disabled;
 	private int _currentBackupIndex;
 	private int _currentRetryIndex;
 	private float _initialTime = 0f;
+	private boolean wasPlaying;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -476,7 +479,7 @@ public class SambaPlayer extends FrameLayout {
 			else
 				player.disableControls();
 		}
-		else enableControls = flag;
+		else _enableControls = flag;
 	}
 
 	/**
@@ -520,7 +523,7 @@ public class SambaPlayer extends FrameLayout {
 	 * @param flag true to enable auto fullscreen mode and false to disable it
 	 */
 	public void setAutoFullscreenMode(boolean flag) {
-		autoFsMode = flag;
+		_autoFsMode = flag;
 	}
 
 	/**
@@ -575,7 +578,8 @@ public class SambaPlayer extends FrameLayout {
 			return;
 		}
 
-		int currentPosition = player.getCurrentPosition();
+		final int currentPosition = player.getCurrentPosition();
+		//final boolean wasPlaying = isPlaying();
 
 		for (SambaMedia.Output o : media.outputs)
 			o.isDefault = o.label.equals(output.label);
@@ -583,7 +587,7 @@ public class SambaPlayer extends FrameLayout {
 		media.url = output.url;
 
 		destroyInternal();
-		create(false);
+		create(false, true);
 		player.seek(currentPosition);
 	}
 
@@ -660,10 +664,14 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void create() {
-		create(true);
+		create(true, true);
 	}
 
 	private void create(boolean notify) {
+		create(notify, true);
+	}
+
+	private void create(boolean notify, boolean isAutoPlay) {
 		if (player != null) {
 			Log.i("SambaPlayer", "Player already created!");
 			return;
@@ -688,7 +696,7 @@ public class SambaPlayer extends FrameLayout {
 		// no autoplay if there's ad because ImaWrapper takes control of the player
 		player = new SimpleVideoPlayer((Activity)getContext(), this,
 				new Video(media.url, videoType, media.drmRequest), media.title,
-				(sambaCast == null || !sambaCast.isCasting()) && (media.adUrl == null || media.adUrl.isEmpty()),
+				isAutoPlay && (sambaCast == null || !sambaCast.isCasting()) && (media.adUrl == null || media.adUrl.isEmpty()),
 				media.isAudioOnly);
 
 		player.setThemeColor(media.themeColor);
@@ -726,19 +734,27 @@ public class SambaPlayer extends FrameLayout {
 			@Override
 			public void onOrientationChanged(int orientation) {
 				if (Settings.System.getInt(getContext().getContentResolver(),
-						Settings.System.ACCELEROMETER_ROTATION, 0) == 0 || !autoFsMode || player == null)
+						Settings.System.ACCELEROMETER_ROTATION, 0) == 0 || !_autoFsMode || player == null)
 					return;
 
-				if(orientation <= 15 && orientation >= 0) {
-					if(player.isFullscreen()) {
+				if (orientation <= 15 && orientation >= 0) {
+					if(_wasAutoFS && player.isFullscreen()) {
 						player.setFullscreen(false);
 					}
+
 					SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PORTRAIT));
-				}else if((orientation >= 80 && orientation <= 100 ) || (orientation >= 260 && orientation <= 290)){
-					if(!player.isFullscreen()) {
-						player.setFullscreen(true);
+				}
+				else {
+					final boolean isReverseLandscape = orientation >= 80 && orientation <= 100;
+
+					if (orientation >= 260 && orientation <= 290 || isReverseLandscape) {
+						if(!player.isFullscreen()) {
+							_wasAutoFS = true;
+							player.setFullscreen(true, isReverseLandscape);
+						}
+
+						SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
 					}
-					SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
 				}
 			}
 		};
@@ -782,7 +798,7 @@ public class SambaPlayer extends FrameLayout {
 				player.setCaptionMenu(captionMenu);
 			}
 
-			if (!enableControls)
+			if (!_enableControls)
 				player.disableControls();
 
 			PluginManager.getInstance().onInternalPlayerCreated(player);
@@ -864,10 +880,10 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void showError(@NonNull SambaPlayerError error) {
-		if (_errorScreen == null)
-			_errorScreen = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
+		if (errorScreen == null)
+			errorScreen = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
 
-		TextView textView = (TextView) _errorScreen.findViewById(R.id.error_message);
+		TextView textView = (TextView) errorScreen.findViewById(R.id.error_message);
 		textView.setText(error.toString());
 
 		// removes images if audio player
@@ -879,14 +895,14 @@ public class SambaPlayer extends FrameLayout {
 		// default error image
 		else textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.error_icon, 0, 0);
 
-		if (_errorScreen.getParent() == null)
-			addView(_errorScreen);
+		if (errorScreen.getParent() == null)
+			addView(errorScreen);
 	}
 
 	private void destroyError() {
-		if (_errorScreen == null) return;
-		removeView(_errorScreen);
-		_errorScreen = null;
+		if (errorScreen == null) return;
+		removeView(errorScreen);
+		errorScreen = null;
 	}
 
     private void startProgressTimer() {

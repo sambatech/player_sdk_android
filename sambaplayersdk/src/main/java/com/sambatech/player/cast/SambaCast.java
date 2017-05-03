@@ -130,8 +130,7 @@ public final class SambaCast {
 	 */
 	public SambaCast(@NonNull Context context) {
 		LayoutInflater inflater = LayoutInflater.from(context);
-		View view = inflater.inflate(R.layout.cast_button, null);
-		castButton = (MediaRouteButton)view.findViewById(R.id.cast_button);
+		castButton = (MediaRouteButton)inflater.inflate(R.layout.cast_button, null);
 		castContext = CastContext.getSharedInstance(context);
 
 //		Context castContextTest = new ContextThemeWrapper(context, android.support.v7.mediarouter.R.style.Theme_MediaRouter);
