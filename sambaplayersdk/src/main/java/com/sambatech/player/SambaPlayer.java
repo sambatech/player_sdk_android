@@ -162,7 +162,8 @@ public class SambaPlayer extends FrameLayout {
 						}
 					});
 				} catch (IOException e1) {
-					e1.printStackTrace();
+                    dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
+                            "Oops! Server can't be reached, please try again later...", true, e));
 				}
 				return;
 			}
