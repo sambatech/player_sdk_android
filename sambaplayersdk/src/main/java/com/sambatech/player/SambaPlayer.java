@@ -55,6 +55,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -120,18 +122,49 @@ public class SambaPlayer extends FrameLayout {
 
 			// URL not found (or cannot reach server)
 			if (Helpers.isNetworkAvailable(getContext())) {
-				// check whether it can fallback (changes error criticity) or fail otherwise
-				if (_currentBackupIndex < media.backupUrls.length) {
-					if (_initialTime == 0f)
-						_initialTime = getCurrentTime();
 
-					media.url = media.backupUrls[_currentBackupIndex++];
+				dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(), "Connecting...", false, e));
+				try {
 
-					destroyInternal();
-					create(false);
-					dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(), "Connecting...", false, e));
-					return;
+					final HttpURLConnection con = (HttpURLConnection) new URL(String.format("%s://www.google.com",
+                            media.request.protocol)).openConnection();
+					con.setConnectTimeout(1000);
+                    con.setReadTimeout(1000);
+					Helpers.requestUrl(con, new Helpers.RequestCallback() {
+
+						@Override
+						public void onSuccess(String response) {
+							// check whether it can fallback (changes error criticity) or fail otherwise
+                            ((Activity) SambaPlayer.this.getContext()).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (_currentBackupIndex < media.backupUrls.length) {
+                                        if (_initialTime == 0f)
+                                            _initialTime = getCurrentTime();
+
+                                        media.url = media.backupUrls[_currentBackupIndex++];
+
+                                        destroyInternal();
+                                        create(false);
+                                        dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(), "Connecting...", false, e));
+                                    }else {
+                                        dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
+                                                "Oops! Server can't be reached, please try again later...", true, e));
+                                    }
+                                }
+                            });
+						}
+
+						@Override
+						public void onError(Exception e, String response) {
+							dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
+									"Oops! No internet connection, please try again...", true, e));
+						}
+					});
+				} catch (IOException e1) {
+					e1.printStackTrace();
 				}
+				return;
 			}
 			// no network connection
 			else if (_currentRetryIndex++ < media.retriesTotal) {
