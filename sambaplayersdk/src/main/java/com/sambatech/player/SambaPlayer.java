@@ -620,7 +620,7 @@ public class SambaPlayer extends FrameLayout {
 		media.url = output.url;
 
 		destroyInternal();
-		create(false, true);
+		create(false);
 		player.seek(currentPosition);
 	}
 
@@ -729,7 +729,8 @@ public class SambaPlayer extends FrameLayout {
 		// no autoplay if there's ad because ImaWrapper takes control of the player
 		player = new SimpleVideoPlayer((Activity)getContext(), this,
 				new Video(media.url, videoType, media.drmRequest), media.title,
-				isAutoPlay && (sambaCast == null || !sambaCast.isCasting()) && (media.adUrl == null || media.adUrl.isEmpty()),
+				!notify && isAutoPlay || isAutoPlay && (sambaCast == null || !sambaCast.isCasting())
+                        && (media.adUrl == null || media.adUrl.isEmpty()),
 				media.isAudioOnly);
 
 		player.setThemeColor(media.themeColor);
