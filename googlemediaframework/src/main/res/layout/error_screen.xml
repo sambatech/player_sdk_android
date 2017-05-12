@@ -23,6 +23,7 @@
         android:background="@android:color/transparent"
         android:layout_below="@+id/error_message"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:layout_marginTop="30dp"/>
 
 </RelativeLayout>

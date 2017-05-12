@@ -121,17 +121,23 @@ public class SambaPlayer extends FrameLayout {
 		public void onError(final Exception e) {
 			Log.d("SambaPlayer", "Error: " + media, e);
 
-			String msg = e.getCause() instanceof UnsupportedDrmException ? "You're not allowed to "
-					+ (media.isAudioOnly ? "listen to this audio" : "watch this video")
-					: "Oops! Please try again later...";
+			String msg = "Você está offline! Verifique sua conexão.";
 			SambaPlayerError.Severity severity = SambaPlayerError.Severity.recoverable;
 
-			// URL not found (or cannot reach server)
-			if (Helpers.isNetworkAvailable(getContext())) {
-				msg = "Connecting...";
-				severity = SambaPlayerError.Severity.info;
+			if (_initialTime == 0f)
+				_initialTime = getCurrentTime();
 
-				destroyInternal();
+			destroyInternal();
+
+			// unauthorized DRM content
+			if (e.getCause() instanceof UnsupportedDrmException) {
+				msg = String.format("Você não tem permissão para %s", media.isAudioOnly ? "ouvir este áudio" : "assistir este vídeo");
+				severity = SambaPlayerError.Severity.critical;
+			}
+			// URL not found (or cannot reach server)
+			else if (Helpers.isNetworkAvailable(getContext())) {
+				msg = "Conectando...";
+				severity = SambaPlayerError.Severity.info;
 
 				try {
 					final HttpURLConnection con = (HttpURLConnection) new URL(String.format("%s://www.google.com",
@@ -148,20 +154,16 @@ public class SambaPlayer extends FrameLayout {
                                 @Override
                                 public void run() {
                                     if (_currentBackupIndex < media.backupUrls.length) {
-                                        if (_initialTime == 0f)
-                                            _initialTime = getCurrentTime();
-
                                         media.url = media.backupUrls[_currentBackupIndex++];
 
-                                        destroyInternal();
                                         create(false);
                                         dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
-		                                        "Connecting...", SambaPlayerError.Severity.info, e));
+		                                        "Conectando...", SambaPlayerError.Severity.info, e));
 	                                    return;
                                     }
 
                                     dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
-                                            "Oops! Server can't be reached, please try again later...",
+		                                    "Ocorreu um erro! Por favor, tente mais tarde...",
 	                                        SambaPlayerError.Severity.critical, e));
                                 }
                             });
@@ -170,13 +172,13 @@ public class SambaPlayer extends FrameLayout {
 						@Override
 						public void onError(Exception e, String response) {
 							dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
-									"Oops! No internet connection, please try again...",
+									"Você está offline! Verifique sua conexão.",
 									SambaPlayerError.Severity.recoverable, e));
 						}
 					});
 				}
 				catch (IOException e1) {
-                    msg = "Oops! Server can't be reached, please try again...";
+                    msg = "Ocorreu um erro! Por favor, tente novamente.";
 		            severity = SambaPlayerError.Severity.recoverable;
 				}
 			}
@@ -184,11 +186,6 @@ public class SambaPlayer extends FrameLayout {
 			else if (_currentRetryIndex++ < media.retriesTotal) {
 				final AtomicInteger secs = new AtomicInteger(8);
 				final Timer timer = new Timer();
-
-				if (_initialTime == 0f)
-					_initialTime = getCurrentTime();
-
-				destroyInternal();
 
 				timer.scheduleAtFixedRate(new TimerTask() {
 					@Override
@@ -203,7 +200,7 @@ public class SambaPlayer extends FrameLayout {
 								}
 
 								dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
-										secs.get() > 0 ? String.format("Reconnecting in %ss", secs) : "Connecting...",
+										secs.get() > 0 ? String.format("Reconectando em %ss", secs) : "Conectando...",
 										SambaPlayerError.Severity.info, e, R.drawable.ic_nosignal_disable));
 
 								secs.decrementAndGet();
@@ -213,7 +210,6 @@ public class SambaPlayer extends FrameLayout {
 				}, 0, 1000);
 				return;
 			}
-			else destroyInternal();
 
 			dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
 					msg, severity, e));
@@ -945,7 +941,10 @@ public class SambaPlayer extends FrameLayout {
 
 		// removes images if audio player
 		if (media.isAudioOnly)
-			textView.setCompoundDrawables(null, null, null, null);
+			// shows retry button when recoverable error
+			if (error.getSeverity() == SambaPlayerError.Severity.recoverable)
+				textView.setVisibility(GONE);
+			else textView.setCompoundDrawables(null, null, null, null);
 		// set custom image
 		else if (error.getDrawableRes() > 0)
 			textView.setCompoundDrawablesWithIntrinsicBounds(0, error.getDrawableRes(), 0, 0);
