@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -120,22 +121,30 @@ public class SambaPlayer extends FrameLayout {
 		public void onError(final Exception e) {
 			Log.d("SambaPlayer", "Error: " + media, e);
 
+			String msg = e.getCause() instanceof UnsupportedDrmException ? "You're not allowed to "
+					+ (media.isAudioOnly ? "listen to this audio" : "watch this video")
+					: "Oops! Please try again later...";
+			SambaPlayerError.Severity severity = SambaPlayerError.Severity.recoverable;
+
 			// URL not found (or cannot reach server)
 			if (Helpers.isNetworkAvailable(getContext())) {
+				msg = "Connecting...";
+				severity = SambaPlayerError.Severity.info;
 
-				dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(), "Connecting...", false, e));
+				destroyInternal();
+
 				try {
-
 					final HttpURLConnection con = (HttpURLConnection) new URL(String.format("%s://www.google.com",
                             media.request.protocol)).openConnection();
+
 					con.setConnectTimeout(1000);
                     con.setReadTimeout(1000);
-					Helpers.requestUrl(con, new Helpers.RequestCallback() {
 
+					Helpers.requestUrl(con, new Helpers.RequestCallback() {
 						@Override
 						public void onSuccess(String response) {
 							// check whether it can fallback (changes error criticity) or fail otherwise
-                            ((Activity) SambaPlayer.this.getContext()).runOnUiThread(new Runnable() {
+                            ((Activity) getContext()).runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     if (_currentBackupIndex < media.backupUrls.length) {
@@ -146,26 +155,30 @@ public class SambaPlayer extends FrameLayout {
 
                                         destroyInternal();
                                         create(false);
-                                        dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(), "Connecting...", false, e));
-                                    }else {
-                                        dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
-                                                "Oops! Server can't be reached, please try again later...", true, e));
+                                        dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+		                                        "Connecting...", SambaPlayerError.Severity.info, e));
+	                                    return;
                                     }
+
+                                    dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+                                            "Oops! Server can't be reached, please try again later...",
+	                                        SambaPlayerError.Severity.critical, e));
                                 }
                             });
 						}
 
 						@Override
 						public void onError(Exception e, String response) {
-							dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
-									"Oops! No internet connection, please try again...", true, e));
+							dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+									"Oops! No internet connection, please try again...",
+									SambaPlayerError.Severity.recoverable, e));
 						}
 					});
-				} catch (IOException e1) {
-                    dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
-                            "Oops! Server can't be reached, please try again later...", true, e));
 				}
-				return;
+				catch (IOException e1) {
+                    msg = "Oops! Server can't be reached, please try again...";
+		            severity = SambaPlayerError.Severity.recoverable;
+				}
 			}
 			// no network connection
 			else if (_currentRetryIndex++ < media.retriesTotal) {
@@ -180,7 +193,7 @@ public class SambaPlayer extends FrameLayout {
 				timer.scheduleAtFixedRate(new TimerTask() {
 					@Override
 					public void run() {
-						((Activity) SambaPlayer.this.getContext()).runOnUiThread(new Runnable() {
+						((Activity) getContext()).runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
 								if (secs.get() == 0) {
@@ -189,9 +202,9 @@ public class SambaPlayer extends FrameLayout {
 									create(false);
 								}
 
-								dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
+								dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
 										secs.get() > 0 ? String.format("Reconnecting in %ss", secs) : "Connecting...",
-										false, e, R.drawable.ic_nosignal_disable));
+										SambaPlayerError.Severity.info, e, R.drawable.ic_nosignal_disable));
 
 								secs.decrementAndGet();
 							}
@@ -200,11 +213,10 @@ public class SambaPlayer extends FrameLayout {
 				}, 0, 1000);
 				return;
 			}
+			else destroyInternal();
 
-			dispatchError(SambaPlayerError.unknown.setValues(e.hashCode(),
-					e.getCause() instanceof UnsupportedDrmException ? "You're not allowed to "
-						+ (media.isAudioOnly ? "listen to this audio" : "watch this video")
-						: "Oops! Please try again later...", true, e));
+			dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+					msg, severity, e));
 		}
 
 		@Override
@@ -303,7 +315,7 @@ public class SambaPlayer extends FrameLayout {
 			movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, media.title);
 
 			CastQuery qs = new CastQuery(true, CastOptionsProvider.environment.toString(),
-					CastOptionsProvider.appId, (int)getCurrentTime(), SambaPlayer.this.getCaption());
+					CastOptionsProvider.appId, (int)getCurrentTime(), getCaption());
 
 			CastObject castObject = new CastObject(media.title, media.id,
 					(int) getDuration(),media.themeColorHex,
@@ -407,7 +419,7 @@ public class SambaPlayer extends FrameLayout {
 	private int _currentBackupIndex;
 	private int _currentRetryIndex;
 	private float _initialTime = 0f;
-	private boolean wasPlaying;
+	//private boolean wasPlaying;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -921,6 +933,16 @@ public class SambaPlayer extends FrameLayout {
 		TextView textView = (TextView) errorScreen.findViewById(R.id.error_message);
 		textView.setText(error.toString());
 
+		ImageButton retryButton = (ImageButton) errorScreen.findViewById(R.id.retry_button);
+		retryButton.setVisibility(error.getSeverity() == SambaPlayerError.Severity.recoverable ? VISIBLE : GONE);
+		retryButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				destroyInternal();
+				create(false);
+			}
+		});
+
 		// removes images if audio player
 		if (media.isAudioOnly)
 			textView.setCompoundDrawables(null, null, null, null);
@@ -936,6 +958,7 @@ public class SambaPlayer extends FrameLayout {
 
 	private void destroyError() {
 		if (errorScreen == null) return;
+		errorScreen.findViewById(R.id.retry_button).setOnClickListener(null);
 		removeView(errorScreen);
 		errorScreen = null;
 	}
@@ -976,9 +999,16 @@ public class SambaPlayer extends FrameLayout {
 		// give user the chance to customize error message before showing it (in case of critical)
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.ERROR, error));
 
-		if (error.isCritical())
-			destroy(error);
-		else showError(error);
+		switch (error.getSeverity()) {
+			case critical:
+				destroy(error);
+				break;
+
+			case info:
+			case recoverable:
+				showError(error);
+				break;
+		}
 	}
 
 	private void setupCast() {
