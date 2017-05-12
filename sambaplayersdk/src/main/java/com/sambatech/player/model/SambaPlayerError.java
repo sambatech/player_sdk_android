@@ -1,6 +1,5 @@
 package com.sambatech.player.model;
 
-import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
 
 /**
@@ -14,17 +13,32 @@ public enum SambaPlayerError {
 	rootedDevice,
 	unknown;
 
+	/**
+	 * The severity of the error:
+	 *
+	 * minor - dispatches error notification without showing the error screen
+	 * info - shows error screen without destroying the player
+	 * recoverable - display a retry button
+	 * critical - player must be destroyed
+	 */
+	public enum Severity {
+		minor,
+		info,
+		recoverable,
+		critical
+	}
+
 	private int code;
 	private String message;
-	private boolean critical;
+	private Severity severity = Severity.minor;
 	private Exception exception;
 	private @DrawableRes int drawableRes;
 
 	static {
-		invalidUrl.setValues(0, "Invalid URL format", true);
-		emptyUrl.setValues(1, "Missing URL for the specified media", true);
-		rootedDevice.setValues(2, "Specified media cannot play on a rooted device", true);
-		unknown.setValues(3, "Unknown exception");
+		invalidUrl.setValues(1, "Invalid URL format", Severity.critical);
+		emptyUrl.setValues(2, "Missing URL for the specified media", Severity.critical);
+		rootedDevice.setValues(3, "Specified media cannot play on a rooted device", Severity.critical);
+		unknown.setValues(-1, "Unknown exception");
 	}
 
 	/**
@@ -44,11 +58,11 @@ public enum SambaPlayerError {
 	}
 
 	/**
-	 * Whether exception is critical (destroys player) or not
-	 * @return True if is critical or false otherwise
+	 * The severity of the error
+	 * @return The error severity
 	 */
-	public boolean isCritical() {
-		return critical;
+	public Severity getSeverity() {
+		return severity;
 	}
 
 	/**
@@ -67,15 +81,15 @@ public enum SambaPlayerError {
 	 * Replaces default exception message for current instance.
 	 * @param code The exception code
 	 * @param message The message to be replaced
-	 * @param critical Whether exception is critical (destroys player) or not
+	 * @param severity The severity of the error
 	 * @param exception The exception related exception
 	 * @param drawableRes A custom error image to show with the message
 	 * @return The reference to itself
 	 */
-	public SambaPlayerError setValues(int code, String message, boolean critical, Exception exception, @DrawableRes int drawableRes) {
+	public SambaPlayerError setValues(int code, String message, Severity severity, Exception exception, @DrawableRes int drawableRes) {
 		this.code = code;
 		this.message = message;
-		this.critical = critical;
+		this.severity = severity;
 		this.exception = exception;
 		this.drawableRes = drawableRes;
 		return this;
@@ -85,23 +99,23 @@ public enum SambaPlayerError {
 	 * Replaces default exception message for current instance.
 	 * @param code The exception code
 	 * @param message The message to be replaced
-	 * @param critical Whether exception is critical (destroys player) or not
+	 * @param severity The severity of the error
 	 * @param exception The exception related exception
 	 * @return The reference to itself
 	 */
-	public SambaPlayerError setValues(int code, String message, boolean critical, Exception exception) {
-		return setValues(code, message, critical, exception, 0);
+	public SambaPlayerError setValues(int code, String message, Severity severity, Exception exception) {
+		return setValues(code, message, severity, exception, 0);
 	}
 
 	/**
 	 * Replaces default exception message for current instance.
 	 * @param code The exception code
 	 * @param message The message to be replaced
-	 * @param critical Whether exception is critical (destroys player) or not
+	 * @param severity The severity of the error
 	 * @return The same instance reference
 	 */
-	public SambaPlayerError setValues(int code, String message, boolean critical) {
-		return setValues(code, message, critical, null);
+	public SambaPlayerError setValues(int code, String message, Severity severity) {
+		return setValues(code, message, severity, null);
 	}
 
 	/**
@@ -111,7 +125,7 @@ public enum SambaPlayerError {
 	 * @return The same instance reference
 	 */
 	public SambaPlayerError setValues(int code, String message) {
-		return setValues(code, message, false);
+		return setValues(code, message, Severity.minor);
 	}
 
 	@Override

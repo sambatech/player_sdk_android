@@ -15,4 +15,14 @@
         android:drawablePadding="10dp"
         android:drawableTop="@drawable/error_icon"/>
 
+    <ImageButton
+        android:id="@+id/retry_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_retry"
+        android:background="@android:color/transparent"
+        android:layout_below="@+id/error_message"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"/>
+
 </RelativeLayout>
