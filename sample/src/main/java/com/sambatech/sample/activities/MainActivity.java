@@ -500,7 +500,6 @@ public class MainActivity extends Activity {
 		media.title = "Geo-blocking";
 		media.description = "Geo-blocking";
 		media.thumbs = thumbs;
-		media.environment = SambaMediaRequest.Environment.STAGING;
 
 		medias.add(media);
 

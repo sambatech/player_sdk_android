@@ -20,12 +20,6 @@
  */
 package com.google.android.libraries.mediaframework.exoplayerextensions;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
-
 /**
  * Exception thrown when the required level of DRM is not supported.
  */

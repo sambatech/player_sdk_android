@@ -35,10 +35,10 @@ public enum SambaPlayerError {
 	private @DrawableRes int drawableRes;
 
 	static {
-		invalidUrl.setValues(1, "Invalid URL format", Severity.critical);
-		emptyUrl.setValues(2, "Missing URL for the specified media", Severity.critical);
-		rootedDevice.setValues(3, "Specified media cannot play on a rooted device", Severity.critical);
-		unknown.setValues(-1, "Unknown exception");
+		invalidUrl.setValues(1, "Ocorreu um erro! Por favor, tente mais tarde...", Severity.critical);
+		emptyUrl.setValues(2, "Ocorreu um erro! Por favor, tente mais tarde...", Severity.critical);
+		rootedDevice.setValues(3, "Conteúdo bloqueado: dispositivo inseguro (rooted)", Severity.critical);
+		unknown.setValues(-1, "Erro desconhecido");
 	}
 
 	/**

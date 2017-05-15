@@ -23,6 +23,8 @@ public final class CastOptionsProvider implements OptionsProvider {
 	public static String playerUrl;
 	public static SambaMediaRequest.Environment environment;
 
+	public CastOptionsProvider() {}
+
 	@Override
 	public CastOptions getCastOptions(Context context) {
 		configProfile(context, SambaMediaRequest.Environment.PROD, false);

@@ -131,7 +131,7 @@ public class SambaPlayer extends FrameLayout {
 
 			// unauthorized DRM content
 			if (e.getCause() instanceof UnsupportedDrmException) {
-				msg = String.format("Você não tem permissão para %s", media.isAudioOnly ? "ouvir este áudio" : "assistir este vídeo");
+				msg = String.format("Você não tem permissão para %s", media.isAudioOnly ? "ouvir este áudio." : "assistir este vídeo.");
 				severity = SambaPlayerError.Severity.critical;
 			}
 			// URL not found (or cannot reach server)
@@ -633,13 +633,13 @@ public class SambaPlayer extends FrameLayout {
 		player.seek(currentPosition);
 	}
 
-	/*
+	/**
 	 * Changes the current output.
 	 * @param index The index in the outputs array.
 	 */
-	/*public void changeOutput(int index) {
-
-	}*/
+	public void switchOutput(int index) {
+		player.setSelectedTrack(index);
+	}
 
 	/**
 	 * Changes the current caption.
@@ -811,6 +811,7 @@ public class SambaPlayer extends FrameLayout {
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 						player.closeOutputMenu();
 						changeOutput((SambaMedia.Output) parent.getItemAtPosition(position));
+						//switchOutput(position);
 					}
 				}, new View.OnClickListener() {
 					@Override

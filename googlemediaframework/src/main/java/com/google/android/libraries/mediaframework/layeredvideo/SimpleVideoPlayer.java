@@ -173,6 +173,14 @@ public class SimpleVideoPlayer {
 		return layerManager.getExoplayerWrapper().getPlaybackState();
 	}
 
+	public void setSelectedTrack(int index) {
+		layerManager.getExoplayerWrapper().setSelectedTrack(ExoplayerWrapper.TYPE_VIDEO, index);
+	}
+
+	public int getSelectedTrack() {
+		return layerManager.getExoplayerWrapper().getSelectedTrack(ExoplayerWrapper.TYPE_VIDEO);
+	}
+
 	/**
 	 * Hides the seek bar thumb and prevents the user from seeking to different time points in the
 	 * video.
