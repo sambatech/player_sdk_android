@@ -269,12 +269,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private boolean canSeek;
 
 	/**
-	 * Player Control
-	 *
-	 */
-	PlayerControl playerControl;
-
-	/**
 	 * <p> Derived from the Color class (ex. {@link Color#RED}), the chrome consists of three
 	 * views, which are are tinted with the the chrome color.
 	 *
@@ -359,7 +353,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private boolean isFullscreen;
 
 	/**
-	 * Whether the seekbar_progress is currently being dragged.
+	 * Whether the seekbar is currently being dragged.
 	 */
 	private boolean isSeekbarDragging;
 
@@ -397,7 +391,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private ImageButton pausePlayLargeButton;
 
 	/**
-	 * Play/pause toggle button; causes the player to play or pause the media.
+	 * Displays the play icon when the video is paused, or the pause icon when the video is playing.
 	 */
 	private ImageButton pausePlayButton;
 
@@ -490,6 +484,11 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private View _captionMenuView;
 
 	private InterceptableListener interceptableListener;
+
+	/**
+	 * Saved orientation for coming back from fullscreen.
+	 */
+	private int savedOrientation;
 
 	public PlaybackControlLayer(String videoTitle) {
 		this(videoTitle, null, true);
@@ -584,6 +583,8 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 		layerManager.getControl().addCallback(this);
 
+		savedOrientation = layerManager.getActivity().getResources().getConfiguration().orientation;
+
 		textColor = DEFAULT_TEXT_COLOR;
 		chromeColor = DEFAULT_CHROME_COLOR;
 		controlColor = DEFAULT_CONTROL_TINT_COLOR;
@@ -611,7 +612,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 		// Make the view hidden initially. It will be made visible again in the show(timeout) method.
 		playbackControlRootView.setVisibility(View.INVISIBLE);
-		playerControl = getLayerManager().getControl();
 
 		return view;
 	}
@@ -672,6 +672,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 		if (isFullscreen) {
 			fullscreenCallback.onReturnFromFullscreen();
+			//activity.setRequestedOrientation(savedOrientation);
 			activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
 			// Make the status bar and navigation bar visible again.
@@ -684,6 +685,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			isFullscreen = false;
 		} else {
 			fullscreenCallback.onGoToFullscreen();
+			savedOrientation = activity.getResources().getConfiguration().orientation;
 			activity.setRequestedOrientation(isReverseLandscape ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE :
 					ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -764,8 +766,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 					.setDuration(FADE_OUT_DURATION_MS)
 					.setListener(new Animator.AnimatorListener() {
 						@Override
-						public void onAnimationStart(Animator animation) {
-						}
+						public void onAnimationStart(Animator animation) {}
 
 						@Override
 						public void onAnimationEnd(Animator animation) {
@@ -784,12 +785,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 						}
 
 						@Override
-						public void onAnimationCancel(Animator animation) {
-						}
+						public void onAnimationCancel(Animator animation) {}
 
 						@Override
-						public void onAnimationRepeat(Animator animation) {
-						}
+						public void onAnimationRepeat(Animator animation) {}
 					});
 		}
 	}
@@ -969,7 +968,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	}
 
 	/**
-	 * Sets the color of the seekbar_progress.
+	 * Sets the color of the seekbar.
 	 * @param color a color derived from the @{link Color} class (ex. {@link Color#RED}).
 	 */
 	public void setThemeColor(int color) {
@@ -1025,6 +1024,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * @param shouldPlay If true, then the player starts playing. If false, the player pauses.
 	 */
 	public void setPlayPause(boolean shouldPlay) {
+		PlayerControl playerControl = getLayerManager().getControl();
 		if (playerControl == null) {
 			return;
 		}
@@ -1189,6 +1189,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				if (outputMenu == null)
 					return;
 
+				PlayerControl playerControl = getLayerManager().getControl();
 				menuWasPlaying = playerControl.isPlaying();
 				playerControl.pause();
 				outputMenu.show();
@@ -1206,6 +1207,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
             public void onClick(View v) {
                if(captionMenu == null) return;
 
+	           PlayerControl playerControl = getLayerManager().getControl();
                menuWasPlaying = playerControl.isPlaying();
                playerControl.pause();
                captionMenu.show();
@@ -1281,8 +1283,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				updatePlayPauseButton();
 				show(DEFAULT_TIMEOUT_MS);
 
-				if (interceptableListener != null)
+				if (interceptableListener != null) {
+					PlayerControl playerControl = getLayerManager().getControl();
 					interceptableListener.onSeek(playerControl != null ? playerControl.getCurrentPosition() : 0);
+				}
 
 				handler.sendEmptyMessage(SHOW_PROGRESS);
 			}
@@ -1316,16 +1320,24 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * Intercepts play action to allow external control.
 	 */
 	private void play() {
-		if (interceptableListener == null || interceptableListener.onPlay())
-			playerControl.start();
+		PlayerControl playerControl = getLayerManager().getControl();
+
+		if (playerControl == null || (interceptableListener != null && !interceptableListener.onPlay()))
+			return;
+
+		playerControl.start();
 	}
 
 	/**
 	 * Intercepts pause action to allow external control.
 	 */
 	private void pause() {
-		if (interceptableListener == null || interceptableListener.onPause())
-			playerControl.pause();
+		PlayerControl playerControl = getLayerManager().getControl();
+
+		if (playerControl == null || (interceptableListener != null && !interceptableListener.onPause()))
+			return;
+
+		playerControl.pause();
 	}
 
 	/**
@@ -1467,8 +1479,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			return;
 		}
 
-		if (interceptableListener != null && shouldBePlaying ||
-				interceptableListener == null && playerControl.isPlaying()) {
+		if (interceptableListener != null ? shouldBePlaying : playerControl.isPlaying()) {
 			pausePlayLargeButton.setImageResource(R.drawable.ic_action_pause_large);
 			pausePlayButton.setImageResource(R.drawable.ic_action_pause);
 		} else {

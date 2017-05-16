@@ -217,6 +217,7 @@ public class SimpleVideoPlayer {
 	 * container.
 	 */
 	public void hide() {
+		videoSurfaceLayer.hide(); // TODO: testar!
 		playbackControlLayer.hide();
 		subtitleLayer.setVisibility(View.GONE);
 	}
@@ -300,7 +301,9 @@ public class SimpleVideoPlayer {
     /**
      * Getting the subtitleLayer externaly
      */
-    public SubtitleLayer getSubtitleLayer() { return subtitleLayer; }
+    public SubtitleLayer getSubtitleLayer() {
+    	return subtitleLayer;
+    }
 
     /**
 	 * Pause video playback.
@@ -399,7 +402,7 @@ public class SimpleVideoPlayer {
 	}
 
 	/**
-	 * Sets the color of the seekbar_progress.
+	 * Sets the color of the seekbar.
 	 * @param color a color derived from the @{link Color} class
 	 *              (ex. {@link android.graphics.Color#RED}).
 	 */
@@ -438,6 +441,7 @@ public class SimpleVideoPlayer {
 	 * the screen.
 	 */
 	public void show() {
+		videoSurfaceLayer.show(); // TODO: testar!
 		playbackControlLayer.show();
 		subtitleLayer.setVisibility(View.VISIBLE);
 	}

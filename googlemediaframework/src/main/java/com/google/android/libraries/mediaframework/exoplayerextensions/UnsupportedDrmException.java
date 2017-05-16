@@ -31,7 +31,7 @@ public final class UnsupportedDrmException extends Exception {
   public static final int REASON_INVALID_SERVER_CODE = 3;
   public static final int REASON_SERVER_NOT_CONNECTED = 4;
 
-  public int reason;
+  public final int reason;
 
   public UnsupportedDrmException(int reason) {
     this.reason = reason;
