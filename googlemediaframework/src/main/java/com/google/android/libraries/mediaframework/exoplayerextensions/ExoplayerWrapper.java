@@ -33,6 +33,7 @@ import com.google.android.exoplayer.MediaCodecAudioTrackRenderer;
 import com.google.android.exoplayer.MediaCodecTrackRenderer;
 import com.google.android.exoplayer.MediaCodecTrackRenderer.DecoderInitializationException;
 import com.google.android.exoplayer.MediaCodecVideoTrackRenderer;
+import com.google.android.exoplayer.MediaFormat;
 import com.google.android.exoplayer.TimeRange;
 import com.google.android.exoplayer.TrackRenderer;
 import com.google.android.exoplayer.audio.AudioTrack;
@@ -551,6 +552,23 @@ public class ExoplayerWrapper implements ExoPlayer.Listener, ChunkSampleSource.E
     if (type == TYPE_TEXT && index < 0 && captionListener != null) {
       captionListener.onCues(Collections.<Cue>emptyList());
     }
+  }
+
+  public MediaFormat[] getTrackFormats(int type) {
+    if (player == null)
+      return null;
+
+    final int t = player.getTrackCount(type);
+    MediaFormat[] medias = new MediaFormat[t];
+
+    for (int i = 0; i < t; ++i)
+      medias[i] = player.getTrackFormat(type, i);
+
+    return medias;
+  }
+
+  public int getTrackCount(int type) {
+    return player.getTrackCount(type);
   }
 
   public boolean getBackgrounded() {

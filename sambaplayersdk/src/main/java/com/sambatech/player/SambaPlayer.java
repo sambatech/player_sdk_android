@@ -82,6 +82,7 @@ public class SambaPlayer extends FrameLayout {
                             _hasStarted = true;
 	                        _currentRetryIndex = 0;
 
+	                        initOutputMenu();
 	                        destroyError();
                             SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
 
@@ -635,10 +636,24 @@ public class SambaPlayer extends FrameLayout {
 
 	/**
 	 * Changes the current output.
+	 * Must be called after START event has been dispatched.
 	 * @param index The index in the outputs array.
 	 */
 	public void switchOutput(int index) {
+		if (player == null || outputMenu == null)
+			return;
+
+		outputMenu.setTag(index);
 		player.setSelectedTrack(index);
+	}
+
+	/**
+	 * Retrieves the selected output index.
+	 * @return The selected output index
+	 */
+	public int getCurrentOutputIndex() {
+		return outputMenu != null && outputMenu.getTag() != null ?
+				(int)outputMenu.getTag() : media.defaultOutputIndex;
 	}
 
 	/**
@@ -802,45 +817,9 @@ public class SambaPlayer extends FrameLayout {
 			}
 		};
 
+		// video-only
 		if (!media.isAudioOnly) {
-			// Output Menu
-			if (media.outputs != null && media.outputs.size() > 1) {
-				outputMenu = initDialog(R.string.output, new OutputAdapter(getContext(), media.outputs),
-						new AdapterView.OnItemClickListener() {
-					@Override
-					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-						player.closeOutputMenu();
-						changeOutput((SambaMedia.Output) parent.getItemAtPosition(position));
-						//switchOutput(position);
-					}
-				}, new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						player.closeOutputMenu();
-					}
-				});
-
-				player.setOutputMenu(outputMenu);
-			}
-
-			// Captions
-			if (media.captions != null && media.captions.size() > 0) {
-				captionMenu = initDialog(R.string.captions, new CaptionsAdapter(getContext(), media.captions),
-						new AdapterView.OnItemClickListener() {
-					@Override
-					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-						player.closeCaptionMenu();
-						changeCaption(position);
-					}
-				}, new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						player.closeCaptionMenu();
-					}
-				});
-
-				player.setCaptionMenu(captionMenu);
-			}
+			initCaptionMenu();
 
 			if (!_enableControls)
 				player.disableControls();
@@ -881,6 +860,51 @@ public class SambaPlayer extends FrameLayout {
 		menuList.deferNotifyDataSetChanged();
 
 		return dialog;
+	}
+
+	private void initOutputMenu() {
+		if (media.isAudioOnly || media.outputs == null ||
+				media.outputs.size() <= 1 || player == null)
+			return;
+
+		outputMenu = initDialog(R.string.output, new OutputAdapter(getContext(),
+						player.getTrackFormats(ExoplayerWrapper.TYPE_VIDEO), this),
+				new AdapterView.OnItemClickListener() {
+					@Override
+					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+						player.closeOutputMenu();
+						switchOutput(position);
+					}
+				}, new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						player.closeOutputMenu();
+					}
+				});
+
+		player.setOutputMenu(outputMenu);
+	}
+
+	private void initCaptionMenu() {
+		if (media.isAudioOnly || media.captions == null ||
+				media.captions.size() == 0 || player == null)
+			return;
+
+		captionMenu = initDialog(R.string.captions, new CaptionsAdapter(getContext(), media.captions),
+				new AdapterView.OnItemClickListener() {
+					@Override
+					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+						player.closeCaptionMenu();
+						changeCaption(position);
+					}
+				}, new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						player.closeCaptionMenu();
+					}
+				});
+
+		player.setCaptionMenu(captionMenu);
 	}
 
 	private void destroyInternal() {

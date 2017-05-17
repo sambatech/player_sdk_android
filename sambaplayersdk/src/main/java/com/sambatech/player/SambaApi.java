@@ -308,10 +308,10 @@ public class SambaApi {
 								continue;
 							}
 
-							// TODO: checar comportamento de projeto sem default output
 							if (!label.equalsIgnoreCase("_raw") && !output.isNull("url")) {
 								if (label.startsWith(defaultOutputCurrent)) {
 									media.url = normalizeProtocol(output.getString("url"), request.protocol);
+									media.defaultOutputIndex = j;
 									cOutput.isDefault = true;
 								}
 

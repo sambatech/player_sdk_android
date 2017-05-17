@@ -21,6 +21,7 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.google.android.exoplayer.MediaFormat;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 
@@ -179,6 +180,14 @@ public class SimpleVideoPlayer {
 
 	public int getSelectedTrack() {
 		return layerManager.getExoplayerWrapper().getSelectedTrack(ExoplayerWrapper.TYPE_VIDEO);
+	}
+
+	public MediaFormat[] getTrackFormats(int type) {
+		return layerManager.getExoplayerWrapper().getTrackFormats(type);
+	}
+
+	public int getTrackCount(int type) {
+		return layerManager.getExoplayerWrapper().getTrackCount(type);
 	}
 
 	/**

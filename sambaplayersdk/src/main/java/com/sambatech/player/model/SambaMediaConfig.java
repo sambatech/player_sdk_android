@@ -26,6 +26,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public DrmRequest drmRequest;
 	public boolean blockIfRooted;
 	public int retriesTotal = 3;
+	public int defaultOutputIndex = 0;
 
 	public SambaMediaConfig() {}
 
