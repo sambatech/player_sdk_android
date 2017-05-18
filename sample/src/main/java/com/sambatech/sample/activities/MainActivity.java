@@ -282,6 +282,9 @@ public class MainActivity extends Activity {
 		m.adTag = new LiquidMedia.AdTag();
 		m.adTag.name = m.title;
 		m.adTag.url = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480|640x480&iu=/1011235/640x480_WebDigital_TheNoite_PreRoll&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]&a=0";
+		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
+		thumb.url = "https://vignette4.wikia.nocookie.net/telepedia/images/4/4e/Logotipo_do_SBT.png/revision/latest?cb=20150603172637&path-prefix=pt-br";
+		m.thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));
 		mediaList.add(m);
 
 		//http://fast.player.liquidplatform.com/pApiv2/embed/25ce5b8513c18a9eae99a8af601d0943/5db4352a8618fbf794753d2f1170dbf8?jsApi=true&enableShare=true&wideScreen=true&html5=false&autoStart=true&ad_program=https%253A%252F%252Fpubads.g.doubleclick.net%252Fgampad%252Fads%253Fsz%253D640x480%257C640x480%2526iu%253D%252F1011235%252F640x480_WebDigital_TheNoite_PreRoll%2526impl%253Ds%2526gdfp_req%253D1%2526env%253Dvp%2526output%253Dvast%2526unviewed_position_start%253D1%2526url%253D%255Breferrer_url%255D%2526description_url%253D%255Bdescription_url%255D%2526correlator%253D%255Btimestamp%255D&a=0&parentURL=#http://www.sbt.com.br/sbtvideos/programa/400/The-Noite-com-Danilo-Gentili/categoria/4527/5db4352a8618fbf794753d2f1170dbf8/Adultos-com-voz-de-crianca-porque-fica-engracado.html

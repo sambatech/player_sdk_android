@@ -21,7 +21,6 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
@@ -1063,8 +1062,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		outputMenu.setOnDismissListener(new DialogInterface.OnDismissListener() {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
-				if (menuWasPlaying)
+				if (menuWasPlaying) {
 					play();
+					hide(true);
+				}
 			}
 		});
 
@@ -1084,8 +1085,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
         captionMenu.setOnDismissListener(new DialogInterface.OnDismissListener(){
             @Override
             public void onDismiss(DialogInterface dialog) {
-                if(menuWasPlaying)
-                    play();
+                if (menuWasPlaying) {
+	                play();
+	                hide(true);
+                }
             }
         });
 
@@ -1096,7 +1099,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		return _captionMenuView;
 	}
 
-	// TODO it might not be here
 	/**
 	 * Closes the output menu.
 	 */
@@ -1109,7 +1111,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
      */
     public void closeCaptionMenu() {
         captionMenu.dismiss();
-	    hide(true);
     }
 
 	/**
@@ -1183,6 +1184,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		actionButtonsContainer = (LinearLayout) view.findViewById(R.id.actions_container);
 		loadingProgress = (ProgressBar) loadingSpinner.findViewById(R.id.loadingLarge);
 
+		// output
 		outputButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -1197,11 +1199,10 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		});
 
 		if (outputMenu == null) {
-			// hidden by default
 			outputButton.setVisibility(View.GONE);
 		}
 
-        //Caption
+        // caption
         captionButton.setOnClickListener(new View.OnClickListener() {
            @Override
             public void onClick(View v) {

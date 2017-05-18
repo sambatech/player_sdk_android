@@ -71,6 +71,7 @@ public class SambaPlayer extends FrameLayout {
 
 	private final ExoplayerWrapper.PlaybackListener playbackListener =
 			new ExoplayerWrapper.PlaybackListener() {
+
 		@Override
 		public void onStateChanged(boolean playWhenReady, int playbackState) {
 			Log.i("SambaPlayer", "state: " + playWhenReady + " " + playbackState + "; playing: " + isPlaying());
@@ -98,6 +99,7 @@ public class SambaPlayer extends FrameLayout {
                         dispatchPlay();
                     }
                     else dispatchPause();
+
 					player.hideLoading();
 					break;
 				case ExoPlayer.STATE_ENDED:
@@ -114,7 +116,6 @@ public class SambaPlayer extends FrameLayout {
 				case ExoPlayer.STATE_BUFFERING:
 					player.showLoading();
 					break;
-
 			}
 		}
 
@@ -675,7 +676,6 @@ public class SambaPlayer extends FrameLayout {
 		SambaMedia.Caption caption = (SambaMedia.Caption) adapter.getItem(adapter.currentIndex);
 
 		return String.format("[%s,ffcc00,42]", caption.language);
-
 	}
 
 	/**
