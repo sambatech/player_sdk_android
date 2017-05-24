@@ -23,7 +23,7 @@ public final class PrepareActivity extends Activity {
 	}
 
 	/**
-	 * Verify whether Google Play Services (GPS) is up-to-date and try to update it.
+	 * Verify whether Google Play Services (GPS) is up-to-date or try to update it otherwise.
 	 */
 	private void checkAndUpdateGPSIfNeeded() {
 		GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();

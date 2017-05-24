@@ -60,7 +60,8 @@ public class OutputAdapter extends BaseAdapter {
 		}
 		else holder = (OutputItem) convertView.getTag();
 
-		holder.label.setText(output.adaptive ? "Auto" : output.height + "p");
+		holder.label.setText(output.adaptive ? "Auto" : output.height > 0 ?
+				output.height + "p" : Math.round(output.bitrate/1000f) + "k");
 		holder.radio.setChecked(position == player.getCurrentOutputIndex());
 
 		return convertView;

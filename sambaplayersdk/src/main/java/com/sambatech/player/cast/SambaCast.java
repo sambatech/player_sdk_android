@@ -13,6 +13,8 @@ import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.CastStateListener;
 import com.google.android.gms.cast.framework.SessionManager;
 import com.google.android.gms.cast.framework.SessionManagerListener;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.ResultCallbacks;
 import com.google.android.gms.common.api.Status;
 import com.sambatech.player.R;
@@ -129,6 +131,12 @@ public final class SambaCast {
 	 * Must be called inside "Activity.onCreate".
 	 */
 	public SambaCast(@NonNull Context context) {
+		int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context);
+
+		// if Google Play Services API is up-to-date
+		if (status != ConnectionResult.SUCCESS)
+			return;
+
 		LayoutInflater inflater = LayoutInflater.from(context);
 		castButton = (MediaRouteButton)inflater.inflate(R.layout.cast_button, null);
 		castContext = CastContext.getSharedInstance(context);

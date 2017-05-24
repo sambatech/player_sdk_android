@@ -20,7 +20,9 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.exoplayer.BehindLiveWindowException;
 import com.google.android.exoplayer.ExoPlayer;
+import com.google.android.exoplayer.MediaFormat;
 import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
@@ -94,6 +96,11 @@ public class SambaPlayer extends FrameLayout {
 		                        seek(_initialTime);
 		                        _initialTime = 0;
 	                        }
+
+	                        if (_initialOutput != -1) {
+		                        switchOutput(_initialOutput);
+		                        _initialOutput = -1;
+	                        }
                         }
 
                         dispatchPlay();
@@ -125,9 +132,13 @@ public class SambaPlayer extends FrameLayout {
 
 			String msg = "Você está offline! Verifique sua conexão.";
 			SambaPlayerError.Severity severity = SambaPlayerError.Severity.recoverable;
+			final boolean isBehindLiveWindowException = e.getCause() instanceof BehindLiveWindowException;
 
 			if (_initialTime == 0f)
 				_initialTime = getCurrentTime();
+
+			if (isBehindLiveWindowException)
+				_initialOutput = player.getTrackCount(ExoplayerWrapper.TYPE_VIDEO) - 1;
 
 			destroyInternal();
 
@@ -136,7 +147,13 @@ public class SambaPlayer extends FrameLayout {
 				msg = String.format("Você não tem permissão para %s", media.isAudioOnly ? "ouvir este áudio." : "assistir este vídeo.");
 				severity = SambaPlayerError.Severity.critical;
 			}
-			// URL not found (or cannot reach server)
+			// possible network or streaming instability (misalignment, holes, etc.), try to recover
+			else if (isBehindLiveWindowException) {
+				msg = "Instabilidade na rede ou no envio de dados.";
+				severity = SambaPlayerError.Severity.minor;
+				create(false);
+			}
+			// URL not found
 			else if (Helpers.isNetworkAvailable(getContext())) {
 				msg = "Conectando...";
 				severity = SambaPlayerError.Severity.info;
@@ -417,6 +434,7 @@ public class SambaPlayer extends FrameLayout {
 	private int _currentBackupIndex;
 	private int _currentRetryIndex;
 	private float _initialTime = 0f;
+	private int _initialOutput = -1;
 	//private boolean wasPlaying;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
@@ -863,12 +881,16 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void initOutputMenu() {
-		if (media.isAudioOnly || media.outputs == null ||
-				media.outputs.size() <= 1 || player == null)
+		if (player == null)
+			return;
+
+		final MediaFormat[] tracks = player.getTrackFormats(ExoplayerWrapper.TYPE_VIDEO);
+
+		if (media.isAudioOnly || tracks.length <= 1)
 			return;
 
 		outputMenu = initDialog(R.string.output, new OutputAdapter(getContext(),
-						player.getTrackFormats(ExoplayerWrapper.TYPE_VIDEO), this),
+						tracks, this),
 				new AdapterView.OnItemClickListener() {
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

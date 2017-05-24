@@ -20,14 +20,13 @@ android {
 
 dependencies {
     // DEV
-    //compile fileTree(dir: 'libs', include: ['*.jar'])
-    //compile project(':googlemediaframework')
+    compile project(':googlemediaframework')
 
     // PROD
-    compile('com.sambatech.player:gmf:0.2.1-1') {
+    /*compile('com.sambatech.player:gmf:0.2.1-1') {
         // DEPLOY
         transitive=true
-    }
+    }*/
 
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.3.0'
