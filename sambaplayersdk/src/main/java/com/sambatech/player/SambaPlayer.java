@@ -101,6 +101,11 @@ public class SambaPlayer extends FrameLayout {
 		                        switchOutput(_initialOutput);
 		                        _initialOutput = -1;
 	                        }
+
+	                        if(_initialFullscreen != null) {
+								player.setFullscreen(_initialFullscreen);
+								_initialFullscreen = null;
+							}
                         }
 
                         dispatchPlay();
@@ -139,6 +144,8 @@ public class SambaPlayer extends FrameLayout {
 
 			if (isBehindLiveWindowException)
 				_initialOutput = player.getTrackCount(ExoplayerWrapper.TYPE_VIDEO) - 1;
+
+			_initialFullscreen = player.isFullscreen();
 
 			destroyInternal();
 
@@ -435,6 +442,7 @@ public class SambaPlayer extends FrameLayout {
 	private int _currentRetryIndex;
 	private float _initialTime = 0f;
 	private int _initialOutput = -1;
+	private Boolean _initialFullscreen = null;
 	//private boolean wasPlaying;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
@@ -658,6 +666,7 @@ public class SambaPlayer extends FrameLayout {
 	 * Must be called after START event has been dispatched.
 	 * @param index The index in the outputs array.
 	 */
+
 	public void switchOutput(int index) {
 		if (player == null || outputMenu == null)
 			return;
