@@ -18,24 +18,26 @@ import com.sambatech.player.SambaPlayer;
  */
 public class OutputAdapter extends BaseAdapter {
 
-	private @NonNull Context context;
-	private @NonNull MediaFormat[] outputs;
-	private @NonNull SambaPlayer player;
+	private final @NonNull Context context;
+	private final @NonNull MediaFormat[] outputs;
+	private final @NonNull SambaPlayer player;
+	private final int outputOffset;
 
-	public OutputAdapter(@NonNull Context context, @NonNull MediaFormat[] outputs, @NonNull SambaPlayer player) {
+	public OutputAdapter(@NonNull Context context, @NonNull MediaFormat[] outputs, @NonNull SambaPlayer player, int outputOffset) {
 		this.context = context;
 		this.outputs = outputs;
 		this.player = player;
+		this.outputOffset = outputOffset;
 	}
 
 	@Override
 	public int getCount() {
-		return outputs.length;
+		return outputs.length - outputOffset;
 	}
 
 	@Override
 	public Object getItem(int position) {
-		return outputs[position];
+		return outputs[position + outputOffset];
 	}
 
 	@Override

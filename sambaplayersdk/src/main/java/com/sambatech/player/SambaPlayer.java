@@ -211,17 +211,20 @@ public class SambaPlayer extends FrameLayout {
 			// no network connection
 			else if (_currentRetryIndex++ < media.retriesTotal) {
 				final AtomicInteger secs = new AtomicInteger(8);
-				final Timer timer = new Timer();
 
-				timer.scheduleAtFixedRate(new TimerTask() {
+				stopErrorTimer();
+
+				errorTimer = new Timer();
+
+				errorTimer.scheduleAtFixedRate(new TimerTask() {
 					@Override
 					public void run() {
 						((Activity) getContext()).runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
 								if (secs.get() == 0) {
-									timer.cancel();
-									timer.purge();
+									errorTimer.cancel();
+									errorTimer.purge();
 									create(false);
 								}
 
@@ -443,7 +446,10 @@ public class SambaPlayer extends FrameLayout {
 	private float _initialTime = 0f;
 	private int _initialOutput = -1;
 	private Boolean _initialFullscreen = null;
-	//private boolean wasPlaying;
+	private Timer errorTimer;
+    private boolean _abrEnabled;
+    private int _outputOffset;
+    //private boolean wasPlaying;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -486,9 +492,14 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	/**
-	 * Resumes media playback.
+	 * Resumes media playback
+	 * @param outputIndex start index
 	 */
-	public void play() {
+	public void play(boolean abrEnabled, int outputIndex) {
+        _abrEnabled = abrEnabled;
+        _outputOffset = abrEnabled ? 0 : 1;
+		_initialOutput = outputIndex;
+
 		// in case of forbidden rooted device
 		if (_disabled) return;
 
@@ -505,6 +516,13 @@ public class SambaPlayer extends FrameLayout {
 		}
 
 		player.play();
+	}
+
+	/**
+	 * Resumes media playback.
+	 */
+	public void play() {
+		play(true, -1);
 	}
 
 	/**
@@ -671,8 +689,8 @@ public class SambaPlayer extends FrameLayout {
 		if (player == null || outputMenu == null)
 			return;
 
-		outputMenu.setTag(index);
-		player.setSelectedTrack(index);
+		outputMenu.setTag(index + _outputOffset);
+		player.setSelectedTrack(index + _outputOffset);
 	}
 
 	/**
@@ -680,8 +698,8 @@ public class SambaPlayer extends FrameLayout {
 	 * @return The selected output index
 	 */
 	public int getCurrentOutputIndex() {
-		return outputMenu != null && outputMenu.getTag() != null ?
-				(int)outputMenu.getTag() : media.defaultOutputIndex;
+		return (outputMenu != null && outputMenu.getTag() != null ?
+				(int)outputMenu.getTag() : media.defaultOutputIndex) - _outputOffset;
 	}
 
 	/**
@@ -893,13 +911,13 @@ public class SambaPlayer extends FrameLayout {
 		if (player == null)
 			return;
 
-		final MediaFormat[] tracks = player.getTrackFormats(ExoplayerWrapper.TYPE_VIDEO);
+        final MediaFormat[] tracks = player.getTrackFormats(ExoplayerWrapper.TYPE_VIDEO);
 
-		if (media.isAudioOnly || tracks.length <= 1)
-			return;
+        if (media.isAudioOnly || tracks.length <= 1)
+            return;
 
 		outputMenu = initDialog(R.string.output, new OutputAdapter(getContext(),
-						tracks, this),
+						tracks, this, _outputOffset),
 				new AdapterView.OnItemClickListener() {
 					@Override
 					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -943,6 +961,7 @@ public class SambaPlayer extends FrameLayout {
 			return;
 
 		stopProgressTimer();
+		stopErrorTimer();
 		stop();
 		player.setFullscreen(false);
 
@@ -1038,6 +1057,14 @@ public class SambaPlayer extends FrameLayout {
 		progressTimer.cancel();
 		progressTimer.purge();
 		progressTimer = null;
+	}
+
+	private void stopErrorTimer() {
+		if(errorTimer == null) return;
+
+		errorTimer.cancel();
+		errorTimer.purge();
+		errorTimer = null;
 	}
 
 	private void dispatchPlay() {
