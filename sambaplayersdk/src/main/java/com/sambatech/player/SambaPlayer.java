@@ -447,7 +447,6 @@ public class SambaPlayer extends FrameLayout {
 	private int _initialOutput = -1;
 	private Boolean _initialFullscreen = null;
 	private Timer errorTimer;
-    private boolean _abrEnabled;
     private int _outputOffset;
     //private boolean wasPlaying;
 
@@ -496,12 +495,11 @@ public class SambaPlayer extends FrameLayout {
 	 * @param outputIndex start index
 	 */
 	public void play(boolean abrEnabled, int outputIndex) {
-        _abrEnabled = abrEnabled;
         _outputOffset = abrEnabled ? 0 : 1;
 		_initialOutput = outputIndex;
 
-		// in case of forbidden rooted device
-		if (_disabled) return;
+		// in case of forbidden rooted device or error state
+		if (_disabled || errorScreen != null) return;
 
 		// defer play if plugins not loaded yet
 		if (!PluginManager.getInstance().isLoaded()) {
@@ -957,11 +955,12 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void destroyInternal() {
+		stopProgressTimer();
+		stopErrorTimer();
+
 		if (player == null)
 			return;
 
-		stopProgressTimer();
-		stopErrorTimer();
 		stop();
 		player.setFullscreen(false);
 
