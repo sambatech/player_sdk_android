@@ -1,7 +1,12 @@
 #!/bin/bash
 
+# $1: Bintray user
+# $2: Bintray API key
+# $3 (optional): Version suffix
+
 repoUser=$1
 repoApiKey=$2
+versionSuffix=$([[ -z $3 ]] && echo 'beta' || echo $3)
 ret=''
 
 set -x
@@ -14,7 +19,7 @@ publish() {
 
 	# vars
 	output="$1/build/outputs/aar"
-	v="$(cat "$1/build.gradle" | grep 'versionName' | sed $'s/^[^"\']*[\'"v]*//' | sed $'s/[^0-9]*$//')-beta"
+	v="$(cat "$1/build.gradle" | grep 'versionName' | sed $'s/^[^"\']*[\'"v]*//' | sed $'s/[^0-9]*$//')-$versionSuffix"
 	pomPath="$output/$2-$v.pom"
 	pomPathTmp="$output/tmp.pom"
 	args=($@)
@@ -36,7 +41,7 @@ publish() {
 	# configuring repo client tool
 	./jfrog bt config --user $repoUser --key $repoApiKey --licenses MIT --interactive false
 	# uploading artifacts to repo
-	./jfrog bt u "$output/$2*" 'sambatech/maven/sdk-android/v0' "com/sambatech/player/$2/$v/" --publish true --override true
+	./jfrog bt u "$output/$2*" "sambatech/maven/sdk-android/v0" "com/sambatech/player/$2/$v/" --publish true --override true
 
 	ret=$v
 }

@@ -13,9 +13,16 @@ dependencies:
     - ~/android
 
 deployment:
+  master:
+    branch: master
+    commands:
+      - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
+      - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
+      - assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
+  
   dev:
     branch: dev
     commands:
       - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
       - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
-      - assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
+      - assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev
