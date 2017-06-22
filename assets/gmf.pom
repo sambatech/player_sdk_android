@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.sambatech.player</groupId>
   <artifactId>gmf</artifactId>
-  <version>0.2.0</version>
+  <version>0.2.1-1</version>
   <packaging>aar</packaging>
   <name>Samba Player Android SDK Base</name>
   <description>Samba Tech's video player SDK base (Google Media Framework)</description>
@@ -24,9 +24,9 @@
   </developers>
   <dependencies>
     <dependency>
-      <groupId>com.sambatech.player.3rd</groupId>
+      <groupId>com.google.android.exoplayer</groupId>
       <artifactId>exoplayer</artifactId>
-      <version>1.5.2</version>
+      <version>r1.5.7</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

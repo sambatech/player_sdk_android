@@ -1,0 +1,21 @@
+machine:
+   environment:
+     ANDROID_HOME: /usr/local/android-sdk-linux
+
+dependencies:
+  pre:
+    - openssl aes-256-cbc -d -in assets/build-vars-enc -k $SENS_DATA_KEY >> ~/.circlerc
+    - curl -fL https://getcli.jfrog.io | sh
+    - chmod +x jfrog
+
+  cache_directories:
+    - ~/.android
+    - ~/android
+
+deployment:
+  dev:
+    branch: dev
+    commands:
+      - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
+      - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
+      - assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY

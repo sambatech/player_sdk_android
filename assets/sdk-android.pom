@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.sambatech.player</groupId>
   <artifactId>sdk-android</artifactId>
-  <version>1.0.0-alpha</version>
+  <version>0.1.0</version>
   <packaging>aar</packaging>
   <name>Samba Player Android SDK</name>
   <description>Samba Tech's video player SDK</description>
@@ -26,19 +26,25 @@
     <dependency>
       <groupId>com.sambatech.player</groupId>
       <artifactId>gmf</artifactId>
-      <version>0.2.0</version>
+      <version>0.2.1-1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
-      <groupId>com.sambatech.player.3rd</groupId>
-      <artifactId>ima-android-sdk</artifactId>
-      <version>3.1.3</version>
+      <groupId>com.google.ads.interactivemedia.v3</groupId>
+      <artifactId>interactivemedia</artifactId>
+      <version>3.7.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.android.gms</groupId>
       <artifactId>play-services-ads</artifactId>
-      <version>8.4.0</version>
+      <version>10.2.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.android.gms</groupId>
+      <artifactId>play-services-cast-framework</artifactId>
+      <version>10.2.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
