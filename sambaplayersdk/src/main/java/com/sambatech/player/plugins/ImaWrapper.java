@@ -49,7 +49,7 @@ import java.util.List;
 public class ImaWrapper implements Plugin {
 
 	private static String PLAYER_TYPE = "google/gmf-android";
-	private static String PLAYER_VERSION = "0.2.0";
+	private static String PLAYER_VERSION = "0.2.1";
 
 	/**
 	 * The activity that is displaying this video player.
@@ -236,7 +236,7 @@ public class ImaWrapper implements Plugin {
 			adsManager = adsManagerLoadedEvent.getAdsManager();
 			adsManager.addAdErrorListener(this);
 			adsManager.addAdEventListener(this);
-			adsManager.init();
+			adsManager.init(contentPlayer.getMedia().adsSettings.rendering);
 		}
 	}
 
@@ -371,6 +371,8 @@ public class ImaWrapper implements Plugin {
 		ImaSdkSettings sdkSettings = ImaSdkFactory.getInstance().createImaSdkSettings();
 		sdkSettings.setPlayerType(PLAYER_TYPE);
 		sdkSettings.setPlayerVersion(PLAYER_VERSION);
+		sdkSettings.setMaxRedirects(media.adsSettings.maxRedirects);
+		sdkSettings.setDebugMode(media.adsSettings.debugMode);
 
 		adsLoader = ImaSdkFactory.getInstance().createAdsLoader(activity, sdkSettings);
 		adListener = new AdListener();
@@ -572,10 +574,11 @@ public class ImaWrapper implements Plugin {
 		adDisplayContainer.setPlayer(videoAdPlayer);
 		adDisplayContainer.setAdContainer(adUiContainer);
 
-		AdsRequest request = ImaSdkFactory.getInstance().createAdsRequest();
+		final AdsRequest request = ImaSdkFactory.getInstance().createAdsRequest();
 		request.setAdTagUrl(tagUrl);
 		request.setContentProgressProvider(contentProgressProvider);
 		request.setAdDisplayContainer(adDisplayContainer);
+		request.setVastLoadTimeout(contentPlayer.getMedia().adsSettings.vastLoadTimeout);
 
 		return request;
 	}

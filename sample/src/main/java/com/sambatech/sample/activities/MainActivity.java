@@ -281,7 +281,8 @@ public class MainActivity extends Activity {
 		m.id = "5db4352a8618fbf794753d2f1170dbf8";
 		m.adTag = new LiquidMedia.AdTag();
 		m.adTag.name = m.title;
-		m.adTag.url = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480|640x480&iu=/1011235/640x480_WebDigital_TheNoite_PreRoll&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]&a=0";
+		//m.adTag.url = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480|640x480&iu=/1011235/640x480_WebDigital_TheNoite_PreRoll&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&url=[referrer_url]&description_url=[description_url]&correlator=[timestamp]&a=0";
+		m.adTag.url = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/1011235/640x480_WebDigital_PreRoll&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1]&volume=50";
 		LiquidMedia.Thumb thumb = new LiquidMedia.Thumb();
 		thumb.url = "https://vignette4.wikia.nocookie.net/telepedia/images/4/4e/Logotipo_do_SBT.png/revision/latest?cb=20150603172637&path-prefix=pt-br";
 		m.thumbs = new ArrayList<>(Arrays.asList(new LiquidMedia.Thumb[]{thumb}));

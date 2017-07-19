@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '25.0.0'
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 23
+        targetSdkVersion 25
         versionCode 1
         versionName '1.0'
     }
@@ -27,11 +27,11 @@ dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // DEV
-    //compile project(':sambaplayersdk')
+    compile project(':sambaplayersdk')
 
 
     // PROD
-    compile 'com.sambatech.player:sdk-android:0.9.4-beta'
+    //compile 'com.sambatech.player:sdk-android:0.9.4-beta'
 
     compile 'org.bitbucket.b_c:jose4j:0.4.4'
     compile 'com.mcxiaoke.volley:library:1.0.19'

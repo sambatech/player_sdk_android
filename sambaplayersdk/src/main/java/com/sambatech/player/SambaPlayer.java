@@ -486,7 +486,7 @@ public class SambaPlayer extends FrameLayout {
 	 *
 	 * @return Media data
 	 */
-	public SambaMedia getMedia() {
+	public @NonNull SambaMedia getMedia() {
 		return media;
 	}
 
