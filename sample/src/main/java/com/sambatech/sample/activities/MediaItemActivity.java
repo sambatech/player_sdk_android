@@ -11,9 +11,9 @@ import android.widget.Toast;
 
 import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.SambaApi;
+import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.cast.CastOptionsProvider;
 import com.sambatech.player.cast.SambaCast;
-import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -302,6 +302,12 @@ public class MediaItemActivity extends Activity {
 			player.setLayoutParams(player.getLayoutParams());
 		}
 
+		/*final AdsSettings settings = new AdsSettings(10f, 5);
+
+	    settings.rendering.setMimeTypes(Arrays.asList("text/html", "video/mpeg", "image/jpeg"));
+	    settings.rendering.setBitrateKbps(200000);
+	    settings.debugMode = true;
+	    media.adsSettings = settings;*/
 
 		// enabling Chromecast on player
 		player.setSambaCast(sambaCast);

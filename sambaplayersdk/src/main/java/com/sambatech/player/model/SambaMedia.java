@@ -16,7 +16,7 @@ public class SambaMedia {
 	public String url;
 	public String type = "";
 	public String adUrl;
-	public final AdsSettings adsSettings = new AdsSettings();
+	public @NonNull AdsSettings adsSettings = new AdsSettings();
 	public Drawable thumb;
 	public float initialTime = 0f;
 	public float duration = 0f;
