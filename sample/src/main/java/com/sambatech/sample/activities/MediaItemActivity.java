@@ -18,6 +18,7 @@ import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
+import com.sambatech.player.model.AdsSettings;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
@@ -34,6 +35,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -302,12 +304,12 @@ public class MediaItemActivity extends Activity {
 			player.setLayoutParams(player.getLayoutParams());
 		}
 
-		/*final AdsSettings settings = new AdsSettings(10f, 5);
+		final AdsSettings settings = new AdsSettings(20000f, 5);
 
-	    settings.rendering.setMimeTypes(Arrays.asList("text/html", "video/mpeg", "image/jpeg"));
-	    settings.rendering.setBitrateKbps(200000);
-	    settings.debugMode = true;
-	    media.adsSettings = settings;*/
+	    //settings.rendering.setMimeTypes(Arrays.asList("text/html", "video/mpeg", "image/jpeg"));
+	    //settings.rendering.setBitrateKbps(200000);
+	    //settings.debugMode = true;
+	    media.adsSettings = settings;
 
 		// enabling Chromecast on player
 		player.setSambaCast(sambaCast);

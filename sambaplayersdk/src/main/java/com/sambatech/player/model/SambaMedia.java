@@ -35,6 +35,7 @@ public class SambaMedia {
 		title = media.title;
 		url = media.url;
 		adUrl = media.adUrl;
+		adsSettings = media.adsSettings;
 		thumb = media.thumb;
 		initialTime = media.initialTime;
 		duration = media.duration;

@@ -11,11 +11,11 @@ public final class AdsSettings {
 
 	public final AdsRenderingSettings rendering = ImaSdkFactory.getInstance().createAdsRenderingSettings();
 	public final int maxRedirects;
-	public final float vastLoadTimeout;
+	public final float vastLoadTimeout; // ms
 	public boolean debugMode;
 
 	public AdsSettings() {
-		this(5000f);
+		this(8000f);
 	}
 
 	public AdsSettings(float vastLoadTimeout) {
