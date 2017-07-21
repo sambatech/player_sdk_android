@@ -32,19 +32,19 @@
     <dependency>
       <groupId>com.google.ads.interactivemedia.v3</groupId>
       <artifactId>interactivemedia</artifactId>
-      <version>3.7.0</version>
+      <version>3.7.4</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.android.gms</groupId>
       <artifactId>play-services-ads</artifactId>
-      <version>10.2.1</version>
+      <version>11.0.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.android.gms</groupId>
       <artifactId>play-services-cast-framework</artifactId>
-      <version>10.2.1</version>
+      <version>11.0.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
