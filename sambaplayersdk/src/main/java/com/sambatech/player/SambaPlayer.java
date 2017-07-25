@@ -89,19 +89,22 @@ public class SambaPlayer extends FrameLayout {
 	                        destroyError();
                             SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
 
-	                        //Show controls
+	                        // show controls
 							player.show();
 
+	                        // initial position
 	                        if (!media.isLive && _initialTime > 0) {
 		                        seek(_initialTime);
 		                        _initialTime = 0;
 	                        }
 
+	                        // initial output
 	                        if (_initialOutput != -1) {
 		                        switchOutput(_initialOutput);
 		                        _initialOutput = -1;
 	                        }
 
+	                        // start in fullscreen
 	                        if(_initialFullscreen != null) {
 								player.setFullscreen(_initialFullscreen);
 								_initialFullscreen = null;
@@ -127,6 +130,29 @@ public class SambaPlayer extends FrameLayout {
 					break;
 				case ExoPlayer.STATE_BUFFERING:
 					player.showLoading();
+					stopErrorTimer();
+
+					// buffering timeout
+					final AtomicInteger secs = new AtomicInteger(20);
+
+					errorTimer = new Timer();
+					errorTimer.scheduleAtFixedRate(new TimerTask() {
+						@Override
+						public void run() {
+							((Activity) getContext()).runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									// on buffer timeout disable ABR (sets to lower)
+									if (secs.get() == 0) {
+										stopErrorTimer();
+										_initialOutput = 0;
+									}
+
+									secs.decrementAndGet();
+								}
+							});
+						}
+					}, 0, 1000);
 					break;
 			}
 		}
@@ -142,6 +168,7 @@ public class SambaPlayer extends FrameLayout {
 			if (_initialTime == 0f)
 				_initialTime = getCurrentTime();
 
+			// misalignment
 			if (isBehindLiveWindowException)
 				_initialOutput = player.getTrackCount(ExoplayerWrapper.TYPE_VIDEO) - 1;
 
@@ -215,7 +242,6 @@ public class SambaPlayer extends FrameLayout {
 				stopErrorTimer();
 
 				errorTimer = new Timer();
-
 				errorTimer.scheduleAtFixedRate(new TimerTask() {
 					@Override
 					public void run() {
@@ -223,8 +249,7 @@ public class SambaPlayer extends FrameLayout {
 							@Override
 							public void run() {
 								if (secs.get() == 0) {
-									errorTimer.cancel();
-									errorTimer.purge();
+									stopErrorTimer();
 									create(false);
 								}
 
@@ -1030,7 +1055,11 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void destroyError() {
-		if (errorScreen == null) return;
+		stopErrorTimer();
+
+		if (errorScreen == null)
+			return;
+
 		errorScreen.findViewById(R.id.retry_button).setOnClickListener(null);
 		removeView(errorScreen);
 		errorScreen = null;
