@@ -9,10 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
@@ -38,6 +40,7 @@ public class ItemDetailFragment extends Fragment {
 	 * The dummy content this fragment is presenting.
 	 */
 	private MediaContent.Media mItem;
+	private SimpleExoPlayer player;
 
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
@@ -69,24 +72,37 @@ public class ItemDetailFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState) {
 		SimpleExoPlayerView playerView = (SimpleExoPlayerView)inflater.inflate(R.layout.item_detail, container, false);
+		playerView.requestFocus();
 
 		if (mItem != null) {
-			SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(getContext(), new DefaultTrackSelector());
-			playerView.setPlayer(player);
-
 			// preparing
 			// all deliveries
 			DefaultBandwidthMeter bwMeter = new DefaultBandwidthMeter();
 			DefaultHttpDataSourceFactory baseDataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(getContext(), "ExoPlayer v2"), bwMeter);
 			DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(getContext(), bwMeter, baseDataSourceFactory);
+			DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(getContext());
+			AdaptiveTrackSelection.Factory adaptiveTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bwMeter);
+			DefaultTrackSelector trackSelector = new DefaultTrackSelector(adaptiveTrackSelectionFactory);
+
+			// instantiate
+			player = ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector);
+			playerView.setPlayer(player);
 
 			// hls
 			MediaSource mediaSource = new HlsMediaSource(Uri.parse(mItem.url), dataSourceFactory, null, null);
 
-			player.prepare(mediaSource);
 			player.setPlayWhenReady(true);
+			player.prepare(mediaSource);
 		}
 
 		return playerView;
+	}
+
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+
+		if (player != null)
+			player.release();
 	}
 }

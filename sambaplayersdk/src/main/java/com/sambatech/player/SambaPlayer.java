@@ -833,9 +833,11 @@ public class SambaPlayer extends FrameLayout {
 
 		//Live treatment
 		if (media.isLive) {
-			((Activity)getContext()).findViewById(R.id.time_container).setVisibility(INVISIBLE);
+			if (!media.isDvr) {
+				((Activity) getContext()).findViewById(R.id.time_container).setVisibility(INVISIBLE);
+				player.setControlsVisible(false, "seekbar");
+			}
 
-			player.setControlsVisible(false, "seekbar");
 			player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.ic_live),
 					getContext().getString(R.string.live), null);
 		}

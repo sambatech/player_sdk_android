@@ -35,7 +35,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -247,6 +246,7 @@ public class MediaItemActivity extends Activity {
 			    }
 
 			    media.isAudioOnly = liquidMedia.qualifier.toLowerCase().equals("audio");
+			    media.isDvr = liquidMedia.dvr;
 
 			    loadPlayer(media);
 

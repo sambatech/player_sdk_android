@@ -27,6 +27,7 @@ public class SambaMedia {
 	public ArrayList<Caption> captions;
 	public @NonNull CaptionsConfig captionsConfig = new CaptionsConfig();
 	public String drmToken;
+	public boolean isDvr;
 
 	public SambaMedia() {}
 
@@ -46,6 +47,7 @@ public class SambaMedia {
 		captions = media.captions;
 		captionsConfig = media.captionsConfig;
 		drmToken = media.drmToken;
+		isDvr = media.isDvr;
 	}
 
 	public static class Output {

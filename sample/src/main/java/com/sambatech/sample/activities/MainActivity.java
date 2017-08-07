@@ -460,6 +460,18 @@ public class MainActivity extends Activity {
 
 		medias.add(media);
 
+		// HLS DVR
+		media = new LiquidMedia();
+		media.environment = SambaMediaRequest.Environment.PROD;
+		media.ph = ph;
+		media.streamUrl = "http://origin3.live.sambatech.com.br/liveevent_dvr/client_playerHash/livestream/playlist.m3u8?DVR";
+		media.dvr = true;
+		media.title = "HLS DVR";
+		media.description = "HLS with DVR";
+		media.thumbs = thumbs;
+
+		medias.add(media);
+
 		// fallback URL
 		media = new LiquidMedia();
 		media.environment = SambaMediaRequest.Environment.STAGING;

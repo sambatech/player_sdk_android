@@ -29,6 +29,8 @@ import java.util.List;
  */
 public class ObservablePlayerControl extends PlayerControl {
 
+  private final ExoPlayer exoPlayer;
+
   /**
    * Callbacks which will react to the player pausing or playing.
    */
@@ -39,7 +41,8 @@ public class ObservablePlayerControl extends PlayerControl {
    */
   public ObservablePlayerControl(ExoPlayer exoPlayer) {
     super(exoPlayer);
-    callbacks = new ArrayList<PlayerControlCallback>();
+    this.exoPlayer = exoPlayer;
+    callbacks = new ArrayList<>();
   }
 
   /**
@@ -48,6 +51,11 @@ public class ObservablePlayerControl extends PlayerControl {
    */
   public void addCallback(PlayerControlCallback callback) {
     callbacks.add(callback);
+  }
+
+  @Override
+  public void seekTo(int timeMillis) {
+    exoPlayer.seekTo(timeMillis);
   }
 
   /**

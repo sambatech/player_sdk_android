@@ -108,13 +108,13 @@ public class ItemListActivity extends AppCompatActivity {
 			return mValues.size();
 		}
 
-		public class ViewHolder extends RecyclerView.ViewHolder {
-			public final View mView;
-			public final TextView mIdView;
-			public final TextView mContentView;
-			public MediaContent.Media mItem;
+		class ViewHolder extends RecyclerView.ViewHolder {
+			final View mView;
+			final TextView mIdView;
+			final TextView mContentView;
+			MediaContent.Media mItem;
 
-			public ViewHolder(View view, TextView idView, TextView contentView) {
+			ViewHolder(View view, TextView idView, TextView contentView) {
 				super(view);
 				mView = view;
 				mIdView = idView;
