@@ -11,7 +11,7 @@ import android.widget.TextView;
 import com.sambatech.player.R;
 import com.sambatech.player.model.SambaMedia;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author tmiranda - 12/01/17
@@ -21,9 +21,9 @@ public class CaptionsAdapter extends BaseAdapter {
     public int currentIndex = -1;
 
     private Context cContext;
-    private ArrayList<SambaMedia.Caption> captions;
+    private List<SambaMedia.Caption> captions;
 
-    public CaptionsAdapter(Context context, ArrayList<SambaMedia.Caption> cList) {
+    public CaptionsAdapter(Context context, List<SambaMedia.Caption> cList) {
         this.cContext = context;
         this.captions = cList;
     }
