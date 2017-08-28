@@ -11,6 +11,7 @@ public class SambaMediaRequest {
 
 	public String projectHash;
 	public String mediaId;
+	public String liveChannelId;
 	public String streamName;
 	public String streamUrl;
 	public @NonNull String[] backupUrls = new String[]{};
@@ -24,7 +25,21 @@ public class SambaMediaRequest {
 	 * @param mediaId Hash code of the media
 	 */
 	public SambaMediaRequest(String projectHash, String mediaId) {
-		this(projectHash, mediaId, null);
+		this(projectHash, mediaId, false);
+	}
+
+	/**
+	 * Represents a live stream request.
+	 *
+	 * @param projectHash Hash code of the project
+	 * @param mediaOrLiveChannelId Hash code of the media or live
+	 */
+	public SambaMediaRequest(String projectHash, String mediaOrLiveChannelId, boolean isLive) {
+		this.projectHash = projectHash;
+
+		if (isLive)
+			this.liveChannelId = mediaOrLiveChannelId;
+		else this.mediaId = mediaOrLiveChannelId;
 	}
 
 	/**

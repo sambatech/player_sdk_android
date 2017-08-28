@@ -39,16 +39,18 @@ public class SambaApi {
 	/**
 	 * Output map
 	 */
-	private static final Map<String, Integer> outputMap = new HashMap<String, Integer>() {{
-		put("_raw", -1);
-		put("abr", 0);
-		put("abr_hls", 0);
-		put("240p", 1);
-		put("360p", 2);
-		put("480p", 3);
-		put("720p", 4);
-		put("1080p", 5);
-	}};
+	private static final Map<String, Integer> outputMap = new HashMap<>();
+
+	static {
+		outputMap.put("_raw", -1);
+		outputMap.put("abr", 0);
+		outputMap.put("abr_hls", 0);
+		outputMap.put("240p", 1);
+		outputMap.put("360p", 2);
+		outputMap.put("480p", 3);
+		outputMap.put("720p", 4);
+		outputMap.put("1080p", 5);
+	}
 
 	/**
 	 * SambaApi constructor
@@ -57,7 +59,6 @@ public class SambaApi {
 	 * @param accessToken Configured SambaTech access token (ignored for now, pass an empty string or null)
 	 */
 	public SambaApi(Activity activity, String accessToken) {
-		//TODO validar token
 		this.activity = activity;
 		this.accessToken = accessToken;
 	}
@@ -143,8 +144,17 @@ public class SambaApi {
 					endpoint = normalizeProtocol(activity.getString(R.string.player_endpoint_prod), request.protocol);
 			}
 
-			String url = endpoint + request.projectHash + (request.mediaId != null ? "/" + request.mediaId : "?" +
-					(request.streamUrl != null ? "alternateLive=" + request.streamUrl : "streamName=" + request.streamName));
+			String url = String.format("%s%s/", endpoint, request.projectHash);
+
+			if (request.mediaId != null)
+				url += String.format("%s", request.mediaId);
+			else if (request.liveChannelId != null)
+				url += String.format("live/%s", request.liveChannelId);
+
+			if (request.streamUrl != null)
+				url += String.format("?alternateLive=%s", request.streamUrl);
+			else if (request.streamName != null)
+				url += String.format("?streamName=%s", request.streamName);
 
 			InputStream inputStream = null;
 			Scanner scanner = null;
