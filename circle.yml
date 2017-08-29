@@ -1,14 +1,15 @@
 machine:
   environment:
     ANDROID_HOME: /usr/local/android-sdk-linux
-
-dependencies:
-  pre:
-    - openssl aes-256-cbc -d -in assets/build-vars-enc -k $SENS_DATA_KEY >> ~/.circlerc
+  post:
     - cd $CIRCLE_PROJECT_REPONAME && curl --header "Authorization:token $GITHUB_USER_TOKEN" --header "Accept:application/vnd.github.v3.raw" --remote-name --location https://api.github.com/repos/sambatech/devops/contents/circle-ci/run-sonar.sh
     - cd $CIRCLE_PROJECT_REPONAME && chmod a+x run-sonar.sh
     - cd $CIRCLE_PROJECT_REPONAME && ./run-sonar.sh install
     - cd $CIRCLE_PROJECT_REPONAME && ./run-sonar.sh run
+
+dependencies:
+  pre:
+    - openssl aes-256-cbc -d -in assets/build-vars-enc -k $SENS_DATA_KEY >> ~/.circlerc
     - curl -fL https://getcli.jfrog.io | sh
     - chmod +x jfrog
     - cp -r assets/licenses $ANDROID_HOME/
