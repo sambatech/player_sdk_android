@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'org.sonarqube'
 
 android {
     compileSdkVersion 25
@@ -15,6 +16,18 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.projectName", "SambaPlayer Android SDK"
+        property "sonar.projectKey", "sambaplayer-android-sdk"
+        property "sonar.host.url", "http://ec2-34-203-40-94.compute-1.amazonaws.com/sonar/"
+        property "sonar.language", "java"
+        property "sonar.sources", "src/main/java/"
+        property "sonar.login", "dev"
+        property "sonar.password", "44a538ed1"
     }
 }
 
