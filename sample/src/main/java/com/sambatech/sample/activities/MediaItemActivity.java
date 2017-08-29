@@ -246,7 +246,7 @@ public class MediaItemActivity extends Activity {
 				    return;
 			    }
 
-			    media.isAudioOnly = liquidMedia.qualifier.toLowerCase().equals("audio");
+			    media.isAudioOnly = "audio".equalsIgnoreCase(liquidMedia.qualifier);
 
 			    loadPlayer(media);
 
@@ -254,8 +254,8 @@ public class MediaItemActivity extends Activity {
 
 		    //Response error
 		    @Override
-		    public void onMediaResponseError(String msg, SambaMediaRequest request) {
-			    Toast.makeText(MediaItemActivity.this, msg + " " + request, Toast.LENGTH_SHORT).show();
+		    public void onMediaResponseError(Exception e, SambaMediaRequest request) {
+			    Toast.makeText(MediaItemActivity.this, e.getMessage() + " " + request, Toast.LENGTH_SHORT).show();
 		    }
 	    };
 
@@ -265,7 +265,7 @@ public class MediaItemActivity extends Activity {
 		    m.url = liquidMedia.url;
 		    m.title = liquidMedia.title;
 		    m.type = liquidMedia.type;
-		    m.isAudioOnly = liquidMedia.qualifier.toLowerCase().equals("audio");
+		    m.isAudioOnly = "audio".equalsIgnoreCase(liquidMedia.qualifier);
 		    callback.onMediaResponse(m);
 		    return;
 	    }
@@ -274,7 +274,10 @@ public class MediaItemActivity extends Activity {
         SambaApi api = new SambaApi(this, "token");
 
 	    //Instantiate a unique request. Params: playerHash, mediaId, streamName, streamUrl ( alternateLive on our browser version )
-        SambaMediaRequest sbRequest = new SambaMediaRequest(liquidMedia.ph, liquidMedia.id, null, liquidMedia.streamUrl, liquidMedia.backupUrls);
+        SambaMediaRequest sbRequest = liquidMedia.liveChannelId != null ?
+		        new SambaMediaRequest(liquidMedia.ph, liquidMedia.liveChannelId, true) :
+		        new SambaMediaRequest(liquidMedia.ph, liquidMedia.id, null, liquidMedia.streamUrl, liquidMedia.backupUrls);
+
 		sbRequest.environment = liquidMedia.environment;
 
 	    if (liquidMedia.description != null || liquidMedia.shortDescription != null) {
@@ -287,7 +290,8 @@ public class MediaItemActivity extends Activity {
     }
 
     private void loadPlayer(final SambaMedia media) {
-	    if (media == null) return;
+	    if (media == null)
+	    	return;
 
 	    if (activityMedia.adTag != null) {
 		    media.adUrl = activityMedia.adTag.url;

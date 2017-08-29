@@ -30,8 +30,9 @@ public class LiquidMedia implements Cloneable {
     public @NonNull SambaMediaRequest.Environment environment = SambaMediaRequest.Environment.PROD;
     public EntitlementScheme entitlementScheme;
     public String[] backupUrls;
+    public String liveChannelId;
 
-    public Object clone() throws CloneNotSupportedException {
+	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
 

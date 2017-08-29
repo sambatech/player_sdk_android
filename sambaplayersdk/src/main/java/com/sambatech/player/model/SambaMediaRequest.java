@@ -32,14 +32,15 @@ public class SambaMediaRequest {
 	 * Represents a live stream request.
 	 *
 	 * @param projectHash Hash code of the project
-	 * @param mediaOrLiveChannelId Hash code of the media or live
+	 * @param mediaIdOrLiveChannelId The media ID or live channel ID (depending on the flag)
+	 * @param isLive Set this flag to true when using a live channel ID
 	 */
-	public SambaMediaRequest(String projectHash, String mediaOrLiveChannelId, boolean isLive) {
+	public SambaMediaRequest(String projectHash, String mediaIdOrLiveChannelId, boolean isLive) {
 		this.projectHash = projectHash;
 
 		if (isLive)
-			this.liveChannelId = mediaOrLiveChannelId;
-		else this.mediaId = mediaOrLiveChannelId;
+			this.liveChannelId = mediaIdOrLiveChannelId;
+		else this.mediaId = mediaIdOrLiveChannelId;
 	}
 
 	/**

@@ -460,6 +460,17 @@ public class MainActivity extends Activity {
 
 		medias.add(media);
 
+		// HLS + DVR
+		media = new LiquidMedia();
+		media.environment = SambaMediaRequest.Environment.STAGING;
+		media.ph = "7e1c06038102a6d35995586970de734c";
+		media.liveChannelId = "e10c180abe9b717efd006f3eb752e974";
+		media.title = "HLS + DVR";
+		media.description = "HLS + DVR";
+		media.thumbs = thumbs;
+
+		medias.add(media);
+
 		// fallback URL
 		media = new LiquidMedia();
 		media.environment = SambaMediaRequest.Environment.STAGING;
