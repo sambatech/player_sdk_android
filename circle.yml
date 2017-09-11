@@ -9,6 +9,12 @@ machine:
     - cd $CIRCLE_PROJECT_REPONAME && ./run-sonar.sh install
     - cd $CIRCLE_PROJECT_REPONAME && ./run-sonar.sh run
 
+general:
+  branches:
+    only:
+      - master
+      - dev
+
 dependencies:
   pre:
     - curl -fL https://getcli.jfrog.io | sh
@@ -18,17 +24,18 @@ dependencies:
   cache_directories:
     - ~/.android
 
+compile:
+  override:
+      - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
+      - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
+
 deployment:
   master:
     branch: master
     commands:
-      - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
-      - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
       - assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
   
   dev:
     branch: dev
     commands:
-      - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
-      - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
       - assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev
