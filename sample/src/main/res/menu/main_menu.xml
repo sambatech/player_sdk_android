@@ -1,42 +1,27 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/adTag"
-        android:orderInCategory="100"
-        android:title="+"
-        android:showAsAction="always"
-        android:icon="@drawable/ic_plus_white"
-        android:actionViewClass="android.widget.SearchView"/>
+        android:id="@+id/all"
+        android:title="@string/all"
+        android:orderInCategory="100" />
 
     <item
-        android:id="@+id/withTag"
-        android:title="DFP"
-        android:orderInCategory="100"
-        android:showAsAction="always"
-        android:icon="@drawable/ic_dbclick_disable"/>
+        android:id="@+id/prod"
+        android:title="@string/prod"
+        android:orderInCategory="100" />
 
     <item
-        android:id="@+id/autoPlay"
-        android:title="Auto Play"
-        android:orderInCategory="100"
-        android:showAsAction="always"
-        android:icon="@drawable/ic_action_play"/>
+        android:id="@+id/staging"
+        android:title="@string/staging"
+        android:orderInCategory="100" />
 
     <item
-        android:id="@+id/common"
-        android:title="@string/common"
-        android:orderInCategory="100"
-        android:showAsAction="never" />
-
-    <item
-        android:id="@+id/live"
-        android:title="@string/live"
-        android:orderInCategory="100"
-        android:showAsAction="never" />
+        android:id="@+id/dev"
+        android:title="@string/dev"
+        android:orderInCategory="100" />
 
     <item
         android:id="@+id/about"
         android:title="@string/about"
-        android:orderInCategory="100"
-        android:showAsAction="never" />
+        android:orderInCategory="100" />
 </menu>
