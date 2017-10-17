@@ -23,6 +23,9 @@ public final class MediaInfo {
 	private String[] backupUrls;
 	private String adUrl;
 	private boolean autoPlay;
+	private String liveChannelId;
+	private boolean audioLive;
+	private boolean controlsEnabled;
 
 	public String getProjectHash() {
 		return projectHash;
@@ -134,5 +137,29 @@ public final class MediaInfo {
 
 	public void setAutoPlay(boolean autoPlay) {
 		this.autoPlay = autoPlay;
+	}
+
+	public String getLiveChannelId() {
+		return liveChannelId;
+	}
+
+	public void setLiveChannelId(String liveChannelId) {
+		this.liveChannelId = liveChannelId;
+	}
+
+	public void setAudioLive(boolean audioLive) {
+		this.audioLive = audioLive;
+	}
+
+	public boolean isAudioLive() {
+		return audioLive;
+	}
+
+	public void setControlsEnabled(boolean controlsEnabled) {
+		this.controlsEnabled = controlsEnabled;
+	}
+
+	public boolean isControlsEnabled() {
+		return controlsEnabled;
 	}
 }

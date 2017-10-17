@@ -130,7 +130,7 @@ public class LiquidMedia implements Cloneable {
     public static class Params {
 
 	    private String title;
-	    private Boolean autoStart;
+	    private boolean autoStart;
 	    private String streamName;
 	    private String primaryLive;
 	    private String backupLive;
@@ -141,6 +141,7 @@ public class LiquidMedia implements Cloneable {
 	    private boolean hasTwitter;
 	    private String ad_program;
 	    private String thumbnailURL;
+	    private boolean enableControls = true;
 
 	    public String getTitle() {
 		    return title;
@@ -150,11 +151,11 @@ public class LiquidMedia implements Cloneable {
 		    this.title = title;
 	    }
 
-	    public Boolean getAutoStart() {
+	    public boolean getAutoStart() {
 		    return autoStart;
 	    }
 
-	    public void setAutoStart(Boolean autoStart) {
+	    public void setAutoStart(boolean autoStart) {
 		    this.autoStart = autoStart;
 	    }
 
@@ -236,6 +237,18 @@ public class LiquidMedia implements Cloneable {
 
 	    public void setThumbnailURL(String thumbnailURL) {
 		    this.thumbnailURL = thumbnailURL;
+	    }
+
+	    public boolean getEnableControls() {
+		    return enableControls;
+	    }
+
+	    public boolean isEnableControls() {
+		    return enableControls;
+	    }
+
+	    public void setEnableControls(boolean enableControls) {
+		    this.enableControls = enableControls;
 	    }
     }
 }

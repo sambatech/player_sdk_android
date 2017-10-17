@@ -19,6 +19,7 @@ import com.sambatech.sample.model.MediaInfo;
 import com.sambatech.sample.rest.LiquidApi;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.Bind;
@@ -122,6 +123,7 @@ public class MainActivity extends Activity {
 			final MediaInfo mediaInfo = new MediaInfo();
 
 			mediaInfo.setId(m.getId());
+			mediaInfo.setLiveChannelId(m.getLiveChannelId());
 			mediaInfo.setProjectHash(m.getPh());
 			mediaInfo.setTitle(m.getTitle());
 			mediaInfo.setDescription(m.getDescription());
@@ -134,7 +136,20 @@ public class MainActivity extends Activity {
 			if (params != null) {
 				mediaInfo.setAdUrl(params.getAd_program());
 				mediaInfo.setStreamUrl(params.getPrimaryLive());
-				mediaInfo.setBackupUrls(new String[]{params.getBackupLive()});
+				mediaInfo.setAutoPlay(params.getAutoStart());
+				mediaInfo.setControlsEnabled(params.getEnableControls());
+
+				if (params.getBackupLive() != null)
+					mediaInfo.setBackupUrls(new String[]{params.getBackupLive()});
+
+				if ("audiolive".equalsIgnoreCase(params.getType()))
+					mediaInfo.setAudioLive(true);
+
+				if (params.getTitle() != null && !params.getTitle().isEmpty())
+					mediaInfo.setTitle(params.getTitle());
+
+				if (params.getThumbnailURL() != null && !params.getThumbnailURL().isEmpty())
+					mediaInfo.setThumbnail(params.getThumbnailURL());
 			}
 
 			switch (m.getEnv().toLowerCase()) {

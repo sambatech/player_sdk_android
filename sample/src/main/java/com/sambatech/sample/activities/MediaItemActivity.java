@@ -246,7 +246,7 @@ public class MediaItemActivity extends Activity {
 				    return;
 			    }
 
-			    media.isAudioOnly = "audio".equalsIgnoreCase(mediaInfo.getQualifier());
+			    media.isAudioOnly = mediaInfo.isAudioLive() || "audio".equalsIgnoreCase(mediaInfo.getQualifier());
 
 			    loadPlayer(media);
 		    }
@@ -273,10 +273,10 @@ public class MediaItemActivity extends Activity {
         final SambaApi api = new SambaApi(this, "token");
 
 	    //Instantiate a unique request. Params: playerHash, mediaId, streamName, streamUrl ( alternateLive on our browser version )
-        final SambaMediaRequest sbRequest = mediaInfo.getId() != null ?
-		        new SambaMediaRequest(mediaInfo.getProjectHash(), mediaInfo.getId(), true) :
+        final SambaMediaRequest sbRequest = mediaInfo.getLiveChannelId() != null ?
+		        new SambaMediaRequest(mediaInfo.getProjectHash(), mediaInfo.getLiveChannelId(), true) :
 		        new SambaMediaRequest(mediaInfo.getProjectHash(), mediaInfo.getId(), null,
-				        mediaInfo.getStreamUrl(), mediaInfo.getBackupUrls());
+				        mediaInfo.getStreamUrl(), mediaInfo.getBackupUrls(), mediaInfo.isAudioLive());
 
 		sbRequest.environment = mediaInfo.getEnvironment();
 
@@ -313,6 +313,7 @@ public class MediaItemActivity extends Activity {
 
 		// enabling Chromecast on player
 		player.setSambaCast(sambaCast);
+	    player.setEnableControls(activityMedia.isControlsEnabled());
 	    player.setMedia(media);
 
 		//ti = new Date().getTime();
