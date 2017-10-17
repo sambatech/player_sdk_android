@@ -357,7 +357,8 @@ public class SambaPlayer extends FrameLayout {
 			// enabling hook for API and user actions
 			player.setInterceptableListener(interceptableListener);
 			player.setAutoHide(false);
-			player.setControlsVisible(false, "outputMenu", "captionMenu");
+			player.setControlsVisible(false, Controls.OUTPUT);
+			player.setControlsVisible(false, Controls.OUTPUT, Controls.CAPTION);
 
 			// converting SambaMedia to MediaInfo
 			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
@@ -440,8 +441,8 @@ public class SambaPlayer extends FrameLayout {
 		@Override
 		public void onDisconnected() {
 			player.setControlsVisible(true,
-					outputMenu != null ? "outputMenu" : null,
-					captionMenu != null ? "captionMenu" : null);
+					outputMenu != null ? Controls.OUTPUT : null,
+					captionMenu != null ? Controls.CAPTION : null);
 			player.setAutoHide(true);
 			player.seek(lastPosition*1000);
 			lastPosition = 0;
@@ -591,6 +592,18 @@ public class SambaPlayer extends FrameLayout {
 				player.disableControls();
 		}
 		else _enableControls = flag;
+	}
+
+	/**
+	 * Enables/Disables the player controls.
+	 * @param state Whether to enable or disable the controls
+	 * @param controls List of the controls to be affected (from enum <code>SambaPlayer.Controls</code>); omit this parameter to affect all controls
+	 */
+	public void setControlsVisible(boolean state, Controls... controls) {
+		if (player == null)
+			return;
+
+		player.setControlsVisible(state, controls);
 	}
 
 	/**
@@ -835,7 +848,7 @@ public class SambaPlayer extends FrameLayout {
 		if (media.isLive) {
 			((Activity)getContext()).findViewById(R.id.time_container).setVisibility(INVISIBLE);
 
-			player.setControlsVisible(false, "seekbar");
+			player.setControlsVisible(false, Controls.SEEKBAR);
 			player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.ic_live),
 					getContext().getString(R.string.live), null);
 		}
@@ -844,9 +857,8 @@ public class SambaPlayer extends FrameLayout {
 		player.setPlayCallback(playListener);
 
 		if (media.isAudioOnly) {
-			player.setControlsVisible(true, "play");
-			player.setControlsVisible(false, "fullscreen", "playLarge", "topChrome");
-			//playbackControlLayer.swapControls("time", "seekbar");
+			player.setControlsVisible(true, Controls.PLAY);
+			player.setControlsVisible(false, Controls.FULLSCREEN, Controls.PLAY_LARGE, Controls.TOP_CHROME);
 			player.setBackgroundColor(0xFF434343);
 			player.setChromeColor(0x00000000);
 		}
@@ -1137,4 +1149,7 @@ public class SambaPlayer extends FrameLayout {
 			player.addActionButton(button);
 		}
 	}
+
+	// alias
+	public final class Controls extends com.google.android.libraries.mediaframework.layeredvideo.Controls {}
 }
