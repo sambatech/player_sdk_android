@@ -34,6 +34,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.UnsupportedDrmException;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
+import com.google.android.libraries.mediaframework.layeredvideo.Controls;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.sambatech.player.adapter.CaptionsAdapter;
@@ -597,9 +598,9 @@ public class SambaPlayer extends FrameLayout {
 	/**
 	 * Enables/Disables the player controls.
 	 * @param state Whether to enable or disable the controls
-	 * @param controls List of the controls to be affected (from enum <code>SambaPlayer.Controls</code>); omit this parameter to affect all controls
+	 * @param controls List of the controls to be affected (constants from class <code>SambaPlayer.Controls</code>); omit this parameter to affect all controls
 	 */
-	public void setControlsVisible(boolean state, Controls... controls) {
+	public void setControlsVisible(boolean state, com.google.android.libraries.mediaframework.layeredvideo.Controls... controls) {
 		if (player == null)
 			return;
 
