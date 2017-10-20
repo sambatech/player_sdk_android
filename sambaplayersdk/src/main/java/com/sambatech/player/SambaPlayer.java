@@ -61,6 +61,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -358,7 +361,6 @@ public class SambaPlayer extends FrameLayout {
 			// enabling hook for API and user actions
 			player.setInterceptableListener(interceptableListener);
 			player.setAutoHide(false);
-			player.setControlsVisible(false, Controls.OUTPUT);
 			player.setControlsVisible(false, Controls.OUTPUT, Controls.CAPTION);
 
 			// converting SambaMedia to MediaInfo
@@ -442,8 +444,8 @@ public class SambaPlayer extends FrameLayout {
 		@Override
 		public void onDisconnected() {
 			player.setControlsVisible(true,
-					outputMenu != null ? Controls.OUTPUT : null,
-					captionMenu != null ? Controls.CAPTION : null);
+					outputMenu != null && !controlsHidden.contains(Controls.OUTPUT) ? Controls.OUTPUT : null,
+					captionMenu != null && !controlsHidden.contains(Controls.CAPTION) ? Controls.CAPTION : null);
 			player.setAutoHide(true);
 			player.seek(lastPosition*1000);
 			lastPosition = 0;
@@ -475,6 +477,7 @@ public class SambaPlayer extends FrameLayout {
 	private Boolean _initialFullscreen = null;
 	private Timer errorTimer;
     private int _outputOffset;
+	private List<String> controlsHidden = new ArrayList<>();
     //private boolean wasPlaying;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
@@ -596,15 +599,19 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	/**
-	 * Enables/Disables the player controls.
-	 * @param state Whether to enable or disable the controls
-	 * @param controls List of the controls to be affected (constants from class <code>SambaPlayer.Controls</code>); omit this parameter to affect all controls
+	 * Hides the player controls.
+	 * @param controls List of the controls to be affected (constants from class <code>SambaPlayer.Controls</code>)
 	 */
-	public void setControlsVisible(boolean state, com.google.android.libraries.mediaframework.layeredvideo.Controls... controls) {
-		if (player == null)
+	public void setHideControls(@NonNull final String... controls) {
+		if (controls.length == 0)
 			return;
 
-		player.setControlsVisible(state, controls);
+		if (player == null) {
+			Collections.addAll(controlsHidden, controls);
+			return;
+		}
+
+		player.setControlsVisible(false, controls);
 	}
 
 	/**
@@ -864,6 +871,9 @@ public class SambaPlayer extends FrameLayout {
 			player.setChromeColor(0x00000000);
 		}
 		else player.setFullscreenCallback(fullscreenListener);
+
+		if (!controlsHidden.isEmpty())
+			setHideControls(controlsHidden.toArray(new String[0]));
 
 		// Fullscreen
 		orientationEventListener = new OrientationEventListener(getContext()) {
@@ -1151,6 +1161,8 @@ public class SambaPlayer extends FrameLayout {
 		}
 	}
 
-	// alias
-	public final class Controls extends com.google.android.libraries.mediaframework.layeredvideo.Controls {}
+	/**
+	 * Lists of all available controls.
+	 */
+	public static final class Controls extends com.google.android.libraries.mediaframework.layeredvideo.Controls {}
 }

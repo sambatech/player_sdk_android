@@ -231,7 +231,7 @@ public class SimpleVideoPlayer {
 		subtitleLayer.setVisibility(View.GONE);
 	}
 
-	public void setControlsVisible(boolean state, Controls... controls) {
+	public void setControlsVisible(boolean state, String... controls) {
 		playbackControlLayer.setControlsVisible(state, controls);
 	}
 

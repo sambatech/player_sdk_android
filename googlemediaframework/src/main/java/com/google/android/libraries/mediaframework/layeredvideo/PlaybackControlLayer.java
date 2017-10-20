@@ -479,7 +479,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 	private List<Callback> preInitCallbacks = new ArrayList<>();
 
-	private HashMap<Controls, View> controlsMap;
+	private HashMap<String, View> controlsMap;
 
 	private View _captionMenuView;
 
@@ -1117,9 +1117,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	/**
 	 * Enables/Disables the specified controls.
 	 * @param state Whether to enable or disable the listed controls
-	 * @param controls Names from enum <code>Controls</code>
+	 * @param controls Names from class <code>Controls</code>
 	 */
-	public void setControlsVisible(final boolean state, final Controls... controls) {
+	public void setControlsVisible(final boolean state, final String... controls) {
 		if (controlsMap == null) {
 			preInitCallbacks.add(new Callback() {
 				public void call() {
@@ -1133,12 +1133,12 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 		// specific controls
 		if (controls.length > 0) {
-			for (Controls control : controls)
+			for (String control : controls)
 				if (controlsMap.containsKey(control))
 					controlsMap.get(control).setVisibility(state || !Controls.SEEKBAR.equals(control) ? visibility : View.INVISIBLE);
 		}
 		// all
-		else for (Map.Entry<Controls, View> pair : controlsMap.entrySet())
+		else for (Map.Entry<String, View> pair : controlsMap.entrySet())
 			pair.getValue().setVisibility(state || !Controls.SEEKBAR.equals(pair.getKey()) ? visibility : View.INVISIBLE);
 	}
 
