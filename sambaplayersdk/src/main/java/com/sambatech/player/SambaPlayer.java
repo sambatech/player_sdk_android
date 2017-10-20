@@ -954,7 +954,7 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void initOutputMenu() {
-		if (player == null)
+		if (player == null || controlsHidden.contains(Controls.OUTPUT))
 			return;
 
         final MediaFormat[] tracks = player.getTrackFormats(ExoplayerWrapper.TYPE_VIDEO);
@@ -978,11 +978,13 @@ public class SambaPlayer extends FrameLayout {
 				});
 
 		player.setOutputMenu(outputMenu);
+		player.setControlsVisible(true, Controls.OUTPUT);
 	}
 
 	private void initCaptionMenu() {
-		if (media.isAudioOnly || media.captions == null ||
-				media.captions.size() == 0 || player == null)
+		if (player == null || media.isAudioOnly ||
+				media.captions == null || media.captions.size() == 0 ||
+				controlsHidden.contains(Controls.CAPTION))
 			return;
 
 		captionMenu = initDialog(R.string.captions, new CaptionsAdapter(getContext(), media.captions),
@@ -1000,6 +1002,7 @@ public class SambaPlayer extends FrameLayout {
 				});
 
 		player.setCaptionMenu(captionMenu);
+		player.setControlsVisible(true, Controls.CAPTION);
 	}
 
 	private void destroyInternal() {

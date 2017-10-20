@@ -1069,8 +1069,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				}
 			}
 		});
-
-		outputButton.setVisibility(View.VISIBLE);
 	}
 
 	/**
@@ -1092,8 +1090,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
                 }
             }
         });
-
-        captionButton.setVisibility(View.VISIBLE);
     }
 
 	public View getCaptionMenu() {
