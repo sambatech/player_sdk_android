@@ -12,7 +12,7 @@ dependencies:
   pre:
     - curl -fL https://getcli.jfrog.io | sh
     - chmod +x jfrog
-    - cp -r assets/licenses $ANDROID_HOME/
+    - cp -R assets/licenses $ANDROID_HOME/
 
   cache_directories:
     - ~/.android
