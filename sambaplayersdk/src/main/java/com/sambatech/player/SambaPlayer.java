@@ -34,7 +34,6 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.mediaframework.exoplayerextensions.ExoplayerWrapper;
 import com.google.android.libraries.mediaframework.exoplayerextensions.UnsupportedDrmException;
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
-import com.google.android.libraries.mediaframework.layeredvideo.Controls;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
 import com.sambatech.player.adapter.CaptionsAdapter;
@@ -62,7 +61,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -606,10 +605,10 @@ public class SambaPlayer extends FrameLayout {
 		if (controls.length == 0)
 			return;
 
-		if (player == null) {
-			Collections.addAll(controlsHidden, controls);
+		controlsHidden = Arrays.asList(controls);
+
+		if (player == null)
 			return;
-		}
 
 		player.setControlsVisible(false, controls);
 	}

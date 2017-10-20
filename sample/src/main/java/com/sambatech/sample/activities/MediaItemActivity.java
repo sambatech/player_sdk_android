@@ -344,6 +344,11 @@ public class MediaItemActivity extends Activity {
 			player.pause();
 	}
 
+	@OnClick(R.id.hide_controls) public void hideControlsHandler() {
+		if (player != null)
+			player.setHideControls(SambaPlayer.Controls.SEEKBAR, SambaPlayer.Controls.FULLSCREEN, SambaPlayer.Controls.OUTPUT);
+	}
+
 	@OnClick(R.id.create_session) public void createSessionHandler() {
 		if (entitlementScheme == null || media == null ||
 				media.drmRequest == null) return;
