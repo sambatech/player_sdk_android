@@ -47,6 +47,7 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.PlayerCon
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -1068,8 +1069,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				}
 			}
 		});
-
-		outputButton.setVisibility(View.VISIBLE);
 	}
 
 	/**
@@ -1091,8 +1090,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
                 }
             }
         });
-
-        captionButton.setVisibility(View.VISIBLE);
     }
 
 	public View getCaptionMenu() {
@@ -1116,13 +1113,13 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	/**
 	 * Enables/Disables the specified controls.
 	 * @param state Whether to enable or disable the listed controls
-	 * @param names Controls names: "play", "playLarge", "fullscreen", "outputMenu", "captionMenu", "seekbar", "time"
+	 * @param controls Names from class <code>Controls</code>
 	 */
-	public void setControlsVisible(final boolean state, final String ... names) {
+	public void setControlsVisible(final boolean state, final String... controls) {
 		if (controlsMap == null) {
 			preInitCallbacks.add(new Callback() {
 				public void call() {
-					setControlsVisible(state, names);
+					setControlsVisible(state, controls);
 				}
 			});
 			return;
@@ -1130,38 +1127,16 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 		int visibility = state ? View.VISIBLE : View.GONE;
 
-		// specifics
-		if (names.length > 0) {
-			for (String name : names)
-				if (controlsMap.containsKey(name))
-					controlsMap.get(name).setVisibility(state || !name.equals("seekbar") ? visibility : View.INVISIBLE);
+		// specific controls
+		if (controls.length > 0) {
+			for (String control : controls)
+				if (controlsMap.containsKey(control))
+					controlsMap.get(control).setVisibility(state || !Controls.SEEKBAR.equals(control) ? visibility : View.INVISIBLE);
 		}
 		// all
 		else for (Map.Entry<String, View> pair : controlsMap.entrySet())
-			pair.getValue().setVisibility(state || !pair.getKey().equals("seekbar") ? visibility : View.INVISIBLE);
+			pair.getValue().setVisibility(state || !Controls.SEEKBAR.equals(pair.getKey()) ? visibility : View.INVISIBLE);
 	}
-
-	/*public void swapControls(final String name1, final String name2) {
-		if (controlsMap == null) {
-			preInitCallbacks.add(new Callback() {
-				public void call() {
-					swapControls(name1, name2);
-				}
-			});
-			return;
-		}
-
-		if (controlsMap.containsKey(name1) && controlsMap.containsKey(name2)) {
-			View control1 = (View)controlsMap.get(name1);
-			View control2 = (View)controlsMap.get(name2);
-			int index1 = view.indexOfChild(control1);
-
-			view.removeView(control1);
-			view.addView(control1, view.indexOfChild(control2));
-			view.removeView(control2);
-			view.addView(control2, index1);
-		}
-	}*/
 
 	/**
 	 * Perform binding to UI, setup of event handlers and initialization of values.
@@ -1299,17 +1274,17 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		timeFormatter = new Formatter(timeFormat, Locale.getDefault());
 
 		controlsMap = new HashMap<>();
-		controlsMap.put("playLarge", pausePlayLargeButton);
-		controlsMap.put("play", pausePlayButton);
-		controlsMap.put("fullscreen", fullscreenButton);
-		controlsMap.put("outputMenu", outputButton);
-		controlsMap.put("captionMenu", captionButton);
-		controlsMap.put("seekbar", seekBar);
-		controlsMap.put("topChrome", topChrome);
-		controlsMap.put("bottomChrome", bottomChrome);
-		controlsMap.put("time", view.findViewById(R.id.time_container));
+		controlsMap.put(Controls.PLAY_LARGE, pausePlayLargeButton);
+		controlsMap.put(Controls.PLAY, pausePlayButton);
+		controlsMap.put(Controls.FULLSCREEN, fullscreenButton);
+		controlsMap.put(Controls.OUTPUT, outputButton);
+		controlsMap.put(Controls.CAPTION, captionButton);
+		controlsMap.put(Controls.SEEKBAR, seekBar);
+		controlsMap.put(Controls.TOP_CHROME, topChrome);
+		controlsMap.put(Controls.BOTTOM_CHROME, bottomChrome);
+		controlsMap.put(Controls.TIME, view.findViewById(R.id.time_container));
 
-		if (preInitCallbacks.size() > 0) {
+		if (!preInitCallbacks.isEmpty()) {
 			for (Callback callback : preInitCallbacks)
 				callback.call();
 

@@ -261,7 +261,7 @@ public class SambaApi {
 				media.projectHash = projectConfig.getString("playerHash");
 				media.projectId = projectConfig.getInt("id");
 				media.title = json.getString("title");
-				media.isAudioOnly = "audio".equals(qualifier);
+				media.isAudioOnly = "audio".equals(qualifier) || request.isStreamAudio;
 
 				if (json.has("id"))
 					media.id = json.getString("id");

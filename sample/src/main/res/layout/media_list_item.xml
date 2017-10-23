@@ -8,7 +8,7 @@
         android:layout_width="100dp"
         android:layout_height="80dp"
         android:layout_alignParentLeft="true"
-        android:background="#488e44"
+        android:background="#333333"
         android:padding="5dp"
         android:scaleType="centerCrop"
         android:layout_margin="10dp"/>
@@ -25,7 +25,7 @@
             android:textSize="20sp"
             android:fontFamily="sans-serif"
             android:text="Testando o título"
-            android:textColor="@android:color/secondary_text_light"
+            android:textColor="@android:color/tertiary_text_light"
             android:layout_gravity="left"
             android:textStyle="bold"
             android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
@@ -46,11 +46,7 @@
                    android:layout_width="wrap_content"
                    android:layout_height="wrap_content"
                    android:layout_gravity="right"
-                   android:src="@drawable/ic_arrow"
-            />
+                   android:src="@drawable/ic_arrow" />
 
     </LinearLayout>
-
-
-
 </LinearLayout>

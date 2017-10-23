@@ -60,6 +60,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -357,7 +360,7 @@ public class SambaPlayer extends FrameLayout {
 			// enabling hook for API and user actions
 			player.setInterceptableListener(interceptableListener);
 			player.setAutoHide(false);
-			player.setControlsVisible(false, "outputMenu", "captionMenu");
+			player.setControlsVisible(false, Controls.OUTPUT, Controls.CAPTION);
 
 			// converting SambaMedia to MediaInfo
 			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
@@ -440,8 +443,8 @@ public class SambaPlayer extends FrameLayout {
 		@Override
 		public void onDisconnected() {
 			player.setControlsVisible(true,
-					outputMenu != null ? "outputMenu" : null,
-					captionMenu != null ? "captionMenu" : null);
+					outputMenu != null && !controlsHidden.contains(Controls.OUTPUT) ? Controls.OUTPUT : null,
+					captionMenu != null && !controlsHidden.contains(Controls.CAPTION) ? Controls.CAPTION : null);
 			player.setAutoHide(true);
 			player.seek(lastPosition*1000);
 			lastPosition = 0;
@@ -473,6 +476,7 @@ public class SambaPlayer extends FrameLayout {
 	private Boolean _initialFullscreen = null;
 	private Timer errorTimer;
     private int _outputOffset;
+	private List<String> controlsHidden = new ArrayList<>();
     //private boolean wasPlaying;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
@@ -591,6 +595,22 @@ public class SambaPlayer extends FrameLayout {
 				player.disableControls();
 		}
 		else _enableControls = flag;
+	}
+
+	/**
+	 * Hides the player controls.
+	 * @param controls List of the controls to be affected (constants from class <code>SambaPlayer.Controls</code>)
+	 */
+	public void setHideControls(@NonNull final String... controls) {
+		if (controls.length == 0)
+			return;
+
+		controlsHidden = Arrays.asList(controls);
+
+		if (player == null)
+			return;
+
+		player.setControlsVisible(false, controls);
 	}
 
 	/**
@@ -835,7 +855,7 @@ public class SambaPlayer extends FrameLayout {
 		if (media.isLive) {
 			((Activity)getContext()).findViewById(R.id.time_container).setVisibility(INVISIBLE);
 
-			player.setControlsVisible(false, "seekbar");
+			player.setControlsVisible(false, Controls.SEEKBAR);
 			player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.ic_live),
 					getContext().getString(R.string.live), null);
 		}
@@ -844,13 +864,15 @@ public class SambaPlayer extends FrameLayout {
 		player.setPlayCallback(playListener);
 
 		if (media.isAudioOnly) {
-			player.setControlsVisible(true, "play");
-			player.setControlsVisible(false, "fullscreen", "playLarge", "topChrome");
-			//playbackControlLayer.swapControls("time", "seekbar");
+			player.setControlsVisible(true, Controls.PLAY);
+			player.setControlsVisible(false, Controls.FULLSCREEN, Controls.PLAY_LARGE, Controls.TOP_CHROME);
 			player.setBackgroundColor(0xFF434343);
 			player.setChromeColor(0x00000000);
 		}
 		else player.setFullscreenCallback(fullscreenListener);
+
+		if (!controlsHidden.isEmpty())
+			setHideControls(controlsHidden.toArray(new String[0]));
 
 		// Fullscreen
 		orientationEventListener = new OrientationEventListener(getContext()) {
@@ -931,7 +953,7 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	private void initOutputMenu() {
-		if (player == null)
+		if (player == null || controlsHidden.contains(Controls.OUTPUT))
 			return;
 
         final MediaFormat[] tracks = player.getTrackFormats(ExoplayerWrapper.TYPE_VIDEO);
@@ -955,11 +977,13 @@ public class SambaPlayer extends FrameLayout {
 				});
 
 		player.setOutputMenu(outputMenu);
+		player.setControlsVisible(true, Controls.OUTPUT);
 	}
 
 	private void initCaptionMenu() {
-		if (media.isAudioOnly || media.captions == null ||
-				media.captions.size() == 0 || player == null)
+		if (player == null || media.isAudioOnly ||
+				media.captions == null || media.captions.size() == 0 ||
+				controlsHidden.contains(Controls.CAPTION))
 			return;
 
 		captionMenu = initDialog(R.string.captions, new CaptionsAdapter(getContext(), media.captions),
@@ -977,6 +1001,7 @@ public class SambaPlayer extends FrameLayout {
 				});
 
 		player.setCaptionMenu(captionMenu);
+		player.setControlsVisible(true, Controls.CAPTION);
 	}
 
 	private void destroyInternal() {
@@ -1137,4 +1162,9 @@ public class SambaPlayer extends FrameLayout {
 			player.addActionButton(button);
 		}
 	}
+
+	/**
+	 * Lists of all available controls.
+	 */
+	public static final class Controls extends com.google.android.libraries.mediaframework.layeredvideo.Controls {}
 }
