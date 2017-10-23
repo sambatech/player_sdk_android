@@ -7,7 +7,7 @@
 repoUser=$1
 repoApiKey=$2
 versionSuffix=$([[ -z $3 ]] && echo 'beta' || echo $3)
-ret=''
+ret='0.2.1-1'
 
 set -x
 
@@ -41,10 +41,10 @@ publish() {
 	# configuring repo client tool
 	./jfrog bt config --user $repoUser --key $repoApiKey --licenses MIT --interactive false
 	# uploading artifacts to repo
-	./jfrog bt u "$output/$2*" "sambatech/maven/sdk-android/v0" "com/sambatech/player/$2/$v/" --publish true --override true
+	./jfrog bt u "$output/$2*" "sambatech/maven/sdk-android/beta2" "com/sambatech/player/$2/$v/" --publish true --override true
 
 	ret=$v
 }
 
-publish googlemediaframework gmf
+#publish googlemediaframework gmf
 publish sambaplayersdk sdk-android gmf $ret
