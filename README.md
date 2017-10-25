@@ -29,10 +29,11 @@ repositories {
 }
 ...
 dependencies {
-    compile 'com.sambatech.player:sdk-android:0.2.4-beta'
+    compile 'com.sambatech.player:sdk-android:0.10.0-beta'
     //compile 'com.sambatech.player:sdk-android:0.+' // para utilizar a versão mais atual
 }
 ```
+Para verificar todas as versões disponíveis, favor consultar nossa página de [releases](https://github.com/sambatech/player_sdk_android/releases).
 
 2) Instanciar o SambaPlayer em um View:
 ```xml
