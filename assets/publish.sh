@@ -7,7 +7,7 @@
 repoUser=$1
 repoApiKey=$2
 versionSuffix=$([[ -z $3 ]] && echo 'beta' || echo $3)
-ret='0.2.1-1'
+ret=''
 
 set -x
 
@@ -46,5 +46,5 @@ publish() {
 	ret=$v
 }
 
-#publish googlemediaframework gmf
+publish googlemediaframework gmf
 publish sambaplayersdk sdk-android gmf $ret
