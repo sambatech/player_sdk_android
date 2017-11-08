@@ -28,6 +28,8 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 
 /**
@@ -320,16 +323,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private ImageButton fullscreenButton;
 
 	/**
-	 * Shows a menu for changing media quality.
-	 */
-	private ImageButton outputButton;
-
-    /**
-     * Shows a menu for changing caption.
-     */
-    private ImageButton captionButton;
-
-	/**
 	 * Loading Progress bar
 	 */
 	private ProgressBar loadingProgress;
@@ -396,6 +389,11 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private ImageButton pausePlayButton;
 
 	/**
+	 * Displays the MenuIcon
+	 */
+	private ImageButton menuButton;
+
+	/**
 	 * Displays a track and a thumb which can be used to seek to different time points in the video.
 	 */
 	private SeekBar seekBar;
@@ -458,16 +456,16 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private FrameLayout loadingSpinner;
 
 	/**
-	 * The output menu.
+	 * The output menu modalsheet.
 	 */
-	private Dialog outputMenu;
+	private BottomSheetDialog outputSheetDialog;
 
-    /**
-     * The caption menu
-     */
-    private Dialog captionMenu;
+	/**
+	 * Captions menu modalsheet
+	 */
+	private BottomSheetDialog captionsSheetDialog;
 
-    /**
+	/**
 	 * Indicates playback last state before the output menu has open.
 	 */
 	private boolean menuWasPlaying;
@@ -476,6 +474,36 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * Whether it should auto hide controls or not.
 	 */
 	private boolean autoHide = true;
+
+	/**
+	 * Controls Menu
+	 */
+	private OptionsMenuController optionsMenuController;
+
+	private OptionsMenuLayer.OptionsMenuCallback optionsMenuCallback = new OptionsMenuLayer.OptionsMenuCallback() {
+		@Override
+		public void onTouchHD() {
+			if (outputSheetDialog == null) return;
+			PlayerControl playerControl = getLayerManager().getControl();
+			menuWasPlaying = playerControl.isPlaying();
+			playerControl.pause();
+			outputSheetDialog.show();
+		}
+
+		@Override
+		public void onTouchCaptions() {
+			if(captionsSheetDialog == null) return;
+			PlayerControl playerControl = getLayerManager().getControl();
+			menuWasPlaying = playerControl.isPlaying();
+			playerControl.pause();
+			captionsSheetDialog.show();
+		}
+
+		@Override
+		public void onTouchSpeed() {
+
+		}
+	};
 
 	private List<Callback> preInitCallbacks = new ArrayList<>();
 
@@ -490,16 +518,14 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	private int savedOrientation;
 
-	public PlaybackControlLayer(String videoTitle) {
-		this(videoTitle, null, true);
-	}
-
-	public PlaybackControlLayer(String videoTitle, FullscreenCallback fullscreenCallback, boolean autoHide) {
+	public PlaybackControlLayer(String videoTitle, FullscreenCallback fullscreenCallback, boolean autoHide, OptionsMenuController optionsMenuController) {
 		this.videoTitle = videoTitle;
 		this.canSeek = true;
 		this.fullscreenCallback = fullscreenCallback;
 		this.shouldBePlaying = false;
 		this.autoHide = autoHide;
+		this.optionsMenuController = optionsMenuController;
+		this.optionsMenuController.setCallback(optionsMenuCallback);
 		actionButtons = new ArrayList<>();
 	}
 
@@ -1055,20 +1081,21 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * @param view The view for the output menu.
 	 */
 	public void setOutputMenu(View view) {
-		outputMenu = new Dialog(getLayerManager().getActivity());
-		outputMenu.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		outputMenu.setContentView(view);
-		outputMenu.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-		outputMenu.setOnDismissListener(new DialogInterface.OnDismissListener() {
+		outputSheetDialog = new BottomSheetDialog(getLayerManager().getActivity());
+		outputSheetDialog.setContentView(view);
+		outputSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
 				if (menuWasPlaying) {
 					play();
 					hide(true);
+					if (optionsMenuController != null) optionsMenuController.hideMenu();
 				}
 			}
 		});
+		BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(((View) view.getParent()));
+		bottomSheetBehavior.setHideable(false);
+		bottomSheetBehavior.setPeekHeight(Integer.MAX_VALUE);
 	}
 
 	/**
@@ -1076,20 +1103,22 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * @param view The view for the caption menu
 	 */
 	public void setCaptionMenu(View view) {
-        captionMenu = new Dialog(getLayerManager().getActivity());
-        captionMenu.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        captionMenu.setContentView(_captionMenuView = view);
-        captionMenu.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-        captionMenu.setOnDismissListener(new DialogInterface.OnDismissListener(){
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                if (menuWasPlaying) {
-	                play();
-	                hide(true);
-                }
-            }
-        });
+		_captionMenuView = view;
+		captionsSheetDialog = new BottomSheetDialog(getLayerManager().getActivity());
+		captionsSheetDialog.setContentView(view);
+		captionsSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				if (menuWasPlaying) {
+					play();
+					hide(true);
+					if (optionsMenuController != null) optionsMenuController.hideMenu();
+				}
+			}
+		});
+		BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(((View) view.getParent()));
+		bottomSheetBehavior.setHideable(false);
+		bottomSheetBehavior.setPeekHeight(Integer.MAX_VALUE);
     }
 
 	public View getCaptionMenu() {
@@ -1100,14 +1129,16 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * Closes the output menu.
 	 */
 	public void closeOutputMenu() {
-		outputMenu.dismiss();
+		outputSheetDialog.dismiss();
+		if (optionsMenuController != null) optionsMenuController.hideMenu();
 	}
 
     /**
      * Closes the caption menu.
      */
     public void closeCaptionMenu() {
-        captionMenu.dismiss();
+		captionsSheetDialog.dismiss();
+		if (optionsMenuController != null) optionsMenuController.hideMenu();
     }
 
 	/**
@@ -1146,8 +1177,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		pausePlayLargeButton = (ImageButton) view.findViewById(R.id.pauseLarge);
 		pausePlayButton = (ImageButton) view.findViewById(R.id.pause);
 		fullscreenButton = (ImageButton) view.findViewById((R.id.fullscreen));
-		outputButton = (ImageButton) view.findViewById(R.id.output_button);
-        captionButton = (ImageButton) view.findViewById(R.id.caption_button);
 		seekBar = (SeekBar) view.findViewById(R.id.mediacontroller_progress);
 		videoTitleView = (TextView) view.findViewById(R.id.video_title);
 		endTime = (TextView) view.findViewById(R.id.time_duration);
@@ -1158,41 +1187,31 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		bottomChrome = (LinearLayout) view.findViewById(R.id.bottom_chrome);
 		actionButtonsContainer = (LinearLayout) view.findViewById(R.id.actions_container);
 		loadingProgress = (ProgressBar) loadingSpinner.findViewById(R.id.loadingLarge);
+		menuButton = (ImageButton) view.findViewById(R.id.menu_button);
 
 		// output
-		outputButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (outputMenu == null)
-					return;
-
-				PlayerControl playerControl = getLayerManager().getControl();
-				menuWasPlaying = playerControl.isPlaying();
-				playerControl.pause();
-				outputMenu.show();
-			}
-		});
-
-		if (outputMenu == null) {
-			outputButton.setVisibility(View.GONE);
+		if (outputSheetDialog == null) {
+			if (optionsMenuController != null) optionsMenuController.setHdButtonVisibility(false);
 		}
 
         // caption
-        captionButton.setOnClickListener(new View.OnClickListener() {
-           @Override
-            public void onClick(View v) {
-               if(captionMenu == null) return;
-
-	           PlayerControl playerControl = getLayerManager().getControl();
-               menuWasPlaying = playerControl.isPlaying();
-               playerControl.pause();
-               captionMenu.show();
-           }
-        });
-
-        if (captionMenu == null) {
-           captionButton.setVisibility(View.GONE);
+        if (captionsSheetDialog == null) {
+			if (optionsMenuController != null) optionsMenuController.setCaptionsButtonVisibility(false);
         }
+
+        //menu
+		if(outputSheetDialog == null && captionsSheetDialog == null) {
+			menuButton.setVisibility(View.GONE);
+		} else {
+			menuButton.setVisibility(View.VISIBLE);
+		}
+
+        menuButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (optionsMenuController != null) optionsMenuController.showMenu();
+			}
+		});
 
 		// The play button should toggle play/pause when the play/pause button is clicked.
 		pausePlayLargeButton.setOnClickListener(new View.OnClickListener() {
@@ -1277,8 +1296,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		controlsMap.put(Controls.PLAY_LARGE, pausePlayLargeButton);
 		controlsMap.put(Controls.PLAY, pausePlayButton);
 		controlsMap.put(Controls.FULLSCREEN, fullscreenButton);
-		controlsMap.put(Controls.OUTPUT, outputButton);
-		controlsMap.put(Controls.CAPTION, captionButton);
+		controlsMap.put(Controls.MENU, menuButton);
 		controlsMap.put(Controls.SEEKBAR, seekBar);
 		controlsMap.put(Controls.TOP_CHROME, topChrome);
 		controlsMap.put(Controls.BOTTOM_CHROME, bottomChrome);

@@ -52,6 +52,12 @@ public class SimpleVideoPlayer {
 	 */
 	private final PlaybackControlLayer playbackControlLayer;
 
+
+	/**
+	 * Implents Options Menu and its methods
+	 */
+	private final OptionsMenuLayer optionsMenuLayer;
+
 	/**
 	 * Displays subtitles at bottom center of video player.
 	 */
@@ -112,9 +118,11 @@ public class SimpleVideoPlayer {
 			PlaybackControlLayer.FullscreenCallback fullscreenCallback) {
 		this.activity = activity;
 
-		playbackControlLayer = new PlaybackControlLayer(videoTitle, fullscreenCallback, !audioOnly);
+		optionsMenuLayer = new OptionsMenuLayer();
+		playbackControlLayer = new PlaybackControlLayer(videoTitle, fullscreenCallback, !audioOnly, optionsMenuLayer);
 		subtitleLayer = new SubtitleLayer();
 		videoSurfaceLayer = new VideoSurfaceLayer(autoplay);
+
 		this.autoplay = autoplay;
 		this.audioOnly = audioOnly;
 
@@ -122,6 +130,7 @@ public class SimpleVideoPlayer {
 		layers.add(videoSurfaceLayer);
 		layers.add(playbackControlLayer);
 		layers.add(subtitleLayer);
+		layers.add(optionsMenuLayer);
 
 		layerManager = new LayerManager(activity,
 				container,

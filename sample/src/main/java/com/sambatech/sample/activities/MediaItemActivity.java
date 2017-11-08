@@ -346,7 +346,7 @@ public class MediaItemActivity extends Activity {
 
 	@OnClick(R.id.hide_controls) public void hideControlsHandler() {
 		if (player != null)
-			player.setHideControls(SambaPlayer.Controls.SEEKBAR, SambaPlayer.Controls.FULLSCREEN, SambaPlayer.Controls.OUTPUT);
+			player.setHideControls(SambaPlayer.Controls.SEEKBAR, SambaPlayer.Controls.FULLSCREEN, SambaPlayer.Controls.MENU);
 	}
 
 	@OnClick(R.id.create_session) public void createSessionHandler() {
