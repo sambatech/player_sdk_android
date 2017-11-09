@@ -58,6 +58,7 @@ public class OptionsMenuLayer implements Layer, View.OnClickListener, OptionsMen
             callback.onTouchSpeed();
         } else if (i == R.id.close_menu_button) {
             hideMenu();
+            callback.onMenuDismiss();
         }
     }
 
@@ -104,6 +105,7 @@ public class OptionsMenuLayer implements Layer, View.OnClickListener, OptionsMen
         void onTouchHD();
         void onTouchCaptions();
         void onTouchSpeed();
+        void onMenuDismiss();
     }
 }
 

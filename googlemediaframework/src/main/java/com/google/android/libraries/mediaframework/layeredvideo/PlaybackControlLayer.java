@@ -484,24 +484,28 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		@Override
 		public void onTouchHD() {
 			if (outputSheetDialog == null) return;
-			PlayerControl playerControl = getLayerManager().getControl();
-			menuWasPlaying = playerControl.isPlaying();
-			playerControl.pause();
 			outputSheetDialog.show();
 		}
 
 		@Override
 		public void onTouchCaptions() {
 			if(captionsSheetDialog == null) return;
-			PlayerControl playerControl = getLayerManager().getControl();
-			menuWasPlaying = playerControl.isPlaying();
-			playerControl.pause();
 			captionsSheetDialog.show();
 		}
 
 		@Override
 		public void onTouchSpeed() {
 
+		}
+
+		@Override
+		public void onMenuDismiss() {
+			if (menuWasPlaying) {
+				play();
+				hide(true);
+			} else {
+				show();
+			}
 		}
 	};
 
@@ -1090,12 +1094,15 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 					play();
 					hide(true);
 					if (optionsMenuController != null) optionsMenuController.hideMenu();
+				} else {
+					show();
 				}
 			}
 		});
 		BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(((View) view.getParent()));
 		bottomSheetBehavior.setHideable(false);
 		bottomSheetBehavior.setPeekHeight(Integer.MAX_VALUE);
+		menuButton.setVisibility(View.VISIBLE);
 	}
 
 	/**
@@ -1113,12 +1120,15 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 					play();
 					hide(true);
 					if (optionsMenuController != null) optionsMenuController.hideMenu();
+				} else {
+					show();
 				}
 			}
 		});
 		BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(((View) view.getParent()));
 		bottomSheetBehavior.setHideable(false);
 		bottomSheetBehavior.setPeekHeight(Integer.MAX_VALUE);
+		menuButton.setVisibility(View.VISIBLE);
     }
 
 	public View getCaptionMenu() {
@@ -1202,14 +1212,18 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
         //menu
 		if(outputSheetDialog == null && captionsSheetDialog == null) {
 			menuButton.setVisibility(View.GONE);
-		} else {
-			menuButton.setVisibility(View.VISIBLE);
 		}
 
         menuButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if (optionsMenuController != null) optionsMenuController.showMenu();
+				if (optionsMenuController != null) {
+					PlayerControl playerControl = getLayerManager().getControl();
+					menuWasPlaying = playerControl.isPlaying();
+					playerControl.pause();
+					hide(true);
+					optionsMenuController.showMenu();
+				}
 			}
 		});
 
