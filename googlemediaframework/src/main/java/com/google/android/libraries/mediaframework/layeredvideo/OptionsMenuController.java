@@ -14,4 +14,8 @@ public interface OptionsMenuController {
     OptionsMenuLayer.OptionsMenuCallback getCallback();
 
     void setCallback(OptionsMenuLayer.OptionsMenuCallback callback);
+
+    void bringToFront();
+
+    boolean isVisible();
 }

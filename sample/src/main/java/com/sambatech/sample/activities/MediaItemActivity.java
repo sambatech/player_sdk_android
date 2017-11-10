@@ -130,11 +130,13 @@ public class MediaItemActivity extends Activity {
 		@Override
 		public void onFullscreen(SambaEvent e) {
 			status.setText(String.format("Status: %s", e.getType()));
+			getActionBar().hide();
 		}
 
 		@Override
 		public void onFullscreenExit(SambaEvent e) {
 			status.setText(String.format("Status: %s", e.getType()));
+			getActionBar().show();
 		}
 
 		@Override

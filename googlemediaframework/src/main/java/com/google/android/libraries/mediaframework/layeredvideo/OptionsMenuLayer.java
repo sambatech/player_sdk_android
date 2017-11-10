@@ -83,7 +83,7 @@ public class OptionsMenuLayer implements Layer, View.OnClickListener, OptionsMen
     @Override
     public void showMenu() {
         view.setVisibility(View.VISIBLE);
-        layerManager.getContainer().bringChildToFront(view);
+        bringToFront();
     }
 
     @Override
@@ -99,6 +99,16 @@ public class OptionsMenuLayer implements Layer, View.OnClickListener, OptionsMen
     @Override
     public void setCallback(OptionsMenuCallback callback) {
         this.callback = callback;
+    }
+
+    @Override
+    public void bringToFront() {
+        layerManager.getContainer().bringChildToFront(view);
+    }
+
+    @Override
+    public boolean isVisible() {
+        return view.getVisibility() == View.VISIBLE;
     }
 
     public interface OptionsMenuCallback {

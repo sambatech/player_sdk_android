@@ -480,6 +480,16 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	private OptionsMenuController optionsMenuController;
 
+
+	/**
+	 * Fullscreen Flags
+	 */
+	private final int mFullScreenFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+			| View.SYSTEM_UI_FLAG_FULLSCREEN
+			| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+			| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+			| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+
 	private OptionsMenuLayer.OptionsMenuCallback optionsMenuCallback = new OptionsMenuLayer.OptionsMenuCallback() {
 		@Override
 		public void onTouchHD() {
@@ -505,6 +515,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				hide(true);
 			} else {
 				show();
+			}
+			if (isFullscreen) {
+				getLayerManager().getActivity().getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
 			}
 		}
 	};
@@ -719,8 +732,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			activity.setRequestedOrientation(isReverseLandscape ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE :
 					ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
-			activity.getWindow().getDecorView().setSystemUiVisibility(
-					View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
+			activity.getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
 
 			// Whenever the status bar and navigation bar appear, we want the playback controls to
 			// appear as well.
@@ -733,7 +745,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 						// fullscreen flag is NOT triggered. This means that the status bar is showing. If
 						// this is the case, then we show the playback controls as well (by calling show()).
 						if ((i & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-							show();
+							if (!optionsMenuController.isVisible())show();
 						}
 					}
 				}
@@ -807,8 +819,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 							// Make sure that the status bar and navigation bar are hidden when the playback
 							// controls are hidden.
 							if (isFullscreen) {
-								getLayerManager().getActivity().getWindow().getDecorView().setSystemUiVisibility(
-										View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
+								getLayerManager().getActivity().getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
 							}
 							handler.removeMessages(SHOW_PROGRESS);
 							isVisible = false;
@@ -832,6 +843,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	public void show(int timeout) {
 		if (!autoHide)
 			timeout = 0;
+
+		if (optionsMenuController.isVisible())
+			return;
 
 		if (!isVisible && getLayerManager().getContainer() != null) {
 			playbackControlRootView.setAlpha(1.0f);
@@ -1097,6 +1111,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 				} else {
 					show();
 				}
+				if (isFullscreen) {
+					getLayerManager().getActivity().getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
+				}
 			}
 		});
 		BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(((View) view.getParent()));
@@ -1122,6 +1139,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 					if (optionsMenuController != null) optionsMenuController.hideMenu();
 				} else {
 					show();
+				}
+				if (isFullscreen) {
+					getLayerManager().getActivity().getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
 				}
 			}
 		});
