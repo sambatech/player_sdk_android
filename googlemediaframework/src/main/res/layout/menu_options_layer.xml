@@ -16,7 +16,6 @@
         android:showDividers="middle">
 
         <LinearLayout
-            android:gravity="center"
             android:id="@+id/quality_button"
             android:layout_width="70dp"
             android:layout_height="70dp"
@@ -25,8 +24,8 @@
             <ImageView
                 android:layout_width="41dp"
                 android:layout_height="20dp"
-                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="12dp"
+                android:layout_gravity="center_horizontal"
                 android:src="@drawable/hd_active" />
 
             <TextView
@@ -34,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="13dp"
                 android:gravity="center"
-                android:text="Qualdade"
+                android:text="Qualidade"
                 android:textColor="@color/white"
                 android:textSize="12sp" />
 
