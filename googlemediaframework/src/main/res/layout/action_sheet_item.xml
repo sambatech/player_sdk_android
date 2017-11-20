@@ -5,22 +5,21 @@
     android:orientation="horizontal">
 
     <RadioButton
-        android:id="@+id/output_radio"
-        android:layout_height="wrap_content"
+        android:id="@+id/sheet_output_radio"
         android:layout_width="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:clickable="false"
         android:focusable="false"
-        android:clickable="false" />
+        android:gravity="center" />
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
         android:text="@string/output_default"
-        android:id="@+id/menu_item_label"
-        android:textColor="#666666"
-        android:textAppearance="?android:attr/textAppearanceMedium"/>
+        android:id="@+id/sheet_item_label"
+        android:textColor="#D9000000"
+        android:textSize="16sp"/>
 
 </LinearLayout>
