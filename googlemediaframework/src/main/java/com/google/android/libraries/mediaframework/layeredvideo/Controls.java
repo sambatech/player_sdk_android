@@ -11,8 +11,7 @@ public class Controls {
 	public static final String PLAY = "play";
 	public static final String PLAY_LARGE = "playLarge";
 	public static final String FULLSCREEN = "fullscreen";
-	public static final String OUTPUT = "output";
-	public static final String CAPTION = "caption";
+	public static final String MENU = "menu";
 	public static final String SEEKBAR = "seekbar";
 	public static final String TOP_CHROME = "topChrome";
 	public static final String BOTTOM_CHROME = "bottomChrome";
