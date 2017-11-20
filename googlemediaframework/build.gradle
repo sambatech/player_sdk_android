@@ -41,5 +41,6 @@ android {
 }
 
 dependencies {
+    compile 'com.android.support:design:25.4.0'
     compile 'com.google.android.exoplayer:exoplayer:r1.5.7'
 }

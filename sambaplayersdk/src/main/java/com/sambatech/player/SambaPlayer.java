@@ -36,8 +36,8 @@ import com.google.android.libraries.mediaframework.exoplayerextensions.Unsupport
 import com.google.android.libraries.mediaframework.exoplayerextensions.Video;
 import com.google.android.libraries.mediaframework.layeredvideo.PlaybackControlLayer;
 import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
-import com.sambatech.player.adapter.CaptionsAdapter;
-import com.sambatech.player.adapter.OutputAdapter;
+import com.sambatech.player.adapter.CaptionsSheetAdapter;
+import com.sambatech.player.adapter.OutputSheetAdapter;
 import com.sambatech.player.cast.CastDRM;
 import com.sambatech.player.cast.CastObject;
 import com.sambatech.player.cast.CastOptionsProvider;
@@ -360,7 +360,7 @@ public class SambaPlayer extends FrameLayout {
 			// enabling hook for API and user actions
 			player.setInterceptableListener(interceptableListener);
 			player.setAutoHide(false);
-			player.setControlsVisible(false, Controls.OUTPUT, Controls.CAPTION);
+			player.setControlsVisible(false, Controls.MENU);
 
 			// converting SambaMedia to MediaInfo
 			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
@@ -442,9 +442,6 @@ public class SambaPlayer extends FrameLayout {
 
 		@Override
 		public void onDisconnected() {
-			player.setControlsVisible(true,
-					outputMenu != null && !controlsHidden.contains(Controls.OUTPUT) ? Controls.OUTPUT : null,
-					captionMenu != null && !controlsHidden.contains(Controls.CAPTION) ? Controls.CAPTION : null);
 			player.setAutoHide(true);
 			player.seek(lastPosition*1000);
 			lastPosition = 0;
@@ -462,8 +459,8 @@ public class SambaPlayer extends FrameLayout {
 	private boolean _hasStarted;
 	private boolean _hasFinished;
 	private OrientationEventListener orientationEventListener;
-	private View outputMenu;
-	private View captionMenu;
+	private View outputSheetView;
+	private View captionSheetView;
 	private SambaCast sambaCast;
 	private boolean _autoFsMode;
 	private boolean _enableControls;
@@ -729,10 +726,10 @@ public class SambaPlayer extends FrameLayout {
 	 */
 
 	public void switchOutput(int index) {
-		if (player == null || outputMenu == null)
+		if (player == null || outputSheetView == null)
 			return;
 
-		outputMenu.setTag(index + _outputOffset);
+		outputSheetView.setTag(index + _outputOffset);
 		player.setSelectedTrack(index + _outputOffset);
 	}
 
@@ -741,8 +738,8 @@ public class SambaPlayer extends FrameLayout {
 	 * @return The selected output index
 	 */
 	public int getCurrentOutputIndex() {
-		return (outputMenu != null && outputMenu.getTag() != null ?
-				(int)outputMenu.getTag() : media.defaultOutputIndex) - _outputOffset;
+		return (outputSheetView != null && outputSheetView.getTag() != null ?
+				(int)outputSheetView.getTag() : media.defaultOutputIndex) - _outputOffset;
 	}
 
 	/**
@@ -758,11 +755,9 @@ public class SambaPlayer extends FrameLayout {
 	}
 
 	public String getCaption() {
-		if (captionMenu == null) return null;
-
-		CaptionsAdapter adapter = (CaptionsAdapter) ((ListView) captionMenu.findViewById(R.id.menu_list)).getAdapter();
+		if (captionSheetView == null) return null;
+		CaptionsSheetAdapter adapter = (CaptionsSheetAdapter) ((ListView) captionSheetView.findViewById(R.id.sheet_list)).getAdapter();
 		SambaMedia.Caption caption = (SambaMedia.Caption) adapter.getItem(adapter.currentIndex);
-
 		return String.format("[%s,ffcc00,42]", caption.language);
 	}
 
@@ -932,28 +927,8 @@ public class SambaPlayer extends FrameLayout {
 			castListener.onConnected(sambaCast.getCastSession());
 	}
 
-	private View initDialog(@StringRes int titleRes, ListAdapter adapter,
-	                        AdapterView.OnItemClickListener itemListener,
-	                        OnClickListener cancelListener) {
-		View dialog = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.menu_layout, null);
-
-		TextView cancelButton = (TextView) dialog.findViewById(R.id.menu_cancel_button);
-		TextView title = (TextView) dialog.findViewById(R.id.menu_label);
-		title.setText(getContext().getString(titleRes));
-
-		cancelButton.setOnClickListener(cancelListener);
-
-		ListView menuList = (ListView) dialog.findViewById(R.id.menu_list);
-
-		menuList.setAdapter(adapter);
-		menuList.setOnItemClickListener(itemListener);
-		menuList.deferNotifyDataSetChanged();
-
-		return dialog;
-	}
-
 	private void initOutputMenu() {
-		if (player == null || controlsHidden.contains(Controls.OUTPUT))
+		if (player == null)
 			return;
 
         final MediaFormat[] tracks = player.getTrackFormats(ExoplayerWrapper.TYPE_VIDEO);
@@ -961,47 +936,47 @@ public class SambaPlayer extends FrameLayout {
         if (media.isAudioOnly || tracks.length <= 1)
             return;
 
-		outputMenu = initDialog(R.string.output, new OutputAdapter(getContext(),
-						tracks, this, _outputOffset),
-				new AdapterView.OnItemClickListener() {
-					@Override
-					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-						player.closeOutputMenu();
-						switchOutput(position);
-					}
-				}, new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						player.closeOutputMenu();
-					}
-				});
+		outputSheetView = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.action_sheet, null);
+		TextView title = (TextView) outputSheetView.findViewById(R.id.action_sheet_title);
+		title.setText(getContext().getString(R.string.output));
 
-		player.setOutputMenu(outputMenu);
-		player.setControlsVisible(true, Controls.OUTPUT);
+		final ListView menuList = (ListView) outputSheetView.findViewById(R.id.sheet_list);
+		menuList.setAdapter(new OutputSheetAdapter(getContext(), tracks, this, _outputOffset));
+		menuList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				player.closeOutputMenu();
+				switchOutput(position);
+				menuList.smoothScrollToPosition(0);
+			}
+		});
+		menuList.deferNotifyDataSetChanged();
+
+		player.setOutputMenu(outputSheetView);
 	}
 
 	private void initCaptionMenu() {
-		if (player == null || media.isAudioOnly ||
-				media.captions == null || media.captions.size() == 0 ||
-				controlsHidden.contains(Controls.CAPTION))
+		if (player == null || media.isAudioOnly || media.captions == null || media.captions.size() == 0)
 			return;
 
-		captionMenu = initDialog(R.string.captions, new CaptionsAdapter(getContext(), media.captions),
-				new AdapterView.OnItemClickListener() {
-					@Override
-					public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-						player.closeCaptionMenu();
-						changeCaption(position);
-					}
-				}, new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						player.closeCaptionMenu();
-					}
-				});
+		captionSheetView = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.action_sheet, null);
+		TextView title = (TextView) captionSheetView.findViewById(R.id.action_sheet_title);
+		title.setText(getContext().getString(R.string.captions));
 
-		player.setCaptionMenu(captionMenu);
-		player.setControlsVisible(true, Controls.CAPTION);
+		final ListView menuList = (ListView) captionSheetView.findViewById(R.id.sheet_list);
+
+		menuList.setAdapter(new CaptionsSheetAdapter(getContext(), media.captions));
+		menuList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				player.closeCaptionMenu();
+				changeCaption(position);
+				menuList.smoothScrollToPosition(0);
+			}
+		});
+		menuList.deferNotifyDataSetChanged();
+
+		player.setCaptionMenu(captionSheetView);
 	}
 
 	private void destroyInternal() {
@@ -1014,14 +989,12 @@ public class SambaPlayer extends FrameLayout {
 		stop();
 		player.setFullscreen(false);
 
-		if (outputMenu != null) {
-			((ListView)outputMenu.findViewById(R.id.menu_list)).setOnItemClickListener(null);
-			outputMenu.findViewById(R.id.menu_cancel_button).setOnClickListener(null);
+		if (outputSheetView != null) {
+			((ListView)outputSheetView.findViewById(R.id.sheet_list)).setOnItemClickListener(null);
 		}
 
-        if (captionMenu != null) {
-            ((ListView) captionMenu.findViewById(R.id.menu_list)).setOnItemClickListener(null);
-            captionMenu.findViewById(R.id.menu_cancel_button).setOnClickListener(null);
+        if (captionSheetView != null) {
+            ((ListView) captionSheetView.findViewById(R.id.sheet_list)).setOnItemClickListener(null);
         }
 
 		orientationEventListener.disable();
@@ -1037,8 +1010,8 @@ public class SambaPlayer extends FrameLayout {
         player.setControlsVisible(false);
 		player.release();
 
-		outputMenu = null;
-		captionMenu = null;
+		outputSheetView = null;
+		captionSheetView = null;
 		orientationEventListener = null;
 		player = null;
 		_hasStarted = false;
