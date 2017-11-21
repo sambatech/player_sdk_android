@@ -19,13 +19,13 @@ import com.sambatech.sample.model.MediaInfo;
 import com.sambatech.sample.rest.LiquidApi;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import butterknife.Bind;
 import butterknife.BindString;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnItemClick;
+import butterknife.Unbinder;
 import de.greenrobot.event.EventBus;
 import retrofit.Call;
 import retrofit.Callback;
@@ -36,11 +36,12 @@ import retrofit.Retrofit;
  */
 public class MainActivity extends Activity {
 
-	@Bind(R.id.media_list) ListView list;
-	@Bind(R.id.progressbar_view) LinearLayout loading;
+	@BindView(R.id.media_list) ListView list;
+	@BindView(R.id.progressbar_view) LinearLayout loading;
 	@BindString(R.string.media_list_api) String mediaListApi;
 
 	private MediasAdapter mAdapter;
+	private Unbinder unbinder;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +49,14 @@ public class MainActivity extends Activity {
 
 		setContentView(R.layout.activity_main);
 
-		ButterKnife.bind(this);
+		unbinder = ButterKnife.bind(this);
 		requestMediaList();
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		ButterKnife.unbind(this);
+		unbinder.unbind();
 	}
 
 	@Override

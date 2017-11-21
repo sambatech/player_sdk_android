@@ -2,12 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:paddingRight="16dp"
     android:paddingLeft="16dp"
-    android:paddingBottom="8dp"
-    app:layout_behavior="@string/bottom_sheet_behavior">
+    android:paddingBottom="8dp">
 
     <TextView
         android:layout_width="match_parent"
