@@ -26,9 +26,7 @@ public class LiquidApi {
                 .client(httpClient)
                 .build();
 
-        ILiquidApi service = retrofit.create(ILiquidApi.class);
-
-        return service;
+        return retrofit.create(ILiquidApi.class);
 
     }
 

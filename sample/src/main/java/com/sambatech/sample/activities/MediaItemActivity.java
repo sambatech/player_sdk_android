@@ -39,7 +39,7 @@ import java.net.URL;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
@@ -51,34 +51,34 @@ public class MediaItemActivity extends Activity {
 
     private MediaInfo activityMedia;
 
-    @Bind(R.id.title)
+    @BindView(R.id.title)
     TextView titleView;
 
-    @Bind(R.id.description)
+    @BindView(R.id.description)
     TextView descView;
 
-    @Bind(R.id.status)
+    @BindView(R.id.status)
     TextView status;
 
-    @Bind(R.id.samba_player)
+    @BindView(R.id.samba_player)
     SambaPlayer player;
 
-	@Bind(R.id.progressbar_view)
+	@BindView(R.id.progressbar_view)
 	LinearLayout loading;
 
-	@Bind(R.id.loading_text)
+	@BindView(R.id.loading_text)
 	TextView loadingText;
 
-	@Bind(R.id.validation_controlbar)
+	@BindView(R.id.validation_controlbar)
 	View validationControlbar;
 
-	@Bind(R.id.policies)
+	@BindView(R.id.policies)
 	Spinner policySpinner;
 
-    @Bind(R.id.session_controls)
+    @BindView(R.id.session_controls)
     LinearLayout sessionControls;
 
-    @Bind(R.id.auth_controls)
+    @BindView(R.id.auth_controls)
     LinearLayout authControls;
 
 	private EntitlementScheme entitlementScheme;

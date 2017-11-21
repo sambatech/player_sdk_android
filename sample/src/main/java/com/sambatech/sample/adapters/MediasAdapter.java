@@ -16,7 +16,7 @@ import com.sambatech.sample.utils.VolleySingleton;
 
 import java.util.List;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -106,13 +106,13 @@ public class MediasAdapter extends BaseAdapter {
     }
 
     static class MediaItem {
-        @Bind(R.id.thumbPreview)
+        @BindView(R.id.thumbPreview)
         NetworkImageView thumb;
 
-        @Bind(R.id.titlePreview)
+        @BindView(R.id.titlePreview)
         TextView title;
 
-	    @Bind(R.id.description)
+	    @BindView(R.id.description)
 	    TextView description;
 
         MediaItem(View view) {
