@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 28
-        versionName "v0.10.2-beta"
+        versionCode 29
+        versionName "v0.10.3-beta"
     }
     buildTypes {
         release {
@@ -44,8 +44,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
-    compile 'com.google.android.gms:play-services-ads:11.0.2'
-    compile 'com.google.android.gms:play-services-cast-framework:11.0.2'
+    compile 'com.google.android.gms:play-services-ads:11.6.0'
+    compile 'com.google.android.gms:play-services-cast-framework:11.6.0'
     compile 'org.bitbucket.b_c:jose4j:0.4.4'
 }
 
