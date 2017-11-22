@@ -24,7 +24,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 25
         versionCode 14
-        versionName 'v0.2.1-5'
+        versionName 'v0.2.1-6'
     }
     buildTypes {
         release {
@@ -41,6 +41,6 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:design:25.2.0'
+    compile 'com.android.support:design:25.4.0'
     compile 'com.google.android.exoplayer:exoplayer:r1.5.7'
 }

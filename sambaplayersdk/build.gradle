@@ -9,7 +9,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 25
         versionCode 31
-        versionName "v0.10.5-beta"
+        versionName "v0.10.6-beta"
     }
     buildTypes {
         release {
@@ -33,13 +33,13 @@ sonarqube {
 
 dependencies {
     // DEV
-    compile project(':googlemediaframework')
+    //compile project(':googlemediaframework')
 
     // PROD
-    /*compile('com.sambatech.player:gmf:0.2.1-2') {
+    compile('com.sambatech.player:gmf:0.2.1-6') {
         // DEPLOY
         transitive=true
-    }*/
+    }
 
     testCompile 'junit:junit:4.12'
     compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
