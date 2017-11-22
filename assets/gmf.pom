@@ -29,5 +29,11 @@
       <version>r1.5.7</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>com.android.support</groupId>
+      <artifactId>design</artifactId>
+      <version>25.4.0</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>
