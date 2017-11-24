@@ -1,6 +1,5 @@
 package com.sambatech.player.plugins;
 
-import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
@@ -10,7 +9,7 @@ import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlaye
 import com.google.android.libraries.mediaframework.layeredvideo.SubtitleLayer;
 import com.sambatech.player.R;
 import com.sambatech.player.SambaPlayer;
-import com.sambatech.player.adapter.CaptionsAdapter;
+import com.sambatech.player.adapter.CaptionsSheetAdapter;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
@@ -187,7 +186,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 		final View captionsMenu = _internalPlayer.getCaptionMenu();
 
 		if (captionsMenu != null)
-			((CaptionsAdapter)((ListView)captionsMenu.findViewById(R.id.menu_list)).getAdapter()).currentIndex = index;
+			((CaptionsSheetAdapter)((ListView)captionsMenu.findViewById(R.id.sheet_list)).getAdapter()).currentIndex = index;
 	}
 
 	private void parse(String captionsText) {

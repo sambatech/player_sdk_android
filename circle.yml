@@ -1,28 +1,31 @@
-machine:
-   environment:
-     ANDROID_HOME: /usr/local/android-sdk-linux
-
 dependencies:
   pre:
-    - openssl aes-256-cbc -d -in assets/build-vars-enc -k $SENS_DATA_KEY >> ~/.circlerc
     - curl -fL https://getcli.jfrog.io | sh
     - chmod +x jfrog
-    - cp -r assets/licenses $ANDROID_HOME/
+    - cp -R assets/licenses $ANDROID_HOME/
 
   cache_directories:
     - ~/.android
+
+compile:
+  override:
+    - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
+    - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
+  post:
+    - wget https://s3.amazonaws.com/circleci-dependencies/player/sensitive-data/build-vars-enc
+    - openssl aes-256-cbc -d -in build-vars-enc -k $SENS_DATA_KEY >> ~/.circlerc
+    - curl --header "Authorization:token $GITHUB_USER_TOKEN" --header "Accept:application/vnd.github.v3.raw" --remote-name --location https://api.github.com/repos/sambatech/devops/contents/circle-ci/run-sonar.sh
+    - chmod a+x run-sonar.sh
+    - ./run-sonar.sh install
+    - ./run-sonar.sh run
 
 deployment:
   master:
     branch: master
     commands:
-      - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
-      - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
       - assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
   
   dev:
     branch: dev
     commands:
-      - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
-      - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
       - assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev

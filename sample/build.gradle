@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 17
@@ -24,6 +24,8 @@ android {
 }
 
 dependencies {
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+
     //compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // DEV
@@ -31,7 +33,7 @@ dependencies {
 
 
     // PROD
-    //compile 'com.sambatech.player:sdk-android:0.9.5-dev'
+    //compile 'com.sambatech.player:sdk-android:0.10.6-dev'
 
     compile 'org.bitbucket.b_c:jose4j:0.4.4'
     compile 'com.mcxiaoke.volley:library:1.0.19'
@@ -39,5 +41,5 @@ dependencies {
     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
     compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
     compile 'com.squareup.okhttp:logging-interceptor:2.6.0'
-    compile 'com.jakewharton:butterknife:7.0.1'
+    compile 'com.jakewharton:butterknife:8.8.1'
 }

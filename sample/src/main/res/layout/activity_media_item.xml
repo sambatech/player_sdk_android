@@ -73,6 +73,15 @@
         style="@android:style/Widget.DeviceDefault.Button.Small"
         android:text="Pause"/>
 
+    <Button
+        android:id="@+id/hide_controls"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/validation_controlbar"
+        android:layout_toEndOf="@id/pause"
+        style="@android:style/Widget.DeviceDefault.Button.Small"
+        android:text="Hide Controls"/>
+
     <TextView
         android:id="@+id/status"
         android:layout_width="match_parent"

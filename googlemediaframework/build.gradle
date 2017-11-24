@@ -18,13 +18,13 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 11
-        versionName 'v0.2.1-1'
+        versionCode 15
+        versionName 'v0.2.1-6'
     }
     buildTypes {
         release {
@@ -41,5 +41,6 @@ android {
 }
 
 dependencies {
+    compile 'com.android.support:design:25.4.0'
     compile 'com.google.android.exoplayer:exoplayer:r1.5.7'
 }

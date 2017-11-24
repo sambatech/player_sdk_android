@@ -25,7 +25,8 @@ import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.sample.MainApplication;
 import com.sambatech.sample.R;
-import com.sambatech.sample.model.LiquidMedia;
+import com.sambatech.sample.model.EntitlementScheme;
+import com.sambatech.sample.model.MediaInfo;
 import com.sambatech.sample.utils.Helpers;
 
 import org.w3c.dom.Document;
@@ -38,48 +39,49 @@ import java.net.URL;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
+/**
+ * The activity where the media player is shown.
+ */
 public class MediaItemActivity extends Activity {
 
-    private LiquidMedia activityMedia;
+    private MediaInfo activityMedia;
 
-    @Bind(R.id.title)
+    @BindView(R.id.title)
     TextView titleView;
 
-    @Bind(R.id.description)
+    @BindView(R.id.description)
     TextView descView;
 
-    @Bind(R.id.status)
+    @BindView(R.id.status)
     TextView status;
 
-    @Bind(R.id.samba_player)
+    @BindView(R.id.samba_player)
     SambaPlayer player;
 
-	@Bind(R.id.progressbar_view)
+	@BindView(R.id.progressbar_view)
 	LinearLayout loading;
 
-	@Bind(R.id.loading_text)
-	TextView loading_text;
+	@BindView(R.id.loading_text)
+	TextView loadingText;
 
-	@Bind(R.id.validation_controlbar)
+	@BindView(R.id.validation_controlbar)
 	View validationControlbar;
 
-	@Bind(R.id.policies)
+	@BindView(R.id.policies)
 	Spinner policySpinner;
 
-    @Bind(R.id.session_controls)
+    @BindView(R.id.session_controls)
     LinearLayout sessionControls;
 
-    @Bind(R.id.auth_controls)
+    @BindView(R.id.auth_controls)
     LinearLayout authControls;
 
-
-	private boolean _autoPlay;
-	private LiquidMedia.EntitlementScheme entitlementScheme;
+	private EntitlementScheme entitlementScheme;
 	private SambaMediaConfig media;
 	private SambaCast sambaCast;
 	//private long ti; // benchmark
@@ -128,11 +130,13 @@ public class MediaItemActivity extends Activity {
 		@Override
 		public void onFullscreen(SambaEvent e) {
 			status.setText(String.format("Status: %s", e.getType()));
+			getActionBar().hide();
 		}
 
 		@Override
 		public void onFullscreenExit(SambaEvent e) {
 			status.setText(String.format("Status: %s", e.getType()));
+			getActionBar().show();
 		}
 
 		@Override
@@ -161,25 +165,22 @@ public class MediaItemActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_media_item);
 
-		if (getIntent() != null)
-			_autoPlay = getIntent().getBooleanExtra("autoPlay", true);
-
         ButterKnife.bind(this);
 
 		if (getActionBar() != null)
       		getActionBar().setDisplayHomeAsUpEnabled(true);
 
 	    if (activityMedia == null) {
-		    activityMedia = EventBus.getDefault().removeStickyEvent(LiquidMedia.class);
-		    loading_text.setText("Carregando mídia: " + activityMedia.title.split("\\.", 2)[0]);
+		    activityMedia = EventBus.getDefault().removeStickyEvent(MediaInfo.class);
+		    loadingText.setText(String.format("Carregando mídia: %s", activityMedia.getTitle().split("\\.", 2)[0]));
 	    }
 
 	    // cast
-		CastOptionsProvider.configProfile(this, activityMedia.environment);
+		CastOptionsProvider.configProfile(this, activityMedia.getEnvironment());
 
 		// testing...
-//		CastOptionsProvider.appId = "411C092F";
-//		CastOptionsProvider.playerUrl = "192.168.0.113:8000/";
+		//CastOptionsProvider.appId = "411C092F";
+		//CastOptionsProvider.playerUrl = "192.168.0.113:8000/";
 
 		sambaCast = new SambaCast(this);
 
@@ -213,23 +214,24 @@ public class MediaItemActivity extends Activity {
 
 	/**
 	 * Request the given media
-	 * @param liquidMedia - Liquid media object
+	 * @param mediaInfo - Liquid media object
 	 */
-    private void requestMedia(final LiquidMedia liquidMedia) {
+    private void requestMedia(final MediaInfo mediaInfo) {
 	    SambaApiCallback callback = new SambaApiCallback() {
 		    //Success response of one media only. Returns a SambaMedia object
 		    @Override
 		    public void onMediaResponse(SambaMedia media) {
-			    if (media == null) return;
+			    if (media == null)
+			    	return;
 
-			    LiquidMedia.EntitlementScheme entitlementScheme = liquidMedia.entitlementScheme;
+			    // media injection
+			    if (mediaInfo.getUrl() != null)
+				    media.url = mediaInfo.getUrl();
 
-			    if (liquidMedia.url != null)
-				    media.url = liquidMedia.url;
-
-			    if (entitlementScheme != null) {
+			    // DRM
+			    if (mediaInfo.getEntitlementScheme() != null) {
 				    MediaItemActivity.this.media = (SambaMediaConfig)media;
-				    MediaItemActivity.this.entitlementScheme = entitlementScheme;
+				    MediaItemActivity.this.entitlementScheme = mediaInfo.getEntitlementScheme();
 
 				    loading.setVisibility(View.GONE);
 				    titleView.setVisibility(View.VISIBLE);
@@ -237,62 +239,62 @@ public class MediaItemActivity extends Activity {
 
 				    validationControlbar.setVisibility(View.VISIBLE);
 
-                    //DRM controls
-                    if(((SambaMediaConfig) media).drmRequest != null ) {
+                    // DRM controls
+                    if (((SambaMediaConfig) media).drmRequest != null) {
                         sessionControls.setVisibility(View.VISIBLE);
                         authControls.setVisibility(View.VISIBLE);
                     }
+
 				    return;
 			    }
 
-			    media.isAudioOnly = liquidMedia.qualifier.toLowerCase().equals("audio");
-			    media.isDvr = liquidMedia.dvr;
+			    media.isAudioOnly = mediaInfo.isAudioLive() || "audio".equalsIgnoreCase(mediaInfo.getQualifier());
 
 			    loadPlayer(media);
-
 		    }
 
 		    //Response error
 		    @Override
-		    public void onMediaResponseError(String msg, SambaMediaRequest request) {
-			    Toast.makeText(MediaItemActivity.this, msg + " " + request, Toast.LENGTH_SHORT).show();
+		    public void onMediaResponseError(Exception e, SambaMediaRequest request) {
+			    Toast.makeText(MediaItemActivity.this, e.getMessage() + " " + request, Toast.LENGTH_SHORT).show();
 		    }
 	    };
 
 	    // if injected media
-	    if (liquidMedia.ph == null && liquidMedia.url != null && !liquidMedia.url.isEmpty()) {
+	    if (mediaInfo.getProjectHash() == null && mediaInfo.getUrl() != null && !mediaInfo.getUrl().isEmpty()) {
 		    SambaMediaConfig m = new SambaMediaConfig();
-		    m.url = liquidMedia.url;
-		    m.title = liquidMedia.title;
-		    m.type = liquidMedia.type;
-		    m.isAudioOnly = liquidMedia.qualifier.toLowerCase().equals("audio");
+		    m.url = mediaInfo.getUrl();
+		    m.title = mediaInfo.getTitle();
+		    m.type = mediaInfo.getType();
+		    m.isAudioOnly = "audio".equalsIgnoreCase(mediaInfo.getQualifier());
 		    callback.onMediaResponse(m);
 		    return;
 	    }
 
 	    //Instantiates the SambaApi class
-        SambaApi api = new SambaApi(this, "token");
+        final SambaApi api = new SambaApi(this, "token");
 
 	    //Instantiate a unique request. Params: playerHash, mediaId, streamName, streamUrl ( alternateLive on our browser version )
-        SambaMediaRequest sbRequest = new SambaMediaRequest(liquidMedia.ph, liquidMedia.id, null, liquidMedia.streamUrl, liquidMedia.backupUrls);
-		sbRequest.environment = liquidMedia.environment;
+        final SambaMediaRequest sbRequest = mediaInfo.getLiveChannelId() != null ?
+		        new SambaMediaRequest(mediaInfo.getProjectHash(), mediaInfo.getLiveChannelId(), true) :
+		        new SambaMediaRequest(mediaInfo.getProjectHash(), mediaInfo.getId(), null,
+				        mediaInfo.getStreamUrl(), mediaInfo.getBackupUrls(), mediaInfo.isAudioLive());
 
-	    if (liquidMedia.description != null || liquidMedia.shortDescription != null) {
-		    descView.setText(((liquidMedia.description != null) ? liquidMedia.description : "") +
-				    "\n " + ((liquidMedia.shortDescription != null) ? liquidMedia.shortDescription : ""));
-	    }
+		sbRequest.environment = mediaInfo.getEnvironment();
+
+	    descView.setText((mediaInfo.getDescription() != null ? mediaInfo.getDescription() : ""));
 
         sbRequest.protocol = SambaMediaRequest.Protocol.HTTP;
         api.requestMedia(sbRequest, callback);
     }
 
     private void loadPlayer(final SambaMedia media) {
-	    if (media == null) return;
+	    if (media == null)
+	    	return;
 
-	    if (activityMedia.adTag != null) {
-		    media.adUrl = activityMedia.adTag.url;
-		    media.title = activityMedia.adTag.name;
-	    }
+	    // injected ad
+	    if (activityMedia.getAdUrl() != null)
+		    media.adUrl = activityMedia.getAdUrl();
 
 		loading.setVisibility(View.GONE);
 		titleView.setVisibility(View.VISIBLE);
@@ -313,21 +315,12 @@ public class MediaItemActivity extends Activity {
 
 		// enabling Chromecast on player
 		player.setSambaCast(sambaCast);
+	    player.setEnableControls(activityMedia.isControlsEnabled());
 	    player.setMedia(media);
-
-		/*//Disable controls randomically
-		Random random = new Random();
-		Boolean flag = random.nextBoolean();
-
-		//Set enable controls
-		player.setEnableControls(flag);
-
-		if (!flag)
-			descView.setText("Mídia com controls desabilitados");*/
 
 		//ti = new Date().getTime();
 
-		if (_autoPlay)
+		if (activityMedia.isAutoPlay())
 			player.play();
 	}
 
@@ -351,6 +344,11 @@ public class MediaItemActivity extends Activity {
 	@OnClick(R.id.pause) public void pauseHandler() {
 		if (player != null)
 			player.pause();
+	}
+
+	@OnClick(R.id.hide_controls) public void hideControlsHandler() {
+		if (player != null)
+			player.setHideControls(SambaPlayer.Controls.SEEKBAR, SambaPlayer.Controls.FULLSCREEN, SambaPlayer.Controls.MENU);
 	}
 
 	@OnClick(R.id.create_session) public void createSessionHandler() {
@@ -387,13 +385,13 @@ public class MediaItemActivity extends Activity {
 						status.setText(String.format("Session: %s", sessionId));
 					}
 					catch (Exception e) {
-						e.printStackTrace();
+						Log.e(MediaItemActivity.class.getSimpleName(), "Error parsing DRM session data.", e);
 					}
 				}
 			});
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			Log.e(MediaItemActivity.class.getSimpleName(), "Error requesting DRM session creation.", e);
 		}
 	}
 
@@ -437,6 +435,7 @@ public class MediaItemActivity extends Activity {
 			case 3:
 				url += "&PackageId=3";
 				break;
+			default: break;
 		}
 
 		try {
@@ -454,7 +453,7 @@ public class MediaItemActivity extends Activity {
 			});
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			Log.e(MediaItemActivity.class.getSimpleName(), "Error requesting DRM authorization.", e);
 		}
 	}
 

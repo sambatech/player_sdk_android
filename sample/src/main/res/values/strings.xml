@@ -4,10 +4,11 @@
 
     <string name="svapi_prod">http://api.sambavideos.sambatech.com/v1/</string>
     <string name="svapi_stage">http://staging.sambavideos.sambatech.com/v1/</string>
-    <string name="svapi_dev">http://52.2.166.124:8091/v1/</string>
+    <string name="svapi_dev">http://web1.qa.sambatech.com:10000/v1/</string>
     <string name="svapi_token_prod">ec8f5393-8e54-4ef2-842e-3f6cf0ea6287</string>
     <string name="svapi_token_dev">08008acb-c9b8-4452-af78-2d36d83db640</string>
-    <string name="mysjon_endpoint">https://api.myjson.com/bins/</string>
+    <string name="drm_url">http://sambatech.live.ott.irdeto.com/</string>
+    <string name="media_list_api">http://playerground.sambatech.com/v1/liquid/medias</string>
     <string name="ad_program">Ad Tags</string>
     <string name="common">VOD</string>
     <string name="live">Live</string>
@@ -19,7 +20,10 @@
     <string name="about_text">Sample App criada pelo time do Player da Sambatech - Leandro Zanol, Priscila Magalhães e Thiago Miranda</string>
     <string name="loading">Carregando listagem&#8230;</string>
     <string name="title_activity_menu">MenuActivity</string>
-    <string name="drm_url">http://sambatech.live.ott.irdeto.com/</string>
+    <string name="all">All</string>
+    <string name="prod">Prod</string>
+    <string name="staging">Staging</string>
+    <string name="dev">QA</string>
 
     <string-array name="policies">
         <item>Aluguel 48h (p5)</item>

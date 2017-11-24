@@ -1,14 +1,15 @@
 apply plugin: 'com.android.library'
+apply plugin: 'org.sonarqube'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 26
-        versionName "v0.9.5-beta"
+        versionCode 32
+        versionName "v0.10.6-beta"
     }
     buildTypes {
         release {
@@ -18,21 +19,32 @@ android {
     }
 }
 
+sonarqube {
+    properties {
+        property "sonar.projectName", "SambaPlayer Android SDK"
+        property "sonar.projectKey", "sambaplayer-android-sdk"
+        property "sonar.host.url", "http://ec2-34-203-40-94.compute-1.amazonaws.com/sonar/"
+        property "sonar.language", "java"
+        property "sonar.sources", "src/main/java/"
+        property "sonar.login", "dev"
+        property "sonar.password", "44a538ed1"
+    }
+}
+
 dependencies {
     // DEV
     compile project(':googlemediaframework')
 
     // PROD
-    /*compile('com.sambatech.player:gmf:0.2.1-1') {
+    /*compile('com.sambatech.player:gmf:0.2.1-5-dev') {
         // DEPLOY
         transitive=true
     }*/
 
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25.2.0'
     compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
-    compile 'com.google.android.gms:play-services-ads:11.0.2'
-    compile 'com.google.android.gms:play-services-cast-framework:11.0.2'
+    compile 'com.google.android.gms:play-services-ads:11.6.0'
+    compile 'com.google.android.gms:play-services-cast-framework:11.6.0'
     compile 'org.bitbucket.b_c:jose4j:0.4.4'
 }
 

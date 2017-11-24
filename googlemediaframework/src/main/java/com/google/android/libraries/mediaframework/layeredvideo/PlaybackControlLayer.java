@@ -18,21 +18,20 @@ package com.google.android.libraries.mediaframework.layeredvideo;
 
 import android.animation.Animator;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.os.Message;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialog;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -319,16 +318,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private ImageButton fullscreenButton;
 
 	/**
-	 * Shows a menu for changing media quality.
-	 */
-	private ImageButton outputButton;
-
-    /**
-     * Shows a menu for changing caption.
-     */
-    private ImageButton captionButton;
-
-	/**
 	 * Loading Progress bar
 	 */
 	private ProgressBar loadingProgress;
@@ -395,6 +384,11 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private ImageButton pausePlayButton;
 
 	/**
+	 * Displays the MenuIcon
+	 */
+	private ImageButton menuButton;
+
+	/**
 	 * Displays a track and a thumb which can be used to seek to different time points in the video.
 	 */
 	private SeekBar seekBar;
@@ -457,16 +451,16 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	private FrameLayout loadingSpinner;
 
 	/**
-	 * The output menu.
+	 * The output menu modalsheet.
 	 */
-	private Dialog outputMenu;
+	private BottomSheetDialog outputSheetDialog;
 
-    /**
-     * The caption menu
-     */
-    private Dialog captionMenu;
+	/**
+	 * Captions menu modalsheet
+	 */
+	private BottomSheetDialog captionsSheetDialog;
 
-    /**
+	/**
 	 * Indicates playback last state before the output menu has open.
 	 */
 	private boolean menuWasPlaying;
@@ -475,6 +469,53 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * Whether it should auto hide controls or not.
 	 */
 	private boolean autoHide = true;
+
+	/**
+	 * Controls Menu
+	 */
+	private OptionsMenuController optionsMenuController;
+
+
+	/**
+	 * Fullscreen Flags
+	 */
+	private final int mFullScreenFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+			| View.SYSTEM_UI_FLAG_FULLSCREEN
+			| View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+			| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+			| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+
+	private OptionsMenuLayer.OptionsMenuCallback optionsMenuCallback = new OptionsMenuLayer.OptionsMenuCallback() {
+		@Override
+		public void onTouchHD() {
+			if (outputSheetDialog == null) return;
+			outputSheetDialog.show();
+		}
+
+		@Override
+		public void onTouchCaptions() {
+			if(captionsSheetDialog == null) return;
+			captionsSheetDialog.show();
+		}
+
+		@Override
+		public void onTouchSpeed() {
+
+		}
+
+		@Override
+		public void onMenuDismiss() {
+			if (menuWasPlaying) {
+				play();
+				hide(true);
+			} else {
+				show();
+			}
+			if (isFullscreen) {
+				getLayerManager().getActivity().getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
+			}
+		}
+	};
 
 	private List<Callback> preInitCallbacks = new ArrayList<>();
 
@@ -489,16 +530,14 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 */
 	private int savedOrientation;
 
-	public PlaybackControlLayer(String videoTitle) {
-		this(videoTitle, null, true);
-	}
-
-	public PlaybackControlLayer(String videoTitle, FullscreenCallback fullscreenCallback, boolean autoHide) {
+	public PlaybackControlLayer(String videoTitle, FullscreenCallback fullscreenCallback, boolean autoHide, OptionsMenuController optionsMenuController) {
 		this.videoTitle = videoTitle;
 		this.canSeek = true;
 		this.fullscreenCallback = fullscreenCallback;
 		this.shouldBePlaying = false;
 		this.autoHide = autoHide;
+		this.optionsMenuController = optionsMenuController;
+		this.optionsMenuController.setCallback(optionsMenuCallback);
 		actionButtons = new ArrayList<>();
 	}
 
@@ -688,8 +727,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			activity.setRequestedOrientation(isReverseLandscape ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE :
 					ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
-			activity.getWindow().getDecorView().setSystemUiVisibility(
-					View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
+			activity.getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
 
 			// Whenever the status bar and navigation bar appear, we want the playback controls to
 			// appear as well.
@@ -702,7 +740,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 						// fullscreen flag is NOT triggered. This means that the status bar is showing. If
 						// this is the case, then we show the playback controls as well (by calling show()).
 						if ((i & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-							show();
+							if (!optionsMenuController.isVisible())show();
 						}
 					}
 				}
@@ -776,8 +814,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 							// Make sure that the status bar and navigation bar are hidden when the playback
 							// controls are hidden.
 							if (isFullscreen) {
-								getLayerManager().getActivity().getWindow().getDecorView().setSystemUiVisibility(
-										View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN);
+								getLayerManager().getActivity().getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
 							}
 							handler.removeMessages(SHOW_PROGRESS);
 							isVisible = false;
@@ -801,6 +838,9 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	public void show(int timeout) {
 		if (!autoHide)
 			timeout = 0;
+
+		if (optionsMenuController.isVisible())
+			return;
 
 		if (!isVisible && getLayerManager().getContainer() != null) {
 			playbackControlRootView.setAlpha(1.0f);
@@ -1054,22 +1094,27 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * @param view The view for the output menu.
 	 */
 	public void setOutputMenu(View view) {
-		outputMenu = new Dialog(getLayerManager().getActivity());
-		outputMenu.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		outputMenu.setContentView(view);
-		outputMenu.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-		outputMenu.setOnDismissListener(new DialogInterface.OnDismissListener() {
+		outputSheetDialog = new BottomSheetDialog(getLayerManager().getActivity());
+		outputSheetDialog.setContentView(view);
+		outputSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
 			@Override
 			public void onDismiss(DialogInterface dialog) {
 				if (menuWasPlaying) {
 					play();
 					hide(true);
+					if (optionsMenuController != null) optionsMenuController.hideMenu();
+				} else {
+					show();
+				}
+				if (isFullscreen) {
+					getLayerManager().getActivity().getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
 				}
 			}
 		});
-
-		outputButton.setVisibility(View.VISIBLE);
+		BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(((View) view.getParent()));
+		bottomSheetBehavior.setHideable(false);
+		bottomSheetBehavior.setPeekHeight(Integer.MAX_VALUE);
+		menuButton.setVisibility(View.VISIBLE);
 	}
 
 	/**
@@ -1077,22 +1122,28 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * @param view The view for the caption menu
 	 */
 	public void setCaptionMenu(View view) {
-        captionMenu = new Dialog(getLayerManager().getActivity());
-        captionMenu.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        captionMenu.setContentView(_captionMenuView = view);
-        captionMenu.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-        captionMenu.setOnDismissListener(new DialogInterface.OnDismissListener(){
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                if (menuWasPlaying) {
-	                play();
-	                hide(true);
-                }
-            }
-        });
-
-        captionButton.setVisibility(View.VISIBLE);
+		_captionMenuView = view;
+		captionsSheetDialog = new BottomSheetDialog(getLayerManager().getActivity());
+		captionsSheetDialog.setContentView(view);
+		captionsSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				if (menuWasPlaying) {
+					play();
+					hide(true);
+					if (optionsMenuController != null) optionsMenuController.hideMenu();
+				} else {
+					show();
+				}
+				if (isFullscreen) {
+					getLayerManager().getActivity().getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
+				}
+			}
+		});
+		BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(((View) view.getParent()));
+		bottomSheetBehavior.setHideable(false);
+		bottomSheetBehavior.setPeekHeight(Integer.MAX_VALUE);
+		menuButton.setVisibility(View.VISIBLE);
     }
 
 	public View getCaptionMenu() {
@@ -1103,26 +1154,28 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 	 * Closes the output menu.
 	 */
 	public void closeOutputMenu() {
-		outputMenu.dismiss();
+		outputSheetDialog.dismiss();
+		if (optionsMenuController != null) optionsMenuController.hideMenu();
 	}
 
     /**
      * Closes the caption menu.
      */
     public void closeCaptionMenu() {
-        captionMenu.dismiss();
+		captionsSheetDialog.dismiss();
+		if (optionsMenuController != null) optionsMenuController.hideMenu();
     }
 
 	/**
 	 * Enables/Disables the specified controls.
 	 * @param state Whether to enable or disable the listed controls
-	 * @param names Controls names: "play", "playLarge", "fullscreen", "outputMenu", "captionMenu", "seekbar", "time"
+	 * @param controls Names from class <code>Controls</code>
 	 */
-	public void setControlsVisible(final boolean state, final String ... names) {
+	public void setControlsVisible(final boolean state, final String... controls) {
 		if (controlsMap == null) {
 			preInitCallbacks.add(new Callback() {
 				public void call() {
-					setControlsVisible(state, names);
+					setControlsVisible(state, controls);
 				}
 			});
 			return;
@@ -1130,38 +1183,16 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 
 		int visibility = state ? View.VISIBLE : View.GONE;
 
-		// specifics
-		if (names.length > 0) {
-			for (String name : names)
-				if (controlsMap.containsKey(name))
-					controlsMap.get(name).setVisibility(state || !name.equals("seekbar") ? visibility : View.INVISIBLE);
+		// specific controls
+		if (controls.length > 0) {
+			for (String control : controls)
+				if (controlsMap.containsKey(control))
+					controlsMap.get(control).setVisibility(state || !Controls.SEEKBAR.equals(control) ? visibility : View.INVISIBLE);
 		}
 		// all
 		else for (Map.Entry<String, View> pair : controlsMap.entrySet())
-			pair.getValue().setVisibility(state || !pair.getKey().equals("seekbar") ? visibility : View.INVISIBLE);
+			pair.getValue().setVisibility(state || !Controls.SEEKBAR.equals(pair.getKey()) ? visibility : View.INVISIBLE);
 	}
-
-	/*public void swapControls(final String name1, final String name2) {
-		if (controlsMap == null) {
-			preInitCallbacks.add(new Callback() {
-				public void call() {
-					swapControls(name1, name2);
-				}
-			});
-			return;
-		}
-
-		if (controlsMap.containsKey(name1) && controlsMap.containsKey(name2)) {
-			View control1 = (View)controlsMap.get(name1);
-			View control2 = (View)controlsMap.get(name2);
-			int index1 = view.indexOfChild(control1);
-
-			view.removeView(control1);
-			view.addView(control1, view.indexOfChild(control2));
-			view.removeView(control2);
-			view.addView(control2, index1);
-		}
-	}*/
 
 	/**
 	 * Perform binding to UI, setup of event handlers and initialization of values.
@@ -1171,8 +1202,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		pausePlayLargeButton = (ImageButton) view.findViewById(R.id.pauseLarge);
 		pausePlayButton = (ImageButton) view.findViewById(R.id.pause);
 		fullscreenButton = (ImageButton) view.findViewById((R.id.fullscreen));
-		outputButton = (ImageButton) view.findViewById(R.id.output_button);
-        captionButton = (ImageButton) view.findViewById(R.id.caption_button);
 		seekBar = (SeekBar) view.findViewById(R.id.mediacontroller_progress);
 		videoTitleView = (TextView) view.findViewById(R.id.video_title);
 		endTime = (TextView) view.findViewById(R.id.time_duration);
@@ -1183,41 +1212,35 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		bottomChrome = (LinearLayout) view.findViewById(R.id.bottom_chrome);
 		actionButtonsContainer = (LinearLayout) view.findViewById(R.id.actions_container);
 		loadingProgress = (ProgressBar) loadingSpinner.findViewById(R.id.loadingLarge);
+		menuButton = (ImageButton) view.findViewById(R.id.menu_button);
 
 		// output
-		outputButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (outputMenu == null)
-					return;
-
-				PlayerControl playerControl = getLayerManager().getControl();
-				menuWasPlaying = playerControl.isPlaying();
-				playerControl.pause();
-				outputMenu.show();
-			}
-		});
-
-		if (outputMenu == null) {
-			outputButton.setVisibility(View.GONE);
+		if (outputSheetDialog == null) {
+			if (optionsMenuController != null) optionsMenuController.setHdButtonVisibility(false);
 		}
 
         // caption
-        captionButton.setOnClickListener(new View.OnClickListener() {
-           @Override
-            public void onClick(View v) {
-               if(captionMenu == null) return;
-
-	           PlayerControl playerControl = getLayerManager().getControl();
-               menuWasPlaying = playerControl.isPlaying();
-               playerControl.pause();
-               captionMenu.show();
-           }
-        });
-
-        if (captionMenu == null) {
-           captionButton.setVisibility(View.GONE);
+        if (captionsSheetDialog == null) {
+			if (optionsMenuController != null) optionsMenuController.setCaptionsButtonVisibility(false);
         }
+
+        //menu
+		if(outputSheetDialog == null && captionsSheetDialog == null) {
+			menuButton.setVisibility(View.GONE);
+		}
+
+        menuButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (optionsMenuController != null) {
+					PlayerControl playerControl = getLayerManager().getControl();
+					menuWasPlaying = playerControl.isPlaying();
+					playerControl.pause();
+					hide(true);
+					optionsMenuController.showMenu();
+				}
+			}
+		});
 
 		// The play button should toggle play/pause when the play/pause button is clicked.
 		pausePlayLargeButton.setOnClickListener(new View.OnClickListener() {
@@ -1299,17 +1322,16 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		timeFormatter = new Formatter(timeFormat, Locale.getDefault());
 
 		controlsMap = new HashMap<>();
-		controlsMap.put("playLarge", pausePlayLargeButton);
-		controlsMap.put("play", pausePlayButton);
-		controlsMap.put("fullscreen", fullscreenButton);
-		controlsMap.put("outputMenu", outputButton);
-		controlsMap.put("captionMenu", captionButton);
-		controlsMap.put("seekbar", seekBar);
-		controlsMap.put("topChrome", topChrome);
-		controlsMap.put("bottomChrome", bottomChrome);
-		controlsMap.put("time", view.findViewById(R.id.time_container));
+		controlsMap.put(Controls.PLAY_LARGE, pausePlayLargeButton);
+		controlsMap.put(Controls.PLAY, pausePlayButton);
+		controlsMap.put(Controls.FULLSCREEN, fullscreenButton);
+		controlsMap.put(Controls.MENU, menuButton);
+		controlsMap.put(Controls.SEEKBAR, seekBar);
+		controlsMap.put(Controls.TOP_CHROME, topChrome);
+		controlsMap.put(Controls.BOTTOM_CHROME, bottomChrome);
+		controlsMap.put(Controls.TIME, view.findViewById(R.id.time_container));
 
-		if (preInitCallbacks.size() > 0) {
+		if (!preInitCallbacks.isEmpty()) {
 			for (Callback callback : preInitCallbacks)
 				callback.call();
 

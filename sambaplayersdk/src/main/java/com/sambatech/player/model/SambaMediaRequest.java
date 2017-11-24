@@ -11,8 +11,10 @@ public class SambaMediaRequest {
 
 	public String projectHash;
 	public String mediaId;
+	public String liveChannelId;
 	public String streamName;
 	public String streamUrl;
+	public boolean isStreamAudio;
 	public @NonNull String[] backupUrls = new String[]{};
 	public @NonNull Environment environment = Environment.PROD;
 	public @NonNull Protocol protocol = Protocol.HTTPS;
@@ -24,7 +26,22 @@ public class SambaMediaRequest {
 	 * @param mediaId Hash code of the media
 	 */
 	public SambaMediaRequest(String projectHash, String mediaId) {
-		this(projectHash, mediaId, null);
+		this(projectHash, mediaId, false);
+	}
+
+	/**
+	 * Represents a live stream request.
+	 *
+	 * @param projectHash Hash code of the project
+	 * @param mediaIdOrLiveChannelId The media ID or live channel ID (depending on the flag)
+	 * @param isLive Set this flag to true when using a live channel ID
+	 */
+	public SambaMediaRequest(String projectHash, String mediaIdOrLiveChannelId, boolean isLive) {
+		this.projectHash = projectHash;
+
+		if (isLive)
+			this.liveChannelId = mediaIdOrLiveChannelId;
+		else this.mediaId = mediaIdOrLiveChannelId;
 	}
 
 	/**
@@ -60,11 +77,26 @@ public class SambaMediaRequest {
 	 * @param backupUrls URL list for fallback purposes
 	 */
 	public SambaMediaRequest(String projectHash, String mediaId, String streamName, String streamUrl, String[] backupUrls) {
+		this(projectHash, mediaId, streamName, streamUrl, backupUrls, false);
+	}
+
+	/**
+	 * Represents a direct live stream request (by URL) with other backup URLs.
+	 *
+	 * @param projectHash Hash code of the project
+	 * @param mediaId Hash code of the media
+	 * @param streamName Name of the stream (live only)
+	 * @param streamUrl URL for stream (`streamName` will be ignored)
+	 * @param backupUrls URL list for fallback purposes
+	 * @param isStreamAudio Whether the stream URL is audio
+	 */
+	public SambaMediaRequest(String projectHash, String mediaId, String streamName, String streamUrl, String[] backupUrls, boolean isStreamAudio) {
 		this.projectHash = projectHash;
 		this.mediaId = mediaId;
 		this.streamName = streamName;
 		this.streamUrl = streamUrl;
 		this.backupUrls = backupUrls != null ? backupUrls : new String[]{};
+		this.isStreamAudio = isStreamAudio;
 	}
 
 	@Override

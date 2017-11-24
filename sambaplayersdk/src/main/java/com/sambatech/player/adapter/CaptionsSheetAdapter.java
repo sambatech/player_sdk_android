@@ -11,19 +11,20 @@ import android.widget.TextView;
 import com.sambatech.player.R;
 import com.sambatech.player.model.SambaMedia;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author tmiranda - 12/01/17
+ * Created by luizbyrro on 07/11/17.
  */
-public class CaptionsAdapter extends BaseAdapter {
+
+public class CaptionsSheetAdapter extends BaseAdapter {
 
     public int currentIndex = -1;
 
     private Context cContext;
-    private ArrayList<SambaMedia.Caption> captions;
+    private List<SambaMedia.Caption> captions;
 
-    public CaptionsAdapter(Context context, ArrayList<SambaMedia.Caption> cList) {
+    public CaptionsSheetAdapter(Context context, List<SambaMedia.Caption> cList) {
         this.cContext = context;
         this.captions = cList;
     }
@@ -49,7 +50,7 @@ public class CaptionsAdapter extends BaseAdapter {
 
         if (convertView == null) {
             convertView = ((LayoutInflater) cContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE))
-		            .inflate(R.layout.menu_item, parent, false);
+                    .inflate(R.layout.action_sheet_item, parent, false);
 
             holder = new CaptionItem(convertView);
             convertView.setTag(holder);
@@ -71,8 +72,8 @@ public class CaptionsAdapter extends BaseAdapter {
         RadioButton radio;
 
         CaptionItem(View view) {
-            this.radio = (RadioButton) view.findViewById(R.id.output_radio);
-            this.label = (TextView) view.findViewById(R.id.menu_item_label);
+            this.radio = (RadioButton) view.findViewById(R.id.sheet_output_radio);
+            this.label = (TextView) view.findViewById(R.id.sheet_item_label);
         }
     }
 }

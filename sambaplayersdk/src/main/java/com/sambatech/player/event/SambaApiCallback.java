@@ -25,8 +25,8 @@ public abstract class SambaApiCallback {
 	/**
 	 *
 	 * Fired up after an error response from the server.
-	 * @param msg Error message
+	 * @param e The raised exception
 	 * @param request Original request
 	 */
-	public void onMediaResponseError(String msg, SambaMediaRequest request) {}
+	public void onMediaResponseError(Exception e, SambaMediaRequest request) {}
 }

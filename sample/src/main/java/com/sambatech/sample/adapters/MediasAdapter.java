@@ -11,13 +11,12 @@ import android.widget.TextView;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.sambatech.sample.R;
-import com.sambatech.sample.model.LiquidMedia;
+import com.sambatech.sample.model.MediaInfo;
 import com.sambatech.sample.utils.VolleySingleton;
 
+import java.util.List;
 
-import java.util.ArrayList;
-
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -27,26 +26,23 @@ import butterknife.ButterKnife;
  */
 public class MediasAdapter extends BaseAdapter {
 
-    private ArrayList<LiquidMedia> medias;
-    private Context mContext;
+    private List<MediaInfo> mediaList;
 	private LayoutInflater inflater;
 
-    public MediasAdapter(Context mContext, ArrayList<LiquidMedia> mList) {
-        this.medias = mList;
-        this.mContext = mContext;
-
+    public MediasAdapter(Context mContext, List<MediaInfo> mList) {
+        mediaList = mList;
 	    inflater = (LayoutInflater) mContext
 			    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
     public int getCount() {
-        return medias.size();
+        return mediaList.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return medias.get(position);
+        return mediaList.get(position);
     }
 
     @Override
@@ -56,134 +52,71 @@ public class MediasAdapter extends BaseAdapter {
 
 	@Override
 	public int getViewTypeCount() {
-
-		if (getCount() != 0)
-			return getCount();
-
-		return 1;
+		return getCount() > 0 ? getCount() : 1;
 	}
 
 	@Override
 	public int getItemViewType(int position) {
-
 		return position;
 	}
 
     @Override
     public View getView(final int position, View view, ViewGroup viewGroup) {
-        MediaItem holder;
+		if (view == null) {
+			final View customView = inflater.inflate(R.layout.media_list_item, viewGroup, false);
+			final MediaItem holder = new MediaItem(customView);
+			final MediaInfo media = (MediaInfo) getItem(position);
+			final ImageLoader mImageLoader = VolleySingleton.getInstance().getImageLoader();
 
-	    if(view == null) {
+			// if there's any thumb
+			if (media.getThumbnail() != null)
+				holder.thumb.setImageUrl(media.getThumbnail(), mImageLoader);
+				// audio
+			else if ("audio".equalsIgnoreCase(media.getQualifier()))
+				holder.thumb.setImageUrl("https://cdn3.iconfinder.com/data/icons/buttons-1/512/Notes.png", mImageLoader);
 
-		    view = inflater.inflate(R.layout.media_list_item, viewGroup, false);
-	        holder = new MediaItem(view);
+			holder.title.setText(media.getTitle() != null ? media.getTitle().split("\\.", 2)[0] : "");
+			holder.description.setText(media.getDescription() != null ? media.getDescription() : "");
 
-	        LiquidMedia media = (LiquidMedia) getItem(position);
-	        ImageLoader mImageLoader = VolleySingleton.getInstance().getImageLoader();
+			final boolean odd = (position & 1) == 1;
 
-		    // if there's any thumb
-		    if (media.thumbs != null && media.thumbs.size() > 0)
-			    holder.thumb.setImageUrl(getIdealThumb(media.thumbs), mImageLoader);
-		    else if (media.qualifier.toLowerCase().equals("audio"))
-			    holder.thumb.setImageUrl("https://cdn3.iconfinder.com/data/icons/buttons-1/512/Notes.png", mImageLoader);
-
-	        holder.title.setText(media.title.split("\\.", 2)[0]);
-
-	        if (media.description != null || media.shortDescription != null) {
-		        String text = (media.description != null ? media.description : "") + "\n " + (media.shortDescription != null ? media.shortDescription : "");
-		        holder.description.setText(text);
-	        } else {
-		        holder.description.setText("");
-	        }
-
-
-	        switch (media.environment) {
-				case LOCAL:
-					holder.thumb.setBackgroundColor(Color.parseColor("#488e44"));
-					break;
-				case DEV:
-					holder.thumb.setBackgroundColor(Color.parseColor("#993a2d"));
+			// colors
+			switch (media.getEnvironment()) {
+				case PROD:
+					customView.setBackgroundColor(Color.parseColor(odd ? "#eeffee" : "#ddffdd"));
 					break;
 				case STAGING:
-					holder.thumb.setBackgroundColor(Color.parseColor("#c48a2d"));
+					customView.setBackgroundColor(Color.parseColor(odd ? "#ddeeff" : "#ccddff"));
 					break;
-				case PROD:
-					holder.thumb.setBackgroundColor(Color.parseColor("#33419b"));
+				case DEV:
+					customView.setBackgroundColor(Color.parseColor(odd ? "#ffeeee" : "#ffdddd"));
+					break;
+				case LOCAL:
+				default:
+					customView.setBackgroundColor(Color.parseColor(odd ? "#eeeeee" : "#ffffff"));
 					break;
 			}
 
-		    //Cores
-		    if (position % 2 == 0) {
-			    view.setBackgroundColor(Color.parseColor("#EEEEEE"));
-		    } else {
-			    view.setBackgroundColor(Color.parseColor("#DDDDDD"));
-		    }
+			customView.setTag(holder);
 
-		    view.setTag(holder);
-
-		    /**holder.arrow.setOnClickListener(new View.OnClickListener() {
-			    @Override
-			    public void onClick(View v) {
-				    LiquidMedia media = (LiquidMedia) getItem(position);
-				    EventBus.getDefault().post(new ItemClickEvent("newActivity", media));
-			    }
-		    });
-
-		    holder.thumb.setOnClickListener(new View.OnClickListener() {
-			    @Override
-			    public void onClick(View v) {
-				    LiquidMedia media = (LiquidMedia) getItem(position);
-				    EventBus.getDefault().post(new ItemClickEvent("sameActivity", media));
-			    }
-		    });
-
-		    holder.title.setOnClickListener(new View.OnClickListener() {
-			    @Override
-			    public void onClick(View v) {
-				    LiquidMedia media = (LiquidMedia) getItem(position);
-				    EventBus.getDefault().post(new ItemClickEvent("sameActivity", media));
-			    }
-		    });**/
-
-	    }
+			return customView;
+		}
 
         return view;
     }
 
-	/**
-	 * Get the smallest thumb of the media ( for optimization purposes )
-	 * @param thumbs
-	 * @return
-	 */
-	private String getIdealThumb(ArrayList<LiquidMedia.Thumb> thumbs) {
-        int size = 0;
-        String thumbUrl = "";
-        for(LiquidMedia.Thumb thumb : thumbs) {
-
-            if(size == 0 || size > thumb.size) {
-                size = thumb.size;
-                thumbUrl = thumb.url;
-            }
-
-        }
-        return thumbUrl;
-    }
-
     static class MediaItem {
-        @Bind(R.id.thumbPreview)
+        @BindView(R.id.thumbPreview)
         NetworkImageView thumb;
 
-        @Bind(R.id.titlePreview)
+        @BindView(R.id.titlePreview)
         TextView title;
 
-	    @Bind(R.id.description)
+	    @BindView(R.id.description)
 	    TextView description;
 
         MediaItem(View view) {
             ButterKnife.bind(this, view);
         }
     }
-
-
 }
-
