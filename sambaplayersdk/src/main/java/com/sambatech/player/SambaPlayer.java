@@ -5,6 +5,7 @@ import android.app.MediaRouteButton;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
@@ -43,6 +44,7 @@ import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
+import com.google.android.exoplayer2.text.CaptionStyleCompat;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
@@ -108,6 +110,11 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static android.graphics.Typeface.NORMAL;
+import static android.util.TypedValue.COMPLEX_UNIT_SP;
+import static android.view.accessibility.CaptioningManager.CaptionStyle.EDGE_TYPE_NONE;
+import static android.view.animation.Animation.ABSOLUTE;
 
 /**
  * Represents the player, responsible for managing media playback.
@@ -802,9 +809,17 @@ public class SambaPlayer extends FrameLayout {
         playerView = new SimpleExoPlayerView(getContext());
         player = playerInstanceDefault.createPlayerInstance();
         playerView.setPlayer(player);
-        //playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, media.url);
-        //playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, "https://storage.googleapis.com/wvmedia/clear/vp9/tears/tears.mpd");
-        playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, "https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv");
+
+
+        Typeface typeface = Typeface.create((Typeface) null, NORMAL);
+        CaptionStyleCompat captionStyleCompat = new CaptionStyleCompat(media.captionsConfig.color, 0, 0,EDGE_TYPE_NONE, 0,  typeface);
+        playerView.getSubtitleView().setStyle(captionStyleCompat);
+        playerView.getSubtitleView().setFixedTextSize(COMPLEX_UNIT_SP, media.captionsConfig.size);
+
+
+        playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, media.url);
+        //playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, "https://storage.googleapis.com/wvmedia/clear/h264/tears/tears.mpd");
+        //playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, "https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv");
 
         final int[] times = {0};
         player.addListener(new Player.EventListener() {
@@ -819,7 +834,7 @@ public class SambaPlayer extends FrameLayout {
                 if (trackGroup == null) return;
                 for(int i = 0; i < trackGroup.length; i++) {
                     if (format == null) format = trackGroup.getFormat(0);
-                    if (trackGroup.getFormat(i).bitrate > format.bitrate) {
+                    if (trackGroup.getFormat(i).bitrate < format.bitrate) {
                         format = trackGroup.getFormat(i);
                     }
                 }
@@ -829,8 +844,8 @@ public class SambaPlayer extends FrameLayout {
 
                 TrackGroupArray trackGroupArray = playerMediaSourceInterface.getSubtitles();
                 if (trackGroupArray != null) {
-                    Log.d("VideoLog track", trackGroupArray.get(0).toString());
-                    playerMediaSourceInterface.setSubtitle(trackGroupArray.get(0));
+                    Log.d("VideoLog track", trackGroupArray.get(1).toString());
+                    playerMediaSourceInterface.setSubtitle(trackGroupArray.get(1));
                 }
             }
 
