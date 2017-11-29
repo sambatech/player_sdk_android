@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
@@ -313,12 +312,12 @@ public class SambaApi {
 				JSONObject drm = playerSecurity.optJSONObject("drmSecurity");
 
 				if (drm != null) {
-					media.drmRequest = new DrmRequest(drm.optString("widevineSignatureURL"));
-					media.drmRequest.addLicenseParam("SubContentType", drm.optString("subContentType", "Default"));
-					media.drmRequest.addLicenseParam("CrmId", drm.optString("crmId"));
-					media.drmRequest.addLicenseParam("AccountId", drm.optString("accountId"));
-					media.drmRequest.addLicenseParam("ContentId", drm.optString("contentId"));
-					media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
+//					media.drmRequest = new DrmRequest(drm.optString("widevineSignatureURL"));
+//					media.drmRequest.addLicenseParam("SubContentType", drm.optString("subContentType", "Default"));
+//					media.drmRequest.addLicenseParam("CrmId", drm.optString("crmId"));
+//					media.drmRequest.addLicenseParam("AccountId", drm.optString("accountId"));
+//					media.drmRequest.addLicenseParam("ContentId", drm.optString("contentId"));
+//					media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
 				}
 
 				media.blockIfRooted = playerSecurity.optBoolean("rootedDevices", false);

@@ -1,6 +1,7 @@
 package com.sambatech.sample.activities;
 
 import android.app.Activity;
+import android.drm.DrmInfoRequest;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,7 +10,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.SambaApi;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.cast.CastOptionsProvider;
@@ -347,15 +347,15 @@ public class MediaItemActivity extends Activity {
 	}
 
 	@OnClick(R.id.hide_controls) public void hideControlsHandler() {
-		if (player != null)
-			player.setHideControls(SambaPlayer.Controls.SEEKBAR, SambaPlayer.Controls.FULLSCREEN, SambaPlayer.Controls.MENU);
+		//if (player != null)
+			//player.setHideControls(SambaPlayer.Controls.SEEKBAR, SambaPlayer.Controls.FULLSCREEN, SambaPlayer.Controls.MENU);
 	}
 
 	@OnClick(R.id.create_session) public void createSessionHandler() {
 		if (entitlementScheme == null || media == null ||
 				media.drmRequest == null) return;
 
-		final DrmRequest drmRequest = media.drmRequest;
+		final DrmInfoRequest drmRequest = media.drmRequest;
 
 		status.setText("Creating session...");
 
@@ -375,12 +375,12 @@ public class MediaItemActivity extends Activity {
 						NamedNodeMap attributes = parse.getElementsByTagName("Session").item(0).getAttributes();
 						String sessionId = attributes.getNamedItem("SessionId").getTextContent();
 
-						drmRequest.addLicenseParam("SessionId", sessionId);
-						drmRequest.addLicenseParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
+						drmRequest.put("SessionId", sessionId);
+						drmRequest.put("Ticket", attributes.getNamedItem("Ticket").getTextContent());
 
 						// for manually injected DRM media
 						if (entitlementScheme.contentId != null)
-							drmRequest.addLicenseParam("ContentId", entitlementScheme.contentId);
+							drmRequest.put("ContentId", entitlementScheme.contentId);
 
 						status.setText(String.format("Session: %s", sessionId));
 					}
@@ -412,12 +412,12 @@ public class MediaItemActivity extends Activity {
 				entitlementScheme == null)
 			return;
 
-		final DrmRequest drmRequest = media.drmRequest;
+		final DrmInfoRequest drmRequest = media.drmRequest;
 
 		status.setText(deauth ? "Deauthorizing..." : "Authorizing...");
 
 		String url = String.format("%sservices/%s?CrmId=sambatech&AccountId=sambatech&SessionId=%s&UserIp=%s", getString(R.string.drm_url),
-				deauth ? "Deauthorize" : "Authorize", drmRequest.getLicenseParam("SessionId"), MainApplication.getExternalIp());
+				deauth ? "Deauthorize" : "Authorize", drmRequest.get("SessionId"), MainApplication.getExternalIp());
 
 		switch ((int)policySpinner.getSelectedItemId()) {
 			case 0:

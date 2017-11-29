@@ -1,6 +1,8 @@
 package com.sambatech.player.model;
 
-import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
+
+import android.drm.DrmInfoRequest;
+
 import com.sambatech.player.utils.Helpers;
 
 import java.lang.reflect.Field;
@@ -23,7 +25,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public String sttmUrl;
 	public String sttmKey;
 	public SambaMediaRequest request;
-	public DrmRequest drmRequest;
+	public DrmInfoRequest drmRequest;
 	public boolean blockIfRooted;
 	public int retriesTotal = 3;
 	public int defaultOutputIndex = 0;

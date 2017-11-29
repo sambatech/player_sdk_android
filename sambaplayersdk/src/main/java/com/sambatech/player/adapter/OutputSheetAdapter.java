@@ -1,6 +1,7 @@
 package com.sambatech.player.adapter;
 
 import android.content.Context;
+import android.media.MediaFormat;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +10,6 @@ import android.widget.BaseAdapter;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.google.android.exoplayer.MediaFormat;
 import com.sambatech.player.R;
 import com.sambatech.player.SambaPlayer;
 
@@ -65,8 +65,8 @@ public class OutputSheetAdapter extends BaseAdapter {
         }
         else holder = (OutputSheetAdapter.OutputItem) convertView.getTag();
 
-        holder.label.setText(output.adaptive ? "Auto" : output.height > 0 ?
-                output.height + "p" : Math.round(output.bitrate/1000f) + "k");
+        holder.label.setText(output.containsKey(MediaFormat.KEY_MAX_HEIGHT) ? "Auto" : output.getInteger(MediaFormat.KEY_HEIGHT) > 0 ?
+                output.getInteger(MediaFormat.KEY_HEIGHT) + "p" : Math.round(output.getFloat(MediaFormat.KEY_BIT_RATE)/1000f) + "k");
         holder.radio.setChecked(position == player.getCurrentOutputIndex());
 
         return convertView;
