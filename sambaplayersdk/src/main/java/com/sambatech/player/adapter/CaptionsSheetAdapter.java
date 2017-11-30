@@ -8,6 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.source.TrackGroup;
+import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.sambatech.player.R;
 import com.sambatech.player.model.SambaMedia;
 
@@ -22,16 +24,16 @@ public class CaptionsSheetAdapter extends BaseAdapter {
     public int currentIndex = -1;
 
     private Context cContext;
-    private List<SambaMedia.Caption> captions;
+    private TrackGroupArray captions;
 
-    public CaptionsSheetAdapter(Context context, List<SambaMedia.Caption> cList) {
+    public CaptionsSheetAdapter(Context context, TrackGroupArray trackGroupArray) {
         this.cContext = context;
-        this.captions = cList;
+        this.captions = trackGroupArray;
     }
 
     @Override
     public int getCount() {
-        return captions.size();
+        return captions.length;
     }
 
     @Override
@@ -59,10 +61,16 @@ public class CaptionsSheetAdapter extends BaseAdapter {
             holder = (CaptionItem) convertView.getTag();
         }
 
-        SambaMedia.Caption caption = (SambaMedia.Caption) getItem(position);
+        TrackGroup caption = (TrackGroup) getItem(position);
 
-        holder.label.setText(caption.label);
-        holder.radio.setChecked(currentIndex != -1 ? currentIndex == position : caption.isDefault);
+        if (caption.getFormat(0).language != null && caption.getFormat(0).language.length() > 0) {
+            holder.label.setText(caption.getFormat(0).language);
+        } else {
+            holder.label.setText(R.string.no_caption);
+        }
+
+
+        holder.radio.setChecked(currentIndex == position);
 
         return convertView;
     }

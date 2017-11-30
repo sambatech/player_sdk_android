@@ -38,13 +38,13 @@
     <dependency>
       <groupId>com.google.android.gms</groupId>
       <artifactId>play-services-ads</artifactId>
-      <version>11.6.0</version>
+      <version>11.6.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.android.gms</groupId>
       <artifactId>play-services-cast-framework</artifactId>
-      <version>11.6.0</version>
+      <version>11.6.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

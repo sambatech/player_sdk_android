@@ -42,4 +42,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <View android:id="@+id/exo_menu_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 </merge>

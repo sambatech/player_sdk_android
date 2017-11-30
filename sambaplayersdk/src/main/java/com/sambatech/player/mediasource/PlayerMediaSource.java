@@ -68,7 +68,7 @@ public class PlayerMediaSource {
 
     public TrackGroup getVideoOutputsTracks() {
         TrackGroupArray trackGroupArray = getTrackGroupArray(VIDEO_RENDERER_INDEX);
-        if (trackGroupArray == null) return null;
+        if (trackGroupArray == null && VIDEO_TRACK_GROUP_INDEX < trackGroupArray.length) return null;
         return trackGroupArray.get(VIDEO_TRACK_GROUP_INDEX);
     }
 

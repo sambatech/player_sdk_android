@@ -10,6 +10,8 @@ import android.widget.BaseAdapter;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.source.TrackGroup;
 import com.sambatech.player.R;
 import com.sambatech.player.SambaPlayer;
 
@@ -19,28 +21,26 @@ import com.sambatech.player.SambaPlayer;
 
 public class OutputSheetAdapter extends BaseAdapter {
 
+    public int currentIndex = -1;
+
     private final @NonNull
     Context context;
-    private final @NonNull MediaFormat[] outputs;
     private final @NonNull
-    SambaPlayer player;
-    private final int outputOffset;
+    TrackGroup outputs;
 
-    public OutputSheetAdapter(@NonNull Context context, @NonNull MediaFormat[] outputs, @NonNull SambaPlayer player, int outputOffset) {
+    public OutputSheetAdapter(@NonNull Context context, @NonNull TrackGroup outputs) {
         this.context = context;
         this.outputs = outputs;
-        this.player = player;
-        this.outputOffset = outputOffset;
     }
 
     @Override
     public int getCount() {
-        return outputs.length - outputOffset;
+        return outputs.length;
     }
 
     @Override
     public Object getItem(int position) {
-        return outputs[position + outputOffset];
+        return outputs.getFormat(position);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class OutputSheetAdapter extends BaseAdapter {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        final MediaFormat output = (MediaFormat) getItem(position);
+        final Format output = (Format) getItem(position);
         OutputSheetAdapter.OutputItem holder;
 
         if (convertView == null) {
@@ -65,9 +65,8 @@ public class OutputSheetAdapter extends BaseAdapter {
         }
         else holder = (OutputSheetAdapter.OutputItem) convertView.getTag();
 
-        holder.label.setText(output.containsKey(MediaFormat.KEY_MAX_HEIGHT) ? "Auto" : output.getInteger(MediaFormat.KEY_HEIGHT) > 0 ?
-                output.getInteger(MediaFormat.KEY_HEIGHT) + "p" : Math.round(output.getFloat(MediaFormat.KEY_BIT_RATE)/1000f) + "k");
-        holder.radio.setChecked(position == player.getCurrentOutputIndex());
+        holder.label.setText(output.height > 0 ? output.height + "p" : Math.round(output.bitrate/1000f) + "k");
+        holder.radio.setChecked(currentIndex == position);
 
         return convertView;
     }

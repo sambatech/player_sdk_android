@@ -419,8 +419,7 @@ public class SambaPlayer extends FrameLayout {
     private List<String> controlsHidden = new ArrayList<>();
 
 
-    private PlaybackControlView playerControlView;
-    private SimpleExoPlayerView playerView;
+    private SambaSimplePlayerView simplePlayerView;
     private SimpleExoPlayer player;
     private PlayerInstanceDefault playerInstanceDefault;
 
@@ -542,10 +541,7 @@ public class SambaPlayer extends FrameLayout {
         if (media.isAudioOnly) return;
 
         if (player != null) {
-            if (flag)
-                playerView.hideController();
-            else
-                playerView.showController();
+            simplePlayerView.setEnableControls(flag);
         } else _enableControls = flag;
     }
 
@@ -592,7 +588,7 @@ public class SambaPlayer extends FrameLayout {
     public void show() {
         if (player == null) return;
 
-        playerControlView.show();
+        simplePlayerView.show();
     }
 
     /**
@@ -601,7 +597,7 @@ public class SambaPlayer extends FrameLayout {
     public void hide() {
         if (player == null) return;
 
-        playerControlView.hide();
+        simplePlayerView.hide();
     }
 
     /**
@@ -806,22 +802,17 @@ public class SambaPlayer extends FrameLayout {
         // 1. Create a default TrackSelector
 
         playerInstanceDefault = new PlayerInstanceDefault(getContext());
-        playerView = new SimpleExoPlayerView(getContext());
+        simplePlayerView = new SambaSimplePlayerView(getContext());
         player = playerInstanceDefault.createPlayerInstance();
-        playerView.setPlayer(player);
-
-
-        Typeface typeface = Typeface.create((Typeface) null, NORMAL);
-        CaptionStyleCompat captionStyleCompat = new CaptionStyleCompat(media.captionsConfig.color, 0, 0,EDGE_TYPE_NONE, 0,  typeface);
-        playerView.getSubtitleView().setStyle(captionStyleCompat);
-        playerView.getSubtitleView().setFixedTextSize(COMPLEX_UNIT_SP, media.captionsConfig.size);
+        simplePlayerView.setPlayer(player);
+        simplePlayerView.setVideoTitle(media.title);
+        simplePlayerView.configureSubTitle(media.captionsConfig);
 
 
         playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, media.url);
         //playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, "https://storage.googleapis.com/wvmedia/clear/h264/tears/tears.mpd");
         //playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, "https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv");
 
-        final int[] times = {0};
         player.addListener(new Player.EventListener() {
             @Override
             public void onTimelineChanged(Timeline timeline, Object manifest) {
@@ -829,24 +820,7 @@ public class SambaPlayer extends FrameLayout {
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                Format format = null;
-                TrackGroup trackGroup = playerMediaSourceInterface.getVideoOutputsTracks();
-                if (trackGroup == null) return;
-                for(int i = 0; i < trackGroup.length; i++) {
-                    if (format == null) format = trackGroup.getFormat(0);
-                    if (trackGroup.getFormat(i).bitrate < format.bitrate) {
-                        format = trackGroup.getFormat(i);
-                    }
-                }
-                Log.d("VideoLog selectedformat", format.toString());
-                playerMediaSourceInterface.setVideoOutputTrack(format);
-
-
-                TrackGroupArray trackGroupArray = playerMediaSourceInterface.getSubtitles();
-                if (trackGroupArray != null) {
-                    Log.d("VideoLog track", trackGroupArray.get(1).toString());
-                    playerMediaSourceInterface.setSubtitle(trackGroupArray.get(1));
-                }
+                simplePlayerView.setupMenu(playerMediaSourceInterface);
             }
 
             @Override
@@ -856,11 +830,7 @@ public class SambaPlayer extends FrameLayout {
 
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                if (player.getVideoFormat() == null) return;
-                Log.d("VideoLog height", String.valueOf(player.getVideoFormat().height));
-                for ( int i=0; i < player.getCurrentTrackSelections().length; i++){
-                    //Log.d("VideoLog height", String.valueOf(player.getCurrentTrackSelections().get(i).getFormat(0).toString()));
-                }
+
             }
 
             @Override
@@ -887,10 +857,8 @@ public class SambaPlayer extends FrameLayout {
         player.setPlayWhenReady(true);
         playerMediaSourceInterface.addSubtitles(media.captions);
         player.prepare(playerMediaSourceInterface.getMediaSource());
-        this.addView(playerView, new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
-        this.setBackgroundColor(Color.BLACK);
+        simplePlayerView.attachPlayerToView(this);
+
 
 //		//Live treatment
 //		if (media.isLive) {
@@ -951,7 +919,6 @@ public class SambaPlayer extends FrameLayout {
 
         // video-only
         if (!media.isAudioOnly) {
-            initCaptionMenu();
 
             //if (!_enableControls)
             //player.disableControls();
@@ -972,58 +939,6 @@ public class SambaPlayer extends FrameLayout {
 
 //		if (sambaCast != null && sambaCast.isCasting())
 //			castListener.onConnected(sambaCast.getCastSession());
-    }
-
-	/*private void initOutputMenu() {
-        if (player == null)
-			return;
-
-        final MediaFormat[] tracks = player.getTrackFormats(ExoplayerWrapper.TYPE_VIDEO);
-
-        if (media.isAudioOnly || tracks.length <= 1)
-            return;
-
-		outputSheetView = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.action_sheet, null);
-		TextView title = (TextView) outputSheetView.findViewById(R.id.action_sheet_title);
-		title.setText(getContext().getString(R.string.output));
-
-		final ListView menuList = (ListView) outputSheetView.findViewById(R.id.sheet_list);
-		menuList.setAdapter(new OutputSheetAdapter(getContext(), tracks, this, _outputOffset));
-		menuList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				player.closeOutputMenu();
-				switchOutput(position);
-				menuList.smoothScrollToPosition(0);
-			}
-		});
-		menuList.deferNotifyDataSetChanged();
-
-		player.setOutputMenu(outputSheetView);
-	}*/
-
-    private void initCaptionMenu() {
-        if (player == null || media.isAudioOnly || media.captions == null || media.captions.size() == 0)
-            return;
-
-        captionSheetView = ((Activity) getContext()).getLayoutInflater().inflate(R.layout.action_sheet, null);
-        TextView title = (TextView) captionSheetView.findViewById(R.id.action_sheet_title);
-        title.setText(getContext().getString(R.string.captions));
-
-        final ListView menuList = (ListView) captionSheetView.findViewById(R.id.sheet_list);
-
-        menuList.setAdapter(new CaptionsSheetAdapter(getContext(), media.captions));
-        menuList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //player.closeCaptionMenu();
-                changeCaption(position);
-                menuList.smoothScrollToPosition(0);
-            }
-        });
-        menuList.deferNotifyDataSetChanged();
-
-        //player.setCaptionMenu(captionSheetView);
     }
 
     private void destroyInternal() {

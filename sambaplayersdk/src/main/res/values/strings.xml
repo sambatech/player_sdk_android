@@ -28,4 +28,5 @@
     <string name="output_default">240p</string>
     <string name="caption_default">Português (Brasil)</string>
     <string name="cancel">Cancelar</string>
+    <string name="no_caption">Sem Legendas</string>
 </resources>

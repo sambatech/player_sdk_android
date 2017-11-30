@@ -43,10 +43,11 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
-    compile 'com.google.android.gms:play-services-ads:11.6.0'
-    compile 'com.google.android.gms:play-services-cast-framework:11.6.0'
+    compile 'com.google.android.gms:play-services-ads:11.6.2'
+    compile 'com.google.android.gms:play-services-cast-framework:11.6.2'
     compile 'org.bitbucket.b_c:jose4j:0.4.4'
     compile 'com.google.android.exoplayer:exoplayer:r2.5.4'
+    compile 'com.android.support:design:25.4.0'
 }
 
 //PUBLISHING
