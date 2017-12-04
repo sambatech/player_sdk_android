@@ -22,14 +22,17 @@
         android:layout_height="44dp">
 
         <TextView
+            android:ellipsize="end"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/video_title_text"
             android:textColor="@android:color/white"
-            android:gravity="center_vertical"
-            android:paddingLeft="8dp"
+            android:gravity="start|center_vertical"
+            android:layout_marginStart="8dp"
             android:textSize="16dp"
-            android:layout_toLeftOf="@+id/buttons_container"/>
+            android:layout_toLeftOf="@+id/buttons_container"
+            android:layout_marginRight="8dp"
+            android:lines="1"/>
 
         <LinearLayout
             android:id="@id/buttons_container"
@@ -39,12 +42,32 @@
             android:layout_alignParentRight="true">
 
             <ImageButton
-                android:id="@+id/options_menu"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:src="@drawable/ic_menu"
-                android:scaleType="center"
+                android:id="@+id/topbar_live_button"
+                android:layout_width="54dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_live"
+                android:scaleType="centerInside"
+                android:padding="5dp"
                 android:background="?android:selectableItemBackground"
+                />
+
+            <ImageButton
+                android:id="@+id/topbar_cast_button"
+                android:layout_width="44dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_cast"
+                android:scaleType="centerCrop"
+                android:background="?android:selectableItemBackground"
+                android:padding="5dp"
+                />
+
+            <ImageButton
+                android:id="@+id/topbar_menu_button"
+                android:layout_width="44dp"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_menu"
+                android:background="?android:selectableItemBackground"
+                android:padding="5dp"
                 />
 
         </LinearLayout>
@@ -124,6 +147,13 @@
             android:paddingRight="4dp"
             android:includeFontPadding="false"
             android:textColor="#FFBEBEBE"/>
+
+        <ImageButton
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:src="@drawable/fullscreen"
+            android:background="?android:selectableItemBackground"
+            android:id="@+id/fullscreen_button"/>
 
     </LinearLayout>
 

@@ -3,6 +3,7 @@ package com.sambatech.player;
 import android.app.Activity;
 import android.app.MediaRouteButton;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -34,6 +35,8 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RendererCapabilities;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
+import com.google.android.exoplayer2.ext.ima.ImaAdsMediaSource;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ClippingMediaSource;
@@ -242,6 +245,18 @@ public class SambaPlayer extends FrameLayout {
         }
     };
 
+    private final SambaSimplePlayerView.FullscreenCallback fullscreenListener = new SambaSimplePlayerView.FullscreenCallback() {
+        @Override
+        public void onGoToFullscreen() {
+            SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN));
+        }
+
+        @Override
+        public void onReturnFromFullscreen() {
+            SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN_EXIT));
+        }
+    };
+
 
     private final Runnable progressDispatcher = new Runnable() {
         @Override
@@ -422,6 +437,7 @@ public class SambaPlayer extends FrameLayout {
     private SambaSimplePlayerView simplePlayerView;
     private SimpleExoPlayer player;
     private PlayerInstanceDefault playerInstanceDefault;
+    private ImaAdsLoader imaAdsLoader;
 
     private PlayerMediaSourceInterface playerMediaSourceInterface;
     //private boolean wasPlaying;
@@ -802,11 +818,12 @@ public class SambaPlayer extends FrameLayout {
         // 1. Create a default TrackSelector
 
         playerInstanceDefault = new PlayerInstanceDefault(getContext());
-        simplePlayerView = new SambaSimplePlayerView(getContext());
+        simplePlayerView = new SambaSimplePlayerView(getContext(), this);
         player = playerInstanceDefault.createPlayerInstance();
         simplePlayerView.setPlayer(player);
         simplePlayerView.setVideoTitle(media.title);
         simplePlayerView.configureSubTitle(media.captionsConfig);
+
 
 
         playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, media.url);
@@ -814,13 +831,19 @@ public class SambaPlayer extends FrameLayout {
         //playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, "https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv");
 
         player.addListener(new Player.EventListener() {
+
+            private TrackGroupArray previousTrackGroupArray = null;
+
             @Override
             public void onTimelineChanged(Timeline timeline, Object manifest) {
             }
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                simplePlayerView.setupMenu(playerMediaSourceInterface);
+                if (trackGroups != previousTrackGroupArray) {
+                    simplePlayerView.setupMenu(playerMediaSourceInterface);
+                    previousTrackGroupArray = trackGroups;
+                }
             }
 
             @Override
@@ -856,8 +879,12 @@ public class SambaPlayer extends FrameLayout {
 
         player.setPlayWhenReady(true);
         playerMediaSourceInterface.addSubtitles(media.captions);
+        //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
+        if (media.adUrl != null ) {
+            playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
+        }
         player.prepare(playerMediaSourceInterface.getMediaSource());
-        simplePlayerView.attachPlayerToView(this);
+        _hasStarted = true;
 
 
 //		//Live treatment
@@ -872,13 +899,13 @@ public class SambaPlayer extends FrameLayout {
 //		player.addPlaybackListener(playbackListener);
 //		player.setPlayCallback(playListener);
 
-//		if (media.isAudioOnly) {
+		if (media.isAudioOnly) {
 //			player.setControlsVisible(true, Controls.PLAY);
 //			player.setControlsVisible(false, Controls.FULLSCREEN, Controls.PLAY_LARGE, Controls.TOP_CHROME);
 //			player.setBackgroundColor(0xFF434343);
 //			player.setChromeColor(0x00000000);
-//		}
-//		else player.setFullscreenCallback(fullscreenListener);
+		}
+		else simplePlayerView.setFullscreenCallback(fullscreenListener);
 
         if (!controlsHidden.isEmpty())
             setHideControls(controlsHidden.toArray(new String[0]));
@@ -886,33 +913,50 @@ public class SambaPlayer extends FrameLayout {
         // Fullscreen
         orientationEventListener = new OrientationEventListener(getContext()) {
 
+            private static final int THRESHOLD = 40;
+            public static final int PORTRAIT = 0;
+            public static final int LANDSCAPE = 270;
+            public static final int REVERSE_PORTRAIT = 180;
+            public static final int REVERSE_LANDSCAPE = 90;
+            private int lastRotatedTo = 0;
+
             {
                 enable();
             }
 
             @Override
             public void onOrientationChanged(int orientation) {
-                if (Settings.System.getInt(getContext().getContentResolver(),
-                        Settings.System.ACCELEROMETER_ROTATION, 0) == 0 || !_autoFsMode || player == null)
-                    return;
+                int newRotateTo = -1;
+                if(orientation >= 360 + PORTRAIT - THRESHOLD && orientation < 360 || orientation >= 0 && orientation <= PORTRAIT + THRESHOLD)
+                    newRotateTo = PORTRAIT;
+                else if(orientation >= LANDSCAPE - THRESHOLD && orientation <= LANDSCAPE + THRESHOLD)
+                    newRotateTo = LANDSCAPE;
+                else if(orientation >= REVERSE_PORTRAIT - THRESHOLD && orientation <= REVERSE_PORTRAIT + THRESHOLD)
+                    newRotateTo = REVERSE_PORTRAIT;
+                else if(orientation >= REVERSE_LANDSCAPE - THRESHOLD && orientation <= REVERSE_LANDSCAPE + THRESHOLD)
+                    newRotateTo = REVERSE_LANDSCAPE;
 
-                if (orientation <= 15 && orientation >= 0) {
-                    //if(_wasAutoFS && player.isFullscreen()) {
-                    //	player.setFullscreen(false);
-                    //}
+                if (newRotateTo == lastRotatedTo) return;
 
-                    SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PORTRAIT));
-                } else {
-                    final boolean isReverseLandscape = orientation >= 80 && orientation <= 100;
+                lastRotatedTo = newRotateTo;
 
-                    if (orientation >= 260 && orientation <= 290 || isReverseLandscape) {
-                        //if(!player.isFullscreen()) {
-                        //_wasAutoFS = true;
-                        //player.setFullscreen(true, isReverseLandscape);
-                        //}
+                if (!_autoFsMode || player == null) return;
 
-                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
+                if (lastRotatedTo == PORTRAIT) {
+                    if(simplePlayerView.isFullscreen()) {
+                        simplePlayerView.setFullscreen(false);
                     }
+                    SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PORTRAIT));
+                } else if (lastRotatedTo == REVERSE_LANDSCAPE) {
+                    if (!simplePlayerView.isFullscreen()) {
+                        simplePlayerView.setFullscreen(true, true);
+                    }
+                    SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
+                } else if (lastRotatedTo == LANDSCAPE) {
+                    if (!simplePlayerView.isFullscreen()) {
+                        simplePlayerView.setFullscreen(true, false);
+                    }
+                    SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
                 }
             }
         };

@@ -35,12 +35,13 @@ public class OutputSheetAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return outputs.length;
+        return outputs.length + 1;
     }
 
     @Override
     public Object getItem(int position) {
-        return outputs.getFormat(position);
+        if (position == 0) return null;
+        return outputs.getFormat(position - 1);
     }
 
     @Override
@@ -60,12 +61,14 @@ public class OutputSheetAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.action_sheet_item, parent, false);
             holder = new OutputSheetAdapter.OutputItem(convertView);
-
             convertView.setTag(holder);
         }
         else holder = (OutputSheetAdapter.OutputItem) convertView.getTag();
 
-        holder.label.setText(output.height > 0 ? output.height + "p" : Math.round(output.bitrate/1000f) + "k");
+        if (output == null)
+            holder.label.setText(R.string.qualitty_auto);
+        else
+            holder.label.setText(output.height > 0 ? output.height + "p" : Math.round(output.bitrate/1000f) + "k");
         holder.radio.setChecked(currentIndex == position);
 
         return convertView;

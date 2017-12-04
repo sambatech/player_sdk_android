@@ -191,7 +191,7 @@ public class MediaItemActivity extends Activity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		destroy();
+		player.pause();
     }
 
 	@Override
@@ -207,7 +207,7 @@ public class MediaItemActivity extends Activity {
 
 
 		if(!sambaCast.isCasting()) {
-			if (player != null && player.hasStarted())
+			//if (player != null && player.hasStarted())
 				player.pause();
 		}
     }
@@ -333,7 +333,6 @@ public class MediaItemActivity extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		destroy();
 	}
 
 	@OnClick(R.id.play) public void playHandler() {
@@ -462,6 +461,5 @@ public class MediaItemActivity extends Activity {
 	private void destroy() {
 		SambaEventBus.unsubscribe(playerListener);
 		player.destroy();
-		finish();
 	}
 }

@@ -6,6 +6,7 @@
     <string name="player_endpoint_local">http://192.168.0.127:8080/player-api/v1/</string>
     <string name="live">AO VIVO</string>
     <string name="captions">Legendas</string>
+    <string name="speed">Velocidade</string>
     <string name="cast_app_id_dev">51DEA4E2</string>
     <string name="cast_app_id_staging">4D431E24</string>
     <string name="cast_app_id_prod">E9CFA23D</string>
@@ -29,4 +30,5 @@
     <string name="caption_default">Português (Brasil)</string>
     <string name="cancel">Cancelar</string>
     <string name="no_caption">Sem Legendas</string>
+    <string name="qualitty_auto">Auto</string>
 </resources>

@@ -1,5 +1,8 @@
 package com.sambatech.player.mediasource;
 
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroup;
@@ -28,4 +31,6 @@ public interface PlayerMediaSourceInterface {
     TrackGroupArray getSubtitles();
 
     void setSubtitle(TrackGroup trackGroup);
+
+    void addAds(String url, FrameLayout frame);
 }

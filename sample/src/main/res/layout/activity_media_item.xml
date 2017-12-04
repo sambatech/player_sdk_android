@@ -12,7 +12,8 @@
         android:id="@+id/samba_player"
         android:layout_width="match_parent"
         android:layout_height="250dp"
-        app:autoFullscreenMode="true"/>
+        app:autoFullscreenMode="true"
+        app:resize_mode="fit"/>
 
     <com.sambatech.player.SambaPlayer
         android:id="@+id/samba_player2"
@@ -20,7 +21,8 @@
         android:layout_height="250dp"
         app:autoFullscreenMode="true"
         android:layout_below="@+id/samba_player"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        app:resize_mode="fit"/>
 
     <TextView
         android:id="@+id/title"

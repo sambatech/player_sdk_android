@@ -3,9 +3,13 @@ package com.sambatech.player.mediasource;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
+import com.google.android.exoplayer2.ext.ima.ImaAdsMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
@@ -35,6 +39,7 @@ public class PlayerMediaSource {
     protected PlayerInstanceDefault playerInstanceDefault;
     protected String url;
     protected MediaSource mediaSource;
+    protected ImaAdsLoader imaAdsLoader;
 
     protected PlayerMediaSource(@NonNull PlayerInstanceDefault playerInstanceDefault) {
         this.playerInstanceDefault = playerInstanceDefault;
@@ -75,6 +80,7 @@ public class PlayerMediaSource {
     public void setVideoOutputTrack(Format format) {
         if (format == null) {
             playerInstanceDefault.trackSelector.clearSelectionOverride(VIDEO_RENDERER_INDEX, getTrackGroupArray(VIDEO_RENDERER_INDEX));
+            return;
         }
         int index = getVideoOutputsTracks().indexOf(format);
         MappingTrackSelector.SelectionOverride override = new MappingTrackSelector.SelectionOverride(new FixedTrackSelection.Factory(), VIDEO_TRACK_GROUP_INDEX, index);
@@ -101,9 +107,19 @@ public class PlayerMediaSource {
     public void setSubtitle(TrackGroup trackGroup){
         if (trackGroup == null) {
             playerInstanceDefault.trackSelector.clearSelectionOverride(CAPTION_RENDERER_INDEX, getTrackGroupArray(CAPTION_RENDERER_INDEX));
+            return;
         }
         int index = getTrackGroupArray(CAPTION_RENDERER_INDEX).indexOf(trackGroup);
         MappingTrackSelector.SelectionOverride override = new MappingTrackSelector.SelectionOverride(new FixedTrackSelection.Factory(), index, CAPTION_FORMAT_INDEX);
         playerInstanceDefault.trackSelector.setSelectionOverride(CAPTION_RENDERER_INDEX, getTrackGroupArray(CAPTION_RENDERER_INDEX), override);
+    }
+
+    public void addAds(String url, FrameLayout frameLayout) {
+        this.imaAdsLoader = new ImaAdsLoader(playerInstanceDefault.context, Uri.parse(url));
+        this.mediaSource =  new ImaAdsMediaSource(
+                mediaSource,
+                playerInstanceDefault.mediaDataSourceFactory,
+                imaAdsLoader,
+                frameLayout);
     }
 }

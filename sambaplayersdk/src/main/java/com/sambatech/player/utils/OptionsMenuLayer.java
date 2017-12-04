@@ -46,7 +46,6 @@ public class OptionsMenuLayer extends FrameLayout implements View.OnClickListene
         speedButton.setOnClickListener(this);
         closeButton.setOnClickListener(this);
         setVisibility(View.GONE);
-        speedButton.setVisibility(View.GONE);
     }
 
     @Override
