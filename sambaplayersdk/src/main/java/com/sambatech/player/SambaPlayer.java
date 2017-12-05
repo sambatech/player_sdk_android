@@ -100,6 +100,7 @@ import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.player.plugins.Captions;
 import com.sambatech.player.plugins.PluginManager;
 import com.sambatech.player.utils.Helpers;
+import com.sambatech.player.utils.Orientation;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -803,17 +804,6 @@ public class SambaPlayer extends FrameLayout {
             return;
         }
 
-        int videoType = C.TYPE_OTHER;
-
-        switch (media.type.toLowerCase()) {
-            case "hls":
-                videoType = C.TYPE_HLS;
-                break;
-            case "dash":
-                videoType = C.TYPE_DASH;
-                break;
-        }
-
 
         // 1. Create a default TrackSelector
 
@@ -825,8 +815,18 @@ public class SambaPlayer extends FrameLayout {
         simplePlayerView.configureSubTitle(media.captionsConfig);
 
 
+        switch (media.type.toLowerCase()) {
+            case "hls":
+                playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, media.url);
+                break;
+            case "dash":
+                playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, media.url);
+                break;
+            default:
+                playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, media.url);
+                break;
+        }
 
-        playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, media.url);
         //playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, "https://storage.googleapis.com/wvmedia/clear/h264/tears/tears.mpd");
         //playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, "https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv");
 
@@ -853,7 +853,7 @@ public class SambaPlayer extends FrameLayout {
 
             @Override
             public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-
+                simplePlayerView.setLoading(playbackState == Player.STATE_BUFFERING);
             }
 
             @Override
@@ -913,11 +913,7 @@ public class SambaPlayer extends FrameLayout {
         // Fullscreen
         orientationEventListener = new OrientationEventListener(getContext()) {
 
-            private static final int THRESHOLD = 40;
-            public static final int PORTRAIT = 0;
-            public static final int LANDSCAPE = 270;
-            public static final int REVERSE_PORTRAIT = 180;
-            public static final int REVERSE_LANDSCAPE = 90;
+            private final Orientation orientation = new Orientation();
             private int lastRotatedTo = 0;
 
             {
@@ -925,38 +921,26 @@ public class SambaPlayer extends FrameLayout {
             }
 
             @Override
-            public void onOrientationChanged(int orientation) {
-                int newRotateTo = -1;
-                if(orientation >= 360 + PORTRAIT - THRESHOLD && orientation < 360 || orientation >= 0 && orientation <= PORTRAIT + THRESHOLD)
-                    newRotateTo = PORTRAIT;
-                else if(orientation >= LANDSCAPE - THRESHOLD && orientation <= LANDSCAPE + THRESHOLD)
-                    newRotateTo = LANDSCAPE;
-                else if(orientation >= REVERSE_PORTRAIT - THRESHOLD && orientation <= REVERSE_PORTRAIT + THRESHOLD)
-                    newRotateTo = REVERSE_PORTRAIT;
-                else if(orientation >= REVERSE_LANDSCAPE - THRESHOLD && orientation <= REVERSE_LANDSCAPE + THRESHOLD)
-                    newRotateTo = REVERSE_LANDSCAPE;
-
-                if (newRotateTo == lastRotatedTo) return;
-
-                lastRotatedTo = newRotateTo;
-
+            public void onOrientationChanged(int newValue) {
                 if (!_autoFsMode || player == null) return;
-
-                if (lastRotatedTo == PORTRAIT) {
-                    if(simplePlayerView.isFullscreen()) {
+                int newOrientation = orientation.getMeasuredOrientation(newValue);
+                if (newOrientation == lastRotatedTo || newOrientation == Orientation.INVALID) return;
+                lastRotatedTo = newOrientation;
+                switch (lastRotatedTo) {
+                    case Orientation.PORTRAIT:
                         simplePlayerView.setFullscreen(false);
-                    }
-                    SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PORTRAIT));
-                } else if (lastRotatedTo == REVERSE_LANDSCAPE) {
-                    if (!simplePlayerView.isFullscreen()) {
+                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PORTRAIT));
+                        break;
+                    case Orientation.REVERSE_LANDSCAPE:
                         simplePlayerView.setFullscreen(true, true);
-                    }
-                    SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
-                } else if (lastRotatedTo == LANDSCAPE) {
-                    if (!simplePlayerView.isFullscreen()) {
+                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
+                        break;
+                    case Orientation.LANDSCAPE:
                         simplePlayerView.setFullscreen(true, false);
-                    }
-                    SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
+                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
+                        break;
+                    default:
+                        break;
                 }
             }
         };

@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -40,7 +41,7 @@ import static android.view.accessibility.CaptioningManager.CaptionStyle.EDGE_TYP
  * Created by luizbyrro on 30/11/2017.
  */
 
-public class SambaSimplePlayerView implements View.OnClickListener{
+public class SambaSimplePlayerView implements View.OnClickListener {
 
     private Context context;
     private FrameLayout playerContainer;
@@ -52,8 +53,11 @@ public class SambaSimplePlayerView implements View.OnClickListener{
     private ImageButton fullscreenButton;
     private TextView videoTitle;
     private OptionsMenuLayer optionsMenuLayer;
+    private FrameLayout loadingView;
+    private LinearLayout controlsView;
 
     private boolean isFullscreen = false;
+    private boolean isReverseLandscape = false;
 
 
     public SambaSimplePlayerView(Context context, FrameLayout playerContainer) {
@@ -61,19 +65,23 @@ public class SambaSimplePlayerView implements View.OnClickListener{
         this.playerContainer = playerContainer;
         playerView = new SimpleExoPlayerView(context);
         bindMethods();
+        //setLoading(false);
         createMenuView();
         this.originalContainerLayoutParams = this.playerContainer.getLayoutParams();
         this.playerContainer.addView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         this.playerContainer.setBackgroundColor(Color.BLACK);
         playerView.setBackgroundColor(Color.BLACK);
+        //playerView.setUseController(false);
     }
 
-    public void bindMethods(){
+    public void bindMethods() {
         videoTitle = (TextView) playerView.findViewById(R.id.video_title_text);
         optionsMenuButton = (ImageButton) playerView.findViewById(R.id.topbar_menu_button);
         liveButton = (ImageButton) playerView.findViewById(R.id.topbar_live_button);
         castButton = (ImageButton) playerView.findViewById(R.id.topbar_cast_button);
         fullscreenButton = (ImageButton) playerView.findViewById(R.id.fullscreen_button);
+        loadingView = (FrameLayout) playerView.findViewById(R.id.exo_progress_view);
+        controlsView = (LinearLayout) playerView.findViewById(R.id.exo_controllbar);
         fullscreenButton.setOnClickListener(this);
         optionsMenuButton.setOnClickListener(this);
     }
@@ -95,13 +103,13 @@ public class SambaSimplePlayerView implements View.OnClickListener{
 
         @Override
         public void onTouchCaptions() {
-            if(captionsSheetDialog == null) return;
+            if (captionsSheetDialog == null) return;
             captionsSheetDialog.show();
         }
 
         @Override
         public void onTouchSpeed() {
-            if(speedSheetDialog == null) return;
+            if (speedSheetDialog == null) return;
             speedSheetDialog.show();
         }
 
@@ -136,9 +144,19 @@ public class SambaSimplePlayerView implements View.OnClickListener{
         }
     }
 
-    public void setPlayer(@NonNull SimpleExoPlayer simpleExoPlayer){
+    public void setPlayer(@NonNull SimpleExoPlayer simpleExoPlayer) {
         this.player = simpleExoPlayer;
         playerView.setPlayer(player);
+    }
+
+    public void setLoading(boolean isLoading) {
+        if (isLoading) {
+            controlsView.setVisibility(View.GONE);
+            loadingView.setVisibility(View.VISIBLE);
+        } else {
+            loadingView.setVisibility(View.GONE);
+            controlsView.setVisibility(View.VISIBLE);
+        }
     }
 
     public void setEnableControls(boolean flag) {
@@ -156,13 +174,13 @@ public class SambaSimplePlayerView implements View.OnClickListener{
 
     }
 
-    public void setVideoTitle(String title){
+    public void setVideoTitle(String title) {
         videoTitle.setText(title);
     }
 
-    public void configureSubTitle(SambaMedia.CaptionsConfig captionsConfig){
+    public void configureSubTitle(SambaMedia.CaptionsConfig captionsConfig) {
         Typeface typeface = Typeface.create((Typeface) null, NORMAL);
-        CaptionStyleCompat captionStyleCompat = new CaptionStyleCompat(captionsConfig.color, 0, 0, EDGE_TYPE_NONE, 0,  typeface);
+        CaptionStyleCompat captionStyleCompat = new CaptionStyleCompat(captionsConfig.color, 0, 0, EDGE_TYPE_NONE, 0, typeface);
         playerView.getSubtitleView().setStyle(captionStyleCompat);
         playerView.getSubtitleView().setFixedTextSize(COMPLEX_UNIT_SP, captionsConfig.size);
     }
@@ -173,8 +191,8 @@ public class SambaSimplePlayerView implements View.OnClickListener{
     private View speedSheetView;
 
     public void setupMenu(PlayerMediaSourceInterface playerMediaSource) {
-        initOutputMenu(playerMediaSource);
-        initCaptionMenu(playerMediaSource);
+        if (playerMediaSource.getVideoOutputsTracks() != null) initOutputMenu(playerMediaSource);
+        if (playerMediaSource.getSubtitles() != null) initCaptionMenu(playerMediaSource);
         initSpeedMenu();
     }
 
@@ -230,8 +248,8 @@ public class SambaSimplePlayerView implements View.OnClickListener{
         TextView title = (TextView) speedSheetView.findViewById(R.id.action_sheet_title);
         title.setText(context.getString(R.string.speed));
         final ListView menuList = (ListView) speedSheetView.findViewById(R.id.sheet_list);
-        final float[] speeds = new float[]{0.25f,0.5f, 1.0f, 1.5f, 2.0f};
-        final float[] audioPitch = new float[]{0.25f,0.5f, 1.0f, 1.5f, 2.0f};
+        final float[] speeds = new float[]{0.25f, 0.5f, 1.0f, 1.5f, 2.0f};
+        final float[] audioPitch = new float[]{0.25f, 0.5f, 1.0f, 1.5f, 2.0f};
         final SpeedSheetAdapter adapter = new SpeedSheetAdapter(context, speeds);
         menuList.setAdapter(adapter);
         adapter.currentIndex = 2;
@@ -273,6 +291,7 @@ public class SambaSimplePlayerView implements View.OnClickListener{
 
     /**
      * Sets the adapter for all menus
+     *
      * @param view The view for the caption menu
      */
     public BottomSheetDialog setupMenuDialog(View view) {
@@ -328,7 +347,6 @@ public class SambaSimplePlayerView implements View.OnClickListener{
     }
 
 
-
     private final int mFullScreenFlags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_FULLSCREEN
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
@@ -353,30 +371,27 @@ public class SambaSimplePlayerView implements View.OnClickListener{
     }
 
 
-    public void setFullscreen( boolean newValue) {
-        setFullscreen(newValue ,false);
+    public void setFullscreen(boolean newValue) {
+        setFullscreen(newValue, false);
     }
 
     /**
      * Fullscreen mode will rotate to landscape mode, hide the action bar, hide the navigation bar,
      * hide the system tray, and make the video player take up the full size of the display.
      * The developer who is using this function must ensure the following:
-     *
+     * <p>
      * <p>1) Inside the android manifest, the activity that uses the video player has the attribute
      * android:configChanges="orientation".
-     *
+     * <p>
      * <p>2) Other views in the activity (or fragment) are
      * hidden (or made visible) when this method is called.
      *
      * @param isReverseLandscape Whether orientation is reverse landscape.
      */
     public void setFullscreen(boolean newValue, boolean isReverseLandscape) {
-        if (this.isFullscreen == newValue) return;
+        if (this.isFullscreen == newValue && this.isReverseLandscape == isReverseLandscape) return;
         if (fullscreenCallback == null) return;
-        //if (playerControl == null) return;
-
-        Activity activity = (Activity) context;
-
+        final Activity activity = (Activity) context;
         if (newValue == false) {
             fullscreenCallback.onReturnFromFullscreen();
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -387,6 +402,7 @@ public class SambaSimplePlayerView implements View.OnClickListener{
             playerContainer.setLayoutParams(originalContainerLayoutParams);
             fullscreenButton.setImageResource(R.drawable.fullscreen);
             this.isFullscreen = newValue;
+            this.isReverseLandscape = isReverseLandscape;
         } else {
             fullscreenCallback.onGoToFullscreen();
             activity.setRequestedOrientation(isReverseLandscape ?
@@ -408,14 +424,17 @@ public class SambaSimplePlayerView implements View.OnClickListener{
                             if ((i & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
                                 if (!optionsMenuLayer.isVisible()) show();
                             }
+                            if (isFullscreen)
+                                activity.getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
                         }
                     }
             );
             playerContainer.setLayoutParams(Util.getLayoutParamsBasedOnParent(playerContainer,
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT));
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
             fullscreenButton.setImageResource(R.drawable.fullscreen_exit);
             this.isFullscreen = newValue;
+            this.isReverseLandscape = isReverseLandscape;
         }
     }
 
