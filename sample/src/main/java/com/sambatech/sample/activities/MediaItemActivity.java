@@ -302,8 +302,8 @@ public class MediaItemActivity extends Activity {
 
 		// If audio, we recommend you to customize the player's height
 		if (media.isAudioOnly) {
-			player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
-			player.setLayoutParams(player.getLayoutParams());
+			//player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
+			//player.setLayoutParams(player.getLayoutParams());
 		}
 
 		final AdsSettings settings = new AdsSettings(20000f, 5);

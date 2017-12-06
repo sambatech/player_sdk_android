@@ -813,6 +813,7 @@ public class SambaPlayer extends FrameLayout {
         simplePlayerView.setPlayer(player);
         simplePlayerView.setVideoTitle(media.title);
         simplePlayerView.configureSubTitle(media.captionsConfig);
+        simplePlayerView.configView(!media.isAudioOnly, media.isLive);
 
 
         switch (media.type.toLowerCase()) {
@@ -840,10 +841,12 @@ public class SambaPlayer extends FrameLayout {
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                if (trackGroups != previousTrackGroupArray) {
-                    simplePlayerView.setupMenu(playerMediaSourceInterface);
-                    previousTrackGroupArray = trackGroups;
-                }
+                boolean isPLayingAd = player.isPlayingAd();
+                int lenght = trackGroups.length;
+                TrackSelectionArray tk = player.getCurrentTrackSelections();
+                if (trackGroups == previousTrackGroupArray) return;
+                simplePlayerView.setupMenu(playerMediaSourceInterface);
+                previousTrackGroupArray = trackGroups;
             }
 
             @Override
@@ -879,7 +882,7 @@ public class SambaPlayer extends FrameLayout {
 
         player.setPlayWhenReady(true);
         playerMediaSourceInterface.addSubtitles(media.captions);
-        //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
+        media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
         if (media.adUrl != null ) {
             playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
         }

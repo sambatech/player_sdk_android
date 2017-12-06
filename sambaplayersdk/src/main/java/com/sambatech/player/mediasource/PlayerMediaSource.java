@@ -67,8 +67,9 @@ public class PlayerMediaSource {
     }
 
     private TrackGroupArray getTrackGroupArray(int renderIndex) {
-        if (getMappedTrackInfo() == null) return null;
-        return getMappedTrackInfo().getTrackGroups(renderIndex);
+        MappingTrackSelector.MappedTrackInfo mappedTrackInfo = getMappedTrackInfo();
+        if (mappedTrackInfo == null) return null;
+        return mappedTrackInfo.getTrackGroups(renderIndex);
     }
 
     public TrackGroup getVideoOutputsTracks() {

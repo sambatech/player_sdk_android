@@ -47,17 +47,29 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     private FrameLayout playerContainer;
     private SimpleExoPlayer player;
     private SimpleExoPlayerView playerView;
+    private OptionsMenuLayer optionsMenuLayer;
+    private FrameLayout loadingView;
+
+    //bottom buttons e  progresso
+    private LinearLayout progressControls;
+    private ImageButton fullscreenButton;
+
+    //barras de controle
+    private LinearLayout bottomBar;
+    private LinearLayout controlsView;
+    private LinearLayout topBar;
+
+    //topbar buttons e texto
     private ImageButton optionsMenuButton;
     private ImageButton liveButton;
     private ImageButton castButton;
-    private ImageButton fullscreenButton;
     private TextView videoTitle;
-    private OptionsMenuLayer optionsMenuLayer;
-    private FrameLayout loadingView;
-    private LinearLayout controlsView;
 
     private boolean isFullscreen = false;
     private boolean isReverseLandscape = false;
+
+    private boolean isLive = false;
+    private boolean isVideo = false;
 
 
     public SambaSimplePlayerView(Context context, FrameLayout playerContainer) {
@@ -65,7 +77,6 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         this.playerContainer = playerContainer;
         playerView = new SimpleExoPlayerView(context);
         bindMethods();
-        //setLoading(false);
         createMenuView();
         this.originalContainerLayoutParams = this.playerContainer.getLayoutParams();
         this.playerContainer.addView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -81,7 +92,15 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         castButton = (ImageButton) playerView.findViewById(R.id.topbar_cast_button);
         fullscreenButton = (ImageButton) playerView.findViewById(R.id.fullscreen_button);
         loadingView = (FrameLayout) playerView.findViewById(R.id.exo_progress_view);
-        controlsView = (LinearLayout) playerView.findViewById(R.id.exo_controllbar);
+
+        controlsView = (LinearLayout) playerView.findViewById(R.id.exo_control_bar);
+        topBar = (LinearLayout) playerView.findViewById(R.id.exo_top_bar);
+        bottomBar = (LinearLayout) playerView.findViewById(R.id.exo_bottom_bar);
+
+        progressControls = (LinearLayout) playerView.findViewById(R.id.exo_progress_controls);
+
+
+
         fullscreenButton.setOnClickListener(this);
         optionsMenuButton.setOnClickListener(this);
     }
@@ -92,6 +111,32 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         this.optionsMenuLayer = new OptionsMenuLayer(context, parent);
         parent.addView(optionsMenuLayer, menuPlaceholder.getLayoutParams());
         optionsMenuLayer.setCallback(optionsMenuCallBack);
+    }
+
+    public void configView(boolean isVideo, boolean isLive) {
+        this.isLive = isLive;
+        this.isVideo = isVideo;
+        if (isVideo) {
+            topBar.setVisibility(View.VISIBLE);
+            if (isLive) {
+                castButton.setVisibility(View.GONE);
+                progressControls.setVisibility(View.GONE);
+                liveButton.setVisibility(View.VISIBLE);
+            } else {
+                castButton.setVisibility(View.VISIBLE);
+                progressControls.setVisibility(View.VISIBLE);
+                liveButton.setVisibility(View.GONE);
+            }
+        } else {
+            topBar.setVisibility(View.GONE);
+            fullscreenButton.setVisibility(View.GONE);
+            if (isLive) {
+                progressControls.setVisibility(View.GONE);
+            } else {
+                progressControls.setVisibility(View.VISIBLE);
+            }
+        }
+        optionsMenuButton.setVisibility(View.GONE);
     }
 
     private OptionsMenuLayer.OptionsMenuCallback optionsMenuCallBack = new OptionsMenuLayer.OptionsMenuCallback() {
@@ -191,9 +236,40 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     private View speedSheetView;
 
     public void setupMenu(PlayerMediaSourceInterface playerMediaSource) {
-        if (playerMediaSource.getVideoOutputsTracks() != null) initOutputMenu(playerMediaSource);
-        if (playerMediaSource.getSubtitles() != null) initCaptionMenu(playerMediaSource);
-        initSpeedMenu();
+        if (!isVideo) {
+            outputSheetView = null;
+            outputSheetDialog = null;
+            captionSheetView = null;
+            captionsSheetDialog = null;
+            speedSheetDialog = null;
+            speedSheetView = null;
+            optionsMenuButton.setVisibility(View.GONE);
+            return;
+        }
+        if (playerMediaSource.getVideoOutputsTracks() != null && playerMediaSource.getVideoOutputsTracks().length > 1) {
+            initOutputMenu(playerMediaSource);
+        }
+        else {
+            outputSheetView = null;
+            outputSheetDialog = null;
+        }
+        if (playerMediaSource.getSubtitles() != null && playerMediaSource.getSubtitles().length > 1) {
+            initCaptionMenu(playerMediaSource);
+        } else {
+            captionSheetView = null;
+            captionsSheetDialog = null;
+        }
+        if (!isLive) {
+            initSpeedMenu();
+        } else {
+            speedSheetDialog = null;
+            speedSheetView = null;
+        }
+        boolean hasMenu = captionsSheetDialog != null || outputSheetDialog!= null || speedSheetDialog != null;
+        optionsMenuButton.setVisibility(hasMenu ? View.VISIBLE : View.GONE);
+        optionsMenuLayer.setCaptionsButtonVisibility(captionsSheetDialog != null);
+        optionsMenuLayer.setHdButtonVisibility(outputSheetDialog != null);
+        optionsMenuLayer.setSpeedButtonVisibility(speedSheetDialog != null);
     }
 
     private void initCaptionMenu(final PlayerMediaSourceInterface playerMediaSource) {
