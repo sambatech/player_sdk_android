@@ -117,6 +117,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         this.isLive = isLive;
         this.isVideo = isVideo;
         if (isVideo) {
+            playerView.setControllerHideOnTouch(true);
+            playerView.setControllerShowTimeoutMs(2*1000);
             topBar.setVisibility(View.VISIBLE);
             if (isLive) {
                 castButton.setVisibility(View.GONE);
@@ -128,6 +130,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
                 liveButton.setVisibility(View.GONE);
             }
         } else {
+            playerView.setControllerHideOnTouch(false);
+            playerView.setControllerShowTimeoutMs(-1);
             topBar.setVisibility(View.GONE);
             fullscreenButton.setVisibility(View.GONE);
             if (isLive) {
@@ -235,7 +239,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     private View captionSheetView;
     private View speedSheetView;
 
-    public void setupMenu(PlayerMediaSourceInterface playerMediaSource) {
+    public void setupMenu(PlayerMediaSourceInterface playerMediaSource, Format selectedVideo, Format selectedSubtitle) {
         if (!isVideo) {
             outputSheetView = null;
             outputSheetDialog = null;
@@ -247,14 +251,14 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             return;
         }
         if (playerMediaSource.getVideoOutputsTracks() != null && playerMediaSource.getVideoOutputsTracks().length > 1) {
-            initOutputMenu(playerMediaSource);
+            initOutputMenu(playerMediaSource, selectedVideo);
         }
         else {
             outputSheetView = null;
             outputSheetDialog = null;
         }
         if (playerMediaSource.getSubtitles() != null && playerMediaSource.getSubtitles().length > 1) {
-            initCaptionMenu(playerMediaSource);
+            initCaptionMenu(playerMediaSource, selectedSubtitle);
         } else {
             captionSheetView = null;
             captionsSheetDialog = null;
@@ -272,7 +276,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         optionsMenuLayer.setSpeedButtonVisibility(speedSheetDialog != null);
     }
 
-    private void initCaptionMenu(final PlayerMediaSourceInterface playerMediaSource) {
+    private void initCaptionMenu(final PlayerMediaSourceInterface playerMediaSource, Format currentCaption) {
         final TrackGroupArray captions = playerMediaSource.getSubtitles();
         captionSheetView = ((Activity) context).getLayoutInflater().inflate(R.layout.action_sheet, null);
         TextView title = (TextView) captionSheetView.findViewById(R.id.action_sheet_title);
@@ -280,7 +284,15 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         final ListView menuList = (ListView) captionSheetView.findViewById(R.id.sheet_list);
         final CaptionsSheetAdapter adapter = new CaptionsSheetAdapter(context, captions);
         menuList.setAdapter(adapter);
-        adapter.currentIndex = 0;
+        if (currentCaption != null) {
+            for (int i = 0; i < captions.length; i++) {
+                if (captions.get(i).getFormat(0) == currentCaption) {
+                    adapter.currentIndex = i;
+                }
+            }
+        } else {
+            adapter.currentIndex = 0;
+        }
         menuList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -295,7 +307,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         captionsSheetDialog = setupMenuDialog(captionSheetView);
     }
 
-    private void initOutputMenu(final PlayerMediaSourceInterface playerMediaSource) {
+    private void initOutputMenu(final PlayerMediaSourceInterface playerMediaSource, Format currentOutput) {
         final TrackGroup outputs = playerMediaSource.getVideoOutputsTracks();
         outputSheetView = ((Activity) context).getLayoutInflater().inflate(R.layout.action_sheet, null);
         TextView title = (TextView) outputSheetView.findViewById(R.id.action_sheet_title);
@@ -303,7 +315,11 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         final ListView menuList = (ListView) outputSheetView.findViewById(R.id.sheet_list);
         final OutputSheetAdapter adapter = new OutputSheetAdapter(context, outputs);
         menuList.setAdapter(adapter);
-        adapter.currentIndex = 0;
+        if (currentOutput != null) {
+            adapter.currentIndex = outputs.indexOf(currentOutput) + 1;
+        } else {
+            adapter.currentIndex = 0;
+        }
         menuList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -328,7 +344,11 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         final float[] audioPitch = new float[]{0.25f, 0.5f, 1.0f, 1.5f, 2.0f};
         final SpeedSheetAdapter adapter = new SpeedSheetAdapter(context, speeds);
         menuList.setAdapter(adapter);
-        adapter.currentIndex = 2;
+        for (int i =0; i < speeds.length; i++) {
+            if (player.getPlaybackParameters().speed == speeds[i]) {
+                adapter.currentIndex = i;
+            }
+        }
         menuList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

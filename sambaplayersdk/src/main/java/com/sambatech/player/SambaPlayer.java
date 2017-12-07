@@ -35,6 +35,7 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RendererCapabilities;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
 import com.google.android.exoplayer2.ext.ima.ImaAdsMediaSource;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
@@ -42,6 +43,7 @@ import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ClippingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -833,20 +835,21 @@ public class SambaPlayer extends FrameLayout {
 
         player.addListener(new Player.EventListener() {
 
-            private TrackGroupArray previousTrackGroupArray = null;
-
             @Override
             public void onTimelineChanged(Timeline timeline, Object manifest) {
             }
 
             @Override
             public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                boolean isPLayingAd = player.isPlayingAd();
-                int lenght = trackGroups.length;
-                TrackSelectionArray tk = player.getCurrentTrackSelections();
-                if (trackGroups == previousTrackGroupArray) return;
-                simplePlayerView.setupMenu(playerMediaSourceInterface);
-                previousTrackGroupArray = trackGroups;
+                Format video = null;
+                Format legenda = null;
+                TrackSelection videos = null;
+                if (trackSelections.length > 0 ) videos = trackSelections.get(0);
+                if (videos != null && videos.getSelectionReason() != C.SELECTION_REASON_INITIAL) { //SELECTION_REASON_INITIAL == auto,
+                    if (trackSelections.length > 0 && trackSelections.get(0) != null) video = trackSelections.get(0).getSelectedFormat();
+                }
+                if (trackSelections.length > 2 && trackSelections.get(2) != null)  legenda = trackSelections.get(2).getSelectedFormat();
+                simplePlayerView.setupMenu(playerMediaSourceInterface, video, legenda);
             }
 
             @Override
@@ -882,7 +885,7 @@ public class SambaPlayer extends FrameLayout {
 
         player.setPlayWhenReady(true);
         playerMediaSourceInterface.addSubtitles(media.captions);
-        media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
+        //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
         if (media.adUrl != null ) {
             playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
         }
