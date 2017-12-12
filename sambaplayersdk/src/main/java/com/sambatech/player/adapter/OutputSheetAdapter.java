@@ -22,26 +22,28 @@ import com.sambatech.player.SambaPlayer;
 public class OutputSheetAdapter extends BaseAdapter {
 
     public int currentIndex = -1;
+    private int offset = 0;
 
     private final @NonNull
     Context context;
     private final @NonNull
     TrackGroup outputs;
 
-    public OutputSheetAdapter(@NonNull Context context, @NonNull TrackGroup outputs) {
+    public OutputSheetAdapter(@NonNull Context context, @NonNull TrackGroup outputs, boolean abrEnabled) {
         this.context = context;
         this.outputs = outputs;
+        this.offset = abrEnabled ? 1 : 0;
     }
 
     @Override
     public int getCount() {
-        return outputs.length + 1;
+        return outputs.length + offset;
     }
 
     @Override
     public Object getItem(int position) {
-        if (position == 0) return null;
-        return outputs.getFormat(position - 1);
+        if (offset == 1 && position == 0) return null;
+        return outputs.getFormat(position - offset);
     }
 
     @Override

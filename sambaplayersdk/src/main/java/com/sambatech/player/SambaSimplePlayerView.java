@@ -82,7 +82,6 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         this.playerContainer.addView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         this.playerContainer.setBackgroundColor(Color.BLACK);
         playerView.setBackgroundColor(Color.BLACK);
-        //playerView.setUseController(false);
     }
 
     public void bindMethods() {
@@ -209,14 +208,10 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     }
 
     public void setEnableControls(boolean flag) {
-        if (flag)
-            playerView.hideController();
-        else
-            playerView.showController();
+        playerView.setUseController(flag);
     }
 
     public void hide() {
-
     }
 
     public void show() {
@@ -239,7 +234,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     private View captionSheetView;
     private View speedSheetView;
 
-    public void setupMenu(PlayerMediaSourceInterface playerMediaSource, Format selectedVideo, Format selectedSubtitle) {
+    public void setupMenu(PlayerMediaSourceInterface playerMediaSource, Format selectedVideo, Format selectedSubtitle, boolean isAbrEnabled) {
         if (!isVideo) {
             outputSheetView = null;
             outputSheetDialog = null;
@@ -251,7 +246,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             return;
         }
         if (playerMediaSource.getVideoOutputsTracks() != null && playerMediaSource.getVideoOutputsTracks().length > 1) {
-            initOutputMenu(playerMediaSource, selectedVideo);
+            initOutputMenu(playerMediaSource, selectedVideo, isAbrEnabled);
         }
         else {
             outputSheetView = null;
@@ -307,16 +302,16 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         captionsSheetDialog = setupMenuDialog(captionSheetView);
     }
 
-    private void initOutputMenu(final PlayerMediaSourceInterface playerMediaSource, Format currentOutput) {
+    private void initOutputMenu(final PlayerMediaSourceInterface playerMediaSource, Format currentOutput, boolean isAbrEnabled) {
         final TrackGroup outputs = playerMediaSource.getVideoOutputsTracks();
         outputSheetView = ((Activity) context).getLayoutInflater().inflate(R.layout.action_sheet, null);
         TextView title = (TextView) outputSheetView.findViewById(R.id.action_sheet_title);
         title.setText(context.getString(R.string.output));
         final ListView menuList = (ListView) outputSheetView.findViewById(R.id.sheet_list);
-        final OutputSheetAdapter adapter = new OutputSheetAdapter(context, outputs);
+        final OutputSheetAdapter adapter = new OutputSheetAdapter(context, outputs, isAbrEnabled);
         menuList.setAdapter(adapter);
         if (currentOutput != null) {
-            adapter.currentIndex = outputs.indexOf(currentOutput) + 1;
+            adapter.currentIndex = outputs.indexOf(currentOutput) + (isAbrEnabled ? 1 : 0);
         } else {
             adapter.currentIndex = 0;
         }
@@ -324,8 +319,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 closeOutputMenu();
-                Format format = null;
-                if (position > 0) format = outputs.getFormat(position - 1);
+                Format format = (Format) adapter.getItem(position);
                 playerMediaSource.setVideoOutputTrack(format);
                 menuList.smoothScrollToPosition(0);
                 adapter.currentIndex = position;

@@ -123,4 +123,26 @@ public class PlayerMediaSource {
                 imaAdsLoader,
                 frameLayout);
     }
+
+    public  void forceOutuputTrackTo(int index, boolean isAbrEnabled) {
+        TrackGroup trackGroup = getVideoOutputsTracks();
+        if (trackGroup != null) {
+            if (isAbrEnabled && index == 0) {
+                setVideoOutputTrack(null);
+            } else {
+                index = index - (isAbrEnabled ? 1 : 0);
+                if (trackGroup.length > index) {
+                    Format forceOutput = getVideoOutputsTracks().getFormat(index);
+                    setVideoOutputTrack(forceOutput);
+                } else {
+                    if (isAbrEnabled) {
+                        setVideoOutputTrack(null);
+                    } else {
+                        Format forceOutput = getVideoOutputsTracks().getFormat(0);
+                        setVideoOutputTrack(forceOutput);
+                    }
+                }
+            }
+        }
+    }
 }

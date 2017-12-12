@@ -157,6 +157,7 @@ public class MediaItemActivity extends Activity {
 		@Override
 		public void onProgress(SambaEvent event) {
 			status.setText(String.format("Status: %s", event.getType()));
+			Log.d("Player Time", "current: " + player.getCurrentTime() + " total: " + player.getDuration());
 		}
 	};
 
@@ -315,7 +316,7 @@ public class MediaItemActivity extends Activity {
 
 		// enabling Chromecast on player
 		player.setSambaCast(sambaCast);
-	    player.setEnableControls(activityMedia.isControlsEnabled());
+	    player.setControlsVisibility(activityMedia.isControlsEnabled());
 	    player.setMedia(media);
 
 		//ti = new Date().getTime();

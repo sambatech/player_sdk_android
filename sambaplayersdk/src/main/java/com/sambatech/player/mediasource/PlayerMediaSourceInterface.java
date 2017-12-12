@@ -33,4 +33,6 @@ public interface PlayerMediaSourceInterface {
     void setSubtitle(TrackGroup trackGroup);
 
     void addAds(String url, FrameLayout frame);
+
+    void forceOutuputTrackTo(int index, boolean isAbrEnabled);
 }
