@@ -9,6 +9,7 @@ import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.sambatech.player.model.SambaMedia;
 
 import java.util.ArrayList;
@@ -35,4 +36,8 @@ public interface PlayerMediaSourceInterface {
     void addAds(String url, FrameLayout frame);
 
     void forceOutuputTrackTo(int index, boolean isAbrEnabled);
+
+    int getCurrentOutputTrackIndex(TrackSelectionArray trackSelections, boolean isAbrEnabled);
+
+    void destroy();
 }

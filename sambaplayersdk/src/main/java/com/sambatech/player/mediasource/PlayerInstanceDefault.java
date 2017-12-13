@@ -42,4 +42,14 @@ public class PlayerInstanceDefault {
     public SimpleExoPlayer createPlayerInstance() {
         return ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector);
     }
+
+    public void destroy() {
+        mainHandler = null;
+        bandwidthMeter = null;
+        adaptiveTrackSelectionFactory = null;
+        trackSelector = null;
+        renderersFactory = null;
+        mediaDataSourceFactory = null;
+
+    }
 }

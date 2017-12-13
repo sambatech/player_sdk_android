@@ -17,6 +17,8 @@ import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelection;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.sambatech.player.model.SambaMedia;
@@ -144,5 +146,29 @@ public class PlayerMediaSource {
                 }
             }
         }
+    }
+
+    public int getCurrentOutputTrackIndex(TrackSelectionArray trackSelections, boolean isAbrEnabled){
+        Format video = null;
+        TrackSelection videos = null;
+        TrackGroup trackGroup = getVideoOutputsTracks();
+        int index = C.INDEX_UNSET;
+        if (trackSelections.length > 0 ) videos = trackSelections.get(VIDEO_RENDERER_INDEX);
+        if (videos == null || trackGroup == null || trackSelections == null) return index;
+        if (videos.getSelectionReason() != C.SELECTION_REASON_INITIAL && videos.getSelectionReason() != C.SELECTION_REASON_TRICK_PLAY) { //SELECTION_REASON_INITIAL == auto,
+            if (trackSelections.length > 0 && trackSelections.get(0) != null) video = trackSelections.get(0).getSelectedFormat();
+            if (video != null) index = trackGroup.indexOf(video);
+            if (index != C.INDEX_UNSET) index = isAbrEnabled ? (index + 1) : index;
+        } else {
+            if (isAbrEnabled) return 0;
+        }
+        return index;
+    }
+
+    protected void destroy(){
+        playerInstanceDefault = null;
+        url = null;
+        mediaSource = null;
+        imaAdsLoader = null;
     }
 }

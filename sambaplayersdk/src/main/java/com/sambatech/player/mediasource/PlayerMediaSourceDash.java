@@ -27,4 +27,10 @@ public class PlayerMediaSourceDash extends PlayerMediaSource implements PlayerMe
         setMediaSource(new DashMediaSource(Uri.parse(url), playerInstanceDefault.mediaDataSourceFactory, dashChunkSourceFactory, playerInstanceDefault.mainHandler, null));
     }
 
+    @Override
+    public void destroy() {
+        super.destroy();
+        dashChunkSourceFactory = null;
+    }
+
 }

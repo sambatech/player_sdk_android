@@ -13,7 +13,6 @@ import com.google.android.exoplayer2.source.ExtractorMediaSource;
 public class PlayerMediaSourceExtractor extends PlayerMediaSource implements PlayerMediaSourceInterface {
 
     private ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-    //"http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"
 
     public PlayerMediaSourceExtractor(PlayerInstanceDefault playerInstanceDefault, String url) {
         super(playerInstanceDefault);
@@ -25,5 +24,11 @@ public class PlayerMediaSourceExtractor extends PlayerMediaSource implements Pla
     public void setUrl(String url) {
         super.setUrl(url);
         setMediaSource(new ExtractorMediaSource(Uri.parse(url),this.playerInstanceDefault.mediaDataSourceFactory, extractorsFactory, this.playerInstanceDefault.mainHandler, null));
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        extractorsFactory = null;
     }
 }

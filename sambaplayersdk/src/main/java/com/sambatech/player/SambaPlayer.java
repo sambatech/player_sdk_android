@@ -130,15 +130,28 @@ import static android.view.animation.Animation.ABSOLUTE;
  */
 public class SambaPlayer extends FrameLayout {
 
-    private final Player.EventListener eventListener = new Player.EventListener() {
+    private final Player.EventListener playerEventListener = new Player.EventListener() {
         @Override
         public void onTimelineChanged(Timeline timeline, Object manifest) {
-
         }
 
         @Override
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
+            Format video = null;
+            Format legenda = null;
+            TrackSelection videos = null;
+            if (trackSelections.length > 0) videos = trackSelections.get(0);
+            if (videos != null && videos.getSelectionReason() != C.SELECTION_REASON_INITIAL && videos.getSelectionReason() != C.SELECTION_REASON_TRICK_PLAY) { // == auto
+                if (trackSelections.length > 0 && trackSelections.get(0) != null)
+                    video = trackSelections.get(0).getSelectedFormat();
+            }
+            if (trackSelections.length > 2 && trackSelections.get(2) != null)
+                legenda = trackSelections.get(2).getSelectedFormat();
+            simplePlayerView.setupMenu(playerMediaSourceInterface, video, legenda, _abrEnabled);
+            if (_forceOutputIndexTo >= 0) {
+                playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
+                _forceOutputIndexTo = -1;
+            }
         }
 
         @Override
@@ -149,32 +162,20 @@ public class SambaPlayer extends FrameLayout {
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
             Log.i("SambaPlayer", "state: " + playWhenReady + " " + playbackState + "; playing: " + isPlaying());
-
             switch (playbackState) {
-                case ExoPlayer.STATE_READY:
+                case Player.STATE_READY:
                     if (playWhenReady) {
                         if (!_hasStarted) {
                             _hasStarted = true;
-                            _currentRetryIndex = 0;
 
-                            //initOutputMenu();
                             destroyError();
                             SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
-
-                            // show controls
-                            //player.show();
 
                             // initial position
                             if (!media.isLive && _initialTime > 0) {
                                 seek(_initialTime);
                                 _initialTime = 0;
                             }
-
-                            // initial output
-                            //if (_initialOutput != -1) {
-                             //   switchOutput(_initialOutput);
-                             //   _initialOutput = -1;
-                            //}
 
                             // start in fullscreen
                             if (_initialFullscreen != null) {
@@ -186,21 +187,20 @@ public class SambaPlayer extends FrameLayout {
                         dispatchPlay();
                     } else dispatchPause();
 
-                    //player.hideLoading();
+                    simplePlayerView.setLoading(false);
                     break;
-                case ExoPlayer.STATE_ENDED:
+                case Player.STATE_ENDED:
                     if (!playWhenReady)
                         break;
 
                     stopProgressTimer();
                     pause();
-                    seek(0);
                     SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
                     _hasFinished = true;
-                    //player.hideLoading();
+                    simplePlayerView.setLoading(false);
                     break;
-                case ExoPlayer.STATE_BUFFERING:
-                    //player.showLoading();
+                case Player.STATE_BUFFERING:
+                    simplePlayerView.setLoading(true);
                     stopErrorTimer();
 
                     // buffering timeout
@@ -248,6 +248,7 @@ public class SambaPlayer extends FrameLayout {
 
         }
     };
+
 
     private final SambaSimplePlayerView.FullscreenCallback fullscreenListener = new SambaSimplePlayerView.FullscreenCallback() {
         @Override
@@ -421,15 +422,10 @@ public class SambaPlayer extends FrameLayout {
     private boolean _hasStarted;
     private boolean _hasFinished;
     private OrientationEventListener orientationEventListener;
-    private View outputSheetView;
-    private View captionSheetView;
     private SambaCast sambaCast;
     private boolean _autoFsMode;
     private boolean _enableControls = true;
-    private boolean _wasAutoFS;
     private boolean _disabled;
-    private int _currentBackupIndex;
-    private int _currentRetryIndex;
     private float _initialTime = 0f;
     private Boolean _initialFullscreen = null;
     private Timer errorTimer;
@@ -441,8 +437,6 @@ public class SambaPlayer extends FrameLayout {
     private SambaSimplePlayerView simplePlayerView;
     private SimpleExoPlayer player;
     private PlayerInstanceDefault playerInstanceDefault;
-    private ImaAdsLoader imaAdsLoader;
-
     private PlayerMediaSourceInterface playerMediaSourceInterface;
     //private boolean wasPlaying;
 
@@ -523,7 +517,7 @@ public class SambaPlayer extends FrameLayout {
      * Resumes media playback.
      */
     public void play() {
-        play(true, 2);
+        play(false, -1);
     }
 
     /**
@@ -564,9 +558,8 @@ public class SambaPlayer extends FrameLayout {
      */
     public void setControlsVisibility(boolean flag) {
         _enableControls = flag;
-        if (player != null && simplePlayerView != null) {
-            simplePlayerView.setEnableControls(flag);
-        }
+        if (player == null && simplePlayerView == null) return;
+        simplePlayerView.setEnableControls(flag);
     }
 
     /**
@@ -592,7 +585,7 @@ public class SambaPlayer extends FrameLayout {
      * @param flag true to enter in the fullscreen mode on and false to exit
      */
     public void setFullscreen(boolean flag) {
-        if (player == null && simplePlayerView != null) return;
+        if (player == null || simplePlayerView == null) return;
         simplePlayerView.setFullscreen(false);
     }
 
@@ -602,7 +595,7 @@ public class SambaPlayer extends FrameLayout {
      * @return boolean Whether fullscreen mode is on of off.
      */
     public boolean isFullscreen() {
-        if (player == null && simplePlayerView != null) return false;
+        if (player == null || simplePlayerView != null) return false;
         return player != null && simplePlayerView.isFullscreen();
     }
 
@@ -662,30 +655,6 @@ public class SambaPlayer extends FrameLayout {
         return _hasFinished;
     }
 
-    /**
-     * Changes the current output.
-     *
-     * @param output SambaMedia.Output indicating the new output
-     */
-    public void changeOutput(@NonNull SambaMedia.Output output) {
-        if (output.url == null || output.url.isEmpty()) {
-            //dispatchError(SambaPlayerError.emptyUrl);
-            Log.e("SambaPlayer", "URL not found for output \"" + output.label + "\".");
-            return;
-        }
-
-        final long currentPosition = player.getCurrentPosition();
-        //final boolean wasPlaying = isPlaying();
-
-        for (SambaMedia.Output o : media.outputs)
-            o.isDefault = o.label.equals(output.label);
-
-        media.url = output.url;
-
-        destroyInternal();
-        create(false);
-        player.seekTo(currentPosition);
-    }
 
     /**
      * Changes the current output.
@@ -695,8 +664,9 @@ public class SambaPlayer extends FrameLayout {
      */
 
     public void switchOutput(int index) {
-        if (player == null || outputSheetView == null)
+        if (player == null || simplePlayerView == null)
             return;
+        playerMediaSourceInterface.forceOutuputTrackTo(index, _abrEnabled);
     }
 
     /**
@@ -705,7 +675,9 @@ public class SambaPlayer extends FrameLayout {
      * @return The selected output index
      */
     public int getCurrentOutputIndex() {
-        return 0;
+        if (player == null || player.getCurrentTrackSelections() == null || simplePlayerView == null || playerMediaSourceInterface == null)
+            return C.INDEX_UNSET;
+        return playerMediaSourceInterface.getCurrentOutputTrackIndex(player.getCurrentTrackSelections(), _abrEnabled);
     }
 
     /**
@@ -722,10 +694,11 @@ public class SambaPlayer extends FrameLayout {
     }
 
     public String getCaption() {
-        if (captionSheetView == null) return null;
-        CaptionsSheetAdapter adapter = (CaptionsSheetAdapter) ((ListView) captionSheetView.findViewById(R.id.sheet_list)).getAdapter();
-        SambaMedia.Caption caption = (SambaMedia.Caption) adapter.getItem(adapter.currentIndex);
-        return String.format("[%s,ffcc00,42]", caption.language);
+        //if (captionSheetView == null) return null;
+        //CaptionsSheetAdapter adapter = (CaptionsSheetAdapter) ((ListView) captionSheetView.findViewById(R.id.sheet_list)).getAdapter();
+        // SambaMedia.Caption caption = (SambaMedia.Caption) adapter.getItem(adapter.currentIndex);
+        //return String.format("[%s,ffcc00,42]", "");
+        return "";
     }
 
     /**
@@ -754,10 +727,7 @@ public class SambaPlayer extends FrameLayout {
         PluginManager.getInstance().onDestroy();
         destroyInternal();
         SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
-
-        //if (error != null)
-        //	showError(error);
-        //else destroyError();
+        destroyError();
     }
 
 	/* End Player API */
@@ -790,9 +760,6 @@ public class SambaPlayer extends FrameLayout {
             return;
         }
 
-
-        // 1. Create a default TrackSelector
-
         playerInstanceDefault = new PlayerInstanceDefault(getContext());
         simplePlayerView = new SambaSimplePlayerView(getContext(), this);
         player = playerInstanceDefault.createPlayerInstance();
@@ -818,189 +785,29 @@ public class SambaPlayer extends FrameLayout {
         //playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, "https://storage.googleapis.com/wvmedia/clear/h264/tears/tears.mpd");
         //playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, "https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv");
 
-        player.addListener(new Player.EventListener() {
-
-            @Override
-            public void onTimelineChanged(Timeline timeline, Object manifest) {
-            }
-
-            @Override
-            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                Format video = null;
-                Format legenda = null;
-                TrackSelection videos = null;
-                if (trackSelections.length > 0 ) videos = trackSelections.get(0);
-                if (videos != null && videos.getSelectionReason() != C.SELECTION_REASON_INITIAL) { //SELECTION_REASON_INITIAL == auto,
-                    if (trackSelections.length > 0 && trackSelections.get(0) != null) video = trackSelections.get(0).getSelectedFormat();
-                }
-                if (trackSelections.length > 2 && trackSelections.get(2) != null)  legenda = trackSelections.get(2).getSelectedFormat();
-                simplePlayerView.setupMenu(playerMediaSourceInterface, video, legenda, _abrEnabled);
-                if (_forceOutputIndexTo >= 0) {
-                    playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
-                    _forceOutputIndexTo = -1;
-                }
-            }
-
-            @Override
-            public void onLoadingChanged(boolean isLoading) {
-
-            }
-
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                Log.i("SambaPlayer", "state: " + playWhenReady + " " + playbackState + "; playing: " + isPlaying());
-                switch (playbackState) {
-                    case Player.STATE_READY:
-                        if (playWhenReady) {
-                            if (!_hasStarted) {
-                                _hasStarted = true;
-                                _currentRetryIndex = 0;
-
-                                destroyError();
-                                SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
-
-                                // initial position
-                                if (!media.isLive && _initialTime > 0) {
-                                    seek(_initialTime);
-                                    _initialTime = 0;
-                                }
-
-                                // start in fullscreen
-                                if (_initialFullscreen != null) {
-                                    //player.setFullscreen(_initialFullscreen);
-                                    _initialFullscreen = null;
-                                }
-                            }
-
-                            dispatchPlay();
-                        } else dispatchPause();
-
-                        simplePlayerView.setLoading(false);
-                        break;
-                    case Player.STATE_ENDED:
-                        if (!playWhenReady)
-                            break;
-
-                        stopProgressTimer();
-                        pause();
-                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
-                        _hasFinished = true;
-                        simplePlayerView.setLoading(false);
-                        break;
-                    case Player.STATE_BUFFERING:
-                        simplePlayerView.setLoading(true);
-                        stopErrorTimer();
-
-                        // buffering timeout
-                        final AtomicInteger secs = new AtomicInteger(20);
-
-                        errorTimer = new Timer();
-                        errorTimer.scheduleAtFixedRate(new TimerTask() {
-                            @Override
-                            public void run() {
-                                ((Activity) getContext()).runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        // on buffer timeout disable ABR (sets to lower)
-                                        if (secs.get() == 0) {
-                                            stopErrorTimer();
-                                            //_initialOutput = 0;
-                                        }
-
-                                        secs.decrementAndGet();
-                                    }
-                                });
-                            }
-                        }, 0, 1000);
-                        break;
-                }
-            }
-
-            @Override
-            public void onRepeatModeChanged(int repeatMode) {
-
-            }
-
-            @Override
-            public void onPlayerError(ExoPlaybackException error) {
-
-            }
-
-            @Override
-            public void onPositionDiscontinuity() {
-
-            }
-
-            @Override
-            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
-            }
-        });
+        player.addListener(playerEventListener);
 
         player.setPlayWhenReady(true);
-        if (media.captions != null && media.captions.size() > 0) playerMediaSourceInterface.addSubtitles(media.captions);
+        if (media.captions != null && media.captions.size() > 0)
+            playerMediaSourceInterface.addSubtitles(media.captions);
         //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
-        if (media.adUrl != null ) playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
+        if (media.adUrl != null)
+            playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
         player.prepare(playerMediaSourceInterface.getMediaSource());
 
 
-//		//Live treatment
-//		if (media.isLive) {
-//			((Activity)getContext()).findViewById(R.id.time_container).setVisibility(INVISIBLE);
-//
-//			player.setControlsVisible(false, Controls.SEEKBAR);
-//			player.addActionButton(ContextCompat.getDrawable(getContext(), R.drawable.ic_live),
-//					getContext().getString(R.string.live), null);
-//		}
-
-//		player.addPlaybackListener(playbackListener);
-//		player.setPlayCallback(playListener);
-
-		if (media.isAudioOnly) {
+        if (media.isAudioOnly) {
 //			player.setControlsVisible(true, Controls.PLAY);
 //			player.setControlsVisible(false, Controls.FULLSCREEN, Controls.PLAY_LARGE, Controls.TOP_CHROME);
 //			player.setBackgroundColor(0xFF434343);
 //			player.setChromeColor(0x00000000);
-		}
-		else simplePlayerView.setFullscreenCallback(fullscreenListener);
+        } else simplePlayerView.setFullscreenCallback(fullscreenListener);
 
         if (!controlsHidden.isEmpty())
             setHideControls(controlsHidden.toArray(new String[0]));
 
         // Fullscreen
-        orientationEventListener = new OrientationEventListener(getContext()) {
-
-            private final Orientation orientation = new Orientation();
-            private int lastRotatedTo = 0;
-
-            {
-                enable();
-            }
-
-            @Override
-            public void onOrientationChanged(int newValue) {
-                if (!_autoFsMode || player == null) return;
-                int newOrientation = orientation.getMeasuredOrientation(newValue);
-                if (newOrientation == lastRotatedTo || newOrientation == Orientation.INVALID) return;
-                lastRotatedTo = newOrientation;
-                switch (lastRotatedTo) {
-                    case Orientation.PORTRAIT:
-                        simplePlayerView.setFullscreen(false);
-                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PORTRAIT));
-                        break;
-                    case Orientation.REVERSE_LANDSCAPE:
-                        simplePlayerView.setFullscreen(true, true);
-                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
-                        break;
-                    case Orientation.LANDSCAPE:
-                        simplePlayerView.setFullscreen(true, false);
-                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
-                        break;
-                    default:
-                        break;
-                }
-            }
-        };
+        createOrientationEventListener();
 
         // video-only
         if (!media.isAudioOnly) {
@@ -1026,48 +833,90 @@ public class SambaPlayer extends FrameLayout {
 //			castListener.onConnected(sambaCast.getCastSession());
     }
 
+
+    private void createOrientationEventListener() {
+        orientationEventListener = new OrientationEventListener(getContext()) {
+
+            private final Orientation orientation = new Orientation();
+            private int lastRotatedTo = 0;
+
+            {
+                enable();
+            }
+
+            @Override
+            public void onOrientationChanged(int newValue) {
+                if (!_autoFsMode || player == null || simplePlayerView == null) return;
+                int newOrientation = orientation.getMeasuredOrientation(newValue);
+                if (newOrientation == lastRotatedTo || newOrientation == Orientation.INVALID)
+                    return;
+                lastRotatedTo = newOrientation;
+                switch (lastRotatedTo) {
+                    case Orientation.PORTRAIT:
+                        simplePlayerView.setFullscreen(false);
+                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PORTRAIT));
+                        break;
+                    case Orientation.REVERSE_LANDSCAPE:
+                        simplePlayerView.setFullscreen(true, true);
+                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
+                        break;
+                    case Orientation.LANDSCAPE:
+                        simplePlayerView.setFullscreen(true, false);
+                        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LANDSCAPE));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        };
+    }
+
     private void destroyInternal() {
         stopProgressTimer();
         stopErrorTimer();
-
-        if (player == null)
-            return;
-
         stop();
-        //player.setFullscreen(false);
-
-        if (outputSheetView != null) {
-            ((ListView) outputSheetView.findViewById(R.id.sheet_list)).setOnItemClickListener(null);
+        setFullscreen(false);
+        if (orientationEventListener != null) {
+            orientationEventListener.disable();
+            orientationEventListener = null;
         }
 
-        if (captionSheetView != null) {
-            ((ListView) captionSheetView.findViewById(R.id.sheet_list)).setOnItemClickListener(null);
-        }
-
-        orientationEventListener.disable();
-        //player.removePlaybackListener(playbackListener);
-        //player.setPlayCallback(null);
-        //player.setFullscreenCallback(null);
 
         if (sambaCast != null) {
             //player.setInterceptableListener(null);
             sambaCast.setEventListener(null);
         }
 
-        // player.setControlsVisible(false);
-        player.release();
 
-        outputSheetView = null;
-        captionSheetView = null;
-        orientationEventListener = null;
-        player = null;
+        if (simplePlayerView != null) {
+            simplePlayerView.setFullscreenCallback(null);
+            simplePlayerView.destroyInternal();
+            simplePlayerView = null;
+        }
+
+        if (playerInstanceDefault != null) {
+            playerInstanceDefault.destroy();
+            playerInstanceDefault = null;
+        }
+
+        if (playerMediaSourceInterface != null) {
+            playerMediaSourceInterface.destroy();
+            playerMediaSourceInterface = null;
+        }
+
+        if (player != null) {
+            player.removeListener(playerEventListener);
+            player.release();
+            player = null;
+        }
+
         _hasStarted = false;
         _hasFinished = false;
         _disabled = false;
     }
 
 	/*private void showError(@NonNull SambaPlayerError error) {
-		if (errorScreen == null)
+        if (errorScreen == null)
 			errorScreen = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
 
 		TextView textView = (TextView) errorScreen.findViewById(R.id.error_message);
