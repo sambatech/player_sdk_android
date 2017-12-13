@@ -165,6 +165,22 @@ public class PlayerMediaSource {
         return index;
     }
 
+    public void forceCaptionTrackTo(int index){
+
+    }
+
+    public int getCurrentCaptionTrackIndex(TrackSelectionArray trackSelections){
+        TrackGroup legenda = null;
+        int index = C.INDEX_UNSET;
+        TrackGroupArray trackGroupArray = getTrackGroupArray(CAPTION_RENDERER_INDEX);
+        if (trackGroupArray != null && trackSelections != null) {
+            if (trackSelections.length > CAPTION_RENDERER_INDEX && trackSelections.get(CAPTION_RENDERER_INDEX) != null)
+                legenda = trackSelections.get(CAPTION_RENDERER_INDEX).getTrackGroup();
+            index = trackGroupArray.indexOf(legenda);
+        }
+        return index;
+    }
+
     protected void destroy(){
         playerInstanceDefault = null;
         url = null;

@@ -664,7 +664,7 @@ public class SambaPlayer extends FrameLayout {
      */
 
     public void switchOutput(int index) {
-        if (player == null || simplePlayerView == null)
+        if (player == null || simplePlayerView == null || playerMediaSourceInterface == null)
             return;
         playerMediaSourceInterface.forceOutuputTrackTo(index, _abrEnabled);
     }
@@ -686,11 +686,9 @@ public class SambaPlayer extends FrameLayout {
      * @param index The index in the captions array
      */
     public void changeCaption(int index) {
-        Captions plugin = (Captions) PluginManager.getInstance().getPlugin(Captions.class);
-
-        if (plugin == null) return;
-
-        plugin.changeCaption(index);
+        if (player == null || simplePlayerView == null || playerMediaSourceInterface == null)
+            return;
+        //return playerMediaSourceInterface.getCurrentCaptionTrackIndex(player.getCurrentTrackSelections());
     }
 
     public String getCaption() {
@@ -699,6 +697,12 @@ public class SambaPlayer extends FrameLayout {
         // SambaMedia.Caption caption = (SambaMedia.Caption) adapter.getItem(adapter.currentIndex);
         //return String.format("[%s,ffcc00,42]", "");
         return "";
+    }
+
+    public int getCurrentCaptionIndex() {
+        if (player == null || player.getCurrentTrackSelections() == null || simplePlayerView == null || playerMediaSourceInterface == null)
+            return C.INDEX_UNSET;
+        return playerMediaSourceInterface.getCurrentCaptionTrackIndex(player.getCurrentTrackSelections());
     }
 
     /**

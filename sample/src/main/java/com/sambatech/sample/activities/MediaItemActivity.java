@@ -160,6 +160,8 @@ public class MediaItemActivity extends Activity {
 			Log.d("Player Time", "current: " + player.getCurrentTime() + " total: " + player.getDuration());
 
 			Log.d("Player CurrentOut", "current: " + player.getCurrentOutputIndex());
+
+			Log.d("Player CurrentCap", "current cap: " + player.getCurrentCaptionIndex());
 		}
 	};
 
