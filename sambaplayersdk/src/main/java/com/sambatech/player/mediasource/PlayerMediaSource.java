@@ -76,7 +76,8 @@ public class PlayerMediaSource {
 
     public TrackGroup getVideoOutputsTracks() {
         TrackGroupArray trackGroupArray = getTrackGroupArray(VIDEO_RENDERER_INDEX);
-        if (trackGroupArray == null || VIDEO_TRACK_GROUP_INDEX >= trackGroupArray.length) return null;
+        if (trackGroupArray == null || VIDEO_TRACK_GROUP_INDEX >= trackGroupArray.length)
+            return null;
         return trackGroupArray.get(VIDEO_TRACK_GROUP_INDEX);
     }
 
@@ -94,7 +95,7 @@ public class PlayerMediaSource {
         if (captions == null || mediaSource == null) return;
         int captionID = 0;
         for (SambaMedia.Caption caption : captions) {
-            if(caption.url != null && caption.label != null) {
+            if (caption.url != null && caption.label != null) {
                 Format englishSubs = Format.createTextSampleFormat(String.valueOf(captionID), MimeTypes.APPLICATION_SUBRIP, SELECTION_FLAG_AUTOSELECT, caption.label);
                 MediaSource subSource = new SingleSampleMediaSource(Uri.parse(caption.url), new DefaultHttpDataSourceFactory("userAgent"), englishSubs, C.TIME_UNSET);
                 mediaSource = new MergingMediaSource(mediaSource, subSource);
@@ -103,11 +104,11 @@ public class PlayerMediaSource {
         }
     }
 
-    public TrackGroupArray getSubtitles(){
+    public TrackGroupArray getSubtitles() {
         return getTrackGroupArray(CAPTION_RENDERER_INDEX);
     }
 
-    public void setSubtitle(TrackGroup trackGroup){
+    public void setSubtitle(TrackGroup trackGroup) {
         if (trackGroup == null) {
             playerInstanceDefault.trackSelector.clearSelectionOverride(CAPTION_RENDERER_INDEX, getTrackGroupArray(CAPTION_RENDERER_INDEX));
             return;
@@ -119,44 +120,27 @@ public class PlayerMediaSource {
 
     public void addAds(String url, FrameLayout frameLayout) {
         this.imaAdsLoader = new ImaAdsLoader(playerInstanceDefault.context, Uri.parse(url));
-        this.mediaSource =  new ImaAdsMediaSource(
+        this.mediaSource = new ImaAdsMediaSource(
                 mediaSource,
                 playerInstanceDefault.mediaDataSourceFactory,
                 imaAdsLoader,
                 frameLayout);
     }
 
-    public  void forceOutuputTrackTo(int index, boolean isAbrEnabled) {
-        TrackGroup trackGroup = getVideoOutputsTracks();
-        if (trackGroup != null) {
-            if (isAbrEnabled && index == 0) {
-                setVideoOutputTrack(null);
-            } else {
-                index = index - (isAbrEnabled ? 1 : 0);
-                if (trackGroup.length > index) {
-                    Format forceOutput = getVideoOutputsTracks().getFormat(index);
-                    setVideoOutputTrack(forceOutput);
-                } else {
-                    if (isAbrEnabled) {
-                        setVideoOutputTrack(null);
-                    } else {
-                        Format forceOutput = getVideoOutputsTracks().getFormat(0);
-                        setVideoOutputTrack(forceOutput);
-                    }
-                }
-            }
-        }
+    public void forceOutuputTrackTo(int index, boolean isAbrEnabled) {
+        setVideoOutputTrack(getOutputByIndex(index,isAbrEnabled));
     }
 
-    public int getCurrentOutputTrackIndex(TrackSelectionArray trackSelections, boolean isAbrEnabled){
+    public int getCurrentOutputTrackIndex(TrackSelectionArray trackSelections, boolean isAbrEnabled) {
         Format video = null;
         TrackSelection videos = null;
         TrackGroup trackGroup = getVideoOutputsTracks();
         int index = C.INDEX_UNSET;
-        if (trackSelections.length > 0 ) videos = trackSelections.get(VIDEO_RENDERER_INDEX);
+        if (trackSelections.length > 0) videos = trackSelections.get(VIDEO_RENDERER_INDEX);
         if (videos == null || trackGroup == null || trackSelections == null) return index;
         if (videos.getSelectionReason() != C.SELECTION_REASON_INITIAL && videos.getSelectionReason() != C.SELECTION_REASON_TRICK_PLAY) { //SELECTION_REASON_INITIAL == auto,
-            if (trackSelections.length > 0 && trackSelections.get(0) != null) video = trackSelections.get(0).getSelectedFormat();
+            if (trackSelections.length > 0 && trackSelections.get(0) != null)
+                video = trackSelections.get(0).getSelectedFormat();
             if (video != null) index = trackGroup.indexOf(video);
             if (index != C.INDEX_UNSET) index = isAbrEnabled ? (index + 1) : index;
         } else {
@@ -165,11 +149,30 @@ public class PlayerMediaSource {
         return index;
     }
 
-    public void forceCaptionTrackTo(int index){
-
+    public void forceCaptionTrackTo(int index) {
+        TrackGroup forcedCaption = getCaptionByIndex(index);
+        if (forcedCaption != null) setSubtitle(forcedCaption);
     }
 
-    public int getCurrentCaptionTrackIndex(TrackSelectionArray trackSelections){
+    public Format getOutputByIndex(int index, boolean isAbrEnabled){
+        Format output = null;
+        TrackGroup trackGroup = getVideoOutputsTracks();
+        if (trackGroup != null) {
+            if (!isAbrEnabled || index != 0) {
+                index = index - (isAbrEnabled ? 1 : 0);
+                if (trackGroup.length > index) {
+                    output = getVideoOutputsTracks().getFormat(index);
+                } else {
+                    if (!isAbrEnabled) {
+                        output = getVideoOutputsTracks().getFormat(0);
+                    }
+                }
+            }
+        }
+        return output;
+    }
+
+    public int getCurrentCaptionTrackIndex(TrackSelectionArray trackSelections) {
         TrackGroup legenda = null;
         int index = C.INDEX_UNSET;
         TrackGroupArray trackGroupArray = getTrackGroupArray(CAPTION_RENDERER_INDEX);
@@ -181,7 +184,18 @@ public class PlayerMediaSource {
         return index;
     }
 
-    protected void destroy(){
+    public TrackGroup getCaptionByIndex(int index){
+        TrackGroupArray captions = getTrackGroupArray(CAPTION_RENDERER_INDEX);
+        TrackGroup caption = null;
+        if (captions != null) {
+            if (captions.length > index) {
+                caption = captions.get(index);
+            }
+        }
+        return caption;
+    }
+
+    protected void destroy() {
         playerInstanceDefault = null;
         url = null;
         mediaSource = null;

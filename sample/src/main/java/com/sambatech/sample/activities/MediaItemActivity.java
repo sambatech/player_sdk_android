@@ -161,7 +161,7 @@ public class MediaItemActivity extends Activity {
 
 			Log.d("Player CurrentOut", "current: " + player.getCurrentOutputIndex());
 
-			Log.d("Player CurrentCap", "current cap: " + player.getCurrentCaptionIndex());
+			Log.d("Player CurrentCap", "current cap: " + player.getCurrentCaptionIndex() + " lenguage: " + player.getCaption());
 		}
 	};
 

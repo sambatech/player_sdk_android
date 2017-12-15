@@ -39,9 +39,13 @@ public interface PlayerMediaSourceInterface {
 
     int getCurrentOutputTrackIndex(TrackSelectionArray trackSelections, boolean isAbrEnabled);
 
+    Format getOutputByIndex(int index, boolean isAbrEnabled);
+
     void forceCaptionTrackTo(int index);
 
     int getCurrentCaptionTrackIndex(TrackSelectionArray trackSelections);
+
+    TrackGroup getCaptionByIndex(int index);
 
     void destroy();
 }

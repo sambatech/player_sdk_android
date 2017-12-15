@@ -3,92 +3,27 @@ package com.sambatech.player;
 import android.app.Activity;
 import android.app.MediaRouteButton;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.net.Uri;
-import android.os.Handler;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.RendererCapabilities;
+import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.drm.UnsupportedDrmException;
-import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
-import com.google.android.exoplayer2.ext.ima.ImaAdsMediaSource;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.source.ClippingMediaSource;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.MergingMediaSource;
-import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.source.dash.DashMediaSource;
-import com.google.android.exoplayer2.source.hls.HlsMediaSource;
-import com.google.android.exoplayer2.text.CaptionStyleCompat;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelectorResult;
-import com.google.android.exoplayer2.ui.PlaybackControlView;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-
-
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
-import com.google.android.exoplayer2.upstream.TransferListener;
-import com.google.android.exoplayer2.util.MimeTypes;
-import com.google.android.exoplayer2.util.Util;
-import com.google.android.gms.cast.Cast;
-import com.google.android.gms.cast.CastDevice;
-import com.google.android.gms.cast.MediaInfo;
-import com.google.android.gms.cast.MediaMetadata;
-import com.google.android.gms.cast.framework.CastSession;
-import com.google.android.gms.cast.framework.media.RemoteMediaClient;
-import com.google.android.gms.common.api.ResultCallbacks;
-import com.google.android.gms.common.api.Status;
-import com.sambatech.player.adapter.CaptionsSheetAdapter;
-import com.sambatech.player.adapter.OutputSheetAdapter;
-import com.sambatech.player.cast.CastDRM;
-import com.sambatech.player.cast.CastObject;
-import com.sambatech.player.cast.CastOptionsProvider;
-import com.sambatech.player.cast.CastQuery;
 import com.sambatech.player.cast.SambaCast;
-import com.sambatech.player.event.SambaCastListener;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
@@ -100,28 +35,16 @@ import com.sambatech.player.mediasource.PlayerMediaSourceInterface;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaPlayerError;
-import com.sambatech.player.plugins.Captions;
 import com.sambatech.player.plugins.PluginManager;
 import com.sambatech.player.utils.Helpers;
 import com.sambatech.player.utils.Orientation;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static android.graphics.Typeface.NORMAL;
-import static android.util.TypedValue.COMPLEX_UNIT_SP;
-import static android.view.accessibility.CaptioningManager.CaptionStyle.EDGE_TYPE_NONE;
-import static android.view.animation.Animation.ABSOLUTE;
 
 /**
  * Represents the player, responsible for managing media playback.
@@ -131,12 +54,27 @@ import static android.view.animation.Animation.ABSOLUTE;
 public class SambaPlayer extends FrameLayout {
 
     private final Player.EventListener playerEventListener = new Player.EventListener() {
+        private boolean trackChanged = false;
+
+
         @Override
         public void onTimelineChanged(Timeline timeline, Object manifest) {
+            if (!player.isPlayingAd() && trackChanged && playerMediaSourceInterface != null) {
+                if (_forceOutputIndexTo >= 0) {
+                    playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
+                    _forceOutputIndexTo = -1;
+                }
+                if (_forceCaptionIndexTo >= 0) {
+                    playerMediaSourceInterface.forceCaptionTrackTo(_forceCaptionIndexTo);
+                    _forceCaptionIndexTo = -1;
+                }
+                trackChanged = false;
+            }
         }
 
         @Override
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+            trackChanged = true;
             Format video = null;
             Format legenda = null;
             TrackSelection videos = null;
@@ -148,10 +86,6 @@ public class SambaPlayer extends FrameLayout {
             if (trackSelections.length > 2 && trackSelections.get(2) != null)
                 legenda = trackSelections.get(2).getSelectedFormat();
             simplePlayerView.setupMenu(playerMediaSourceInterface, video, legenda, _abrEnabled);
-            if (_forceOutputIndexTo >= 0) {
-                playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
-                _forceOutputIndexTo = -1;
-            }
         }
 
         @Override
@@ -188,6 +122,8 @@ public class SambaPlayer extends FrameLayout {
                     } else dispatchPause();
 
                     simplePlayerView.setLoading(false);
+
+
                     break;
                 case Player.STATE_ENDED:
                     if (!playWhenReady)
@@ -432,6 +368,7 @@ public class SambaPlayer extends FrameLayout {
     private List<String> controlsHidden = new ArrayList<>();
     private boolean _abrEnabled = true;
     private int _forceOutputIndexTo = -1;
+    private int _forceCaptionIndexTo = -1;
 
 
     private SambaSimplePlayerView simplePlayerView;
@@ -490,6 +427,7 @@ public class SambaPlayer extends FrameLayout {
     public void play(boolean abrEnabled, int outputIndex) {
         this._abrEnabled = abrEnabled;
         this._forceOutputIndexTo = outputIndex == -1 && !abrEnabled ? 0 : outputIndex;
+        this._forceCaptionIndexTo = 0;
 
         // in case of forbidden rooted device or error state
         if (_disabled || errorScreen != null) return;
@@ -517,7 +455,7 @@ public class SambaPlayer extends FrameLayout {
      * Resumes media playback.
      */
     public void play() {
-        play(false, -1);
+        play(true, -1);
     }
 
     /**
@@ -688,15 +626,16 @@ public class SambaPlayer extends FrameLayout {
     public void changeCaption(int index) {
         if (player == null || simplePlayerView == null || playerMediaSourceInterface == null)
             return;
-        //return playerMediaSourceInterface.getCurrentCaptionTrackIndex(player.getCurrentTrackSelections());
+        playerMediaSourceInterface.forceCaptionTrackTo(index);
     }
 
     public String getCaption() {
-        //if (captionSheetView == null) return null;
-        //CaptionsSheetAdapter adapter = (CaptionsSheetAdapter) ((ListView) captionSheetView.findViewById(R.id.sheet_list)).getAdapter();
-        // SambaMedia.Caption caption = (SambaMedia.Caption) adapter.getItem(adapter.currentIndex);
-        //return String.format("[%s,ffcc00,42]", "");
-        return "";
+        if (player == null || simplePlayerView == null || playerMediaSourceInterface == null)
+            return "";
+        Format caption = null;
+        if (player.getCurrentTrackSelections().length > 2 && player.getCurrentTrackSelections().get(2) != null)
+            caption = player.getCurrentTrackSelections().get(2).getSelectedFormat();
+        return String.format("[%s,ffcc00,42]", caption != null && caption.language != null ? caption.language : "");
     }
 
     public int getCurrentCaptionIndex() {
@@ -832,6 +771,7 @@ public class SambaPlayer extends FrameLayout {
 		});*/
 
         setupCast();
+
 
 //		if (sambaCast != null && sambaCast.isCasting())
 //			castListener.onConnected(sambaCast.getCastSession());

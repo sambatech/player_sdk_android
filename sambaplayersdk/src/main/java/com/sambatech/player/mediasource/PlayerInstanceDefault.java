@@ -50,6 +50,5 @@ public class PlayerInstanceDefault {
         trackSelector = null;
         renderersFactory = null;
         mediaDataSourceFactory = null;
-
     }
 }
