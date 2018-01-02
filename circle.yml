@@ -32,6 +32,6 @@ deployment:
       - assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
   
   dev:
-    branch: dev
+    branch: [dev, live_layout_fix]
     commands:
       - assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev
