@@ -517,7 +517,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 								Drawable icon,
 								String contentDescription,
 								View.OnClickListener onClickListener) {
-		ImageButton button = new ImageButton(activity);
+		ImageView button = new ImageView(activity);
 
 		button.setContentDescription(contentDescription);
 		button.setImageDrawable(icon);
