@@ -177,7 +177,7 @@ public class SambaPlayer extends FrameLayout {
 
 			_initialFullscreen = player.isFullscreen();
 
-			destroyInternal();
+			destroyInternal(isBehindLiveWindowException && _initialFullscreen);
 
 			// unauthorized DRM content
 			if (e.getCause() instanceof UnsupportedDrmException) {
@@ -313,7 +313,7 @@ public class SambaPlayer extends FrameLayout {
 	private final SambaCastListener castListener = new SambaCastListener() {
 
 		RemoteMediaClient castPlayer;
-		
+
 		private int lastPosition = 0;
 
 		private final PlaybackControlLayer.InterceptableListener interceptableListener = new PlaybackControlLayer.InterceptableListener() {
@@ -717,7 +717,7 @@ public class SambaPlayer extends FrameLayout {
 
 		media.url = output.url;
 
-		destroyInternal();
+		destroyInternal(false);
 		create(false);
 		player.seek(currentPosition);
 	}
@@ -788,7 +788,7 @@ public class SambaPlayer extends FrameLayout {
 	 */
 	public void destroy(SambaPlayerError error) {
 		PluginManager.getInstance().onDestroy();
-		destroyInternal();
+		destroyInternal(false);
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
 
 		if (error != null)
@@ -1004,7 +1004,7 @@ public class SambaPlayer extends FrameLayout {
 		player.setControlsVisible(true, Controls.CAPTION);
 	}
 
-	private void destroyInternal() {
+	private void destroyInternal(boolean fullscreenControl) {
 		stopProgressTimer();
 		stopErrorTimer();
 
@@ -1012,7 +1012,7 @@ public class SambaPlayer extends FrameLayout {
 			return;
 
 		stop();
-		player.setFullscreen(false);
+		player.setFullscreen(fullscreenControl);
 
 		if (outputMenu != null) {
 			((ListView)outputMenu.findViewById(R.id.menu_list)).setOnItemClickListener(null);
@@ -1058,7 +1058,7 @@ public class SambaPlayer extends FrameLayout {
 		retryButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				destroyInternal();
+				destroyInternal(false);
 				create(false);
 			}
 		});
