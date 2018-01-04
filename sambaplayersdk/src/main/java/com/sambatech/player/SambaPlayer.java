@@ -177,7 +177,7 @@ public class SambaPlayer extends FrameLayout {
 
 			_initialFullscreen = player.isFullscreen();
 
-			destroyInternal(isBehindLiveWindowException && _initialFullscreen);
+			destroyInternal(isBehindLiveWindowException && _initialFullscreen && Helpers.isNetworkAvailable(getContext()));
 
 			// unauthorized DRM content
 			if (e.getCause() instanceof UnsupportedDrmException) {
