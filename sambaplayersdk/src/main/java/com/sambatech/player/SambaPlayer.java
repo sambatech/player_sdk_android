@@ -177,7 +177,9 @@ public class SambaPlayer extends FrameLayout {
 
 			_initialFullscreen = player.isFullscreen();
 
-			destroyInternal(isBehindLiveWindowException && _initialFullscreen && Helpers.isNetworkAvailable(getContext()));
+			fullscreenControl = isBehindLiveWindowException && _initialFullscreen && Helpers.isNetworkAvailable(getContext());
+			destroyInternal();
+
 
 			// unauthorized DRM content
 			if (e.getCause() instanceof UnsupportedDrmException) {
@@ -291,6 +293,9 @@ public class SambaPlayer extends FrameLayout {
 	private final PlaybackControlLayer.FullscreenCallback fullscreenListener = new PlaybackControlLayer.FullscreenCallback() {
 		@Override
 		public void onGoToFullscreen() {
+			if (originalSambaPlayerLayoutParams == null) {
+				originalSambaPlayerLayoutParams = SambaPlayer.this.getLayoutParams();
+			}
 			SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FULLSCREEN));
 		}
 
@@ -477,7 +482,9 @@ public class SambaPlayer extends FrameLayout {
 	private Timer errorTimer;
     private int _outputOffset;
 	private List<String> controlsHidden = new ArrayList<>();
-    //private boolean wasPlaying;
+	private boolean fullscreenControl;
+	private ViewGroup.LayoutParams originalSambaPlayerLayoutParams;
+	//private boolean wasPlaying;
 
 	public SambaPlayer(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -717,7 +724,7 @@ public class SambaPlayer extends FrameLayout {
 
 		media.url = output.url;
 
-		destroyInternal(false);
+		destroyInternal();
 		create(false);
 		player.seek(currentPosition);
 	}
@@ -788,7 +795,7 @@ public class SambaPlayer extends FrameLayout {
 	 */
 	public void destroy(SambaPlayerError error) {
 		PluginManager.getInstance().onDestroy();
-		destroyInternal(false);
+		destroyInternal();
 		SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
 
 		if (error != null)
@@ -839,6 +846,9 @@ public class SambaPlayer extends FrameLayout {
 		}
 
 		// no autoplay if there's ad because ImaWrapper takes control of the player
+		if (originalSambaPlayerLayoutParams != null) {
+			this.setTag(originalSambaPlayerLayoutParams);
+		}
 		player = new SimpleVideoPlayer((Activity)getContext(), this,
 				new Video(media.url, videoType, media.drmRequest), media.title,
 				!notify && isAutoPlay || isAutoPlay && (sambaCast == null || !sambaCast.isCasting())
@@ -1004,7 +1014,7 @@ public class SambaPlayer extends FrameLayout {
 		player.setControlsVisible(true, Controls.CAPTION);
 	}
 
-	private void destroyInternal(boolean fullscreenControl) {
+	private void destroyInternal() {
 		stopProgressTimer();
 		stopErrorTimer();
 
@@ -1058,7 +1068,7 @@ public class SambaPlayer extends FrameLayout {
 		retryButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				destroyInternal(false);
+				destroyInternal();
 				create(false);
 			}
 		});
