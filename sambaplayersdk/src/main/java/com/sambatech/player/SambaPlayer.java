@@ -11,6 +11,8 @@ import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -19,6 +21,8 @@ import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.drm.UnsupportedDrmException;
+import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
@@ -39,6 +43,9 @@ import com.sambatech.player.plugins.PluginManager;
 import com.sambatech.player.utils.Helpers;
 import com.sambatech.player.utils.Orientation;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -54,27 +61,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SambaPlayer extends FrameLayout {
 
     private final Player.EventListener playerEventListener = new Player.EventListener() {
-        private boolean trackChanged = false;
+        //private boolean trackChanged = false;
 
 
         @Override
         public void onTimelineChanged(Timeline timeline, Object manifest) {
-            if (!player.isPlayingAd() && trackChanged && playerMediaSourceInterface != null) {
-                if (_forceOutputIndexTo >= 0) {
-                    playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
-                    _forceOutputIndexTo = -1;
-                }
-                if (_forceCaptionIndexTo >= 0) {
-                    playerMediaSourceInterface.forceCaptionTrackTo(_forceCaptionIndexTo);
-                    _forceCaptionIndexTo = -1;
-                }
-                trackChanged = false;
-            }
+
         }
 
         @Override
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-            trackChanged = true;
+           // trackChanged = true;
             Format video = null;
             Format legenda = null;
             TrackSelection videos = null;
@@ -86,11 +83,12 @@ public class SambaPlayer extends FrameLayout {
             if (trackSelections.length > 2 && trackSelections.get(2) != null)
                 legenda = trackSelections.get(2).getSelectedFormat();
             simplePlayerView.setupMenu(playerMediaSourceInterface, video, legenda, _abrEnabled);
+
+
         }
 
         @Override
         public void onLoadingChanged(boolean isLoading) {
-
         }
 
         @Override
@@ -101,6 +99,7 @@ public class SambaPlayer extends FrameLayout {
                     if (playWhenReady) {
                         if (!_hasStarted) {
                             _hasStarted = true;
+                            _currentRetryIndex = 0;
 
                             destroyError();
                             SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.START));
@@ -113,16 +112,17 @@ public class SambaPlayer extends FrameLayout {
 
                             // start in fullscreen
                             if (_initialFullscreen != null) {
-                                //player.setFullscreen(_initialFullscreen);
+                                simplePlayerView.setFullscreen(_initialFullscreen);
                                 _initialFullscreen = null;
                             }
                         }
-
                         dispatchPlay();
-                    } else dispatchPause();
+                    } else {
+                        dispatchPause();
+                    }
 
                     simplePlayerView.setLoading(false);
-
+                    adjustCurrentOutputs();
 
                     break;
                 case Player.STATE_ENDED:
@@ -134,6 +134,7 @@ public class SambaPlayer extends FrameLayout {
                     SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
                     _hasFinished = true;
                     simplePlayerView.setLoading(false);
+
                     break;
                 case Player.STATE_BUFFERING:
                     simplePlayerView.setLoading(true);
@@ -152,7 +153,6 @@ public class SambaPlayer extends FrameLayout {
                                     // on buffer timeout disable ABR (sets to lower)
                                     if (secs.get() == 0) {
                                         stopErrorTimer();
-                                        //_initialOutput = 0;
                                     }
 
                                     secs.decrementAndGet();
@@ -170,18 +170,144 @@ public class SambaPlayer extends FrameLayout {
         }
 
         @Override
-        public void onPlayerError(ExoPlaybackException error) {
+        public void onPlayerError(final ExoPlaybackException error) {
+            Log.d("SambaPlayer", "Error: " + media, error);
 
+            String msg = "Você está offline! Verifique sua conexão.";
+            SambaPlayerError.Severity severity = SambaPlayerError.Severity.recoverable;
+            final boolean isBehindLiveWindowException = error.getCause() instanceof BehindLiveWindowException;
+
+            if (_initialTime == 0f)
+                _initialTime = getCurrentTime();
+
+
+            _currentOutputIndex = playerMediaSourceInterface.getCurrentOutputTrackIndex(player.getCurrentTrackSelections(), _abrEnabled);
+            _currentCaptionIndex = playerMediaSourceInterface.getCurrentCaptionTrackIndex(player.getCurrentTrackSelections());
+
+
+            if (_currentCaptionIndex >= 0)_forceCaptionIndexTo = _currentCaptionIndex;
+            if (_currentOutputIndex >= 0) _forceOutputIndexTo = _currentOutputIndex;
+
+            _initialFullscreen = simplePlayerView.isFullscreen();
+
+            destroyInternal();
+
+            // unauthorized DRM content
+            if (error.getCause() instanceof UnsupportedDrmException) {
+                msg = String.format("Você não tem permissão para %s", media.isAudioOnly ? "ouvir este áudio." : "assistir este vídeo.");
+                severity = SambaPlayerError.Severity.critical;
+            }
+            // possible network or streaming instability (misalignment, holes, etc.), try to recover
+            else if (isBehindLiveWindowException) {
+                msg = "Instabilidade na rede ou no envio de dados.";
+                severity = SambaPlayerError.Severity.minor;
+                create(false);
+            }
+            // URL not found
+            else if (Helpers.isNetworkAvailable(getContext())) {
+                msg = "Conectando...";
+                severity = SambaPlayerError.Severity.info;
+
+                try {
+                    final HttpURLConnection con = (HttpURLConnection) new URL(String.format("%s://www.google.com",
+                            media.request.protocol)).openConnection();
+
+                    con.setConnectTimeout(1000);
+                    con.setReadTimeout(1000);
+
+                    Helpers.requestUrl(con, new Helpers.RequestCallback() {
+                        @Override
+                        public void onSuccess(String response) {
+                            // check whether it can fallback (changes error criticity) or fail otherwise
+                            ((Activity) getContext()).runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (_currentBackupIndex < media.backupUrls.length) {
+                                        media.url = media.backupUrls[_currentBackupIndex++];
+
+                                        create(false);
+                                        dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+                                                "Conectando...", SambaPlayerError.Severity.info, error));
+                                        return;
+                                    }
+
+                                    dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+                                            "Ocorreu um erro! Por favor, tente mais tarde...",
+                                            SambaPlayerError.Severity.critical, error));
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onError(Exception e, String response) {
+                            dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+                                    "Você está offline! Verifique sua conexão.",
+                                    SambaPlayerError.Severity.recoverable, e));
+                        }
+                    });
+                }
+                catch (IOException e1) {
+                    msg = "Ocorreu um erro! Por favor, tente novamente.";
+                    severity = SambaPlayerError.Severity.recoverable;
+                }
+            }
+            // no network connection
+            else if (_currentRetryIndex++ < media.retriesTotal) {
+                final AtomicInteger secs = new AtomicInteger(8);
+
+                stopErrorTimer();
+
+                errorTimer = new Timer();
+                errorTimer.scheduleAtFixedRate(new TimerTask() {
+                    @Override
+                    public void run() {
+                        ((Activity) getContext()).runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (secs.get() == 0) {
+                                    stopErrorTimer();
+                                    create(false);
+                                }
+
+                                dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+                                        secs.get() > 0 ? String.format("Reconectando em %ss", secs) : "Conectando...",
+                                        SambaPlayerError.Severity.info, error, R.drawable.ic_nosignal_disable));
+
+                                secs.decrementAndGet();
+                            }
+                        });
+                    }
+                }, 0, 1000);
+                return;
+            }
+
+            dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+                    msg, severity, error));
         }
 
         @Override
         public void onPositionDiscontinuity() {
-
+            adjustCurrentOutputs(); //Pode ser o fim do primero AD
         }
 
         @Override
         public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
 
+        }
+
+        private void adjustCurrentOutputs(){
+            Log.d("debugger", String.valueOf(player.isPlayingAd()));
+            Log.d("debugger", player.getCurrentTrackGroups().toString());
+            if (!player.isPlayingAd() && playerMediaSourceInterface != null) {
+                if (_forceOutputIndexTo >= 0) {
+                    playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
+                    _forceOutputIndexTo = -1;
+                }
+                if (_forceCaptionIndexTo >= 0) {
+                    playerMediaSourceInterface.forceCaptionTrackTo(_forceCaptionIndexTo);
+                    _forceCaptionIndexTo = -1;
+                }
+            }
         }
     };
 
@@ -370,6 +496,12 @@ public class SambaPlayer extends FrameLayout {
     private int _forceOutputIndexTo = -1;
     private int _forceCaptionIndexTo = -1;
 
+    private int _currentBackupIndex;
+    private int _currentRetryIndex;
+
+    private int _currentOutputIndex = -1;
+    private int _currentCaptionIndex = -1;
+
 
     private SambaSimplePlayerView simplePlayerView;
     private SimpleExoPlayer player;
@@ -443,7 +575,8 @@ public class SambaPlayer extends FrameLayout {
             create();
             return;
         } else {
-            playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
+            if (_forceOutputIndexTo >= 0 ) playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
+
             _forceOutputIndexTo = -1;
         }
 
@@ -524,7 +657,7 @@ public class SambaPlayer extends FrameLayout {
      */
     public void setFullscreen(boolean flag) {
         if (player == null || simplePlayerView == null) return;
-        simplePlayerView.setFullscreen(false);
+        simplePlayerView.setFullscreen(flag);
     }
 
     /**
@@ -733,7 +866,7 @@ public class SambaPlayer extends FrameLayout {
         player.setPlayWhenReady(true);
         if (media.captions != null && media.captions.size() > 0)
             playerMediaSourceInterface.addSubtitles(media.captions);
-        //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
+            //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
         if (media.adUrl != null)
             playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
         player.prepare(playerMediaSourceInterface.getMediaSource());
@@ -744,7 +877,9 @@ public class SambaPlayer extends FrameLayout {
 //			player.setControlsVisible(false, Controls.FULLSCREEN, Controls.PLAY_LARGE, Controls.TOP_CHROME);
 //			player.setBackgroundColor(0xFF434343);
 //			player.setChromeColor(0x00000000);
-        } else simplePlayerView.setFullscreenCallback(fullscreenListener);
+        } else {
+            simplePlayerView.setFullscreenCallback(fullscreenListener);
+        }
 
         if (!controlsHidden.isEmpty())
             setHideControls(controlsHidden.toArray(new String[0]));
@@ -859,7 +994,7 @@ public class SambaPlayer extends FrameLayout {
         _disabled = false;
     }
 
-	/*private void showError(@NonNull SambaPlayerError error) {
+	private void showError(@NonNull SambaPlayerError error) {
         if (errorScreen == null)
 			errorScreen = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
 
@@ -890,7 +1025,7 @@ public class SambaPlayer extends FrameLayout {
 
 		if (errorScreen.getParent() == null)
 			addView(errorScreen);
-	}*/
+	}
 
     private void destroyError() {
         stopErrorTimer();
@@ -898,7 +1033,7 @@ public class SambaPlayer extends FrameLayout {
         if (errorScreen == null)
             return;
 
-        //errorScreen.findViewById(R.id.retry_button).setOnClickListener(null);
+        errorScreen.findViewById(R.id.retry_button).setOnClickListener(null);
         removeView(errorScreen);
         errorScreen = null;
     }
@@ -954,7 +1089,7 @@ public class SambaPlayer extends FrameLayout {
 
             case info:
             case recoverable:
-                //showError(error);
+                showError(error);
                 break;
         }
     }
