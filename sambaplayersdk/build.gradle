@@ -8,14 +8,22 @@ android {
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 25
-        versionCode 32
-        versionName "v0.10.7-beta"
+        versionCode 33
+        versionName "v0.10.8-beta"
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    lintOptions {
+        warningsAsErrors true
+        showAll true
+        abortOnError false
+        xmlReport true
     }
 }
 

@@ -168,7 +168,7 @@ public class SambaPlayer extends FrameLayout {
 			SambaPlayerError.Severity severity = SambaPlayerError.Severity.recoverable;
 			final boolean isBehindLiveWindowException = e.getCause() instanceof BehindLiveWindowException;
 
-			if (_initialTime == 0f)
+			if (Math.abs(_initialTime) < Float.MIN_VALUE)
 				_initialTime = getCurrentTime();
 
 			// misalignment
@@ -355,7 +355,9 @@ public class SambaPlayer extends FrameLayout {
 			pause();
 
 			final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
-			if (remoteMediaClient == null) return;
+
+			if (remoteMediaClient == null)
+				return;
 
 			// enabling hook for API and user actions
 			player.setInterceptableListener(interceptableListener);
@@ -425,15 +427,19 @@ public class SambaPlayer extends FrameLayout {
 								sambaCast.stopCasting();
 						}
 					} catch (JSONException e) {
-						e.printStackTrace();
+						dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+								"Error parsing cast JSON.",
+								SambaPlayerError.Severity.minor, e));
 					}
 				}
 			};
 
 			try {
-				castSession.setMessageReceivedCallbacks(CastOptionsProvider.CUSTOM_NAMESPACE,messageReceived);
+				castSession.setMessageReceivedCallbacks(CastOptionsProvider.CUSTOM_NAMESPACE, messageReceived);
 			} catch (IOException e) {
-				e.printStackTrace();
+				dispatchError(SambaPlayerError.unknown.setValues(SambaPlayerError.unknown.getCode(),
+						"Error sending cast message.",
+						SambaPlayerError.Severity.minor, e));
 			}
 
 			this.castPlayer = remoteMediaClient;
