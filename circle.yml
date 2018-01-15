@@ -9,7 +9,7 @@ dependencies:
 
 compile:
   override:
-    - ./gradlew lint
+    - ./gradlew sambaplayersdk:lintRelease
     - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
     - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
   post:
