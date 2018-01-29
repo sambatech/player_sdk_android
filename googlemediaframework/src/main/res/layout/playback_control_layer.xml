@@ -116,7 +116,6 @@
                 android:id="@+id/pause"
                 android:background="@android:color/transparent"
                 android:src="@drawable/ic_action_pause"
-                android:visibility="gone"
                 style="@style/control"/>
 
             <ProgressBar
@@ -163,11 +162,12 @@
                 style="@style/control" />
 
             <ImageButton
-                android:contentDescription="@string/fullscreen"
                 android:id="@+id/fullscreen"
-                android:src="@drawable/fullscreen"
+                style="@style/control"
+                android:layout_height="18dp"
                 android:background="@android:color/transparent"
-                style="@style/control" />
+                android:contentDescription="@string/fullscreen"
+                android:src="@drawable/fullscreen" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

@@ -77,6 +77,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     private View captionSheetView;
     private View speedSheetView;
 
+    private CustomTimeBar customTimeBar;
+
 
     /**
      * The output menu modalsheet.
@@ -124,6 +126,9 @@ public class SambaSimplePlayerView implements View.OnClickListener {
 
         progressControls = (LinearLayout) playerView.findViewById(R.id.exo_progress_controls);
 
+        customTimeBar = (CustomTimeBar) playerView.findViewById(R.id.exo_progress);
+
+        customTimeBar.setDefaultBarColor(0xFF990033);
 
         fullscreenButton.setOnClickListener(this);
         optionsMenuButton.setOnClickListener(this);
