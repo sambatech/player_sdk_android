@@ -61,7 +61,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SambaPlayer extends FrameLayout {
 
     private final Player.EventListener playerEventListener = new Player.EventListener() {
-        //private boolean trackChanged = false;
 
 
         @Override
@@ -71,7 +70,6 @@ public class SambaPlayer extends FrameLayout {
 
         @Override
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-           // trackChanged = true;
             Format video = null;
             Format legenda = null;
             TrackSelection videos = null;
@@ -184,8 +182,7 @@ public class SambaPlayer extends FrameLayout {
             _currentOutputIndex = playerMediaSourceInterface.getCurrentOutputTrackIndex(player.getCurrentTrackSelections(), _abrEnabled);
             _currentCaptionIndex = playerMediaSourceInterface.getCurrentCaptionTrackIndex(player.getCurrentTrackSelections());
 
-
-            if (_currentCaptionIndex >= 0)_forceCaptionIndexTo = _currentCaptionIndex;
+            if (_currentCaptionIndex >= 0) _forceCaptionIndexTo = _currentCaptionIndex;
             if (_currentOutputIndex >= 0) _forceOutputIndexTo = _currentOutputIndex;
 
             _initialFullscreen = simplePlayerView.isFullscreen();
@@ -245,8 +242,7 @@ public class SambaPlayer extends FrameLayout {
                                     SambaPlayerError.Severity.recoverable, e));
                         }
                     });
-                }
-                catch (IOException e1) {
+                } catch (IOException e1) {
                     msg = "Ocorreu um erro! Por favor, tente novamente.";
                     severity = SambaPlayerError.Severity.recoverable;
                 }
@@ -295,9 +291,8 @@ public class SambaPlayer extends FrameLayout {
 
         }
 
-        private void adjustCurrentOutputs(){
-            Log.d("debugger", String.valueOf(player.isPlayingAd()));
-            Log.d("debugger", player.getCurrentTrackGroups().toString());
+
+        private void adjustCurrentOutputs() {
             if (!player.isPlayingAd() && playerMediaSourceInterface != null) {
                 if (_forceOutputIndexTo >= 0) {
                     playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
@@ -575,7 +570,8 @@ public class SambaPlayer extends FrameLayout {
             create();
             return;
         } else {
-            if (_forceOutputIndexTo >= 0 ) playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
+            if (_forceOutputIndexTo >= 0)
+                playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
 
             _forceOutputIndexTo = -1;
         }
@@ -866,7 +862,7 @@ public class SambaPlayer extends FrameLayout {
         player.setPlayWhenReady(true);
         if (media.captions != null && media.captions.size() > 0)
             playerMediaSourceInterface.addSubtitles(media.captions);
-            //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
+        //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
         if (media.adUrl != null)
             playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
         player.prepare(playerMediaSourceInterface.getMediaSource());
@@ -994,38 +990,38 @@ public class SambaPlayer extends FrameLayout {
         _disabled = false;
     }
 
-	private void showError(@NonNull SambaPlayerError error) {
+    private void showError(@NonNull SambaPlayerError error) {
         if (errorScreen == null)
-			errorScreen = ((Activity)getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
+            errorScreen = ((Activity) getContext()).getLayoutInflater().inflate(R.layout.error_screen, this, false);
 
-		TextView textView = (TextView) errorScreen.findViewById(R.id.error_message);
-		textView.setText(error.toString());
+        TextView textView = (TextView) errorScreen.findViewById(R.id.error_message);
+        textView.setText(error.toString());
 
-		ImageButton retryButton = (ImageButton) errorScreen.findViewById(R.id.retry_button);
-		retryButton.setVisibility(error.getSeverity() == SambaPlayerError.Severity.recoverable ? VISIBLE : GONE);
-		retryButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				destroyInternal();
-				create(false);
-			}
-		});
+        ImageButton retryButton = (ImageButton) errorScreen.findViewById(R.id.retry_button);
+        retryButton.setVisibility(error.getSeverity() == SambaPlayerError.Severity.recoverable ? VISIBLE : GONE);
+        retryButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                destroyInternal();
+                create(false);
+            }
+        });
 
-		// removes images if audio player
-		if (media.isAudioOnly)
-			// shows retry button when recoverable error
-			if (error.getSeverity() == SambaPlayerError.Severity.recoverable)
-				textView.setVisibility(GONE);
-			else textView.setCompoundDrawables(null, null, null, null);
-		// set custom image
-		else if (error.getDrawableRes() > 0)
-			textView.setCompoundDrawablesWithIntrinsicBounds(0, error.getDrawableRes(), 0, 0);
-		// default error image
-		else textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.error_icon, 0, 0);
+        // removes images if audio player
+        if (media.isAudioOnly)
+            // shows retry button when recoverable error
+            if (error.getSeverity() == SambaPlayerError.Severity.recoverable)
+                textView.setVisibility(GONE);
+            else textView.setCompoundDrawables(null, null, null, null);
+            // set custom image
+        else if (error.getDrawableRes() > 0)
+            textView.setCompoundDrawablesWithIntrinsicBounds(0, error.getDrawableRes(), 0, 0);
+            // default error image
+        else textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.error_icon, 0, 0);
 
-		if (errorScreen.getParent() == null)
-			addView(errorScreen);
-	}
+        if (errorScreen.getParent() == null)
+            addView(errorScreen);
+    }
 
     private void destroyError() {
         stopErrorTimer();

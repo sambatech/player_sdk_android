@@ -25,6 +25,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.CaptionStyleCompat;
+import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.sambatech.player.adapter.CaptionsSheetAdapter;
 import com.sambatech.player.adapter.OutputSheetAdapter;
@@ -100,7 +101,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     public SambaSimplePlayerView(Context context, FrameLayout playerContainer) {
         this.context = context;
         this.playerContainer = playerContainer;
-        playerView = new SimpleExoPlayerView(context);
+        playerView = (SimpleExoPlayerView) SimpleExoPlayerView.inflate(context, R.layout.custom_simple_exo_player_view, null);
         bindMethods();
         createMenuView();
         this.originalContainerLayoutParams = this.playerContainer.getLayoutParams();
