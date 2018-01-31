@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
@@ -16,6 +17,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.Format;
@@ -25,15 +27,21 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.CaptionStyleCompat;
-import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.sambatech.player.adapter.CaptionsSheetAdapter;
 import com.sambatech.player.adapter.OutputSheetAdapter;
 import com.sambatech.player.adapter.SpeedSheetAdapter;
 import com.sambatech.player.mediasource.PlayerMediaSourceInterface;
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.utils.Controls;
 import com.sambatech.player.utils.OptionsMenuLayer;
 import com.sambatech.player.utils.Util;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static android.graphics.Typeface.NORMAL;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
@@ -78,6 +86,17 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     private View speedSheetView;
 
     private CustomTimeBar customTimeBar;
+    private ProgressBar progressBar;
+
+    //small buttons bottom bar
+    private LinearLayout smallPlayPauseContainer;
+    private ImageButton playSmallButton;
+    private ImageButton pauseSmallButton;
+    private ProgressBar smallProgressBar;
+
+    //hide Controls
+    private HashMap<String, View> controlsMap;
+    private List<String> controls;
 
 
     /**
@@ -100,6 +119,22 @@ public class SambaSimplePlayerView implements View.OnClickListener {
      */
     private boolean menuWasPlaying;
 
+    /**
+     * Play or pause for another buttons.
+     */
+    private View.OnClickListener playPauseClickLisner = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            int i = v.getId();
+            if (i == R.id.small_play) {
+                player.setPlayWhenReady(true);
+            } else if (i == R.id.small_pause) {
+                player.setPlayWhenReady(false);
+            }
+
+        }
+    };
+
     public SambaSimplePlayerView(Context context, FrameLayout playerContainer) {
         this.context = context;
         this.playerContainer = playerContainer;
@@ -110,6 +145,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         this.playerContainer.addView(playerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         this.playerContainer.setBackgroundColor(Color.BLACK);
         playerView.setBackgroundColor(Color.BLACK);
+        initControlsMap();
     }
 
     public void bindMethods() {
@@ -119,19 +155,20 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         castButton = (ImageButton) playerView.findViewById(R.id.topbar_cast_button);
         fullscreenButton = (ImageButton) playerView.findViewById(R.id.fullscreen_button);
         loadingView = (FrameLayout) playerView.findViewById(R.id.exo_progress_view);
-
         controlsView = (LinearLayout) playerView.findViewById(R.id.exo_control_bar);
         topBar = (LinearLayout) playerView.findViewById(R.id.exo_top_bar);
         bottomBar = (LinearLayout) playerView.findViewById(R.id.exo_bottom_bar);
-
         progressControls = (LinearLayout) playerView.findViewById(R.id.exo_progress_controls);
-
         customTimeBar = (CustomTimeBar) playerView.findViewById(R.id.exo_progress);
-
-        customTimeBar.setDefaultBarColor(0xFF990033);
-
+        progressBar = (ProgressBar) playerView.findViewById(R.id.progress_bar);
+        playSmallButton = (ImageButton) playerView.findViewById(R.id.small_play);
+        pauseSmallButton = (ImageButton) playerView.findViewById(R.id.small_pause);
+        smallPlayPauseContainer = (LinearLayout) playerView.findViewById(R.id.play_pause_container);
+        smallProgressBar = (ProgressBar) playerView.findViewById(R.id.small_progress);
         fullscreenButton.setOnClickListener(this);
         optionsMenuButton.setOnClickListener(this);
+        playSmallButton.setOnClickListener(playPauseClickLisner);
+        pauseSmallButton.setOnClickListener(playPauseClickLisner);
     }
 
     public void createMenuView() {
@@ -140,6 +177,18 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         this.optionsMenuLayer = new OptionsMenuLayer(context, parent);
         parent.addView(optionsMenuLayer, menuPlaceholder.getLayoutParams());
         optionsMenuLayer.setCallback(optionsMenuCallBack);
+    }
+
+    public void initControlsMap() {
+        controlsMap = new HashMap<>();
+        controlsMap.put(Controls.PLAY_LARGE, controlsView);
+        controlsMap.put(Controls.PLAY, smallPlayPauseContainer);
+        controlsMap.put(Controls.FULLSCREEN, fullscreenButton);
+        controlsMap.put(Controls.MENU, optionsMenuButton);
+        controlsMap.put(Controls.SEEKBAR, playerView.findViewById(R.id.exo_progress));
+        controlsMap.put(Controls.TOP_CHROME, topBar);
+        controlsMap.put(Controls.BOTTOM_CHROME, bottomBar);
+        controlsMap.put(Controls.TIME, playerView.findViewById(R.id.time_components));
     }
 
     public void configView(boolean isVideo, boolean isLive) {
@@ -151,28 +200,37 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             topBar.setVisibility(View.VISIBLE);
             if (isLive) {
                 castButton.setVisibility(View.GONE);
-                progressControls.setVisibility(View.GONE);
+                progressControls.setVisibility(View.INVISIBLE);
                 liveButton.setVisibility(View.VISIBLE);
             } else {
                 castButton.setVisibility(View.VISIBLE);
                 progressControls.setVisibility(View.VISIBLE);
                 liveButton.setVisibility(View.GONE);
             }
+            smallPlayPauseContainer.setVisibility(View.GONE);
         } else {
             playerView.setControllerHideOnTouch(false);
             playerView.setControllerShowTimeoutMs(-1);
             topBar.setVisibility(View.GONE);
             fullscreenButton.setVisibility(View.GONE);
             if (isLive) {
-                progressControls.setVisibility(View.GONE);
+                progressControls.setVisibility(View.INVISIBLE);
             } else {
                 progressControls.setVisibility(View.VISIBLE);
             }
+            smallPlayPauseContainer.setVisibility(View.VISIBLE);
         }
         optionsMenuButton.setVisibility(View.GONE);
+
+        castButton.setVisibility(View.GONE);
+
+        setControlsVisible(false);
     }
 
-    private OptionsMenuLayer.OptionsMenuCallback optionsMenuCallBack = new OptionsMenuLayer.OptionsMenuCallback() {
+    private OptionsMenuLayer.OptionsMenuCallback optionsMenuCallBack = new OptionsMenuLayer.OptionsMenuCallback(
+
+
+    ) {
         @Override
         public void onTouchHD() {
             if (outputSheetDialog == null) return;
@@ -225,16 +283,6 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     public void setPlayer(@NonNull SimpleExoPlayer simpleExoPlayer) {
         this.player = simpleExoPlayer;
         playerView.setPlayer(player);
-    }
-
-    public void setLoading(boolean isLoading) {
-        if (isLoading) {
-            controlsView.setVisibility(View.GONE);
-            loadingView.setVisibility(View.VISIBLE);
-        } else {
-            loadingView.setVisibility(View.GONE);
-            controlsView.setVisibility(View.VISIBLE);
-        }
     }
 
     public void setEnableControls(boolean flag) {
@@ -575,5 +623,45 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         outputSheetDialog = null;
         captionsSheetDialog = null;
         speedSheetDialog = null;
+    }
+
+    public void setThemeColor(int themeColor){
+        customTimeBar.setDefaultBarColor(themeColor);
+        progressBar.getIndeterminateDrawable().mutate().setColorFilter(themeColor, PorterDuff.Mode.MULTIPLY);
+        smallProgressBar.getIndeterminateDrawable().mutate().setColorFilter(themeColor, PorterDuff.Mode.MULTIPLY);
+    }
+
+    public void updatePlayPause(PlayPauseState playPauseState) {
+        playSmallButton.setVisibility(playPauseState == PlayPauseState.Loading ? View.GONE: playPauseState == PlayPauseState.Pause ? View.VISIBLE : View.GONE);
+        pauseSmallButton.setVisibility(playPauseState == PlayPauseState.Loading ? View.GONE: playPauseState == PlayPauseState.Playing ? View.VISIBLE : View.GONE);
+        smallProgressBar.setVisibility(playPauseState == PlayPauseState.Loading ? View.VISIBLE: View.GONE);
+
+        loadingView.setVisibility(playPauseState == PlayPauseState.Loading ? View.VISIBLE: View.GONE);
+        if (!controls.contains(Controls.PLAY_LARGE))
+            controlsView.setVisibility(playPauseState == PlayPauseState.Loading ? View.GONE: View.VISIBLE);
+    }
+
+    /**
+     * Enables/Disables the specified controls.
+     * @param state Whether to enable or disable the listed controls
+     * @param controls Names from class <code>Controls</code>
+     */
+    public void setControlsVisible(final boolean state, final String... controls) {
+        if(this.controls == null) {
+            this.controls = new ArrayList<>();
+            Collections.addAll(this.controls, controls);
+        }
+
+        int visibility = state ? View.VISIBLE : View.GONE;
+
+        // specific controls
+        if (this.controls.size() > 0) {
+            for (String control : this.controls)
+                if (controlsMap.containsKey(control))
+                    controlsMap.get(control).setVisibility(state || !Controls.SEEKBAR.equals(control) ? visibility : View.INVISIBLE);
+        }
+        // all
+        else for (Map.Entry<String, View> pair : controlsMap.entrySet())
+            pair.getValue().setVisibility(state || !Controls.SEEKBAR.equals(pair.getKey()) ? visibility : View.INVISIBLE);
     }
 }

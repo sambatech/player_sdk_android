@@ -50,7 +50,7 @@ public class CustomTimeBar extends View implements TimeBar {
      */
     private static final long STOP_SCRUBBING_TIMEOUT_MS = 1000;
     private static final int DEFAULT_INCREMENT_COUNT = 20;
-    private static final int DEFAULT_BAR_HEIGHT = 4;
+    private static final int DEFAULT_BAR_HEIGHT = 5;
     private static final int DEFAULT_TOUCH_TARGET_HEIGHT = 26;
     private static final int DEFAULT_PLAYED_COLOR = 0xFFFFFFFF;
     private static final int DEFAULT_AD_MARKER_COLOR = 0xB2FFFF00;
@@ -609,11 +609,11 @@ public class CustomTimeBar extends View implements TimeBar {
     }
 
     private void setBufferedPaint(int playedColor) {
-        this.bufferedPaint.setColor(getDefaultBufferedColor(playedColor));
+        this.bufferedPaint.setColor(getDefaultBufferedColor(0xAAAAAA));
     }
 
     private void setUnplayedPaint(int playedColor) {
-        this.unplayedPaint.setColor(getDefaultUnplayedColor(playedColor));
+        this.unplayedPaint.setColor(getDefaultUnplayedColor(0xAAAAAA));
     }
 
     private void setAdMarkerPaint(int playedColor) {
@@ -625,6 +625,6 @@ public class CustomTimeBar extends View implements TimeBar {
     }
 
     private void setScrubberPaint(int playedColor) {
-        this.scrubberPaint.setColor(getDefaultScrubberColor(playedColor));
+        this.scrubberPaint.setColor(getDefaultScrubberColor(0xFAFAFA));
     }
 }

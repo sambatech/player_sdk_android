@@ -1321,7 +1321,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		timeFormat = new StringBuilder();
 		timeFormatter = new Formatter(timeFormat, Locale.getDefault());
 
-		controlsMap = new HashMap<>();
+		 controlsMap = new HashMap<>();
 		controlsMap.put(Controls.PLAY_LARGE, pausePlayLargeButton);
 		controlsMap.put(Controls.PLAY, pausePlayButton);
 		controlsMap.put(Controls.FULLSCREEN, fullscreenButton);

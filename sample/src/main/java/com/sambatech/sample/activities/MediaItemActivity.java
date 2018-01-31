@@ -23,6 +23,7 @@ import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.model.SambaPlayerError;
+import com.sambatech.player.utils.Controls;
 import com.sambatech.sample.MainApplication;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.EntitlementScheme;
@@ -351,8 +352,8 @@ public class MediaItemActivity extends Activity {
 	}
 
 	@OnClick(R.id.hide_controls) public void hideControlsHandler() {
-		//if (player != null)
-			//player.setHideControls(SambaPlayer.Controls.SEEKBAR, SambaPlayer.Controls.FULLSCREEN, SambaPlayer.Controls.MENU);
+		if (player != null)
+			player.setHideControls(Controls.PLAY_LARGE, Controls.FULLSCREEN, Controls.MENU);
 	}
 
 	@OnClick(R.id.create_session) public void createSessionHandler() {

@@ -23,7 +23,6 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
-import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
@@ -118,8 +117,7 @@ public class SambaPlayer extends FrameLayout {
                     } else {
                         dispatchPause();
                     }
-
-                    simplePlayerView.setLoading(false);
+                    simplePlayerView.updatePlayPause(playWhenReady ? PlayPauseState.Playing : PlayPauseState.Pause);
                     adjustCurrentOutputs();
 
                     break;
@@ -131,11 +129,11 @@ public class SambaPlayer extends FrameLayout {
                     pause();
                     SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
                     _hasFinished = true;
-                    simplePlayerView.setLoading(false);
+                    simplePlayerView.updatePlayPause(PlayPauseState.Pause);
 
                     break;
                 case Player.STATE_BUFFERING:
-                    simplePlayerView.setLoading(true);
+                    simplePlayerView.updatePlayPause(PlayPauseState.Loading);
                     stopErrorTimer();
 
                     // buffering timeout
@@ -643,7 +641,7 @@ public class SambaPlayer extends FrameLayout {
         if (player == null)
             return;
 
-        //player.setControlsVisible(false, controls);
+        simplePlayerView.setControlsVisible(false, controls);
     }
 
     /**
@@ -868,6 +866,8 @@ public class SambaPlayer extends FrameLayout {
         player.prepare(playerMediaSourceInterface.getMediaSource());
 
 
+        simplePlayerView.setThemeColor(media.themeColor);
+
         if (media.isAudioOnly) {
 //			player.setControlsVisible(true, Controls.PLAY);
 //			player.setControlsVisible(false, Controls.FULLSCREEN, Controls.PLAY_LARGE, Controls.TOP_CHROME);
@@ -1007,7 +1007,6 @@ public class SambaPlayer extends FrameLayout {
             }
         });
 
-        // removes images if audio player
         if (media.isAudioOnly)
             // shows retry button when recoverable error
             if (error.getSeverity() == SambaPlayerError.Severity.recoverable)
