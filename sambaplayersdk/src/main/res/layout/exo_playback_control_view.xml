@@ -13,7 +13,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="bottom"
-    android:layoutDirection="ltr">
+    android:layoutDirection="ltr"
+    android:id="@+id/exo_playback_layout">
 
     <LinearLayout
         android:id="@+id/exo_top_bar"
@@ -125,7 +126,7 @@
         android:layout_height="100dp"
         android:layout_alignParentBottom="true"
         android:background="@drawable/controls_bottom_background"
-        android:paddingBottom="8dp"
+        android:paddingBottom="16dp"
         android:paddingLeft="8dp"
         android:paddingRight="8dp">
 
@@ -170,9 +171,10 @@
             <LinearLayout
                 android:id="@+id/exo_progress_controls"
                 android:layout_width="0dp"
-                android:layout_height="40dp"
+                android:layout_height="36dp"
                 android:layout_weight="1"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_gravity="center_vertical">
 
                 <LinearLayout
                     android:id="@+id/time_components"
@@ -218,9 +220,9 @@
 
             <ImageButton
                 android:id="@+id/fullscreen_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="end"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="center_vertical"
                 android:background="?android:selectableItemBackground"
                 android:src="@drawable/fullscreen" />
 

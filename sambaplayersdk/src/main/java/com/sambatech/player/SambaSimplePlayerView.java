@@ -40,6 +40,7 @@ import com.sambatech.player.utils.Util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -96,7 +97,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
 
     //hide Controls
     private HashMap<String, View> controlsMap;
-    private List<String> controls;
+    private LinkedHashSet<View> hiddenViews;
+    private boolean hasMenu = false;
 
 
     /**
@@ -181,6 +183,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
 
     public void initControlsMap() {
         controlsMap = new HashMap<>();
+        hiddenViews = new LinkedHashSet<>();
         controlsMap.put(Controls.PLAY_LARGE, controlsView);
         controlsMap.put(Controls.PLAY, smallPlayPauseContainer);
         controlsMap.put(Controls.FULLSCREEN, fullscreenButton);
@@ -198,6 +201,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             playerView.setControllerHideOnTouch(true);
             playerView.setControllerShowTimeoutMs(2 * 1000);
             topBar.setVisibility(View.VISIBLE);
+            smallPlayPauseContainer.setVisibility(View.GONE);
+            optionsMenuButton.setVisibility(this.hasMenu ? View.VISIBLE : View.GONE);
             if (isLive) {
                 castButton.setVisibility(View.GONE);
                 progressControls.setVisibility(View.INVISIBLE);
@@ -207,24 +212,22 @@ public class SambaSimplePlayerView implements View.OnClickListener {
                 progressControls.setVisibility(View.VISIBLE);
                 liveButton.setVisibility(View.GONE);
             }
-            smallPlayPauseContainer.setVisibility(View.GONE);
         } else {
             playerView.setControllerHideOnTouch(false);
             playerView.setControllerShowTimeoutMs(-1);
             topBar.setVisibility(View.GONE);
             fullscreenButton.setVisibility(View.GONE);
+            smallPlayPauseContainer.setVisibility(View.VISIBLE);
+            controlsView.setVisibility(View.GONE);
+            optionsMenuButton.setVisibility(View.GONE);
             if (isLive) {
                 progressControls.setVisibility(View.INVISIBLE);
             } else {
                 progressControls.setVisibility(View.VISIBLE);
             }
-            smallPlayPauseContainer.setVisibility(View.VISIBLE);
         }
-        optionsMenuButton.setVisibility(View.GONE);
-
         castButton.setVisibility(View.GONE);
-
-        setControlsVisible(false);
+        postConfigUi();
     }
 
     private OptionsMenuLayer.OptionsMenuCallback optionsMenuCallBack = new OptionsMenuLayer.OptionsMenuCallback(
@@ -329,8 +332,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             speedSheetDialog = null;
             speedSheetView = null;
         }
-        boolean hasMenu = captionsSheetDialog != null || outputSheetDialog != null || speedSheetDialog != null;
-        optionsMenuButton.setVisibility(hasMenu ? View.VISIBLE : View.GONE);
+        this.hasMenu = captionsSheetDialog != null || outputSheetDialog != null || speedSheetDialog != null;
+        optionsMenuButton.setVisibility(this.hasMenu && !hiddenViews.contains(optionsMenuButton)? View.VISIBLE : View.GONE);
         optionsMenuLayer.setCaptionsButtonVisibility(captionsSheetDialog != null);
         optionsMenuLayer.setHdButtonVisibility(outputSheetDialog != null);
         optionsMenuLayer.setSpeedButtonVisibility(speedSheetDialog != null);
@@ -625,43 +628,74 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         speedSheetDialog = null;
     }
 
-    public void setThemeColor(int themeColor){
+    public void setThemeColor(int themeColor) {
         customTimeBar.setDefaultBarColor(themeColor);
         progressBar.getIndeterminateDrawable().mutate().setColorFilter(themeColor, PorterDuff.Mode.MULTIPLY);
         smallProgressBar.getIndeterminateDrawable().mutate().setColorFilter(themeColor, PorterDuff.Mode.MULTIPLY);
     }
 
     public void updatePlayPause(PlayPauseState playPauseState) {
-        playSmallButton.setVisibility(playPauseState == PlayPauseState.Loading ? View.GONE: playPauseState == PlayPauseState.Pause ? View.VISIBLE : View.GONE);
-        pauseSmallButton.setVisibility(playPauseState == PlayPauseState.Loading ? View.GONE: playPauseState == PlayPauseState.Playing ? View.VISIBLE : View.GONE);
-        smallProgressBar.setVisibility(playPauseState == PlayPauseState.Loading ? View.VISIBLE: View.GONE);
+        playSmallButton.setVisibility(playPauseState == PlayPauseState.Loading ? View.GONE : playPauseState == PlayPauseState.Pause ? View.VISIBLE : View.GONE);
+        pauseSmallButton.setVisibility(playPauseState == PlayPauseState.Loading ? View.GONE : playPauseState == PlayPauseState.Playing ? View.VISIBLE : View.GONE);
+        smallProgressBar.setVisibility(playPauseState == PlayPauseState.Loading ? View.VISIBLE : View.GONE);
 
-        loadingView.setVisibility(playPauseState == PlayPauseState.Loading ? View.VISIBLE: View.GONE);
-        if (!controls.contains(Controls.PLAY_LARGE))
-            controlsView.setVisibility(playPauseState == PlayPauseState.Loading ? View.GONE: View.VISIBLE);
+        loadingView.setVisibility(playPauseState == PlayPauseState.Loading && isVideo ? View.VISIBLE : View.GONE);
+        if(!hiddenViews.contains(controlsView))
+            controlsView.setVisibility(playPauseState == PlayPauseState.Loading || !isVideo ? View.GONE : View.VISIBLE);
     }
 
     /**
      * Enables/Disables the specified controls.
-     * @param state Whether to enable or disable the listed controls
+     *
+     * @param state    Whether to enable or disable the listed controls
      * @param controls Names from class <code>Controls</code>
      */
     public void setControlsVisible(final boolean state, final String... controls) {
-        if(this.controls == null) {
-            this.controls = new ArrayList<>();
-            Collections.addAll(this.controls, controls);
+        if(state) {
+            if (controls == null || controls.length == 0) {
+                for (Map.Entry<String, View> pair : controlsMap.entrySet()) {
+                    hiddenViews.remove(pair.getValue());
+                }
+            } else {
+                for (String control : controls) {
+                    View view = controlsMap.get(control);
+                    hiddenViews.remove(view);
+                }
+            }
+            configView(this.isVideo, this.isVideo);
+        } else {
+            if (controls == null || controls.length == 0) {
+                for (Map.Entry<String, View> pair : controlsMap.entrySet()) {
+                    hiddenViews.add(pair.getValue());
+                }
+            } else {
+                for (String control : controls) {
+                    View view = controlsMap.get(control);
+                    hiddenViews.add(view);
+                }
+            }
+            postConfigUi();
         }
+    }
 
-        int visibility = state ? View.VISIBLE : View.GONE;
-
-        // specific controls
-        if (this.controls.size() > 0) {
-            for (String control : this.controls)
-                if (controlsMap.containsKey(control))
-                    controlsMap.get(control).setVisibility(state || !Controls.SEEKBAR.equals(control) ? visibility : View.INVISIBLE);
+    private void postConfigUi(){
+        for (View view : hiddenViews){
+            boolean isSeekBar = view.equals(controlsMap.get(Controls.SEEKBAR));
+            int visibility = isSeekBar ? View.INVISIBLE : View.GONE;
+            view.setVisibility(visibility);
         }
-        // all
-        else for (Map.Entry<String, View> pair : controlsMap.entrySet())
-            pair.getValue().setVisibility(state || !Controls.SEEKBAR.equals(pair.getKey()) ? visibility : View.INVISIBLE);
+    }
+
+    public void setChromeColor(int color) {
+        topBar.setBackgroundColor(color);
+        bottomBar.setBackgroundColor(color);
+
+		/*if (playbackControlRootView != null) {
+			updateColors();
+		}*/
+    }
+
+    public void setBackgroundColor(int color) {
+        playerView.findViewById(R.id.exo_playback_layout).setBackgroundColor(color);
     }
 }
