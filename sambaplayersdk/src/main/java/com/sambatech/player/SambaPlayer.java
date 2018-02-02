@@ -124,9 +124,9 @@ public class SambaPlayer extends FrameLayout {
                 case Player.STATE_ENDED:
                     if (!playWhenReady)
                         break;
-
-                    stopProgressTimer();
                     pause();
+                    player.seekTo(0);
+                    stopProgressTimer();
                     SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
                     _hasFinished = true;
                     simplePlayerView.updatePlayPause(PlayPauseState.Pause);
@@ -861,6 +861,8 @@ public class SambaPlayer extends FrameLayout {
         if (media.captions != null && media.captions.size() > 0)
             playerMediaSourceInterface.addSubtitles(media.captions);
         //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
+        //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpodbumper&cmsid=496&vid=short_onecue&correlator=";
+        //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=";
         if (media.adUrl != null)
             playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
         player.prepare(playerMediaSourceInterface.getMediaSource());
@@ -869,8 +871,6 @@ public class SambaPlayer extends FrameLayout {
         simplePlayerView.setThemeColor(media.themeColor);
 
         if (media.isAudioOnly) {
-//			player.setControlsVisible(true, Controls.PLAY);
-//			player.setControlsVisible(false, Controls.FULLSCREEN, Controls.PLAY_LARGE, Controls.TOP_CHROME);
             simplePlayerView.setBackgroundColor(0xFF434343);
             simplePlayerView.setChromeColor(0x00000000);
         } else {

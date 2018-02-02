@@ -12,6 +12,8 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -50,14 +52,14 @@ public class CustomTimeBar extends View implements TimeBar {
      */
     private static final long STOP_SCRUBBING_TIMEOUT_MS = 1000;
     private static final int DEFAULT_INCREMENT_COUNT = 20;
-    private static final int DEFAULT_BAR_HEIGHT = 5;
+    private static final int DEFAULT_BAR_HEIGHT = 8;
     private static final int DEFAULT_TOUCH_TARGET_HEIGHT = 26;
     private static final int DEFAULT_PLAYED_COLOR = 0xFFFFFFFF;
     private static final int DEFAULT_AD_MARKER_COLOR = 0xB2FFFF00;
-    private static final int DEFAULT_AD_MARKER_WIDTH = 4;
-    private static final int DEFAULT_SCRUBBER_ENABLED_SIZE = 12;
+    private static final int DEFAULT_AD_MARKER_WIDTH = 2;
+    private static final int DEFAULT_SCRUBBER_ENABLED_SIZE = 17;
     private static final int DEFAULT_SCRUBBER_DISABLED_SIZE = 0;
-    private static final int DEFAULT_SCRUBBER_DRAGGED_SIZE = 16;
+    private static final int DEFAULT_SCRUBBER_DRAGGED_SIZE = 20;
 
     private final Rect seekBounds;
     private final Rect progressBar;
@@ -498,34 +500,25 @@ public class CustomTimeBar extends View implements TimeBar {
 
     private void drawTimeBar(Canvas canvas) {
         int progressBarHeight = progressBar.height();
-        int barTop = progressBar.centerY() - progressBarHeight / 2;
-        int barBottom = barTop + progressBarHeight;
-        if (duration <= 0) {
-            canvas.drawRect(progressBar.left, barTop, progressBar.right, barBottom, unplayedPaint);
-            return;
-        }
-        int bufferedLeft = bufferedBar.left;
-        int bufferedRight = bufferedBar.right;
-        int progressLeft = Math.max(Math.max(progressBar.left, bufferedRight), scrubberBar.right);
-        if (progressLeft < progressBar.right) {
-            canvas.drawRect(progressLeft, barTop, progressBar.right, barBottom, unplayedPaint);
-        }
-        bufferedLeft = Math.max(bufferedLeft, scrubberBar.right);
-        if (bufferedRight > bufferedLeft) {
-            canvas.drawRect(bufferedLeft, barTop, bufferedRight, barBottom, bufferedPaint);
-        }
+
+        RectF rect = new RectF(progressBar.left, progressBar.top, progressBar.right, progressBar.bottom);
+        canvas.drawRoundRect(rect, progressBarHeight/2, progressBarHeight/2, unplayedPaint);
+
+        rect = new RectF(progressBar.left, progressBar.top, bufferedBar.right, progressBar.bottom);
+        canvas.drawRoundRect(rect, progressBarHeight/2, progressBarHeight/2, bufferedPaint);
+
         if (scrubberBar.width() > 0) {
-            canvas.drawRect(scrubberBar.left, barTop, scrubberBar.right, barBottom, playedPaint);
+            rect = new RectF(scrubberBar.left, progressBar.top, scrubberBar.right, progressBar.bottom);
+            canvas.drawRoundRect(rect, progressBarHeight/2, progressBarHeight/2, playedPaint);
         }
-        int adMarkerOffset = adMarkerWidth / 2;
+        int adMarkerOffset = adMarkerWidth;
         for (int i = 0; i < adGroupCount; i++) {
             long adGroupTimeMs = Util.constrainValue(adGroupTimesMs[i], 0, duration);
-            int markerPositionOffset =
-                    (int) (progressBar.width() * adGroupTimeMs / duration) - adMarkerOffset;
-            int markerLeft = progressBar.left + Math.min(progressBar.width() - adMarkerWidth,
-                    Math.max(0, markerPositionOffset));
+            int markerPositionOffset = (int) (progressBar.width() * adGroupTimeMs / duration) - adMarkerOffset;
+            int markerLeft = progressBar.left + Math.min(progressBar.width() - adMarkerWidth*2, Math.max(0, markerPositionOffset));
             Paint paint = playedAdGroups[i] ? playedAdMarkerPaint : adMarkerPaint;
-            canvas.drawRect(markerLeft, barTop, markerLeft + adMarkerWidth, barBottom, paint);
+            //canvas.drawRect(markerLeft, barTop, markerLeft + adMarkerWidth, barBottom, paint);
+            canvas.drawCircle(markerLeft + adMarkerWidth, progressBar.centerY(), adMarkerWidth, paint);
         }
     }
 
@@ -538,7 +531,9 @@ public class CustomTimeBar extends View implements TimeBar {
         int playheadRadius = scrubberSize / 2;
         int playheadCenter = Util.constrainValue(scrubberBar.right, scrubberBar.left,
                 progressBar.right);
-        canvas.drawCircle(playheadCenter, scrubberBar.centerY(), playheadRadius, scrubberPaint);
+        RectF rect = new RectF(playheadCenter - playheadRadius, scrubberBar.centerY() - playheadRadius/2, playheadCenter + playheadRadius, scrubberBar.centerY() + playheadRadius/2);
+
+        canvas.drawRoundRect(rect, playheadRadius/2, playheadRadius/2, scrubberPaint);
     }
 
     private String getProgressText() {
