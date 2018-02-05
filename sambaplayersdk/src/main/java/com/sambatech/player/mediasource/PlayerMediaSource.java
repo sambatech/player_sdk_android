@@ -99,7 +99,7 @@ public class PlayerMediaSource {
         for (SambaMedia.Caption caption : captions) {
             if (caption.url != null && caption.label != null) {
                 Format englishSubs = Format.createTextSampleFormat(String.valueOf(captionID), MimeTypes.APPLICATION_SUBRIP, SELECTION_FLAG_AUTOSELECT, caption.label);
-                MediaSource subSource = new SingleSampleMediaSource(Uri.parse(caption.url), new DefaultHttpDataSourceFactory("userAgent"), englishSubs, C.TIME_UNSET);
+                MediaSource subSource = new SingleSampleMediaSource.Factory(new DefaultHttpDataSourceFactory("userAgent")).createMediaSource(Uri.parse(caption.url), englishSubs, C.TIME_UNSET);
                 mediaSource = new MergingMediaSource(mediaSource, subSource);
                 captionID++;
             }

@@ -49,7 +49,7 @@
                 android:layout_width="54dp"
                 android:layout_height="match_parent"
                 android:background="?android:selectableItemBackground"
-                android:padding="8dp"
+                android:padding="5dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_live" />
 

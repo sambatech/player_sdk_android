@@ -871,13 +871,13 @@ public class SambaPlayer extends FrameLayout {
         player.addListener(playerEventListener);
 
         player.setPlayWhenReady(true);
-        if (media.captions != null && media.captions.size() > 0)
+        if (media.captions != null && media.captions.size() > 0) {
             playerMediaSourceInterface.addSubtitles(media.captions);
-        media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
-        //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpodbumper&cmsid=496&vid=short_onecue&correlator=";
-        //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=";
-        if (media.adUrl != null)
+        }
+        if (media.adUrl != null) {
             playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
+        }
+
         player.prepare(playerMediaSourceInterface.getMediaSource());
         player.setRepeatMode(Player.REPEAT_MODE_OFF);
 
@@ -902,17 +902,11 @@ public class SambaPlayer extends FrameLayout {
             //if (!_enableControls)
             //player.disableControls();
 
-            //PluginManager.getInstance().onInternalPlayerCreated(player);
+            PluginManager.getInstance().onInternalPlayerCreated(simplePlayerView.getPlayerView());
 
             if (notify)
                 SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
         }
-
-		/*player.addActionButton(ContextCompat.getDrawableRes(getContext(), R.drawable.share),
-                getContext().getString(R.string.share_facebook), new OnClickListener() {
-			@Override
-			public void onClick(View v) {}
-		});*/
 
         setupCast();
 

@@ -25,7 +25,7 @@ public class PlayerInstanceDefault {
     BandwidthMeter bandwidthMeter;
     AdaptiveTrackSelection.Factory adaptiveTrackSelectionFactory;
     DefaultTrackSelector trackSelector;
-    DefaultRenderersFactory renderersFactory;
+    private DefaultRenderersFactory renderersFactory;
     Context context;
     DataSource.Factory mediaDataSourceFactory;
 

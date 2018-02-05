@@ -17,7 +17,7 @@ public class PlayerMediaSourceHLS extends PlayerMediaSource implements PlayerMed
     @Override
     public void setUrl(String url) {
         super.setUrl(url);
-        setMediaSource(new HlsMediaSource(Uri.parse(url), playerInstanceDefault.mediaDataSourceFactory, playerInstanceDefault.mainHandler, null));
+        setMediaSource(new HlsMediaSource.Factory(playerInstanceDefault.mediaDataSourceFactory).createMediaSource(Uri.parse(url), playerInstanceDefault.mainHandler, null));
     }
 
     @Override

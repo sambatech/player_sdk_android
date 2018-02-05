@@ -24,7 +24,11 @@ public class PlayerMediaSourceDash extends PlayerMediaSource implements PlayerMe
     @Override
     public void setUrl(String url) {
         super.setUrl(url);
-        setMediaSource(new DashMediaSource(Uri.parse(url), playerInstanceDefault.mediaDataSourceFactory, dashChunkSourceFactory, playerInstanceDefault.mainHandler, null));
+        setMediaSource(new DashMediaSource.Factory(dashChunkSourceFactory,
+                playerInstanceDefault.mediaDataSourceFactory)
+                .createMediaSource(Uri.parse(url),
+                        playerInstanceDefault.mainHandler,
+                        null));
     }
 
     @Override
