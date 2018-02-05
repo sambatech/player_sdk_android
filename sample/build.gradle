@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 27
     buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 25
+        targetSdkVersion 27
         versionCode 1
         versionName '1.0'
     }
@@ -35,7 +35,7 @@ dependencies {
     // PROD
     //compile 'com.sambatech.player:sdk-android:0.10.6-dev'
 
-    compile 'org.bitbucket.b_c:jose4j:0.4.4'
+    compile 'org.bitbucket.b_c:jose4j:0.6.3'
     compile 'com.mcxiaoke.volley:library:1.0.19'
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'

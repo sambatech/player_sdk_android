@@ -15,6 +15,8 @@ import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.source.ads.AdsLoader;
+import com.google.android.exoplayer2.source.ads.AdsMediaSource;
 import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
@@ -41,7 +43,7 @@ public class PlayerMediaSource {
     protected PlayerInstanceDefault playerInstanceDefault;
     protected String url;
     protected MediaSource mediaSource;
-    protected ImaAdsLoader imaAdsLoader;
+    protected AdsLoader adsLoader;
 
     protected PlayerMediaSource(@NonNull PlayerInstanceDefault playerInstanceDefault) {
         this.playerInstanceDefault = playerInstanceDefault;
@@ -119,11 +121,11 @@ public class PlayerMediaSource {
     }
 
     public void addAds(String url, FrameLayout frameLayout) {
-        this.imaAdsLoader = new ImaAdsLoader(playerInstanceDefault.context, Uri.parse(url));
-        this.mediaSource = new ImaAdsMediaSource(
+        this.adsLoader = new ImaAdsLoader(playerInstanceDefault.context, Uri.parse(url));
+        this.mediaSource = new AdsMediaSource(
                 mediaSource,
                 playerInstanceDefault.mediaDataSourceFactory,
-                imaAdsLoader,
+                adsLoader,
                 frameLayout);
     }
 
@@ -199,6 +201,6 @@ public class PlayerMediaSource {
         playerInstanceDefault = null;
         url = null;
         mediaSource = null;
-        imaAdsLoader = null;
+        adsLoader = null;
     }
 }

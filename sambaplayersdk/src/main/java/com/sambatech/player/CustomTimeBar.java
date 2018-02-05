@@ -1,9 +1,5 @@
 package com.sambatech.player;
 
-/**
- * Created by luizbyrro on 29/01/2018.
- */
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Resources;
@@ -13,7 +9,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.os.Build;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -24,24 +20,139 @@ import android.view.View;
 import android.view.ViewParent;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ui.TimeBar;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Util;
-
 import java.util.Formatter;
 import java.util.Locale;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * A time bar that shows a current position, buffered position, duration and ad markers.
+ * <p>
+ * A DefaultTimeBar can be customized by setting attributes, as outlined below.
+ *
+ * <h3>Attributes</h3>
+ * The following attributes can be set on a DefaultTimeBar when used in a layout XML file:
+ * <p>
+ * <ul>
+ *   <li><b>{@code bar_height}</b> - Dimension for the height of the time bar.
+ *       <ul>
+ *         <li>Default: {@link #DEFAULT_BAR_HEIGHT_DP}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code touch_target_height}</b> - Dimension for the height of the area in which touch
+ *       interactions with the time bar are handled. If no height is specified, this also determines
+ *       the height of the view.
+ *       <ul>
+ *         <li>Default: {@link #DEFAULT_TOUCH_TARGET_HEIGHT_DP}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code ad_marker_width}</b> - Dimension for the width of any ad markers shown on the
+ *       bar. Ad markers are superimposed on the time bar to show the times at which ads will play.
+ *       <ul>
+ *         <li>Default: {@link #DEFAULT_AD_MARKER_WIDTH_DP}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code scrubber_enabled_size}</b> - Dimension for the diameter of the circular scrubber
+ *       handle when scrubbing is enabled but not in progress. Set to zero if no scrubber handle
+ *       should be shown.
+ *       <ul>
+ *         <li>Default: {@link #DEFAULT_SCRUBBER_ENABLED_SIZE_DP}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code scrubber_disabled_size}</b> - Dimension for the diameter of the circular scrubber
+ *       handle when scrubbing isn't enabled. Set to zero if no scrubber handle should be shown.
+ *       <ul>
+ *         <li>Default: {@link #DEFAULT_SCRUBBER_DISABLED_SIZE_DP}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code scrubber_dragged_size}</b> - Dimension for the diameter of the circular scrubber
+ *       handle when scrubbing is in progress. Set to zero if no scrubber handle should be shown.
+ *       <ul>
+ *         <li>Default: {@link #DEFAULT_SCRUBBER_DRAGGED_SIZE_DP}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code scrubber_drawable}</b> - Optional reference to a drawable to draw for the
+ *       scrubber handle. If set, this overrides the default behavior, which is to draw a circle for
+ *       the scrubber handle.
+ *   </li>
+ *   <li><b>{@code played_color}</b> - Color for the portion of the time bar representing media
+ *       before the current playback position.
+ *       <ul>
+ *         <li>Default: {@link #DEFAULT_PLAYED_COLOR}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code scrubber_color}</b> - Color for the scrubber handle.
+ *       <ul>
+ *         <li>Default: see {@link #getDefaultScrubberColor(int)}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code buffered_color}</b> - Color for the portion of the time bar after the current
+ *       played position up to the current buffered position.
+ *       <ul>
+ *         <li>Default: see {@link #getDefaultBufferedColor(int)}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code unplayed_color}</b> - Color for the portion of the time bar after the current
+ *       buffered position.
+ *       <ul>
+ *         <li>Default: see {@link #getDefaultUnplayedColor(int)}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code ad_marker_color}</b> - Color for unplayed ad markers.
+ *       <ul>
+ *         <li>Default: {@link #DEFAULT_AD_MARKER_COLOR}</li>
+ *       </ul>
+ *   </li>
+ *   <li><b>{@code played_ad_marker_color}</b> - Color for played ad markers.
+ *       <ul>
+ *         <li>Default: see {@link #getDefaultPlayedAdMarkerColor(int)}</li>
+ *       </ul>
+ *   </li>
+ * </ul>
  */
 public class CustomTimeBar extends View implements TimeBar {
 
     /**
+     * Default height for the time bar, in dp.
+     */
+    public static final int DEFAULT_BAR_HEIGHT_DP = 8;
+    /**
+     * Default height for the touch target, in dp.
+     */
+    public static final int DEFAULT_TOUCH_TARGET_HEIGHT_DP = 26;
+    /**
+     * Default width for ad markers, in dp.
+     */
+    public static final int DEFAULT_AD_MARKER_WIDTH_DP = 2;
+    /**
+     * Default diameter for the scrubber when enabled, in dp.
+     */
+    public static final int DEFAULT_SCRUBBER_ENABLED_SIZE_DP = 17;
+    /**
+     * Default diameter for the scrubber when disabled, in dp.
+     */
+    public static final int DEFAULT_SCRUBBER_DISABLED_SIZE_DP = 0;
+    /**
+     * Default diameter for the scrubber when dragged, in dp.
+     */
+    public static final int DEFAULT_SCRUBBER_DRAGGED_SIZE_DP = 20;
+    /**
+     * Default color for the played portion of the time bar.
+     */
+    public static final int DEFAULT_PLAYED_COLOR = 0xFFFFFFFF;
+    /**
+     * Default color for ad markers.
+     */
+    public static final int DEFAULT_AD_MARKER_COLOR = 0xB2FFFF00;
+
+    /**
      * The threshold in dps above the bar at which touch events trigger fine scrub mode.
      */
-    private static final int FINE_SCRUB_Y_THRESHOLD = -50;
+    private static final int FINE_SCRUB_Y_THRESHOLD_DP = -50;
     /**
      * The ratio by which times are reduced in fine scrub mode.
      */
@@ -52,25 +163,18 @@ public class CustomTimeBar extends View implements TimeBar {
      */
     private static final long STOP_SCRUBBING_TIMEOUT_MS = 1000;
     private static final int DEFAULT_INCREMENT_COUNT = 20;
-    private static final int DEFAULT_BAR_HEIGHT = 8;
-    private static final int DEFAULT_TOUCH_TARGET_HEIGHT = 26;
-    private static final int DEFAULT_PLAYED_COLOR = 0xFFFFFFFF;
-    private static final int DEFAULT_AD_MARKER_COLOR = 0xB2FFFF00;
-    private static final int DEFAULT_AD_MARKER_WIDTH = 2;
-    private static final int DEFAULT_SCRUBBER_ENABLED_SIZE = 17;
-    private static final int DEFAULT_SCRUBBER_DISABLED_SIZE = 0;
-    private static final int DEFAULT_SCRUBBER_DRAGGED_SIZE = 20;
 
     private final Rect seekBounds;
     private final Rect progressBar;
     private final Rect bufferedBar;
     private final Rect scrubberBar;
-    private Paint playedPaint;
-    private Paint bufferedPaint;
-    private Paint unplayedPaint;
-    private Paint adMarkerPaint;
-    private Paint playedAdMarkerPaint;
-    private Paint scrubberPaint;
+    private final Paint playedPaint;
+    private final Paint bufferedPaint;
+    private final Paint unplayedPaint;
+    private final Paint adMarkerPaint;
+    private final Paint playedAdMarkerPaint;
+    private final Paint scrubberPaint;
+    private final Drawable scrubberDrawable;
     private final int barHeight;
     private final int touchTargetHeight;
     private final int adMarkerWidth;
@@ -82,8 +186,8 @@ public class CustomTimeBar extends View implements TimeBar {
     private final StringBuilder formatBuilder;
     private final Formatter formatter;
     private final Runnable stopScrubbingRunnable;
+    private final CopyOnWriteArraySet<OnScrubListener> listeners;
 
-    private OnScrubListener listener;
     private int keyCountIncrement;
     private long keyTimeIncrement;
     private int lastCoarseScrubXPosition;
@@ -115,43 +219,50 @@ public class CustomTimeBar extends View implements TimeBar {
         playedAdMarkerPaint = new Paint();
         scrubberPaint = new Paint();
         scrubberPaint.setAntiAlias(true);
+        listeners = new CopyOnWriteArraySet<>();
 
         // Calculate the dimensions and paints for drawn elements.
         Resources res = context.getResources();
         DisplayMetrics displayMetrics = res.getDisplayMetrics();
-        fineScrubYThreshold = dpToPx(displayMetrics, FINE_SCRUB_Y_THRESHOLD);
-        int defaultBarHeight = dpToPx(displayMetrics, DEFAULT_BAR_HEIGHT);
-        int defaultTouchTargetHeight = dpToPx(displayMetrics, DEFAULT_TOUCH_TARGET_HEIGHT);
-        int defaultAdMarkerWidth = dpToPx(displayMetrics, DEFAULT_AD_MARKER_WIDTH);
-        int defaultScrubberEnabledSize = dpToPx(displayMetrics, DEFAULT_SCRUBBER_ENABLED_SIZE);
-        int defaultScrubberDisabledSize = dpToPx(displayMetrics, DEFAULT_SCRUBBER_DISABLED_SIZE);
-        int defaultScrubberDraggedSize = dpToPx(displayMetrics, DEFAULT_SCRUBBER_DRAGGED_SIZE);
+        fineScrubYThreshold = dpToPx(displayMetrics, FINE_SCRUB_Y_THRESHOLD_DP);
+        int defaultBarHeight = dpToPx(displayMetrics, DEFAULT_BAR_HEIGHT_DP);
+        int defaultTouchTargetHeight = dpToPx(displayMetrics, DEFAULT_TOUCH_TARGET_HEIGHT_DP);
+        int defaultAdMarkerWidth = dpToPx(displayMetrics, DEFAULT_AD_MARKER_WIDTH_DP);
+        int defaultScrubberEnabledSize = dpToPx(displayMetrics, DEFAULT_SCRUBBER_ENABLED_SIZE_DP);
+        int defaultScrubberDisabledSize = dpToPx(displayMetrics, DEFAULT_SCRUBBER_DISABLED_SIZE_DP);
+        int defaultScrubberDraggedSize = dpToPx(displayMetrics, DEFAULT_SCRUBBER_DRAGGED_SIZE_DP);
         if (attrs != null) {
-            TypedArray a = context.getTheme().obtainStyledAttributes(attrs, com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar, 0,
+            TypedArray a = context.getTheme().obtainStyledAttributes(attrs, R.styleable.DefaultTimeBar, 0,
                     0);
             try {
-                barHeight = a.getDimensionPixelSize(com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_bar_height,
+                scrubberDrawable = a.getDrawable(R.styleable.DefaultTimeBar_scrubber_drawable);
+                if (scrubberDrawable != null) {
+                    setDrawableLayoutDirection(scrubberDrawable, getLayoutDirection());
+                    defaultTouchTargetHeight =
+                            Math.max(scrubberDrawable.getMinimumHeight(), defaultTouchTargetHeight);
+                }
+                barHeight = a.getDimensionPixelSize(R.styleable.DefaultTimeBar_bar_height,
                         defaultBarHeight);
-                touchTargetHeight = a.getDimensionPixelSize(com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_touch_target_height,
+                touchTargetHeight = a.getDimensionPixelSize(R.styleable.DefaultTimeBar_touch_target_height,
                         defaultTouchTargetHeight);
-                adMarkerWidth = a.getDimensionPixelSize(com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_ad_marker_width,
+                adMarkerWidth = a.getDimensionPixelSize(R.styleable.DefaultTimeBar_ad_marker_width,
                         defaultAdMarkerWidth);
                 scrubberEnabledSize = a.getDimensionPixelSize(
-                        com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_scrubber_enabled_size, defaultScrubberEnabledSize);
+                        R.styleable.DefaultTimeBar_scrubber_enabled_size, defaultScrubberEnabledSize);
                 scrubberDisabledSize = a.getDimensionPixelSize(
-                        com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_scrubber_disabled_size, defaultScrubberDisabledSize);
+                        R.styleable.DefaultTimeBar_scrubber_disabled_size, defaultScrubberDisabledSize);
                 scrubberDraggedSize = a.getDimensionPixelSize(
-                        com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_scrubber_dragged_size, defaultScrubberDraggedSize);
-                int playedColor = a.getInt(com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_played_color, DEFAULT_PLAYED_COLOR);
-                int scrubberColor = a.getInt(com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_scrubber_color,
+                        R.styleable.DefaultTimeBar_scrubber_dragged_size, defaultScrubberDraggedSize);
+                int playedColor = a.getInt(R.styleable.DefaultTimeBar_played_color, DEFAULT_PLAYED_COLOR);
+                int scrubberColor = a.getInt(R.styleable.DefaultTimeBar_scrubber_color,
                         getDefaultScrubberColor(playedColor));
-                int bufferedColor = a.getInt(com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_buffered_color,
+                int bufferedColor = a.getInt(R.styleable.DefaultTimeBar_buffered_color,
                         getDefaultBufferedColor(playedColor));
-                int unplayedColor = a.getInt(com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_unplayed_color,
+                int unplayedColor = a.getInt(R.styleable.DefaultTimeBar_unplayed_color,
                         getDefaultUnplayedColor(playedColor));
-                int adMarkerColor = a.getInt(com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_ad_marker_color,
+                int adMarkerColor = a.getInt(R.styleable.DefaultTimeBar_ad_marker_color,
                         DEFAULT_AD_MARKER_COLOR);
-                int playedAdMarkerColor = a.getInt(com.google.android.exoplayer2.ui.R.styleable.DefaultTimeBar_played_ad_marker_color,
+                int playedAdMarkerColor = a.getInt(R.styleable.DefaultTimeBar_played_ad_marker_color,
                         getDefaultPlayedAdMarkerColor(adMarkerColor));
                 playedPaint.setColor(playedColor);
                 scrubberPaint.setColor(scrubberColor);
@@ -174,6 +285,7 @@ public class CustomTimeBar extends View implements TimeBar {
             bufferedPaint.setColor(getDefaultBufferedColor(DEFAULT_PLAYED_COLOR));
             unplayedPaint.setColor(getDefaultUnplayedColor(DEFAULT_PLAYED_COLOR));
             adMarkerPaint.setColor(DEFAULT_AD_MARKER_COLOR);
+            scrubberDrawable = null;
         }
         formatBuilder = new StringBuilder();
         formatter = new Formatter(formatBuilder, Locale.getDefault());
@@ -183,9 +295,13 @@ public class CustomTimeBar extends View implements TimeBar {
                 stopScrubbing(false);
             }
         };
-        scrubberPadding =
-                (Math.max(scrubberDisabledSize, Math.max(scrubberEnabledSize, scrubberDraggedSize)) + 1)
-                        / 2;
+        if (scrubberDrawable != null) {
+            scrubberPadding = (scrubberDrawable.getMinimumWidth() + 1) / 2;
+        } else {
+            scrubberPadding =
+                    (Math.max(scrubberDisabledSize, Math.max(scrubberEnabledSize, scrubberDraggedSize)) + 1)
+                            / 2;
+        }
         duration = C.TIME_UNSET;
         keyTimeIncrement = C.TIME_UNSET;
         keyCountIncrement = DEFAULT_INCREMENT_COUNT;
@@ -196,8 +312,13 @@ public class CustomTimeBar extends View implements TimeBar {
     }
 
     @Override
-    public void setListener(OnScrubListener listener) {
-        this.listener = listener;
+    public void addListener(OnScrubListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeListener(OnScrubListener listener) {
+        listeners.remove(listener);
     }
 
     @Override
@@ -292,7 +413,7 @@ public class CustomTimeBar extends View implements TimeBar {
                         positionScrubber(x);
                     }
                     scrubPosition = getScrubberPosition();
-                    if (listener != null) {
+                    for (OnScrubListener listener : listeners) {
                         listener.onScrubMove(this, scrubPosition);
                     }
                     update();
@@ -344,12 +465,27 @@ public class CustomTimeBar extends View implements TimeBar {
     }
 
     @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        updateDrawableState();
+    }
+
+    @Override
+    public void jumpDrawablesToCurrentState() {
+        super.jumpDrawablesToCurrentState();
+        if (scrubberDrawable != null) {
+            scrubberDrawable.jumpToCurrentState();
+        }
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         int height = heightMode == MeasureSpec.UNSPECIFIED ? touchTargetHeight
                 : heightMode == MeasureSpec.EXACTLY ? heightSize : Math.min(touchTargetHeight, heightSize);
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), height);
+        updateDrawableState();
     }
 
     @Override
@@ -367,32 +503,33 @@ public class CustomTimeBar extends View implements TimeBar {
     }
 
     @Override
-    protected void onSizeChanged(int width, int height, int oldWidth, int oldHeight) {
-        super.onSizeChanged(width, height, oldWidth, oldHeight);
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        if (scrubberDrawable != null && setDrawableLayoutDirection(scrubberDrawable, layoutDirection)) {
+            invalidate();
+        }
     }
 
-    @TargetApi(14)
     @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SELECTED) {
             event.getText().add(getProgressText());
         }
-        event.setClassName(com.google.android.exoplayer2.ui.DefaultTimeBar.class.getName());
+        event.setClassName(CustomTimeBar.class.getName());
     }
 
     @TargetApi(21)
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        info.setClassName(com.google.android.exoplayer2.ui.DefaultTimeBar.class.getCanonicalName());
+        info.setClassName(CustomTimeBar.class.getCanonicalName());
         info.setContentDescription(getProgressText());
         if (duration <= 0) {
             return;
         }
         if (Util.SDK_INT >= 21) {
-            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_FORWARD);
-            info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SCROLL_BACKWARD);
+            info.addAction(AccessibilityAction.ACTION_SCROLL_FORWARD);
+            info.addAction(AccessibilityAction.ACTION_SCROLL_BACKWARD);
         } else if (Util.SDK_INT >= 16) {
             info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
             info.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
@@ -434,23 +571,25 @@ public class CustomTimeBar extends View implements TimeBar {
 
     private void startScrubbing() {
         scrubbing = true;
+        setPressed(true);
         ViewParent parent = getParent();
         if (parent != null) {
             parent.requestDisallowInterceptTouchEvent(true);
         }
-        if (listener != null) {
+        for (OnScrubListener listener : listeners) {
             listener.onScrubStart(this, getScrubberPosition());
         }
     }
 
     private void stopScrubbing(boolean canceled) {
         scrubbing = false;
+        setPressed(false);
         ViewParent parent = getParent();
         if (parent != null) {
             parent.requestDisallowInterceptTouchEvent(false);
         }
         invalidate();
-        if (listener != null) {
+        for (OnScrubListener listener : listeners) {
             listener.onScrubStop(this, getScrubberPosition(), canceled);
         }
     }
@@ -500,7 +639,6 @@ public class CustomTimeBar extends View implements TimeBar {
 
     private void drawTimeBar(Canvas canvas) {
         int progressBarHeight = progressBar.height();
-
         RectF rect = new RectF(progressBar.left, progressBar.top, progressBar.right, progressBar.bottom);
         canvas.drawRoundRect(rect, progressBarHeight/2, progressBarHeight/2, unplayedPaint);
 
@@ -536,6 +674,13 @@ public class CustomTimeBar extends View implements TimeBar {
         canvas.drawRoundRect(rect, playheadRadius/2, playheadRadius/2, scrubberPaint);
     }
 
+    private void updateDrawableState() {
+        if (scrubberDrawable != null && scrubberDrawable.isStateful()
+                && scrubberDrawable.setState(getDrawableState())) {
+            invalidate();
+        }
+    }
+
     private String getProgressText() {
         return Util.getStringForTime(formatBuilder, formatter, position);
     }
@@ -563,7 +708,7 @@ public class CustomTimeBar extends View implements TimeBar {
         if (!scrubbing) {
             startScrubbing();
         }
-        if (listener != null) {
+        for (OnScrubListener listener : listeners) {
             listener.onScrubMove(this, scrubPosition);
         }
         update();
@@ -574,19 +719,23 @@ public class CustomTimeBar extends View implements TimeBar {
         return (int) (dps * displayMetrics.density + 0.5f);
     }
 
-    private static int getDefaultScrubberColor(int playedColor) {
+    private static boolean setDrawableLayoutDirection(Drawable drawable, int layoutDirection) {
+        return Util.SDK_INT >= 23 && drawable.setLayoutDirection(layoutDirection);
+    }
+
+    public static int getDefaultScrubberColor(int playedColor) {
         return 0xFF000000 | playedColor;
     }
 
-    private static int getDefaultUnplayedColor(int playedColor) {
+    public static int getDefaultUnplayedColor(int playedColor) {
         return 0x33000000 | (playedColor & 0x00FFFFFF);
     }
 
-    private static int getDefaultBufferedColor(int playedColor) {
+    public static int getDefaultBufferedColor(int playedColor) {
         return 0xCC000000 | (playedColor & 0x00FFFFFF);
     }
 
-    private static int getDefaultPlayedAdMarkerColor(int adMarkerColor) {
+    public static int getDefaultPlayedAdMarkerColor(int adMarkerColor) {
         return 0x33000000 | (adMarkerColor & 0x00FFFFFF);
     }
 

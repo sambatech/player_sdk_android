@@ -52,6 +52,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static android.content.ContentValues.TAG;
+
 /**
  * Represents the player, responsible for managing media playback.
  *
@@ -90,7 +92,7 @@ public class SambaPlayer extends FrameLayout {
 
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-            Log.i("SambaPlayer", "state: " + playWhenReady + " " + playbackState + "; playing: " + isPlaying());
+            Log.i("SambaPlayer", "state: " + playWhenReady + " " + playbackState + "; playing: " + isPlaying() + "; playingAd: " + player.isPlayingAd());
             switch (playbackState) {
                 case Player.STATE_READY:
                     if (playWhenReady) {
@@ -122,10 +124,11 @@ public class SambaPlayer extends FrameLayout {
 
                     break;
                 case Player.STATE_ENDED:
-                    if (!playWhenReady)
+                    if (!playWhenReady || player.isPlayingAd())
                         break;
                     pause();
                     player.seekTo(0);
+                    Log.d(TAG, "onPlayerStateChanged: " + player.isPlayingAd());
                     stopProgressTimer();
                     SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.FINISH));
                     _hasFinished = true;
@@ -162,6 +165,11 @@ public class SambaPlayer extends FrameLayout {
 
         @Override
         public void onRepeatModeChanged(int repeatMode) {
+
+        }
+
+        @Override
+        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
 
         }
 
@@ -280,12 +288,17 @@ public class SambaPlayer extends FrameLayout {
         }
 
         @Override
-        public void onPositionDiscontinuity() {
+        public void onPositionDiscontinuity(int reason) {
             adjustCurrentOutputs(); //Pode ser o fim do primero AD
         }
 
         @Override
         public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+        }
+
+        @Override
+        public void onSeekProcessed() {
 
         }
 
@@ -860,13 +873,13 @@ public class SambaPlayer extends FrameLayout {
         player.setPlayWhenReady(true);
         if (media.captions != null && media.captions.size() > 0)
             playerMediaSourceInterface.addSubtitles(media.captions);
-        //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
+        media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpod&cmsid=496&vid=short_onecue&correlator=";
         //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/ad_rule_samples&ciu_szs=300x250&ad_rule=1&impl=s&gdfp_req=1&env=vp&output=vmap&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ar%3Dpremidpostoptimizedpodbumper&cmsid=496&vid=short_onecue&correlator=";
         //media.adUrl = "https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=";
         if (media.adUrl != null)
             playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
         player.prepare(playerMediaSourceInterface.getMediaSource());
-
+        player.setRepeatMode(Player.REPEAT_MODE_OFF);
 
         simplePlayerView.setThemeColor(media.themeColor);
 
