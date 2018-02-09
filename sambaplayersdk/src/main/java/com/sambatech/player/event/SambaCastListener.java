@@ -13,6 +13,8 @@ public interface SambaCastListener {
 	 */
 	void onConnected(CastSession castSession);
 
+	void onConnected();
+
 	/**
 	 * Dispatched when a connection is close with Chromecast.
 	 */

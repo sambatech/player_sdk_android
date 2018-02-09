@@ -26,7 +26,21 @@ import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.gms.cast.Cast;
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaMetadata;
+import com.google.android.gms.cast.MediaQueueItem;
+import com.google.android.gms.cast.framework.CastSession;
+import com.google.android.gms.cast.framework.media.RemoteMediaClient;
+import com.google.android.gms.common.api.ResultCallbacks;
+import com.google.android.gms.common.api.Status;
+import com.sambatech.player.cast.CastDRM;
+import com.sambatech.player.cast.CastObject;
+import com.sambatech.player.cast.CastOptionsProvider;
+import com.sambatech.player.cast.CastPlayer;
+import com.sambatech.player.cast.CastQuery;
 import com.sambatech.player.cast.SambaCast;
+import com.sambatech.player.event.SambaCastListener;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
@@ -340,43 +354,9 @@ public class SambaPlayer extends FrameLayout {
         }
     };
 
-/*	private final SambaCastListener castListener = new SambaCastListener() {
+	private final SambaCastListener castListener = new SambaCastListener() {
 
-		RemoteMediaClient castPlayer;
-		
-		private int lastPosition = 0;
-
-		private final PlaybackControlLayer.InterceptableListener interceptableListener = new PlaybackControlLayer.InterceptableListener() {
-			@Override
-			public boolean onPlay() {
-				dispatchPlay();
-				sambaCast.playCast();
-				return false;
-			}
-
-			@Override
-			public boolean onPause() {
-				dispatchPause();
-				sambaCast.pauseCast();
-				return false;
-			}
-
-			@Override
-			public boolean onSeek(int position) {
-				sambaCast.seekTo(position);
-				return false;
-			}
-
-			@Override
-			public int getCurrentTime() {
-				return castPlayer != null ? (int)castPlayer.getApproximateStreamPosition() : 0;
-			}
-
-			@Override
-			public int getDuration() {
-				return castPlayer != null ? (int)castPlayer.getStreamDuration() : 0;
-			}
-		};
+		RemoteMediaClient remoteMediaClient;
 
 		@Override
 		public void onConnected(final CastSession castSession) {
@@ -386,11 +366,6 @@ public class SambaPlayer extends FrameLayout {
 
 			final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
 			if (remoteMediaClient == null) return;
-
-			// enabling hook for API and user actions
-			player.setInterceptableListener(interceptableListener);
-			player.setAutoHide(false);
-			player.setControlsVisible(false, Controls.MENU);
 
 			// converting SambaMedia to MediaInfo
 			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
@@ -414,73 +389,35 @@ public class SambaPlayer extends FrameLayout {
 					.setMetadata(movieMetadata)
 					.build();
 
-			remoteMediaClient.load(mediaInfo, false, 0).setResultCallback(new ResultCallbacks<RemoteMediaClient.MediaChannelResult>() {
-				@Override
-				public void onSuccess(@NonNull RemoteMediaClient.MediaChannelResult mediaChannelResult) {
-					Log.d("load", mediaChannelResult.getStatus().toString());
-				}
+			MediaQueueItem[] mediaQueueItems = new MediaQueueItem[1];
+			mediaQueueItems[0] = new MediaQueueItem.Builder(mediaInfo).build();
 
-				@Override
-				public void onFailure(@NonNull Status status) {
-					Log.d("load", status.toString());
-				}
-			});
+            castPlayer.loadItems(mediaQueueItems, 0, 0, Player.REPEAT_MODE_OFF);
+            castPlayer.setPlayWhenReady(true);
 
 			sambaCast.registerDeviceForProgress(true);
+            //castPlayer.setMessageListener(castSession);
 
-			lastPosition = 0;
+            simplePlayerView.showCast();
 
-			Cast.MessageReceivedCallback messageReceived = new Cast.MessageReceivedCallback() {
-				@Override
-				public void onMessageReceived(CastDevice castDevice, String namespace, String message)  {
-					Log.i("Message Received", castDevice.toString() + namespace + message);
 
-					try {
-						JSONObject jsonObject = new JSONObject(message);
-
-						if (jsonObject.has("progress") && jsonObject.has("duration")) {
-							float progress = jsonObject.getInt("progress");
-							float duration = jsonObject.getInt("duration");
-
-							lastPosition = (int)progress;
-
-							if (player != null)
-								player.setCurrentTime(progress, duration);
-						}
-						else if (jsonObject.has("type")) {
-							jsonObject = new JSONObject(message);
-							String type = jsonObject.getString("type");
-
-							if (type.equalsIgnoreCase("finish"))
-								sambaCast.stopCasting();
-						}
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-				}
-			};
-
-			try {
-				castSession.setMessageReceivedCallbacks(CastOptionsProvider.CUSTOM_NAMESPACE,messageReceived);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			this.castPlayer = remoteMediaClient;
-			player.updatePlayPauseButton(true);
+			this.remoteMediaClient = remoteMediaClient;
 		}
 
-		@Override
+        @Override
+        public void onConnected() {
+            onConnected(sambaCast.getCastSession());
+        }
+
+        @Override
 		public void onDisconnected() {
-			player.setAutoHide(true);
-			player.seek(lastPosition*1000);
-			lastPosition = 0;
-			// disabling hook for API and user actions
-			player.setInterceptableListener(null);
+            long lastPosition = castPlayer.getContentPosition();
+			player.seekTo(lastPosition*1000);
 			play();
 			startProgressTimer();
+			simplePlayerView.hideCast();
 		}
-	};*/
+	};
 
     //private SimpleExoPlayer player;
     private View errorScreen;
@@ -494,6 +431,7 @@ public class SambaPlayer extends FrameLayout {
     private boolean _autoFsMode;
     private boolean _enableControls = true;
     private boolean _disabled;
+
     private float _initialTime = 0f;
     private Boolean _initialFullscreen = null;
     private Timer errorTimer;
@@ -514,6 +452,8 @@ public class SambaPlayer extends FrameLayout {
     private PlayerInstanceDefault playerInstanceDefault;
     private PlayerMediaSourceInterface playerMediaSourceInterface;
     //private boolean wasPlaying;
+
+    CastPlayer castPlayer;
 
     public SambaPlayer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -810,7 +750,10 @@ public class SambaPlayer extends FrameLayout {
         PluginManager.getInstance().onDestroy();
         destroyInternal();
         SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
-        destroyError();
+
+        if (error != null)
+            showError(error);
+        else destroyError();
     }
 
 	/* End Player API */
@@ -910,9 +853,10 @@ public class SambaPlayer extends FrameLayout {
 
         setupCast();
 
+        simplePlayerView.createCastPlayer(castPlayer, media.themeColor, castListener, sambaCast.getButton());
 
-//		if (sambaCast != null && sambaCast.isCasting())
-//			castListener.onConnected(sambaCast.getCastSession());
+		if (sambaCast != null && sambaCast.isCasting())
+			castListener.onConnected(sambaCast.getCastSession());
     }
 
 
@@ -1100,16 +1044,12 @@ public class SambaPlayer extends FrameLayout {
         // if Chromecast support is enabled
         if (sambaCast == null || media.isLive || media.isAudioOnly) return;
 
-        //sambaCast.setEventListener(castListener);
+        sambaCast.setEventListener(castListener);
 
-        if (player != null) {
-            MediaRouteButton button = sambaCast.getButton();
-            ViewGroup parent = (ViewGroup) button.getParent();
+        castPlayer = new CastPlayer(sambaCast.getCastContext());
 
-            if (parent != null)
-                parent.removeView(button);
+        // enabling hook for API and user actions
 
-            //player.addActionButton(button);
-        }
+
     }
 }

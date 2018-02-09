@@ -335,4 +335,7 @@ public final class SambaCast {
 		return isCastSessionValid;
 	}
 
+	public CastContext getCastContext() {
+		return castContext;
+	}
 }

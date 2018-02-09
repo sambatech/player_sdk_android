@@ -23,6 +23,7 @@ import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.model.SambaPlayerError;
+import com.sambatech.player.plugins.DrmRequest;
 import com.sambatech.player.utils.Controls;
 import com.sambatech.sample.MainApplication;
 import com.sambatech.sample.R;
@@ -321,7 +322,7 @@ public class MediaItemActivity extends Activity {
 
 		// enabling Chromecast on player
 		player.setSambaCast(sambaCast);
-	    //player.setControlsVisibility(activityMedia.isControlsEnabled());
+	    player.setControlsVisibility(activityMedia.isControlsEnabled());
 	    player.setMedia(media);
 
 		//ti = new Date().getTime();
@@ -360,7 +361,7 @@ public class MediaItemActivity extends Activity {
 		if (entitlementScheme == null || media == null ||
 				media.drmRequest == null) return;
 
-		final DrmInfoRequest drmRequest = media.drmRequest;
+		final DrmRequest drmRequest = media.drmRequest;
 
 		status.setText("Creating session...");
 
@@ -380,12 +381,12 @@ public class MediaItemActivity extends Activity {
 						NamedNodeMap attributes = parse.getElementsByTagName("Session").item(0).getAttributes();
 						String sessionId = attributes.getNamedItem("SessionId").getTextContent();
 
-						drmRequest.put("SessionId", sessionId);
-						drmRequest.put("Ticket", attributes.getNamedItem("Ticket").getTextContent());
+						drmRequest.addLicenseParam("SessionId", sessionId);
+						drmRequest.addLicenseParam("Ticket", attributes.getNamedItem("Ticket").getTextContent());
 
 						// for manually injected DRM media
 						if (entitlementScheme.contentId != null)
-							drmRequest.put("ContentId", entitlementScheme.contentId);
+							drmRequest.addLicenseParam("ContentId", entitlementScheme.contentId);
 
 						status.setText(String.format("Session: %s", sessionId));
 					}
@@ -417,12 +418,12 @@ public class MediaItemActivity extends Activity {
 				entitlementScheme == null)
 			return;
 
-		final DrmInfoRequest drmRequest = media.drmRequest;
+		final DrmRequest drmRequest = media.drmRequest;
 
 		status.setText(deauth ? "Deauthorizing..." : "Authorizing...");
 
 		String url = String.format("%sservices/%s?CrmId=sambatech&AccountId=sambatech&SessionId=%s&UserIp=%s", getString(R.string.drm_url),
-				deauth ? "Deauthorize" : "Authorize", drmRequest.get("SessionId"), MainApplication.getExternalIp());
+				deauth ? "Deauthorize" : "Authorize", drmRequest.getLicenseParam("SessionId"), MainApplication.getExternalIp());
 
 		switch ((int)policySpinner.getSelectedItemId()) {
 			case 0:

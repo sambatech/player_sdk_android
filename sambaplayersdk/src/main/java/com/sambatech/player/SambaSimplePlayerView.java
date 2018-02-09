@@ -1,6 +1,7 @@
 package com.sambatech.player;
 
 import android.app.Activity;
+import android.app.MediaRouteButton;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
@@ -27,10 +28,14 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.CaptionStyleCompat;
+import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.gms.cast.framework.CastSession;
 import com.sambatech.player.adapter.CaptionsSheetAdapter;
 import com.sambatech.player.adapter.OutputSheetAdapter;
 import com.sambatech.player.adapter.SpeedSheetAdapter;
+import com.sambatech.player.cast.CastPlayer;
+import com.sambatech.player.event.SambaCastListener;
 import com.sambatech.player.mediasource.PlayerMediaSourceInterface;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.utils.Controls;
@@ -52,7 +57,7 @@ import static android.view.accessibility.CaptioningManager.CaptionStyle.EDGE_TYP
  * Created by luizbyrro on 30/11/2017.
  */
 
-public class SambaSimplePlayerView implements View.OnClickListener {
+public class  SambaSimplePlayerView implements View.OnClickListener {
 
     private Context context;
     private FrameLayout playerContainer;
@@ -73,7 +78,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     //topbar buttons e texto
     private ImageButton optionsMenuButton;
     private ImageButton liveButton;
-    private ImageButton castButton;
+    private FrameLayout castButton;
     private TextView videoTitle;
 
     private boolean isFullscreen = false;
@@ -100,6 +105,9 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     private LinkedHashSet<View> hiddenViews;
     private boolean hasMenu = false;
 
+    private PlaybackControlView castControlView;
+    private CastPlayer sambaCastPlayer;
+    private SambaCastListener castListener;
 
     /**
      * The output menu modalsheet.
@@ -154,7 +162,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         videoTitle = (TextView) playerView.findViewById(R.id.video_title_text);
         optionsMenuButton = (ImageButton) playerView.findViewById(R.id.topbar_menu_button);
         liveButton = (ImageButton) playerView.findViewById(R.id.topbar_live_button);
-        castButton = (ImageButton) playerView.findViewById(R.id.topbar_cast_button);
+        castButton = (FrameLayout) playerView.findViewById(R.id.topbar_cast_button);
         fullscreenButton = (ImageButton) playerView.findViewById(R.id.fullscreen_button);
         loadingView = (FrameLayout) playerView.findViewById(R.id.exo_progress_view);
         controlsView = (LinearLayout) playerView.findViewById(R.id.exo_control_bar);
@@ -212,6 +220,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
                 progressControls.setVisibility(View.VISIBLE);
                 liveButton.setVisibility(View.GONE);
             }
+            castButton.setVisibility(View.VISIBLE);
         } else {
             playerView.setControllerHideOnTouch(false);
             playerView.setControllerShowTimeoutMs(-1);
@@ -225,8 +234,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             } else {
                 progressControls.setVisibility(View.VISIBLE);
             }
+            castButton.setVisibility(View.GONE);
         }
-        castButton.setVisibility(View.GONE);
         postConfigUi();
     }
 
@@ -275,7 +284,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             player.setPlayWhenReady(false);
             playerView.hideController();
         } else if (viewId == R.id.topbar_cast_button) {
-
+            //if(castListener != null) castListener.onConnected();
         } else if (viewId == R.id.topbar_live_button) {
 
         } else if (viewId == R.id.fullscreen_button) {
@@ -697,5 +706,35 @@ public class SambaSimplePlayerView implements View.OnClickListener {
 
     public void setBackgroundColor(int color) {
         playerView.findViewById(R.id.exo_playback_layout).setBackgroundColor(color);
+    }
+
+    public void createCastPlayer(@NonNull CastPlayer castPlayer, int themeColor, SambaCastListener castListener, MediaRouteButton button ){
+        this.sambaCastPlayer = sambaCastPlayer;
+        if(castControlView == null) {
+            castControlView = new PlaybackControlView(context);
+            ((CustomTimeBar) castControlView.findViewById(R.id.exo_progress)).setDefaultBarColor(themeColor);
+            this.playerContainer.addView(castControlView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        }
+        castControlView.setPlayer(sambaCastPlayer);
+        this.castListener = castListener;
+
+        castButton.addView(button);
+    }
+
+    public void destroyCastPlayer(){
+        playerContainer.removeView(castControlView);
+        castControlView = null;
+        sambaCastPlayer = null;
+        castListener = null;
+    }
+
+    public void showCast() {
+        castControlView.setVisibility(View.VISIBLE);
+        playerView.setVisibility(View.GONE);
+    }
+
+    public void hideCast() {
+        castControlView.setVisibility(View.GONE);
+        playerView.setVisibility(View.VISIBLE);
     }
 }
