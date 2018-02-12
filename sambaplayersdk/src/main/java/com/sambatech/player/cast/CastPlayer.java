@@ -30,6 +30,8 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.gms.cast.Cast;
+import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.CastStatusCodes;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.MediaQueueItem;
@@ -43,6 +45,11 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient.MediaChannelResult;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -115,16 +122,48 @@ public final class CastPlayer implements Player {
   private int currentWindowIndex;
   private boolean playWhenReady;
   private long lastReportedPositionMs;
+  private long lastReportedDurationMs;
   private int pendingSeekCount;
   private int pendingSeekWindowIndex;
   private long pendingSeekPositionMs;
   private boolean waitingForInitialTimeline;
 
+  private SambaCast sambaCast;
+
+  Cast.MessageReceivedCallback messageReceived = new Cast.MessageReceivedCallback() {
+    @Override
+    public void onMessageReceived(CastDevice castDevice, String namespace, String message)  {
+      Log.i("Message Received", castDevice.toString() + namespace + message);
+
+      try {
+        JSONObject jsonObject = new JSONObject(message);
+
+        if (jsonObject.has("progress") && jsonObject.has("duration")) {
+          lastReportedPositionMs = (long) (jsonObject.getDouble("progress") * 1000);
+          lastReportedDurationMs = (long) (jsonObject.getDouble("duration") * 1000);
+
+         // eventListener.onPlayerStateChanged(true, Player.STATE_READY );
+
+        }
+        else if (jsonObject.has("type")) {
+          jsonObject = new JSONObject(message);
+          String type = jsonObject.getString("type");
+
+          if (type.equalsIgnoreCase("finish"))
+            sambaCast.stopCasting();
+        }
+      } catch (JSONException e) {
+        e.printStackTrace();
+      }
+    }
+  };
+
   /**
-   * @param castContext The context from which the cast session is obtained.
+   * @param sambaCast The context from which the cast session is obtained.
    */
-  public CastPlayer(CastContext castContext) {
-    this.castContext = castContext;
+  public CastPlayer(SambaCast sambaCast) {
+    this.sambaCast = sambaCast;
+    this.castContext = sambaCast.getCastContext();
     timelineTracker = new CastTimelineTracker();
     window = new Timeline.Window();
     period = new Timeline.Period();
@@ -145,6 +184,15 @@ public final class CastPlayer implements Player {
     pendingSeekWindowIndex = C.INDEX_UNSET;
     pendingSeekPositionMs = C.TIME_UNSET;
     updateInternalState();
+  }
+
+
+  public void setMessageListener(CastSession castSession) {
+    try {
+      castSession.setMessageReceivedCallbacks(CastOptionsProvider.CUSTOM_NAMESPACE,messageReceived);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   // Media Queue manipulation methods.

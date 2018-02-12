@@ -396,7 +396,7 @@ public class SambaPlayer extends FrameLayout {
             castPlayer.setPlayWhenReady(true);
 
 			sambaCast.registerDeviceForProgress(true);
-            //castPlayer.setMessageListener(castSession);
+            castPlayer.setMessageListener(castSession);
 
             simplePlayerView.showCast();
 
@@ -1046,7 +1046,7 @@ public class SambaPlayer extends FrameLayout {
 
         sambaCast.setEventListener(castListener);
 
-        castPlayer = new CastPlayer(sambaCast.getCastContext());
+        castPlayer = new CastPlayer(sambaCast);
 
         // enabling hook for API and user actions
 
