@@ -390,6 +390,7 @@ public class SambaApi {
 
 			media.backupUrls = request.backupUrls;
 			media.isLive = true;
+			media.isDvr = json.getJSONObject("liveOutput").has("dvr") ? json.getJSONObject("liveOutput").getBoolean("dvr") : false;
 
 			// media type relies on URL
 			if (media.url.contains(".m3u8"))

@@ -119,7 +119,6 @@ public class MainActivity extends Activity {
 
 	private void extractMediaList(ArrayList<LiquidMedia> mediaList) {
 		final List<MediaInfo> mediaInfoList = new ArrayList<>();
-
 		for (LiquidMedia m : mediaList) {
 			final MediaInfo mediaInfo = new MediaInfo();
 
@@ -172,6 +171,13 @@ public class MainActivity extends Activity {
 			mediaInfoList.add(mediaInfo);
 		}
 
+		MediaInfo mediaInfo = new MediaInfo();
+		mediaInfo.setLiveChannelId("27770eee79431b416ff037d480ffe445");
+		mediaInfo.setProjectHash("7308d46a10eb5bef20e29516ca918f65");
+		mediaInfo.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo.setTitle("live dvr");
+
+		mediaInfoList.add(mediaInfo);
 		showMediaList(mediaInfoList);
 	}
 

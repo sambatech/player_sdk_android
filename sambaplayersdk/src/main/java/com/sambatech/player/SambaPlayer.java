@@ -849,7 +849,7 @@ public class SambaPlayer extends FrameLayout {
         simplePlayerView.setPlayer(player);
         simplePlayerView.setVideoTitle(media.title);
         simplePlayerView.configureSubTitle(media.captionsConfig);
-        simplePlayerView.configView(!media.isAudioOnly, media.isLive);
+        simplePlayerView.configView(!media.isAudioOnly, media.isLive, media.isDvr);
         simplePlayerView.setEnableControls(_enableControls);
 
 

@@ -81,6 +81,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
 
     private boolean isLive = false;
     private boolean isVideo = false;
+    private boolean isDVR = false;
 
     private View outputSheetView;
     private View captionSheetView;
@@ -194,9 +195,10 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         controlsMap.put(Controls.TIME, playerView.findViewById(R.id.time_components));
     }
 
-    public void configView(boolean isVideo, boolean isLive) {
+    public void configView(boolean isVideo, boolean isLive, boolean isDVR) {
         this.isLive = isLive;
         this.isVideo = isVideo;
+        this.isDVR = isDVR;
         if (isVideo) {
             playerView.setControllerHideOnTouch(true);
             playerView.setControllerShowTimeoutMs(2 * 1000);
@@ -205,7 +207,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             optionsMenuButton.setVisibility(this.hasMenu ? View.VISIBLE : View.GONE);
             if (isLive) {
                 castButton.setVisibility(View.GONE);
-                progressControls.setVisibility(View.INVISIBLE);
+                progressControls.setVisibility(isDVR ? View.VISIBLE : View.INVISIBLE);
                 liveButton.setVisibility(View.VISIBLE);
             } else {
                 castButton.setVisibility(View.VISIBLE);
@@ -662,7 +664,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
                     hiddenViews.remove(view);
                 }
             }
-            configView(this.isVideo, this.isVideo);
+            configView(this.isVideo, this.isVideo, this.isDVR);
         } else {
             if (controls == null || controls.length == 0) {
                 for (Map.Entry<String, View> pair : controlsMap.entrySet()) {

@@ -22,6 +22,7 @@ public class SambaMedia {
 	public float duration = 0f;
 	public boolean isLive;
 	public boolean isAudioOnly;
+	public boolean isDvr;
 	public @NonNull String[] backupUrls = new String[]{};
 	public ArrayList<Output> outputs;
 	public ArrayList<Caption> captions;
@@ -41,6 +42,7 @@ public class SambaMedia {
 		duration = media.duration;
 		isLive = media.isLive;
 		isAudioOnly = media.isAudioOnly;
+		isDvr = media.isDvr;
 		backupUrls = media.backupUrls;
 		outputs = media.outputs;
 		captions = media.captions;
