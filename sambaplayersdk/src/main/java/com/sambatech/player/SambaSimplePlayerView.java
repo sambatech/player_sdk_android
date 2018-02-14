@@ -709,7 +709,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
     }
 
     public void createCastPlayer(@NonNull CastPlayer castPlayer, int themeColor, SambaCastListener castListener, MediaRouteButton button ){
-        this.sambaCastPlayer = sambaCastPlayer;
+        this.sambaCastPlayer = castPlayer;
         if(castControlView == null) {
             castControlView = new PlaybackControlView(context);
             ((CustomTimeBar) castControlView.findViewById(R.id.exo_progress)).setDefaultBarColor(themeColor);
