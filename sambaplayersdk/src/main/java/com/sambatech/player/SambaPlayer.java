@@ -373,10 +373,10 @@ public class SambaPlayer extends FrameLayout {
 			movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, media.title);
 
 			CastQuery qs = new CastQuery(true, CastOptionsProvider.environment.toString(),
-					CastOptionsProvider.appId, (int)getCurrentTime(), getCaption());
+					CastOptionsProvider.appId, (long) getCurrentTime(), getCaption());
 
 			CastObject castObject = new CastObject(media.title, media.id,
-					(int) getDuration(),media.themeColorHex,
+					(long) media.duration ,media.themeColorHex,
 					media.projectHash, qs, "", CastOptionsProvider.playerUrl);
 
 			if (media.drmRequest != null)
@@ -412,7 +412,7 @@ public class SambaPlayer extends FrameLayout {
         @Override
 		public void onDisconnected() {
             long lastPosition = castPlayer.getContentPosition();
-			player.seekTo(lastPosition*1000);
+			player.seekTo(lastPosition);
 			play();
 			startProgressTimer();
 			simplePlayerView.hideCast();
@@ -849,11 +849,13 @@ public class SambaPlayer extends FrameLayout {
 
             if (notify)
                 SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
+        } else {
+            setupCast();
         }
 
-        setupCast();
 
-        simplePlayerView.createCastPlayer(castPlayer, media.themeColor, castListener, sambaCast.getButton());
+
+        simplePlayerView.createCastPlayer(castPlayer, media.themeColor, media.captions);
 
 		if (sambaCast != null && sambaCast.isCasting())
 			castListener.onConnected(sambaCast.getCastSession());

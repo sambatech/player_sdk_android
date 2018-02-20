@@ -50,6 +50,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -119,8 +121,8 @@ public final class CastPlayer implements Player {
   private TrackSelectionArray currentTrackSelection;
   private int playbackState;
   private int repeatMode;
-  private int currentWindowIndex;
-  private boolean playWhenReady;
+  private int currentWindowIndex = -1;
+  private boolean playWhenReady = false;
   private static long previousReportedPositionMs = 0;
   private long lastReportedPositionMs = 0;
   private long lastReportedDurationMs;
@@ -130,6 +132,8 @@ public final class CastPlayer implements Player {
   private boolean waitingForInitialTimeline;
 
   private SambaCast sambaCast;
+
+  private List<MediaQueueItem> mediaQueueItems;
 
   Cast.MessageReceivedCallback messageReceived = new Cast.MessageReceivedCallback() {
     @Override
@@ -229,6 +233,8 @@ public final class CastPlayer implements Player {
     if (remoteMediaClient != null) {
       positionMs = positionMs != C.TIME_UNSET ? positionMs : 0;
       waitingForInitialTimeline = true;
+      mediaQueueItems = new ArrayList<>();
+      Collections.addAll(mediaQueueItems, items);
       return remoteMediaClient.queueLoad(items, startIndex, getCastRepeatMode(repeatMode),
           positionMs, null);
     }
@@ -258,6 +264,8 @@ public final class CastPlayer implements Player {
   public PendingResult<MediaChannelResult> addItems(int periodId, MediaQueueItem... items) {
     if (getMediaStatus() != null && (periodId == MediaQueueItem.INVALID_ITEM_ID
         || currentTimeline.getIndexOfPeriod(periodId) != C.INDEX_UNSET)) {
+      mediaQueueItems = new ArrayList<>();
+      Collections.addAll(mediaQueueItems, items);
       return remoteMediaClient.queueInsertItems(items, periodId, null);
     }
     return null;
@@ -352,6 +360,7 @@ public final class CastPlayer implements Player {
 
   @Override
   public void setPlayWhenReady(boolean playWhenReady) {
+    this.playWhenReady = playWhenReady;
     if (sambaCast == null) {
       return;
     }
@@ -384,23 +393,16 @@ public final class CastPlayer implements Player {
 
   @Override
   public void seekTo(int windowIndex, long positionMs) {
-    MediaStatus mediaStatus = getMediaStatus();
-    // We assume the default position is 0. There is no support for seeking to the default position
-    // in RemoteMediaClient.
     positionMs = positionMs != C.TIME_UNSET ? positionMs : 0;
-    if (mediaStatus != null) {
+
       sambaCast.seekTo( (int) positionMs);
+      lastReportedPositionMs = positionMs;
       pendingSeekCount++;
       pendingSeekWindowIndex = windowIndex;
       pendingSeekPositionMs = positionMs;
       for (EventListener listener : listeners) {
         listener.onPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK);
       }
-    } else if (pendingSeekCount == 0) {
-      for (EventListener listener : listeners) {
-        listener.onSeekProcessed();
-      }
-    }
   }
 
   @Override
@@ -448,9 +450,7 @@ public final class CastPlayer implements Player {
 
   @Override
   public void setRepeatMode(@RepeatMode int repeatMode) {
-    if (remoteMediaClient != null) {
-      remoteMediaClient.queueSetRepeatMode(getCastRepeatMode(repeatMode), null);
-    }
+
   }
 
   @Override
@@ -530,23 +530,17 @@ public final class CastPlayer implements Player {
 
   @Override
   public int getBufferedPercentage() {
-    long position = getBufferedPosition();
-    long duration = getDuration();
-    return position == C.TIME_UNSET || duration == C.TIME_UNSET
-        ? 0
-        : duration == 0 ? 100 : Util.constrainValue((int) ((position * 100) / duration), 0, 100);
+    return 100;
   }
 
   @Override
   public boolean isCurrentWindowDynamic() {
-    return !currentTimeline.isEmpty()
-        && currentTimeline.getWindow(getCurrentWindowIndex(), window).isDynamic;
+    return true;
   }
 
   @Override
   public boolean isCurrentWindowSeekable() {
-    return !currentTimeline.isEmpty()
-        && currentTimeline.getWindow(getCurrentWindowIndex(), window).isSeekable;
+    return true;
   }
 
   @Override
@@ -582,22 +576,14 @@ public final class CastPlayer implements Player {
       return;
     }
 
-    int playbackState = fetchPlaybackState(remoteMediaClient);
-    boolean playWhenReady = !(lastReportedPositionMs == previousReportedPositionMs);
-    if (this.playbackState != playbackState
-        || this.playWhenReady != playWhenReady) {
-      this.playbackState = playbackState;
-      this.playWhenReady = playWhenReady;
-      for (EventListener listener : listeners) {
+
+    for (EventListener listener : listeners) {
         listener.onPlayerStateChanged(this.playWhenReady, this.playbackState);
-      }
     }
+
     @RepeatMode int repeatMode = fetchRepeatMode(remoteMediaClient);
-    if (this.repeatMode != repeatMode) {
-      this.repeatMode = repeatMode;
-      for (EventListener listener : listeners) {
-        listener.onRepeatModeChanged(repeatMode);
-      }
+    for (EventListener listener : listeners) {
+      listener.onRepeatModeChanged(repeatMode);
     }
     int currentWindowIndex = fetchCurrentWindowIndex(getMediaStatus());
     if (this.currentWindowIndex != currentWindowIndex && pendingSeekCount == 0) {
@@ -628,9 +614,8 @@ public final class CastPlayer implements Player {
    */
   private boolean updateTimeline() {
     CastTimeline oldTimeline = currentTimeline;
-    MediaStatus status = getMediaStatus();
-    currentTimeline =
-        status != null ? timelineTracker.getCastTimeline(status) : CastTimeline.EMPTY_CAST_TIMELINE;
+    if(mediaQueueItems != null && mediaQueueItems.size() > 0)
+      currentTimeline = timelineTracker.getCastTimeline(mediaQueueItems, mediaQueueItems.get(0).getMedia().getContentId(), lastReportedDurationMs * 1000);
     return !oldTimeline.equals(currentTimeline);
   }
 
@@ -725,7 +710,6 @@ public final class CastPlayer implements Player {
    */
   @RepeatMode
   private static int fetchRepeatMode(RemoteMediaClient remoteMediaClient) {
-    MediaStatus mediaStatus = remoteMediaClient.getMediaStatus();
     return REPEAT_MODE_OFF;
   }
 
@@ -874,6 +858,10 @@ public final class CastPlayer implements Player {
         }
       }
     }
+  }
+
+  public void sendSubtitle(String lenguage){
+    sambaCast.changeSubtitle(lenguage);
   }
 
 }

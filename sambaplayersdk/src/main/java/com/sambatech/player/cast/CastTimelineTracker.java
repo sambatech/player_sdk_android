@@ -38,22 +38,10 @@ import java.util.List;
     scratchContentIdSet = new HashSet<>();
   }
 
-  /**
-   * Returns a {@link CastTimeline} that represent the given {@code status}.
-   *
-   * @param status The Cast media status.
-   * @return A {@link CastTimeline} that represent the given {@code status}.
-   */
-  public CastTimeline getCastTimeline(MediaStatus status) {
-    MediaInfo mediaInfo = status.getMediaInfo();
-    List<MediaQueueItem> items = status.getQueueItems();
-    removeUnusedDurationEntries(items);
 
-    if (mediaInfo != null) {
-      String contentId = mediaInfo.getContentId();
-      long durationUs = CastUtils.getStreamDurationUs(mediaInfo);
-      contentIdToDurationUsMap.put(contentId, durationUs);
-    }
+  public CastTimeline getCastTimeline(List<MediaQueueItem> items, String contentId, long durationUs) {
+    removeUnusedDurationEntries(items);
+    contentIdToDurationUsMap.put(contentId, durationUs);
     return new CastTimeline(items, contentIdToDurationUsMap);
   }
 

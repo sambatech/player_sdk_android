@@ -35,7 +35,7 @@ public class OptionsMenuLayer extends FrameLayout implements View.OnClickListene
 
     public OptionsMenuLayer(Context context, ViewGroup parentView, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        LayoutInflater.from(context).inflate(R.layout.menu_options_layer, this);;
+        LayoutInflater.from(context).inflate(R.layout.menu_options_layer, this);
         this.parentView = parentView;
         hdButton = (LinearLayout) findViewById(R.id.quality_button);
         captionsButton = (LinearLayout) findViewById(R.id.subtitle_button);

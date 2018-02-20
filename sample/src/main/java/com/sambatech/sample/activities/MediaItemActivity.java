@@ -322,7 +322,7 @@ public class MediaItemActivity extends Activity {
 
 		// enabling Chromecast on player
 		player.setSambaCast(sambaCast);
-	    player.setControlsVisibility(activityMedia.isControlsEnabled());
+	    //player.setControlsVisibility(activityMedia.isControlsEnabled());
 	    player.setMedia(media);
 
 		//ti = new Date().getTime();

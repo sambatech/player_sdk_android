@@ -53,11 +53,12 @@
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_live" />
 
-            <FrameLayout
+            <android.app.MediaRouteButton
                 android:id="@+id/topbar_cast_button"
                 android:layout_width="44dp"
                 android:layout_height="match_parent"
-                android:padding="5dp" />
+                android:padding="5dp"
+                android:mediaRouteTypes="user"/>
 
             <ImageButton
                 android:id="@+id/topbar_menu_button"

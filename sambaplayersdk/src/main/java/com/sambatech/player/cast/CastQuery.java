@@ -10,7 +10,7 @@ public class CastQuery {
     private String castApi;
     private String castAppId;
     private String logger;
-    private double initialTime;
+    private long initialTime;
     private String captionTheme;
 
 
@@ -25,7 +25,7 @@ public class CastQuery {
         this.castApi = json.optString("castApi");
         this.castAppId = json.optString("castAppId");
         this.logger = json.optString("logger");
-        this.initialTime = json.optDouble("initialTime");
+        this.initialTime = json.optLong("initialTime");
         this.captionTheme = json.optString("captionTheme");
     }
     
@@ -69,11 +69,11 @@ public class CastQuery {
         this.logger = logger;
     }
 
-    public double getInitialTime() {
+    public long getInitialTime() {
         return this.initialTime;
     }
 
-    public void setInitialTime(double initialTime) {
+    public void setInitialTime(long initialTime) {
         this.initialTime = initialTime;
     }
 
@@ -98,7 +98,7 @@ public class CastQuery {
                 '}';
     }
 
-    public CastQuery(boolean html5, /*String scriptURL,*/ String castApi, String castAppId, double initialTime, String captionTheme) {
+    public CastQuery(boolean html5, /*String scriptURL,*/ String castApi, String castAppId, long initialTime, String captionTheme) {
         this.html5 = html5;
         //this.scriptURL = scriptURL;
         this.castApi = castApi;
