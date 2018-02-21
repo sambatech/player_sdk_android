@@ -523,11 +523,14 @@ public class SambaPlayer extends FrameLayout {
         } else {
             if (_forceOutputIndexTo >= 0)
                 playerMediaSourceInterface.forceOutuputTrackTo(_forceOutputIndexTo, _abrEnabled);
-
             _forceOutputIndexTo = -1;
         }
 
-        player.setPlayWhenReady(true);
+        if (sambaCast.isCasting()) {
+            sambaCast.playCast();
+        } else {
+            player.setPlayWhenReady(true);
+        }
         SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
     }
 
@@ -543,8 +546,11 @@ public class SambaPlayer extends FrameLayout {
      */
     public void pause() {
         if (player == null) return;
-
-        player.setPlayWhenReady(false);
+        if (sambaCast.isCasting()) {
+            sambaCast.pauseCast();
+        } else {
+            player.setPlayWhenReady(false);
+        }
         SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
     }
 
@@ -553,8 +559,11 @@ public class SambaPlayer extends FrameLayout {
      */
     public void stop() {
         if (player == null) return;
-
-        player.stop();
+        if (sambaCast.isCasting()) {
+            //sambaCast.stopCasting();
+        } else {
+            player.stop();
+        }
         SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.STOP));
     }
 
@@ -565,8 +574,11 @@ public class SambaPlayer extends FrameLayout {
      */
     public void seek(float position) {
         if (player == null) return;
-
-        player.seekTo(Math.round(position * 1000f));
+        if (sambaCast.isCasting()) {
+            sambaCast.seekTo((int) (position * 1000));
+        } else {
+            player.seekTo(Math.round(position * 1000f));
+        }
     }
 
     /**
@@ -849,16 +861,24 @@ public class SambaPlayer extends FrameLayout {
 
             if (notify)
                 SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
+        }
+
+        if (media.isAudioOnly || media.isLive) {
+            if (sambaCast != null && sambaCast.isCasting()) {
+                sambaCast.setEventListener(null);
+                sambaCast.stopCasting();
+            }
         } else {
             setupCast();
+
+            simplePlayerView.createCastPlayer(castPlayer, media.themeColor, media.captions);
+
+            if (sambaCast != null && sambaCast.isCasting())
+                castListener.onConnected(sambaCast.getCastSession());
         }
 
 
 
-        simplePlayerView.createCastPlayer(castPlayer, media.themeColor, media.captions);
-
-		if (sambaCast != null && sambaCast.isCasting())
-			castListener.onConnected(sambaCast.getCastSession());
     }
 
 

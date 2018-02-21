@@ -354,9 +354,11 @@ public class SambaApi {
 				langLookup.put("pt-br", "Português");
 				langLookup.put("en-us", "Inglês");
 				langLookup.put("es-es", "Espanhol");
-								langLookup.put("it-it", "Italiano");
-								langLookup.put("fr-fr", "Francês");
-								langLookup.put("disable", "Desativar");
+				langLookup.put("it-it", "Italiano");
+				langLookup.put("fr-fr", "Francês");
+				langLookup.put("zh-cn", "Chinês");
+				langLookup.put("ru-ru", "Russo");
+				langLookup.put("disable", "Desativar");
 
 			    // captionArray
 			    for (int j = captions.length(); j-- > 0;) {

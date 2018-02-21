@@ -12,14 +12,9 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.source.TrackGroup;
-import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.sambatech.player.R;
 import com.sambatech.player.adapter.CastCaptionsAdapter;
-import com.sambatech.player.mediasource.PlayerMediaSourceInterface;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.utils.OptionsMenuLayer;
 

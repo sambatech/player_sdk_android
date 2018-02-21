@@ -222,7 +222,6 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
                 progressControls.setVisibility(View.VISIBLE);
                 liveButton.setVisibility(View.GONE);
             }
-            castButton.setVisibility(View.VISIBLE);
         } else {
             playerView.setControllerHideOnTouch(false);
             playerView.setControllerShowTimeoutMs(-1);
@@ -616,6 +615,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
             ((ViewGroup) playerView.getParent()).removeView(playerView);
         optionsMenuLayer = null;
         playerView = null;
+        destroyCastPlayer();
     }
 
     private void destroyDialogs() {
@@ -719,28 +719,33 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
         }
         castControlView.setPlayer(sambaCastPlayer);
         castControlView.setShowTimeoutMs(-1);
-
         castControlView.findViewById(R.id.play_pause_container).setVisibility(View.GONE);
         castControlView.findViewById(R.id.topbar_live_button).setVisibility(View.GONE);
         castControlView.findViewById(R.id.fullscreen_button).setVisibility(View.GONE);
-        //castControlView.findViewById(R.id.topbar_menu_button).setVisibility(View.GONE);
-        castControlView.findViewById(R.id.topbar_menu_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(castOptionsMenu == null) {
-                    castOptionsMenu = new CastOptionsMenu(playerContainer, context, castPlayer, castControlView, captions);
+        if(captions != null && captions.size() > 1) {
+            castControlView.findViewById(R.id.topbar_menu_button).setVisibility(View.VISIBLE);
+            castControlView.findViewById(R.id.topbar_menu_button).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(castOptionsMenu == null) {
+                        castOptionsMenu = new CastOptionsMenu(playerContainer, context, castPlayer, castControlView, captions);
+                    }
+                    castOptionsMenu.show();
                 }
-                castOptionsMenu.show();
-            }
-        });
+            });
+        } else {
+            castControlView.findViewById(R.id.topbar_menu_button).setVisibility(View.GONE);
+        }
         castControlView.findViewById(R.id.exo_play).setVisibility(View.GONE);
         castControlView.findViewById(R.id.exo_pause).setVisibility(View.GONE);
         ((TextView) castControlView.findViewById(R.id.video_title_text)).setText(videoTitle.getText());
     }
 
     public void destroyCastPlayer(){
-        playerContainer.removeView(castControlView);
-        castOptionsMenu.destroy();
+        if(castControlView != null && playerContainer != null)
+            playerContainer.removeView(castControlView);
+        if(castOptionsMenu != null)
+            castOptionsMenu.destroy();
         castOptionsMenu = null;
         castControlView = null;
         sambaCastPlayer = null;
@@ -752,7 +757,8 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
     }
 
     public void hideCast() {
-        castOptionsMenu.hide();
+        if(castOptionsMenu != null)
+            castOptionsMenu.hide();
         castControlView.setVisibility(View.GONE);
         playerView.setVisibility(View.VISIBLE);
     }
