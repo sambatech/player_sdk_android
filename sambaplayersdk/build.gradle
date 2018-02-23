@@ -34,13 +34,11 @@ sonarqube {
 dependencies {
     // DEV
     //compile project(':googlemediaframework')
-
     // PROD
     /*compile('com.sambatech.player:gmf:0.2.1-5-dev') {
-        // DEPLOY
-        transitive=true
-    }*/
-
+                // DEPLOY
+                transitive=true
+            }*/
     testCompile 'junit:junit:4.12'
     //compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
     //compile 'com.google.android.gms:play-services-ads:11.6.2'

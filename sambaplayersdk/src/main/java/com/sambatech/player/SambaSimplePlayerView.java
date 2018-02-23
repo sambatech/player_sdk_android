@@ -11,6 +11,7 @@ import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -79,7 +80,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
     //topbar buttons e texto
     private ImageButton optionsMenuButton;
     private ImageButton liveButton;
-    private MediaRouteButton castButton;
+    private FrameLayout castButton;
     private TextView videoTitle;
 
     private boolean isFullscreen = false;
@@ -87,6 +88,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
 
     private boolean isLive = false;
     private boolean isVideo = false;
+    private boolean hasCast = false;
 
     private View outputSheetView;
     private View captionSheetView;
@@ -164,7 +166,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
         videoTitle = (TextView) playerView.findViewById(R.id.video_title_text);
         optionsMenuButton = (ImageButton) playerView.findViewById(R.id.topbar_menu_button);
         liveButton = (ImageButton) playerView.findViewById(R.id.topbar_live_button);
-        castButton = (MediaRouteButton) playerView.findViewById(R.id.topbar_cast_button);
+        castButton = (FrameLayout) playerView.findViewById(R.id.topbar_cast_button);
         fullscreenButton = (ImageButton) playerView.findViewById(R.id.fullscreen_button);
         loadingView = (FrameLayout) playerView.findViewById(R.id.exo_progress_view);
         controlsView = (LinearLayout) playerView.findViewById(R.id.exo_control_bar);
@@ -179,6 +181,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
         smallProgressBar = (ProgressBar) playerView.findViewById(R.id.small_progress);
         fullscreenButton.setOnClickListener(this);
         optionsMenuButton.setOnClickListener(this);
+        playerView.findViewById(R.id.cast_image_container).setOnClickListener(this);
         playSmallButton.setOnClickListener(playPauseClickLisner);
         pauseSmallButton.setOnClickListener(playPauseClickLisner);
     }
@@ -204,7 +207,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
         controlsMap.put(Controls.TIME, playerView.findViewById(R.id.time_components));
     }
 
-    public void configView(boolean isVideo, boolean isLive) {
+    public void configView(boolean isVideo, boolean isLive, boolean hasCast) {
         this.isLive = isLive;
         this.isVideo = isVideo;
         if (isVideo) {
@@ -218,7 +221,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
                 progressControls.setVisibility(View.INVISIBLE);
                 liveButton.setVisibility(View.VISIBLE);
             } else {
-                castButton.setVisibility(View.VISIBLE);
+                castButton.setVisibility(hasCast ? View.VISIBLE : View.GONE);
                 progressControls.setVisibility(View.VISIBLE);
                 liveButton.setVisibility(View.GONE);
             }
@@ -284,8 +287,8 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
             menuWasPlaying = player.isPlayingAd() || (player.getPlayWhenReady() && (player.getPlaybackState() == Player.STATE_READY || player.getPlaybackState() == Player.STATE_BUFFERING));
             player.setPlayWhenReady(false);
             playerView.hideController();
-        } else if (viewId == R.id.topbar_cast_button) {
-            //if(castListener != null) castListener.onConnected();
+        } else if (viewId == R.id.cast_image_container) {
+            playerView.findViewById(R.id.cast_dummy_button).performClick();
         } else if (viewId == R.id.topbar_live_button) {
 
         } else if (viewId == R.id.fullscreen_button) {
@@ -673,7 +676,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
                     hiddenViews.remove(view);
                 }
             }
-            configView(this.isVideo, this.isVideo);
+            configView(this.isVideo, this.isVideo, this.hasCast);
         } else {
             if (controls == null || controls.length == 0) {
                 for (Map.Entry<String, View> pair : controlsMap.entrySet()) {
@@ -738,6 +741,14 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
         }
         castControlView.findViewById(R.id.exo_play).setVisibility(View.GONE);
         castControlView.findViewById(R.id.exo_pause).setVisibility(View.GONE);
+        castControlView.findViewById(R.id.cast_image_container).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                castControlView.findViewById(R.id.cast_dummy_button).performClick();
+            }
+        });
+
+        ((ImageButton) castControlView.findViewById(R.id.cast_image_container)).setImageDrawable(context.getResources().getDrawable(R.drawable.ic_cast_connected_24dp));
         ((TextView) castControlView.findViewById(R.id.video_title_text)).setText(videoTitle.getText());
     }
 

@@ -362,7 +362,7 @@ public class SambaPlayer extends FrameLayout {
 		public void onConnected(final CastSession castSession) {
 
 			stopProgressTimer();
-			pause();
+			player.setPlayWhenReady(false);
 
 			final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
 			if (remoteMediaClient == null) return;
@@ -528,6 +528,8 @@ public class SambaPlayer extends FrameLayout {
 
         if (sambaCast.isCasting()) {
             sambaCast.playCast();
+            stopProgressTimer();
+            player.setPlayWhenReady(false);
         } else {
             player.setPlayWhenReady(true);
         }
@@ -804,7 +806,7 @@ public class SambaPlayer extends FrameLayout {
         simplePlayerView.setPlayer(player);
         simplePlayerView.setVideoTitle(media.title);
         simplePlayerView.configureSubTitle(media.captionsConfig);
-        simplePlayerView.configView(!media.isAudioOnly, media.isLive);
+        simplePlayerView.configView(!media.isAudioOnly, media.isLive, sambaCast != null);
         simplePlayerView.setEnableControls(_enableControls);
 
 
