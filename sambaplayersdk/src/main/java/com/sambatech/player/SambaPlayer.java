@@ -526,7 +526,7 @@ public class SambaPlayer extends FrameLayout {
             _forceOutputIndexTo = -1;
         }
 
-        if (sambaCast.isCasting()) {
+        if (sambaCast != null && sambaCast.isCasting()) {
             sambaCast.playCast();
             stopProgressTimer();
             player.setPlayWhenReady(false);
@@ -548,7 +548,7 @@ public class SambaPlayer extends FrameLayout {
      */
     public void pause() {
         if (player == null) return;
-        if (sambaCast.isCasting()) {
+        if (sambaCast != null && sambaCast.isCasting()) {
             sambaCast.pauseCast();
         } else {
             player.setPlayWhenReady(false);
@@ -561,7 +561,7 @@ public class SambaPlayer extends FrameLayout {
      */
     public void stop() {
         if (player == null) return;
-        if (sambaCast.isCasting()) {
+        if (sambaCast != null && sambaCast.isCasting()) {
             //sambaCast.stopCasting();
         } else {
             player.stop();
@@ -576,7 +576,7 @@ public class SambaPlayer extends FrameLayout {
      */
     public void seek(float position) {
         if (player == null) return;
-        if (sambaCast.isCasting()) {
+        if (sambaCast != null && sambaCast.isCasting()) {
             sambaCast.seekTo((int) (position * 1000));
         } else {
             player.seekTo(Math.round(position * 1000f));
@@ -627,8 +627,7 @@ public class SambaPlayer extends FrameLayout {
      * @return boolean Whether fullscreen mode is on of off.
      */
     public boolean isFullscreen() {
-        if (player == null || simplePlayerView != null) return false;
-        return player != null && simplePlayerView.isFullscreen();
+        return simplePlayerView != null && simplePlayerView.isFullscreen();
     }
 
 
