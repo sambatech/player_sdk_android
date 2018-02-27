@@ -24,33 +24,33 @@
   </developers>
   <dependencies>
     <dependency>
-      <groupId>com.sambatech.player</groupId>
-      <artifactId>gmf</artifactId>
-      <version>0.2.1-1</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.ads.interactivemedia.v3</groupId>
-      <artifactId>interactivemedia</artifactId>
-      <version>3.7.4</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.android.gms</groupId>
-      <artifactId>play-services-ads</artifactId>
-      <version>11.6.2</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>com.google.android.gms</groupId>
       <artifactId>play-services-cast-framework</artifactId>
-      <version>11.6.2</version>
+      <version>11.4.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.bitbucket.b_c</groupId>
       <artifactId>jose4j</artifactId>
-      <version>0.4.4</version>
+      <version>0.6.3</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.android.support</groupId>
+      <artifactId>design</artifactId>
+      <version>27.0.2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.android.exoplayer</groupId>
+      <artifactId>exoplayer</artifactId>
+      <version>2.6.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.android.exoplayer</groupId>
+      <artifactId>extension-ima</artifactId>
+      <version>2.6.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
