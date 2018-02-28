@@ -864,8 +864,4 @@ public final class CastPlayer implements Player {
     sambaCast.changeSubtitle(lenguage);
   }
 
-  public void castButtonClick(){
-    sambaCast.getButton().showDialog();
-  }
-
 }

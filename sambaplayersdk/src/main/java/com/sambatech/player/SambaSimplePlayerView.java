@@ -1,7 +1,6 @@
 package com.sambatech.player;
 
 import android.app.Activity;
-import android.app.MediaRouteButton;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
@@ -11,7 +10,6 @@ import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -31,13 +29,11 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.CaptionStyleCompat;
 import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.gms.cast.framework.CastSession;
 import com.sambatech.player.adapter.CaptionsSheetAdapter;
 import com.sambatech.player.adapter.OutputSheetAdapter;
 import com.sambatech.player.adapter.SpeedSheetAdapter;
 import com.sambatech.player.cast.CastOptionsMenu;
 import com.sambatech.player.cast.CastPlayer;
-import com.sambatech.player.event.SambaCastListener;
 import com.sambatech.player.mediasource.PlayerMediaSourceInterface;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.utils.Controls;
@@ -45,10 +41,8 @@ import com.sambatech.player.utils.OptionsMenuLayer;
 import com.sambatech.player.utils.Util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 
 import static android.graphics.Typeface.NORMAL;
@@ -505,8 +499,8 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
 
 
     /**
-     * This is the layout of the container before fullscreen mode has been entered.
-     * When we leave fullscreen mode, we restore the layout of the container to this layout.
+     * This is the layout of the container before sambaplayer_ic_fullscreen mode has been entered.
+     * When we leave sambaplayer_ic_fullscreen mode, we restore the layout of the container to this layout.
      */
     private ViewGroup.LayoutParams originalContainerLayoutParams;
 
@@ -550,7 +544,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
             activity.getWindow().getDecorView().setSystemUiVisibility(0);
 
             playerContainer.setLayoutParams(originalContainerLayoutParams);
-            fullscreenButton.setImageResource(R.drawable.fullscreen);
+            fullscreenButton.setImageResource(R.drawable.sambaplayer_ic_fullscreen);
             this.isFullscreen = newValue;
             this.isReverseLandscape = isReverseLandscape;
         } else {
@@ -567,9 +561,9 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
                     new View.OnSystemUiVisibilityChangeListener() {
                         @Override
                         public void onSystemUiVisibilityChange(int i) {
-                            // By doing a logical AND, we check if the fullscreen option is triggered (i.e. the
+                            // By doing a logical AND, we check if the sambaplayer_ic_fullscreen option is triggered (i.e. the
                             // status bar is hidden). If the result of the logical AND is 0, that means that the
-                            // fullscreen flag is NOT triggered. This means that the status bar is showing. If
+                            // sambaplayer_ic_fullscreen flag is NOT triggered. This means that the status bar is showing. If
                             // this is the case, then we show the playback controls as well (by calling show()).
                             if ((i & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
                                 if (!optionsMenuLayer.isVisible()) playerView.showController();
@@ -582,7 +576,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
             playerContainer.setLayoutParams(Util.getLayoutParamsBasedOnParent(playerContainer,
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT));
-            fullscreenButton.setImageResource(R.drawable.fullscreen_exit);
+            fullscreenButton.setImageResource(R.drawable.sambaplayer_ic_fullscreen_exit);
             this.isFullscreen = newValue;
             this.isReverseLandscape = isReverseLandscape;
         }
@@ -601,7 +595,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
 
         /**
          * When triggered, the activity should show any views that were hidden when the player
-         * went to fullscreen.
+         * went to sambaplayer_ic_fullscreen.
          */
         void onReturnFromFullscreen();
     }
@@ -748,7 +742,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
             }
         });
 
-        ((ImageButton) castControlView.findViewById(R.id.cast_image_container)).setImageDrawable(context.getResources().getDrawable(R.drawable.ic_cast_connected_24dp));
+        ((ImageButton) castControlView.findViewById(R.id.cast_image_container)).setImageDrawable(context.getResources().getDrawable(R.drawable.sambaplayer_cast_connected));
         ((TextView) castControlView.findViewById(R.id.video_title_text)).setText(videoTitle.getText());
     }
 

@@ -13,13 +13,13 @@
         android:textColor="@android:color/white"
         android:layout_centerInParent="true"
         android:drawablePadding="10dp"
-        android:drawableTop="@drawable/error_icon"/>
+        android:drawableTop="@drawable/sambaplayer_error_icon"/>
 
     <ImageButton
         android:id="@+id/retry_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_retry"
+        android:src="@drawable/sambaplayer_ic_retry"
         android:background="@android:color/transparent"
         android:layout_below="@+id/error_message"
         android:layout_centerHorizontal="true"

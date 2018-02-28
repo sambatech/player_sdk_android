@@ -96,8 +96,8 @@ public class MediaItemActivity extends Activity {
 	 * onPause - triggered when the media is paused
 	 * onStop - triggered when the player is destroyed
 	 * onFinish - triggered when the media is finished
-	 * onFullscreen - triggered when the fullscreen is enabled
-	 * onFullscreenExit - triggered when the user exit the fullscreen
+	 * onFullscreen - triggered when the sambaplayer_ic_fullscreen is enabled
+	 * onFullscreenExit - triggered when the user exit the sambaplayer_ic_fullscreen
 	 *
 	 */
 	private SambaPlayerListener playerListener = new SambaPlayerListener() {

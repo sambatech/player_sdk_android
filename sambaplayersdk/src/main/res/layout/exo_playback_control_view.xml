@@ -51,7 +51,7 @@
                 android:background="?android:selectableItemBackground"
                 android:padding="5dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_live" />
+                android:src="@drawable/sambaplayer_ic_live" />
 
             <FrameLayout
                 android:id="@+id/topbar_cast_button"
@@ -70,7 +70,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="?android:selectableItemBackground"
-                    android:src="@drawable/ic_cast_24dp"/>
+                    android:src="@drawable/sambaplayer_cast_unconnected"/>
 
             </FrameLayout>
 
@@ -80,7 +80,7 @@
                 android:layout_height="match_parent"
                 android:background="?android:selectableItemBackground"
                 android:padding="5dp"
-                android:src="@drawable/ic_menu" />
+                android:src="@drawable/sambaplayer_ic_menu" />
 
         </LinearLayout>
 
@@ -233,7 +233,7 @@
                 android:layout_height="36dp"
                 android:layout_gravity="center_vertical"
                 android:background="?android:selectableItemBackground"
-                android:src="@drawable/fullscreen" />
+                android:src="@drawable/sambaplayer_ic_fullscreen" />
 
 
         </LinearLayout>
