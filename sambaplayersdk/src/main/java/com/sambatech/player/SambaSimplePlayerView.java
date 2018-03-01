@@ -41,10 +41,8 @@ import com.sambatech.player.utils.OptionsMenuLayer;
 import com.sambatech.player.utils.Util;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 
 import static android.graphics.Typeface.NORMAL;
@@ -160,24 +158,25 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     }
 
     public void bindMethods() {
-        videoTitle = (TextView) playerView.findViewById(R.id.video_title_text);
-        optionsMenuButton = (ImageButton) playerView.findViewById(R.id.topbar_menu_button);
-        liveButton = (ImageButton) playerView.findViewById(R.id.topbar_live_button);
-        castButton = (FrameLayout) playerView.findViewById(R.id.topbar_cast_button);
-        fullscreenButton = (ImageButton) playerView.findViewById(R.id.fullscreen_button);
-        loadingView = (FrameLayout) playerView.findViewById(R.id.exo_progress_view);
-        controlsView = (LinearLayout) playerView.findViewById(R.id.exo_control_bar);
-        topBar = (LinearLayout) playerView.findViewById(R.id.exo_top_bar);
-        bottomBar = (LinearLayout) playerView.findViewById(R.id.exo_bottom_bar);
-        progressControls = (LinearLayout) playerView.findViewById(R.id.exo_progress_controls);
-        customTimeBar = (CustomTimeBar) playerView.findViewById(R.id.exo_progress);
-        progressBar = (ProgressBar) playerView.findViewById(R.id.progress_bar);
-        playSmallButton = (ImageButton) playerView.findViewById(R.id.small_play);
-        pauseSmallButton = (ImageButton) playerView.findViewById(R.id.small_pause);
-        smallPlayPauseContainer = (LinearLayout) playerView.findViewById(R.id.play_pause_container);
-        smallProgressBar = (ProgressBar) playerView.findViewById(R.id.small_progress);
+        videoTitle = playerView.findViewById(R.id.video_title_text);
+        optionsMenuButton = playerView.findViewById(R.id.topbar_menu_button);
+        liveButton = playerView.findViewById(R.id.topbar_live_button);
+        castButton = playerView.findViewById(R.id.topbar_cast_button);
+        fullscreenButton = playerView.findViewById(R.id.fullscreen_button);
+        loadingView = playerView.findViewById(R.id.exo_progress_view);
+        controlsView = playerView.findViewById(R.id.exo_control_bar);
+        topBar = playerView.findViewById(R.id.exo_top_bar);
+        bottomBar = playerView.findViewById(R.id.exo_bottom_bar);
+        progressControls = playerView.findViewById(R.id.exo_progress_controls);
+        customTimeBar = playerView.findViewById(R.id.exo_progress);
+        progressBar = playerView.findViewById(R.id.progress_bar);
+        playSmallButton = playerView.findViewById(R.id.small_play);
+        pauseSmallButton = playerView.findViewById(R.id.small_pause);
+        smallPlayPauseContainer = playerView.findViewById(R.id.play_pause_container);
+        smallProgressBar = playerView.findViewById(R.id.small_progress);
         fullscreenButton.setOnClickListener(this);
         optionsMenuButton.setOnClickListener(this);
+        liveButton.setOnClickListener(this);
         playerView.findViewById(R.id.cast_image_container).setOnClickListener(this);
         playSmallButton.setOnClickListener(playPauseClickLisner);
         pauseSmallButton.setOnClickListener(playPauseClickLisner);
@@ -208,6 +207,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         this.isLive = isLive;
         this.isVideo = isVideo;
         this.isDVR = isDVR;
+        this.hasCast = hasCast;
         if (isVideo) {
             playerView.setControllerHideOnTouch(true);
             playerView.setControllerShowTimeoutMs(2 * 1000);
@@ -288,7 +288,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         } else if (viewId == R.id.cast_image_container) {
             playerView.findViewById(R.id.cast_dummy_button).performClick();
         } else if (viewId == R.id.topbar_live_button) {
-
+            if(player != null)
+                player.seekToDefaultPosition();
         } else if (viewId == R.id.fullscreen_button) {
             doToggleFullscreen();
         }
@@ -353,9 +354,9 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     private void initCaptionMenu(final PlayerMediaSourceInterface playerMediaSource, Format currentCaption) {
         final TrackGroupArray captions = playerMediaSource.getSubtitles();
         captionSheetView = ((Activity) context).getLayoutInflater().inflate(R.layout.action_sheet, null);
-        TextView title = (TextView) captionSheetView.findViewById(R.id.action_sheet_title);
+        TextView title = captionSheetView.findViewById(R.id.action_sheet_title);
         title.setText(context.getString(R.string.captions));
-        final ListView menuList = (ListView) captionSheetView.findViewById(R.id.sheet_list);
+        final ListView menuList = captionSheetView.findViewById(R.id.sheet_list);
         final CaptionsSheetAdapter adapter = new CaptionsSheetAdapter(context, captions);
         menuList.setAdapter(adapter);
         if (currentCaption != null) {
@@ -384,9 +385,9 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     private void initOutputMenu(final PlayerMediaSourceInterface playerMediaSource, Format currentOutput, boolean isAbrEnabled) {
         final TrackGroup outputs = playerMediaSource.getVideoOutputsTracks();
         outputSheetView = ((Activity) context).getLayoutInflater().inflate(R.layout.action_sheet, null);
-        TextView title = (TextView) outputSheetView.findViewById(R.id.action_sheet_title);
+        TextView title = outputSheetView.findViewById(R.id.action_sheet_title);
         title.setText(context.getString(R.string.output));
-        final ListView menuList = (ListView) outputSheetView.findViewById(R.id.sheet_list);
+        final ListView menuList = outputSheetView.findViewById(R.id.sheet_list);
         final OutputSheetAdapter adapter = new OutputSheetAdapter(context, outputs, isAbrEnabled);
         menuList.setAdapter(adapter);
         if (currentOutput != null) {
@@ -410,9 +411,9 @@ public class SambaSimplePlayerView implements View.OnClickListener {
 
     private void initSpeedMenu() {
         speedSheetView = ((Activity) context).getLayoutInflater().inflate(R.layout.action_sheet, null);
-        TextView title = (TextView) speedSheetView.findViewById(R.id.action_sheet_title);
+        TextView title = speedSheetView.findViewById(R.id.action_sheet_title);
         title.setText(context.getString(R.string.speed));
-        final ListView menuList = (ListView) speedSheetView.findViewById(R.id.sheet_list);
+        final ListView menuList = speedSheetView.findViewById(R.id.sheet_list);
         final float[] speeds = new float[]{0.25f, 0.5f, 1.0f, 1.5f, 2.0f};
         final float[] audioPitch = new float[]{0.25f, 0.5f, 1.0f, 1.5f, 2.0f};
         final SpeedSheetAdapter adapter = new SpeedSheetAdapter(context, speeds);
@@ -570,10 +571,14 @@ public class SambaSimplePlayerView implements View.OnClickListener {
                             // fullscreen flag is NOT triggered. This means that the status bar is showing. If
                             // this is the case, then we show the playback controls as well (by calling show()).
                             if ((i & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                                if (!optionsMenuLayer.isVisible()) playerView.showController();
+                                if(optionsMenuLayer != null && playerView != null) {
+                                    if (!optionsMenuLayer.isVisible()) playerView.showController();
+                                }
                             }
                             if (isFullscreen)
-                                activity.getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
+                                if(activity != null) {
+                                    activity.getWindow().getDecorView().setSystemUiVisibility(mFullScreenFlags);
+                                }
                         }
                     }
             );

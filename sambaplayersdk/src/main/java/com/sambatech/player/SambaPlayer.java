@@ -1,7 +1,6 @@
 package com.sambatech.player;
 
 import android.app.Activity;
-import android.app.MediaRouteButton;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.annotation.NonNull;
@@ -9,7 +8,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -17,10 +15,8 @@ import android.widget.TextView;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -72,13 +68,7 @@ import static android.content.ContentValues.TAG;
  */
 public class SambaPlayer extends FrameLayout {
 
-    private final Player.EventListener playerEventListener = new Player.EventListener() {
-
-
-        @Override
-        public void onTimelineChanged(Timeline timeline, Object manifest) {
-
-        }
+    private final Player.DefaultEventListener playerEventListener = new Player.DefaultEventListener() {
 
         @Override
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
@@ -95,10 +85,6 @@ public class SambaPlayer extends FrameLayout {
             simplePlayerView.setupMenu(playerMediaSourceInterface, video, legenda, _abrEnabled);
 
 
-        }
-
-        @Override
-        public void onLoadingChanged(boolean isLoading) {
         }
 
         @Override
@@ -175,23 +161,13 @@ public class SambaPlayer extends FrameLayout {
         }
 
         @Override
-        public void onRepeatModeChanged(int repeatMode) {
-
-        }
-
-        @Override
-        public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-
-        }
-
-        @Override
         public void onPlayerError(final ExoPlaybackException e) {
             final Exception error = (Exception) e.getCause();
             Log.d("SambaPlayer", "Error: " + media, error);
 
             String msg = "Você está offline! Verifique sua conexão.";
             SambaPlayerError.Severity severity = SambaPlayerError.Severity.recoverable;
-            final boolean isBehindLiveWindowException = error.getCause() instanceof BehindLiveWindowException;
+            final boolean isBehindLiveWindowException = error instanceof BehindLiveWindowException;
 
             if (_initialTime == 0f)
                 _initialTime = getCurrentTime();
@@ -304,17 +280,6 @@ public class SambaPlayer extends FrameLayout {
             adjustCurrentOutputs(); //Pode ser o fim do primero AD
         }
 
-        @Override
-        public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
-        }
-
-        @Override
-        public void onSeekProcessed() {
-
-        }
-
-
         private void adjustCurrentOutputs() {
             if (!player.isPlayingAd() && playerMediaSourceInterface != null) {
                 if (_forceOutputIndexTo >= 0) {
@@ -352,55 +317,55 @@ public class SambaPlayer extends FrameLayout {
         }
     };
 
-	private final SambaCastListener castListener = new SambaCastListener() {
+    private final SambaCastListener castListener = new SambaCastListener() {
 
-		RemoteMediaClient remoteMediaClient;
+        RemoteMediaClient remoteMediaClient;
 
-		@Override
-		public void onConnected(final CastSession castSession) {
+        @Override
+        public void onConnected(final CastSession castSession) {
 
-			stopProgressTimer();
-			player.setPlayWhenReady(false);
+            stopProgressTimer();
+            player.setPlayWhenReady(false);
 
-			final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
-			if (remoteMediaClient == null) return;
+            final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
+            if (remoteMediaClient == null) return;
 
-			// converting SambaMedia to MediaInfo
-			MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
-			movieMetadata.putString(MediaMetadata.KEY_TITLE, media.title);
-			movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, media.title);
+            // converting SambaMedia to MediaInfo
+            MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
+            movieMetadata.putString(MediaMetadata.KEY_TITLE, media.title);
+            movieMetadata.putString(MediaMetadata.KEY_SUBTITLE, media.title);
 
-			CastQuery qs = new CastQuery(true, CastOptionsProvider.environment.toString(),
-					CastOptionsProvider.appId, (long) getCurrentTime(), getCaption());
+            CastQuery qs = new CastQuery(true, CastOptionsProvider.environment.toString(),
+                    CastOptionsProvider.appId, (long) getCurrentTime(), getCaption());
 
-			CastObject castObject = new CastObject(media.title, media.id,
-					(long) media.duration ,media.themeColorHex,
-					media.projectHash, qs, "", CastOptionsProvider.playerUrl);
+            CastObject castObject = new CastObject(media.title, media.id,
+                    (long) media.duration, media.themeColorHex,
+                    media.projectHash, qs, "", CastOptionsProvider.playerUrl);
 
-			if (media.drmRequest != null)
-				castObject.setDrm(new CastDRM(media.drmRequest.getLicenseParam("SessionId"),
-						media.drmRequest.getLicenseParam("Ticket")));
+            if (media.drmRequest != null)
+                castObject.setDrm(new CastDRM(media.drmRequest.getLicenseParam("SessionId"),
+                        media.drmRequest.getLicenseParam("Ticket")));
 
-			MediaInfo mediaInfo = new MediaInfo.Builder(castObject.toString())
-					.setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
-					.setContentType("video/mp4")
-					.setMetadata(movieMetadata)
-					.build();
+            MediaInfo mediaInfo = new MediaInfo.Builder(castObject.toString())
+                    .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                    .setContentType("video/mp4")
+                    .setMetadata(movieMetadata)
+                    .build();
 
-			MediaQueueItem[] mediaQueueItems = new MediaQueueItem[1];
-			mediaQueueItems[0] = new MediaQueueItem.Builder(mediaInfo).build();
+            MediaQueueItem[] mediaQueueItems = new MediaQueueItem[1];
+            mediaQueueItems[0] = new MediaQueueItem.Builder(mediaInfo).build();
 
             castPlayer.loadItems(mediaQueueItems, 0, 0, Player.REPEAT_MODE_OFF);
             castPlayer.setPlayWhenReady(true);
 
-			sambaCast.registerDeviceForProgress(true);
+            sambaCast.registerDeviceForProgress(true);
             castPlayer.setMessageListener(castSession);
 
             simplePlayerView.showCast();
 
 
-			this.remoteMediaClient = remoteMediaClient;
-		}
+            this.remoteMediaClient = remoteMediaClient;
+        }
 
         @Override
         public void onConnected() {
@@ -408,14 +373,14 @@ public class SambaPlayer extends FrameLayout {
         }
 
         @Override
-		public void onDisconnected() {
+        public void onDisconnected() {
             long lastPosition = castPlayer.getContentPosition();
-			player.seekTo(lastPosition);
-			play();
-			startProgressTimer();
-			simplePlayerView.hideCast();
-		}
-	};
+            player.seekTo(lastPosition);
+            play();
+            startProgressTimer();
+            simplePlayerView.hideCast();
+        }
+    };
 
     //private SimpleExoPlayer player;
     private View errorScreen;
@@ -803,7 +768,7 @@ public class SambaPlayer extends FrameLayout {
         simplePlayerView.setPlayer(player);
         simplePlayerView.setVideoTitle(media.title);
         simplePlayerView.configureSubTitle(media.captionsConfig);
-        simplePlayerView.configView(!media.isAudioOnly, media.isLive, media.isLive,sambaCast != null);
+        simplePlayerView.configView(!media.isAudioOnly, media.isLive, media.isDvr, sambaCast != null);
         simplePlayerView.setEnableControls(_enableControls);
 
 
@@ -877,7 +842,6 @@ public class SambaPlayer extends FrameLayout {
         }
 
 
-
     }
 
 
@@ -928,12 +892,10 @@ public class SambaPlayer extends FrameLayout {
             orientationEventListener = null;
         }
 
-
         if (sambaCast != null) {
             //player.setInterceptableListener(null);
             sambaCast.setEventListener(null);
         }
-
 
         if (simplePlayerView != null) {
             simplePlayerView.setFullscreenCallback(null);
@@ -988,7 +950,8 @@ public class SambaPlayer extends FrameLayout {
         else if (error.getDrawableRes() > 0)
             textView.setCompoundDrawablesWithIntrinsicBounds(0, error.getDrawableRes(), 0, 0);
             // default error image
-        else textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.sambaplayer_error_icon, 0, 0);
+        else
+            textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.sambaplayer_error_icon, 0, 0);
 
         if (errorScreen.getParent() == null)
             addView(errorScreen);
@@ -1029,7 +992,6 @@ public class SambaPlayer extends FrameLayout {
 
     private void stopErrorTimer() {
         if (errorTimer == null) return;
-
         errorTimer.cancel();
         errorTimer.purge();
         errorTimer = null;
@@ -1062,15 +1024,8 @@ public class SambaPlayer extends FrameLayout {
     }
 
     private void setupCast() {
-        // if Chromecast support is enabled
         if (sambaCast == null || media.isLive || media.isAudioOnly) return;
-
         sambaCast.setEventListener(castListener);
-
         castPlayer = new CastPlayer(sambaCast);
-
-        // enabling hook for API and user actions
-
-
     }
 }
