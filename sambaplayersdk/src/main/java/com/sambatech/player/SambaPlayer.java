@@ -1,6 +1,7 @@
 package com.sambatech.player;
 
 import android.app.Activity;
+import android.app.MediaRouteButton;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.support.annotation.NonNull;
@@ -8,6 +9,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -118,7 +120,7 @@ public class SambaPlayer extends FrameLayout {
                                 _initialTime = 0;
                             }
 
-                            // start in sambaplayer_ic_fullscreen
+                            // start in fullscreen
                             if (_initialFullscreen != null) {
                                 simplePlayerView.setFullscreen(_initialFullscreen);
                                 _initialFullscreen = null;
@@ -608,9 +610,9 @@ public class SambaPlayer extends FrameLayout {
     }
 
     /**
-     * Sets sambaplayer_ic_fullscreen mode on and off.
+     * Sets fullscreen mode on and off.
      *
-     * @param flag true to enter in the sambaplayer_ic_fullscreen mode on and false to exit
+     * @param flag true to enter in the fullscreen mode on and false to exit
      */
     public void setFullscreen(boolean flag) {
         if (player == null || simplePlayerView == null) return;
@@ -618,9 +620,9 @@ public class SambaPlayer extends FrameLayout {
     }
 
     /**
-     * Indicates the sambaplayer_ic_fullscreen mode on or off.
+     * Indicates the fullscreen mode on or off.
      *
-     * @return boolean Whether sambaplayer_ic_fullscreen mode is on of off.
+     * @return boolean Whether fullscreen mode is on of off.
      */
     public boolean isFullscreen() {
         return simplePlayerView != null && simplePlayerView.isFullscreen();
@@ -628,9 +630,9 @@ public class SambaPlayer extends FrameLayout {
 
 
     /**
-     * Sets whether the player should go automatically on sambaplayer_ic_fullscreen or not.
+     * Sets whether the player should go automatically on fullscreen or not.
      *
-     * @param flag true to enable auto sambaplayer_ic_fullscreen mode and false to disable it
+     * @param flag true to enable auto fullscreen mode and false to disable it
      */
     public void setAutoFullscreenMode(boolean flag) {
         _autoFsMode = flag;
@@ -801,7 +803,7 @@ public class SambaPlayer extends FrameLayout {
         simplePlayerView.setPlayer(player);
         simplePlayerView.setVideoTitle(media.title);
         simplePlayerView.configureSubTitle(media.captionsConfig);
-        simplePlayerView.configView(!media.isAudioOnly, media.isLive, sambaCast != null);
+        simplePlayerView.configView(!media.isAudioOnly, media.isLive, media.isLive,sambaCast != null);
         simplePlayerView.setEnableControls(_enableControls);
 
 

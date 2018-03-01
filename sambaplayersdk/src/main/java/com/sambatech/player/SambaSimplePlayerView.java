@@ -41,8 +41,10 @@ import com.sambatech.player.utils.OptionsMenuLayer;
 import com.sambatech.player.utils.Util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 
 import static android.graphics.Typeface.NORMAL;
@@ -53,7 +55,7 @@ import static android.view.accessibility.CaptioningManager.CaptionStyle.EDGE_TYP
  * Created by luizbyrro on 30/11/2017.
  */
 
-public class  SambaSimplePlayerView implements View.OnClickListener {
+public class SambaSimplePlayerView implements View.OnClickListener {
 
     private Context context;
     private FrameLayout playerContainer;
@@ -83,6 +85,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
     private boolean isLive = false;
     private boolean isVideo = false;
     private boolean hasCast = false;
+    private boolean isDVR = false;
 
     private View outputSheetView;
     private View captionSheetView;
@@ -201,9 +204,10 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
         controlsMap.put(Controls.TIME, playerView.findViewById(R.id.time_components));
     }
 
-    public void configView(boolean isVideo, boolean isLive, boolean hasCast) {
+    public void configView(boolean isVideo, boolean isLive, boolean isDVR, boolean hasCast) {
         this.isLive = isLive;
         this.isVideo = isVideo;
+        this.isDVR = isDVR;
         if (isVideo) {
             playerView.setControllerHideOnTouch(true);
             playerView.setControllerShowTimeoutMs(2 * 1000);
@@ -212,7 +216,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
             optionsMenuButton.setVisibility(this.hasMenu ? View.VISIBLE : View.GONE);
             if (isLive) {
                 castButton.setVisibility(View.GONE);
-                progressControls.setVisibility(View.INVISIBLE);
+                progressControls.setVisibility(isDVR ? View.VISIBLE : View.INVISIBLE);
                 liveButton.setVisibility(View.VISIBLE);
             } else {
                 castButton.setVisibility(hasCast ? View.VISIBLE : View.GONE);
@@ -499,8 +503,8 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
 
 
     /**
-     * This is the layout of the container before sambaplayer_ic_fullscreen mode has been entered.
-     * When we leave sambaplayer_ic_fullscreen mode, we restore the layout of the container to this layout.
+     * This is the layout of the container before fullscreen mode has been entered.
+     * When we leave fullscreen mode, we restore the layout of the container to this layout.
      */
     private ViewGroup.LayoutParams originalContainerLayoutParams;
 
@@ -561,9 +565,9 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
                     new View.OnSystemUiVisibilityChangeListener() {
                         @Override
                         public void onSystemUiVisibilityChange(int i) {
-                            // By doing a logical AND, we check if the sambaplayer_ic_fullscreen option is triggered (i.e. the
+                            // By doing a logical AND, we check if the fullscreen option is triggered (i.e. the
                             // status bar is hidden). If the result of the logical AND is 0, that means that the
-                            // sambaplayer_ic_fullscreen flag is NOT triggered. This means that the status bar is showing. If
+                            // fullscreen flag is NOT triggered. This means that the status bar is showing. If
                             // this is the case, then we show the playback controls as well (by calling show()).
                             if ((i & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
                                 if (!optionsMenuLayer.isVisible()) playerView.showController();
@@ -595,7 +599,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
 
         /**
          * When triggered, the activity should show any views that were hidden when the player
-         * went to sambaplayer_ic_fullscreen.
+         * went to fullscreen.
          */
         void onReturnFromFullscreen();
     }
@@ -670,7 +674,7 @@ public class  SambaSimplePlayerView implements View.OnClickListener {
                     hiddenViews.remove(view);
                 }
             }
-            configView(this.isVideo, this.isVideo, this.hasCast);
+            configView(this.isVideo, this.isVideo, this.isDVR, this.hasCast);
         } else {
             if (controls == null || controls.length == 0) {
                 for (Map.Entry<String, View> pair : controlsMap.entrySet()) {
