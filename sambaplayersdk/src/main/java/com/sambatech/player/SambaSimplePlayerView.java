@@ -706,10 +706,6 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     public void setChromeColor(int color) {
         topBar.setBackgroundColor(color);
         bottomBar.setBackgroundColor(color);
-
-		/*if (playbackControlRootView != null) {
-			updateColors();
-		}*/
     }
 
     public void setBackgroundColor(int color) {
