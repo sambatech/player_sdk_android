@@ -183,7 +183,8 @@ public class SambaPlayer extends FrameLayout {
         }
 
         @Override
-        public void onPlayerError(final ExoPlaybackException error) {
+        public void onPlayerError(final ExoPlaybackException e) {
+            final Exception error = (Exception) e.getCause();
             Log.d("SambaPlayer", "Error: " + media, error);
 
             String msg = "Você está offline! Verifique sua conexão.";
