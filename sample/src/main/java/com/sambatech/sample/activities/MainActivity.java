@@ -171,22 +171,6 @@ public class MainActivity extends Activity {
 			mediaInfoList.add(mediaInfo);
 		}
 
-		MediaInfo mediaInfo = new MediaInfo();
-		mediaInfo.setLiveChannelId("27770eee79431b416ff037d480ffe445");
-		mediaInfo.setProjectHash("7308d46a10eb5bef20e29516ca918f65");
-		mediaInfo.setEnvironment(SambaMediaRequest.Environment.PROD);
-		mediaInfo.setTitle("live dvr");
-		mediaInfoList.add(mediaInfo);
-
-		mediaInfo = new MediaInfo();
-		mediaInfo.setLiveChannelId("ee6173a0e6ef13685018b66048380e34");
-		mediaInfo.setProjectHash("5a8f0f94167b29abb186919ad5680466");
-		mediaInfo.setEnvironment(SambaMediaRequest.Environment.PROD);
-		mediaInfo.setTitle("live exemplo");
-		mediaInfo.setControlsEnabled(true);
-		mediaInfoList.add(mediaInfo);
-
-
 		showMediaList(mediaInfoList);
 	}
 
