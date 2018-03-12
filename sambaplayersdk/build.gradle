@@ -17,6 +17,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    lintOptions {
+        warningsAsErrors false
+        showAll true
+        abortOnError false
+        xmlReport true
+    }
 }
 
 sonarqube {
