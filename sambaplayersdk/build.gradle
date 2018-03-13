@@ -9,7 +9,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 27
         versionCode 38
-        versionName "v0.11.5"
+        versionName "v0.11.5-beta"
     }
     buildTypes {
         release {
