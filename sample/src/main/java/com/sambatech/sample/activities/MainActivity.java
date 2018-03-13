@@ -119,7 +119,6 @@ public class MainActivity extends Activity {
 
 	private void extractMediaList(ArrayList<LiquidMedia> mediaList) {
 		final List<MediaInfo> mediaInfoList = new ArrayList<>();
-
 		for (LiquidMedia m : mediaList) {
 			final MediaInfo mediaInfo = new MediaInfo();
 

@@ -192,40 +192,16 @@ public final class SambaCast {
 	 * Sends a pause message to the remote player.
 	 */
 	public void pauseCast(){
-		if(hasMediaSession(true)) {
-			sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, "{\"type\": \"pause\"}").setResultCallback(new ResultCallbacks<Status>() {
-				@Override
-				public void onSuccess(@NonNull Status status) {
-					Log.i("message", "Message Sent OK: namespace:" + CastOptionsProvider.CUSTOM_NAMESPACE + " message:" + CastOptionsProvider.CUSTOM_NAMESPACE);
-				}
-
-				@Override
-				public void onFailure(@NonNull Status status) {
-					Log.i("message", "Sending message failed");
-				}
-			});
-		}
+		String request = "{\"type\": \"pause\"}";
+		sendRequest(request);
 	}
 
 	/**
 	 * Sends a play message to the remote player.
 	 */
 	public void playCast(){
-		if(hasMediaSession(true)) {
-			sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, "{\"type\": \"play\"}").setResultCallback(new ResultCallbacks<Status>() {
-				@Override
-				public void onSuccess(@NonNull Status status) {
-					Log.i("message", "Message Sent OK: namespace:" + CastOptionsProvider.CUSTOM_NAMESPACE + " message:" + CastOptionsProvider.CUSTOM_NAMESPACE);
-				}
-
-				@Override
-				public void onFailure(@NonNull Status status) {
-					Log.i("message", "Sending message failed");
-				}
-			});
-		}
-
-		//seekTo(0);
+		String request = "{\"type\": \"play\"}";
+		sendRequest(request);
 	}
 
 	/**
@@ -233,22 +209,35 @@ public final class SambaCast {
 	 */
 	public void seekTo(int posisiton){
 		String seekRequest = String.format("{\"type\": \"seek\", \"data\": %s }", posisiton/1000);
-		if(hasMediaSession(true)) {
-			if(hasMediaSession(true)) {
-				sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, seekRequest).setResultCallback(new ResultCallbacks<Status>() {
-					@Override
-					public void onSuccess(@NonNull Status status) {
-						Log.i("message", "Message Sent OK: namespace:" + CastOptionsProvider.CUSTOM_NAMESPACE + " message:" + CastOptionsProvider.CUSTOM_NAMESPACE);
-					}
+		sendRequest(seekRequest);
+	}
 
-					@Override
-					public void onFailure(@NonNull Status status) {
-						Log.i("message", "Sending message failed");
-					}
+	/**
+	 * Sends a seek message to the remote player.
+	 */
+	public void changeSubtitle(String lang){
+		String data = String.format("{\"lang\": \"%s\"}", lang);
+		if(lang == null) {
+			data = "{\"lang\": \"none\"}";
+		}
+		String seekRequest = String.format("{\"type\": \"changeSubtitle\", \"data\": %s }", data);
+		sendRequest(seekRequest);
+
+	}
+
+	private void sendRequest(String request) {
+		if(hasMediaSession(true)) {
+			sessionManager.getCurrentCastSession().sendMessage(CastOptionsProvider.CUSTOM_NAMESPACE, request).setResultCallback(new ResultCallbacks<Status>() {
+				@Override
+				public void onSuccess(@NonNull Status status) {
+					Log.i("message", "Message Sent OK: namespace:" + CastOptionsProvider.CUSTOM_NAMESPACE + " message:" + CastOptionsProvider.CUSTOM_NAMESPACE);
+				}
+				@Override public void onFailure(@NonNull Status status) {
+					Log.i("message", "Sending message failed");}
 				});
-			}
 		}
 	}
+
 
 	/**
 	 * Enables/Disables listening for remote progress event.
@@ -335,4 +324,7 @@ public final class SambaCast {
 		return isCastSessionValid;
 	}
 
+	public CastContext getCastContext() {
+		return castContext;
+	}
 }

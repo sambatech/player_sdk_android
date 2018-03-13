@@ -1,6 +1,7 @@
 package com.sambatech.player.adapter;
 
 import android.content.Context;
+import android.media.MediaFormat;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +10,8 @@ import android.widget.BaseAdapter;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
-import com.google.android.exoplayer.MediaFormat;
+import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.source.TrackGroup;
 import com.sambatech.player.R;
 import com.sambatech.player.SambaPlayer;
 
@@ -19,28 +21,29 @@ import com.sambatech.player.SambaPlayer;
 
 public class OutputSheetAdapter extends BaseAdapter {
 
+    public int currentIndex = -1;
+    private int offset = 0;
+
     private final @NonNull
     Context context;
-    private final @NonNull MediaFormat[] outputs;
     private final @NonNull
-    SambaPlayer player;
-    private final int outputOffset;
+    TrackGroup outputs;
 
-    public OutputSheetAdapter(@NonNull Context context, @NonNull MediaFormat[] outputs, @NonNull SambaPlayer player, int outputOffset) {
+    public OutputSheetAdapter(@NonNull Context context, @NonNull TrackGroup outputs, boolean abrEnabled) {
         this.context = context;
         this.outputs = outputs;
-        this.player = player;
-        this.outputOffset = outputOffset;
+        this.offset = abrEnabled ? 1 : 0;
     }
 
     @Override
     public int getCount() {
-        return outputs.length - outputOffset;
+        return outputs.length + offset;
     }
 
     @Override
     public Object getItem(int position) {
-        return outputs[position + outputOffset];
+        if (offset == 1 && position == 0) return null;
+        return outputs.getFormat(position - offset);
     }
 
     @Override
@@ -54,20 +57,21 @@ public class OutputSheetAdapter extends BaseAdapter {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        final MediaFormat output = (MediaFormat) getItem(position);
+        final Format output = (Format) getItem(position);
         OutputSheetAdapter.OutputItem holder;
 
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.action_sheet_item, parent, false);
             holder = new OutputSheetAdapter.OutputItem(convertView);
-
             convertView.setTag(holder);
         }
         else holder = (OutputSheetAdapter.OutputItem) convertView.getTag();
 
-        holder.label.setText(output.adaptive ? "Auto" : output.height > 0 ?
-                output.height + "p" : Math.round(output.bitrate/1000f) + "k");
-        holder.radio.setChecked(position == player.getCurrentOutputIndex());
+        if (output == null)
+            holder.label.setText(R.string.qualitty_auto);
+        else
+            holder.label.setText(output.height > 0 ? output.height + "p" : Math.round(output.bitrate/1000f) + "k");
+        holder.radio.setChecked(currentIndex == position);
 
         return convertView;
     }

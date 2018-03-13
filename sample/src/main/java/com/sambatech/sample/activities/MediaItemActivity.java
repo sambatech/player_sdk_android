@@ -1,6 +1,7 @@
 package com.sambatech.sample.activities;
 
 import android.app.Activity;
+import android.drm.DrmInfoRequest;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,7 +10,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.SambaApi;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.cast.CastOptionsProvider;
@@ -23,6 +23,8 @@ import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.model.SambaPlayerError;
+import com.sambatech.player.plugins.DrmRequest;
+import com.sambatech.player.utils.Controls;
 import com.sambatech.sample.MainApplication;
 import com.sambatech.sample.R;
 import com.sambatech.sample.model.EntitlementScheme;
@@ -94,8 +96,8 @@ public class MediaItemActivity extends Activity {
 	 * onPause - triggered when the media is paused
 	 * onStop - triggered when the player is destroyed
 	 * onFinish - triggered when the media is finished
-	 * onFullscreen - triggered when the fullscreen is enabled
-	 * onFullscreenExit - triggered when the user exit the fullscreen
+	 * onFullscreen - triggered when the sambaplayer_ic_fullscreen is enabled
+	 * onFullscreenExit - triggered when the user exit the sambaplayer_ic_fullscreen
 	 *
 	 */
 	private SambaPlayerListener playerListener = new SambaPlayerListener() {
@@ -157,6 +159,11 @@ public class MediaItemActivity extends Activity {
 		@Override
 		public void onProgress(SambaEvent event) {
 			status.setText(String.format("Status: %s", event.getType()));
+			Log.d("Player Time", "current: " + player.getCurrentTime() + " total: " + player.getDuration());
+
+			Log.d("Player CurrentOut", "current: " + player.getCurrentOutputIndex());
+
+			Log.d("Player CurrentCap", "current cap: " + player.getCurrentCaptionIndex() + " lenguage: " + player.getCaption());
 		}
 	};
 
@@ -191,7 +198,7 @@ public class MediaItemActivity extends Activity {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		destroy();
+		player.pause();
     }
 
 	@Override
@@ -207,7 +214,7 @@ public class MediaItemActivity extends Activity {
 
 
 		if(!sambaCast.isCasting()) {
-			if (player != null && player.hasStarted())
+			//if (player != null && player.hasStarted())
 				player.pause();
 		}
     }
@@ -315,7 +322,7 @@ public class MediaItemActivity extends Activity {
 
 		// enabling Chromecast on player
 		player.setSambaCast(sambaCast);
-	    player.setEnableControls(activityMedia.isControlsEnabled());
+	    player.setControlsVisibility(activityMedia.isControlsEnabled());
 	    player.setMedia(media);
 
 		//ti = new Date().getTime();
@@ -333,7 +340,6 @@ public class MediaItemActivity extends Activity {
 	@Override
 	protected void onStop() {
 		super.onStop();
-		destroy();
 	}
 
 	@OnClick(R.id.play) public void playHandler() {
@@ -348,7 +354,7 @@ public class MediaItemActivity extends Activity {
 
 	@OnClick(R.id.hide_controls) public void hideControlsHandler() {
 		if (player != null)
-			player.setHideControls(SambaPlayer.Controls.SEEKBAR, SambaPlayer.Controls.FULLSCREEN, SambaPlayer.Controls.MENU);
+			player.setHideControls(Controls.PLAY_LARGE, Controls.FULLSCREEN, Controls.MENU);
 	}
 
 	@OnClick(R.id.create_session) public void createSessionHandler() {
@@ -462,6 +468,5 @@ public class MediaItemActivity extends Activity {
 	private void destroy() {
 		SambaEventBus.unsubscribe(playerListener);
 		player.destroy();
-		finish();
 	}
 }

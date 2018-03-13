@@ -46,5 +46,4 @@ publish() {
 	ret=$v
 }
 
-publish googlemediaframework gmf
-publish sambaplayersdk sdk-android gmf $ret
+publish sambaplayersdk sdk-android $ret

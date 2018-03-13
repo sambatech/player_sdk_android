@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingRight="16dp"
+    android:paddingLeft="16dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:textSize="16sp"
+        android:textColor="#8C000000"
+        android:background="@android:color/white"
+        android:gravity="center_vertical"
+        android:text="Qualidade"
+        android:id="@+id/action_sheet_title"/>
+
+    <ListView
+        android:requiresFadingEdge="vertical"
+        android:fadingEdgeLength="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/sheet_list"
+        android:scrollbars="none"
+        android:background="@android:color/white"
+        android:dividerHeight="1dp"
+        android:divider="#0D000000"/>
+
+</LinearLayout>

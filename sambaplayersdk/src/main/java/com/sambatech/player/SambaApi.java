@@ -5,7 +5,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
@@ -313,12 +312,12 @@ public class SambaApi {
 				JSONObject drm = playerSecurity.optJSONObject("drmSecurity");
 
 				if (drm != null) {
-					media.drmRequest = new DrmRequest(drm.optString("widevineSignatureURL"));
-					media.drmRequest.addLicenseParam("SubContentType", drm.optString("subContentType", "Default"));
-					media.drmRequest.addLicenseParam("CrmId", drm.optString("crmId"));
-					media.drmRequest.addLicenseParam("AccountId", drm.optString("accountId"));
-					media.drmRequest.addLicenseParam("ContentId", drm.optString("contentId"));
-					media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
+//					media.drmRequest = new DrmRequest(drm.optString("widevineSignatureURL"));
+//					media.drmRequest.addLicenseParam("SubContentType", drm.optString("subContentType", "Default"));
+//					media.drmRequest.addLicenseParam("CrmId", drm.optString("crmId"));
+//					media.drmRequest.addLicenseParam("AccountId", drm.optString("accountId"));
+//					media.drmRequest.addLicenseParam("ContentId", drm.optString("contentId"));
+//					media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
 				}
 
 				media.blockIfRooted = playerSecurity.optBoolean("rootedDevices", false);
@@ -355,9 +354,11 @@ public class SambaApi {
 				langLookup.put("pt-br", "Português");
 				langLookup.put("en-us", "Inglês");
 				langLookup.put("es-es", "Espanhol");
-								langLookup.put("it-it", "Italiano");
-								langLookup.put("fr-fr", "Francês");
-								langLookup.put("disable", "Desativar");
+				langLookup.put("it-it", "Italiano");
+				langLookup.put("fr-fr", "Francês");
+				langLookup.put("zh-cn", "Chinês");
+				langLookup.put("ru-ru", "Russo");
+				langLookup.put("disable", "Desativar");
 
 			    // captionArray
 			    for (int j = captions.length(); j-- > 0;) {
@@ -391,6 +392,7 @@ public class SambaApi {
 
 			media.backupUrls = request.backupUrls;
 			media.isLive = true;
+			media.isDvr = json.getJSONObject("liveOutput").has("dvr") ? json.getJSONObject("liveOutput").getBoolean("dvr") : false;
 
 			// media type relies on URL
 			if (media.url.contains(".m3u8"))

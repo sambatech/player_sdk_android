@@ -2,7 +2,7 @@ package com.sambatech.player.plugins;
 
 import android.support.annotation.NonNull;
 
-import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.sambatech.player.SambaPlayer;
 
 /**
@@ -24,7 +24,7 @@ interface Plugin {
 	 *
 	 * @param internalPlayer Instance of internal player (GMF)
 	 */
-	void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer);
+	void onInternalPlayerCreated(@NonNull SimpleExoPlayerView internalPlayer);
 
 	/**
 	 * Dispatched when player gets destroyed.
