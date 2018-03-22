@@ -709,7 +709,6 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 		FrameLayout container = getLayerManager().getContainer();
 
 		if (isFullscreen) {
-			fullscreenCallback.onReturnFromFullscreen();
 			//activity.setRequestedOrientation(savedOrientation);
 			activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
@@ -721,8 +720,8 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			fullscreenButton.setImageResource(R.drawable.fullscreen);
 
 			isFullscreen = false;
+			fullscreenCallback.onReturnFromFullscreen();
 		} else {
-			fullscreenCallback.onGoToFullscreen();
 			savedOrientation = activity.getResources().getConfiguration().orientation;
 			activity.setRequestedOrientation(isReverseLandscape ? ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE :
 					ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -753,6 +752,7 @@ public class PlaybackControlLayer implements Layer, PlayerControlCallback {
 			fullscreenButton.setImageResource(R.drawable.fullscreen_exit);
 
 			isFullscreen = true;
+			fullscreenCallback.onGoToFullscreen();
 		}
 	}
 
