@@ -10,7 +10,7 @@ public class CastObject {
 	
     private String title;
     private String m;
-    private double duration;
+    private long duration;
     private String theme;
     private String ph;
     private CastQuery qs;
@@ -27,7 +27,7 @@ public class CastObject {
     
         this.title = json.optString("title");
         this.m = json.optString("m");
-        this.duration = json.optDouble("duration");
+        this.duration = json.optLong("duration");
         this.theme = json.optString("theme");
         this.ph = json.optString("ph");
         this.qs = new CastQuery(json.optJSONObject("qs"));
@@ -36,7 +36,7 @@ public class CastObject {
 
     }
 
-    public CastObject(String title, String m, double duration, String theme, String ph, CastQuery qs, String thumbURL, String baseURL) {
+    public CastObject(String title, String m, long duration, String theme, String ph, CastQuery qs, String thumbURL, String baseURL) {
         this.title = title;
         this.m = m;
         this.duration = duration;
@@ -63,11 +63,11 @@ public class CastObject {
         this.m = m;
     }
 
-    public double getDuration() {
+    public long getDuration() {
         return this.duration;
     }
 
-    public void setDuration(double duration) {
+    public void setDuration(long duration) {
         this.duration = duration;
     }
 

@@ -9,7 +9,7 @@ dependencies:
 
 compile:
   override:
-    - cd googlemediaframework && ../gradlew assembleRelease --stacktrace
+    - ./gradlew sambaplayersdk:lintRelease
     - cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
   post:
     - wget https://s3.amazonaws.com/circleci-dependencies/player/sensitive-data/build-vars-enc

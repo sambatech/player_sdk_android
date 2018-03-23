@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
@@ -66,7 +66,7 @@ class Tracking implements Plugin {
 		PluginManager.getInstance().notifyPluginLoaded(this);
 	}
 
-	public void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer) {}
+	public void onInternalPlayerCreated(@NonNull SimpleExoPlayerView internalPlayer) {}
 
 	public void onDestroy() {
 		Log.i("track", "destroy");

@@ -1,6 +1,7 @@
 package com.sambatech.player.model;
 
-import com.google.android.libraries.mediaframework.exoplayerextensions.DrmRequest;
+
+import com.sambatech.player.plugins.DrmRequest;
 import com.sambatech.player.utils.Helpers;
 
 import java.lang.reflect.Field;

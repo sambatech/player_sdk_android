@@ -5,8 +5,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
-import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
-import com.google.android.libraries.mediaframework.layeredvideo.SubtitleLayer;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.ui.SubtitleView;
 import com.sambatech.player.R;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.adapter.CaptionsSheetAdapter;
@@ -26,7 +27,7 @@ import java.util.HashMap;
  */
 public final class Captions extends SambaPlayerListener implements Plugin {
 
-	private SubtitleLayer _subtitleLayer;
+	private SubtitleView _subtitleLayer;
 	private SambaPlayer _player;
 	private @NonNull ArrayList<SambaMedia.Caption> _captionsRequest = new ArrayList<>();
 	private SambaMedia.CaptionsConfig _config;
@@ -34,7 +35,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 	private Caption _currentCaption;
 	private int _currentIndex = -1;
 	private boolean _parsed;
-	private SimpleVideoPlayer _internalPlayer;
+	private SimpleExoPlayerView _internalPlayer;
 
 	private static final class Caption {
 		final int index;
@@ -61,7 +62,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 		// clean up
 		_parsed = false;
 		_currentCaption = null;
-		_subtitleLayer.onText("");
+		//_subtitleLayer.onText("");
 
 		SambaMedia.Caption captionRequest = _captionsRequest.get(index);
 
@@ -111,13 +112,13 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 
 	// on view available
 	@Override
-	public void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer) {
+	public void onInternalPlayerCreated(@NonNull SimpleExoPlayerView internalPlayer) {
 		_internalPlayer = internalPlayer;
-		_subtitleLayer = internalPlayer.getSubtitleLayer();
+		_subtitleLayer = internalPlayer.getSubtitleView();
 
 		if (_config != null) {
-			_subtitleLayer.getTextView().setTextColor(_config.color);
-			_subtitleLayer.getTextView().setTextSize(_config.size);
+			//_subtitleLayer.get.setTextColor(_config.color);
+			//_subtitleLayer.getTextView().setTextSize(_config.size);
 		}
 
 		changeMenuItem(_currentIndex);
@@ -166,7 +167,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 
 			// if caption has changed
 			if (_currentCaption == null || _currentCaption.index != caption.index) {
-				_subtitleLayer.onText(caption.text);
+				//_subtitleLayer.onText(caption.text);
 				_currentCaption = caption;
 			}
 
@@ -174,7 +175,7 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 		}
 
 		if (notFound) {
-			_subtitleLayer.onText("");
+			//_subtitleLayer.onText("");
 			_currentCaption = null;
 		}
 	}
@@ -183,10 +184,10 @@ public final class Captions extends SambaPlayerListener implements Plugin {
 		if (index == -1) return;
 
 		// select menu item
-		final View captionsMenu = _internalPlayer.getCaptionMenu();
+		//final View captionsMenu = _internalPlayer.getCaptionMenu();
 
-		if (captionsMenu != null)
-			((CaptionsSheetAdapter)((ListView)captionsMenu.findViewById(R.id.sheet_list)).getAdapter()).currentIndex = index;
+		//if (captionsMenu != null)
+		//	((CaptionsSheetAdapter)((ListView)captionsMenu.findViewById(R.id.sheet_list)).getAdapter()).currentIndex = index;
 	}
 
 	private void parse(String captionsText) {

@@ -2,20 +2,27 @@ apply plugin: 'com.android.library'
 apply plugin: 'org.sonarqube'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 27
     buildToolsVersion '26.0.2'
 
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 25
-        versionCode 32
-        versionName "v0.10.9-beta"
+        targetSdkVersion 27
+        versionCode 39
+        versionName "v0.11.6-beta"
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    lintOptions {
+        warningsAsErrors false
+        showAll true
+        abortOnError false
+        xmlReport true
     }
 }
 
@@ -33,19 +40,21 @@ sonarqube {
 
 dependencies {
     // DEV
-    compile project(':googlemediaframework')
-
+    //compile project(':googlemediaframework')
     // PROD
     /*compile('com.sambatech.player:gmf:0.2.1-5-dev') {
-        // DEPLOY
-        transitive=true
-    }*/
-
+                // DEPLOY
+                transitive=true
+            }*/
     testCompile 'junit:junit:4.12'
-    compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
-    compile 'com.google.android.gms:play-services-ads:11.6.0'
-    compile 'com.google.android.gms:play-services-cast-framework:11.6.0'
-    compile 'org.bitbucket.b_c:jose4j:0.4.4'
+    //compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
+    //compile 'com.google.android.gms:play-services-ads:11.6.2'
+    compile 'com.google.android.gms:play-services-cast-framework:11.4.2'
+    compile 'org.bitbucket.b_c:jose4j:0.6.3'
+    compile 'com.google.android.exoplayer:exoplayer:2.6.1'
+    compile 'com.google.android.exoplayer:extension-ima:2.6.1'
+    compile 'com.android.support:design:27.0.2'
+    //compile 'com.google.android.exoplayer:extension-cast:2.6.1'
 }
 
 //PUBLISHING

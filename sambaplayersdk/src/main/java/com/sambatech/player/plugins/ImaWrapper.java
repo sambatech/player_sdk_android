@@ -1,3 +1,4 @@
+/*
 package com.sambatech.player.plugins;
 
 import android.app.Activity;
@@ -40,118 +41,154 @@ import com.sambatech.player.model.SambaMediaConfig;
 import java.util.ArrayList;
 import java.util.List;
 
+*/
 /**
  * The ImaWrapper is responsible for displaying both videos and ads. This is accomplished using two
  * video players. The content player displays the user's video. When an ad is requested, the ad
  * video player is overlaid on the content video player. When the ad is complete, the ad video
  * player is destroyed and the content video player is displayed again.
- */
+ *//*
+
 public class ImaWrapper implements Plugin {
 
 	private static String PLAYER_TYPE = "google/gmf-android";
 	private static String PLAYER_VERSION = "0.2.1";
 
-	/**
+	*/
+/**
 	 * The activity that is displaying this video player.
-	 */
+	 *//*
+
 	private Activity activity;
 
-	/**
+	*/
+/**
 	 * Url of the ad.
-	 */
+	 *//*
+
 	private Uri adTagUrl;
 
-	/**
+	*/
+/**
 	 * Plays the ad.
-	 */
+	 *//*
+
 	private SimpleVideoPlayer adPlayer;
 
-	/**
+	*/
+/**
 	 * The layout that contains the ad player.
-	 */
+	 *//*
+
 	private FrameLayout adPlayerContainer;
 
-	/**
+	*/
+/**
 	 * Used by the IMA SDK to overlay controls (i.e. skip ad) over the ad player.
-	 */
+	 *//*
+
 	private FrameLayout adUiContainer;
 
-	/**
+	*/
+/**
 	 * Responsible for requesting the ad and creating the
 	 * {@link com.google.ads.interactivemedia.v3.api.AdsManager}
-	 */
+	 *//*
+
 	private AdsLoader adsLoader;
 
 
-	/**
+	*/
+/**
 	 * Responsible for containing listeners for processing the elements of the ad.
-	 */
+	 *//*
+
 	private AdsManager adsManager;
 
 	private AdListener adListener;
 
-	/**
+	*/
+/**
 	 * These callbacks are notified when the video is played and when it ends. The IMA SDK uses this
 	 * to poll for video progress and when to stop the ad.
-	 */
+	 *//*
+
 	private List<VideoAdPlayer.VideoAdPlayerCallback> callbacks;
 
-	/**
+	*/
+/**
 	 * Contains the content player and the ad frame layout.
-	 */
+	 *//*
+
 	private FrameLayout container;
 
-	/**
+	*/
+/**
 	 * Plays the content (i.e. the actual video).
-	 */
+	 *//*
+
 	private SambaPlayer contentPlayer;
 
-	/**
+	*/
+/**
 	 * The callback that is triggered when fullscreen mode is entered or closed.
-	 */
+	 *//*
+
 	private PlaybackControlLayer.FullscreenCallback fullscreenCallback;
 
-	/**
+	*/
+/**
 	 * Last recorded progress in ad playback. Occasionally the ad pauses when it needs to buffer (and
 	 * progress stops), so it must be resumed. We detect this situation by noting if the difference
 	 * "current progress" - "last recorded progress" = 0. If this occurs, then we can pause the
 	 * video and replay it. This causes the ad to continue playback again.
-	 */
+	 *//*
+
 	private VideoProgressUpdate oldVpu;
 
-	/**
+	*/
+/**
 	 * This is the layout of the container before fullscreen mode has been entered.
 	 * When we leave fullscreen mode, we restore the layout of the container to this layout.
-	 */
+	 *//*
+
 	private ViewGroup.LayoutParams originalContainerLayoutParams;
 
 	private ContentProgressProvider contentProgressProvider;
 
-	/**
+	*/
+/**
 	 * A flag to indicate whether the ads has been shown.
-	 */
+	 *//*
+
 	private boolean adsShown;
 
-	/**
+	*/
+/**
 	 * Notifies callbacks when the ad finishes.
-	 */
+	 *//*
+
 	private final ExoplayerWrapper.PlaybackListener adPlaybackListener
 			= new ExoplayerWrapper.PlaybackListener() {
 
-		/**
+		*/
+/**
 		 * We don't respond to errors.
 		 * @param e The error.
-		 */
+		 *//*
+
 		@Override
 		public void onError(Exception e) {
 			Log.i("ima", "ad player error: " + e.getMessage());
 		}
 
-		/**
+		*/
+/**
 		 * We notify all callbacks when the ad ends.
 		 * @param playWhenReady Whether the video should play as soon as it is loaded.
 		 * @param playbackState The state of the Exoplayer instance.
-		 */
+		 *//*
+
 		@Override
 		public void onStateChanged(boolean playWhenReady, int playbackState) {
 			if (playbackState == ExoPlayer.STATE_ENDED) {
@@ -168,9 +205,11 @@ public class ImaWrapper implements Plugin {
 	};
 
 
-	/**
+	*/
+/**
 	 * Sets up ads manager, responds to ad errors, and handles ad state changes.
-	 */
+	 *//*
+
 	private class AdListener implements AdErrorEvent.AdErrorListener,
 			AdsLoader.AdsLoadedListener, AdEvent.AdEventListener {
 
@@ -240,9 +279,11 @@ public class ImaWrapper implements Plugin {
 		}
 	}
 
-	/**
+	*/
+/**
 	 * Handles loading, playing, retrieving progress, pausing, resuming, and stopping ad.
-	 */
+	 *//*
+
 	private final VideoAdPlayer videoAdPlayer = new VideoAdPlayer() {
 		@Override
 		public void playAd() {
@@ -290,7 +331,8 @@ public class ImaWrapper implements Plugin {
 			callbacks.remove(videoAdPlayerCallback);
 		}
 
-		/**
+		*/
+/**
 		 * Reports progress in ad player or content player (whichever is currently playing).
 		 *
 		 * NOTE: When the ad is buffering, the video is paused. However, when the buffering is
@@ -298,7 +340,8 @@ public class ImaWrapper implements Plugin {
 		 * calling the start method, whenever we detect that the ad is buffering. If the ad is done
 		 * buffering, the start method will resume playback. If the ad has not finished buffering,
 		 * then the start method will be ignored.
-		 */
+		 *//*
+
 		@Override
 		public VideoProgressUpdate getAdProgress() {
 			VideoProgressUpdate vpu = adPlayer != null && adPlayer.getDuration() > 0 ?
@@ -417,25 +460,31 @@ public class ImaWrapper implements Plugin {
 		release();
 	}
 
-	/**
+	*/
+/**
 	 * Pause video playback.
-	 */
+	 *//*
+
 	public void pause() {
 		if (adPlayer != null)
 			adPlayer.pause();
 	}
 
-	/**
+	*/
+/**
 	 * Resume video playback.
-	 */
+	 *//*
+
 	public void play() {
 		if (adTagUrl != null)
 			requestAd();
 	}
 
-	/**
+	*/
+/**
 	 * When you are finished using this {@link ImaWrapper}, make sure to call this method.
-	 */
+	 *//*
+
 	public void release() {
 		if (adPlayer != null) {
 			adPlayer.release();
@@ -454,9 +503,11 @@ public class ImaWrapper implements Plugin {
 		}
 	}
 
-	/**
+	*/
+/**
 	 * Create a {@link SimpleVideoPlayer} to play an ad and display it.
-	 */
+	 *//*
+
 	private void createAdPlayer(){
 		// Kill any existing ad player.
 		destroyAdPlayer();
@@ -499,9 +550,11 @@ public class ImaWrapper implements Plugin {
 		adPlayer.setFullscreen(contentPlayer.isFullscreen());
 	}
 
-	/**
+	*/
+/**
 	 * Destroy the {@link SimpleVideoPlayer} responsible for playing the ad and remove it.
-	 */
+	 *//*
+
 	private void destroyAdPlayer(){
 		if(adPlayerContainer != null){
 			container.removeView(adPlayerContainer);
@@ -517,17 +570,21 @@ public class ImaWrapper implements Plugin {
 		adPlayer = null;
 	}
 
-	/**
+	*/
+/**
 	 * Pause and hide the content player.
-	 */
+	 *//*
+
 	private void hideContentPlayer(){
 		contentPlayer.pause();
 		contentPlayer.hide();
 	}
 
-	/**
+	*/
+/**
 	 * Show the content player and start playing again.
-	 */
+	 *//*
+
 	private void showContentPlayer() {
 		if(contentPlayer == null)
 			return;
@@ -538,9 +595,11 @@ public class ImaWrapper implements Plugin {
 			contentPlayer.play();
 	}
 
-	/**
+	*/
+/**
 	 * Pause the content player and notify the ad callbacks that the content has paused.
-	 */
+	 *//*
+
 	private void pauseContent() {
 		hideContentPlayer();
 		for (VideoAdPlayer.VideoAdPlayerCallback callback : callbacks) {
@@ -548,9 +607,11 @@ public class ImaWrapper implements Plugin {
 		}
 	}
 
-	/**
+	*/
+/**
 	 * Resume the content and notify the ad callbacks that the content has resumed.
-	 */
+	 *//*
+
 	private void resumeContent() {
 		if(contentPlayer == null) return;
 
@@ -564,11 +625,13 @@ public class ImaWrapper implements Plugin {
 		}
 	}
 
-	/**
+	*/
+/**
 	 * Create an ads request which will request the VAST document with the given ad tag URL.
 	 * @param tagUrl URL pointing to a VAST document of an ad.
 	 * @return a request for the VAST document.
-	 */
+	 *//*
+
 	private AdsRequest buildAdsRequest(String tagUrl) {
 		AdDisplayContainer adDisplayContainer = ImaSdkFactory.getInstance().createAdDisplayContainer();
 		adDisplayContainer.setPlayer(videoAdPlayer);
@@ -583,11 +646,14 @@ public class ImaWrapper implements Plugin {
 		return request;
 	}
 
-	/**
+	*/
+/**
 	 * Make the ads loader request an ad with the ad tag URL which this {@link ImaWrapper} was
 	 * created with
-	 */
+	 *//*
+
 	private void requestAd() {
 		adsLoader.requestAds(buildAdsRequest(adTagUrl.toString()));
 	}
 }
+*/

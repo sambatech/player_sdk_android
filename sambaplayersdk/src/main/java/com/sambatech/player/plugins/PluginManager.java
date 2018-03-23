@@ -2,7 +2,7 @@ package com.sambatech.player.plugins;
 
 import android.support.annotation.NonNull;
 
-import com.google.android.libraries.mediaframework.layeredvideo.SimpleVideoPlayer;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.sambatech.player.SambaPlayer;
 
 /**
@@ -31,7 +31,7 @@ public class PluginManager implements Plugin {
 		pluginsLoaded = 0;
 
 		plugins = new Plugin[] {
-				new ImaWrapper(),
+				//new ImaWrapper(),
 				new Tracking(),
 				new Captions()
 		};
@@ -40,7 +40,7 @@ public class PluginManager implements Plugin {
 			plugin.onLoad(player);
 	}
 
-	public void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer) {
+	public void onInternalPlayerCreated(@NonNull SimpleExoPlayerView internalPlayer) {
 		for (Plugin plugin : plugins)
 			plugin.onInternalPlayerCreated(internalPlayer);
 	}
