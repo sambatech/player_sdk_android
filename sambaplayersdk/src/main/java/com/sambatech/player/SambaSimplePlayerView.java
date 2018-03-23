@@ -542,7 +542,6 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         if (fullscreenCallback == null) return;
         final Activity activity = (Activity) context;
         if (newValue == false) {
-            fullscreenCallback.onReturnFromFullscreen();
             activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
             // Make the status bar and navigation bar visible again.
@@ -552,8 +551,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             fullscreenButton.setImageResource(R.drawable.sambaplayer_ic_fullscreen);
             this.isFullscreen = newValue;
             this.isReverseLandscape = isReverseLandscape;
+            fullscreenCallback.onReturnFromFullscreen();
         } else {
-            fullscreenCallback.onGoToFullscreen();
             activity.setRequestedOrientation(isReverseLandscape ?
                     ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE :
                     ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -588,6 +587,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             fullscreenButton.setImageResource(R.drawable.sambaplayer_ic_fullscreen_exit);
             this.isFullscreen = newValue;
             this.isReverseLandscape = isReverseLandscape;
+            fullscreenCallback.onGoToFullscreen();
         }
     }
 
