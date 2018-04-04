@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 27
-        versionCode 39
-        versionName "v0.11.6-beta"
+        versionCode 40
+        versionName "v0.11.7-beta"
     }
     buildTypes {
         release {
@@ -39,28 +39,11 @@ sonarqube {
 }
 
 dependencies {
-    // DEV
-    //compile project(':googlemediaframework')
-    // PROD
-    /*compile('com.sambatech.player:gmf:0.2.1-5-dev') {
-                // DEPLOY
-                transitive=true
-            }*/
+
     testCompile 'junit:junit:4.12'
-    //compile 'com.google.ads.interactivemedia.v3:interactivemedia:3.7.4'
-    //compile 'com.google.android.gms:play-services-ads:11.6.2'
     compile 'com.google.android.gms:play-services-cast-framework:11.4.2'
     compile 'org.bitbucket.b_c:jose4j:0.6.3'
     compile 'com.google.android.exoplayer:exoplayer:2.6.1'
     compile 'com.google.android.exoplayer:extension-ima:2.6.1'
     compile 'com.android.support:design:27.0.2'
-    //compile 'com.google.android.exoplayer:extension-cast:2.6.1'
 }
-
-//PUBLISHING
-
-/*GROUP="com.sambatech.player"
-POM_ARTIFACT_ID="gmf"
-VERSION_NAME="0.2.0"
-
-apply from: "${rootDir}/utils/publish.gradle"*/
