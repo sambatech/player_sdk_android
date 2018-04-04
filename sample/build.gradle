@@ -33,7 +33,7 @@ dependencies {
 
 
     // PROD
-    //compile 'com.sambatech.player:sdk-android:0.11.0-dev'
+    //compile 'com.sambatech.player:sdk-android:0.11.7-beta'
 
     compile 'org.bitbucket.b_c:jose4j:0.6.3'
     compile 'com.mcxiaoke.volley:library:1.0.19'

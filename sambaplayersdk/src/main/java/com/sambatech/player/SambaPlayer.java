@@ -771,6 +771,8 @@ public class SambaPlayer extends FrameLayout {
         simplePlayerView.configView(!media.isAudioOnly, media.isLive, media.isDvr, sambaCast != null);
         simplePlayerView.setEnableControls(_enableControls);
 
+        if (media.url.toLowerCase().endsWith(".mp3"))
+            media.type = "progressive";
 
         switch (media.type.toLowerCase()) {
             case "hls":
