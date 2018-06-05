@@ -39,9 +39,9 @@ publish() {
 
 	# JFrog docs: https://www.jfrog.com/confluence/display/CLI/CLI+for+JFrog+Bintray
 	# configuring repo client tool
-	./jfrog bt config --user $repoUser --key $repoApiKey --licenses MIT --interactive false
+	./jfrog bt c --user $repoUser --key $repoApiKey --licenses MIT
 	# uploading artifacts to repo
-	./jfrog bt u "$output/$2*" "sambatech/maven/sdk-android/beta2" "com/sambatech/player/$2/$v/" --publish true --override true
+	./jfrog bt u "$output/$2*" "sambatech/maven/sdk-android/beta2" "com/sambatech/player/$2/$v/" --publish=true --override=true
 
 	ret=$v
 }
