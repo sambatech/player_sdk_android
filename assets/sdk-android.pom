@@ -38,7 +38,13 @@
     <dependency>
       <groupId>com.android.support</groupId>
       <artifactId>design</artifactId>
-      <version>27.0.2</version>
+      <version>27.1.1</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.bumptech.glide</groupId>
+      <artifactId>glide</artifactId>
+      <version>4.7.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

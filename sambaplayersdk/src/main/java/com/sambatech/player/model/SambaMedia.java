@@ -28,6 +28,7 @@ public class SambaMedia {
 	public ArrayList<Caption> captions;
 	public @NonNull CaptionsConfig captionsConfig = new CaptionsConfig();
 	public String drmToken;
+	public String thumbAudioURL;
 
 	public SambaMedia() {}
 
@@ -48,6 +49,7 @@ public class SambaMedia {
 		captions = media.captions;
 		captionsConfig = media.captionsConfig;
 		drmToken = media.drmToken;
+		thumbAudioURL = media.thumbAudioURL;
 	}
 
 	public static class Output {

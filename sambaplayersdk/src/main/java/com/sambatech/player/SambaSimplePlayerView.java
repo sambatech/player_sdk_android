@@ -7,7 +7,9 @@ import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
 import android.view.View;
@@ -15,11 +17,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
@@ -61,6 +69,10 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     private SimpleExoPlayerView playerView;
     private OptionsMenuLayer optionsMenuLayer;
     private FrameLayout loadingView;
+
+    //Thumb audio
+    private FrameLayout thumbAudioLayout;
+    private ImageView thumbAudioImage;
 
     //bottom buttons e  progresso
     private LinearLayout progressControls;
@@ -174,6 +186,9 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         pauseSmallButton = playerView.findViewById(R.id.small_pause);
         smallPlayPauseContainer = playerView.findViewById(R.id.play_pause_container);
         smallProgressBar = playerView.findViewById(R.id.small_progress);
+        thumbAudioLayout = playerView.findViewById(R.id.thumb_audio_layout);
+        thumbAudioImage = playerView.findViewById(R.id.thumb_audio_image);
+
         fullscreenButton.setOnClickListener(this);
         optionsMenuButton.setOnClickListener(this);
         liveButton.setOnClickListener(this);
@@ -709,7 +724,31 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     }
 
     public void setBackgroundColor(int color) {
+        thumbAudioLayout.setVisibility(View.GONE);
         playerView.findViewById(R.id.exo_playback_layout).setBackgroundColor(color);
+    }
+
+    public void setBackgroundImageThumb(String url) {
+        if (url != null && !url.isEmpty()) {
+            thumbAudioLayout.setVisibility(View.VISIBLE);
+            Glide.with(context)
+                    .load(url)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            setBackgroundColor(0xFF434343);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            return false;
+                        }
+                    })
+                    .into(thumbAudioImage);
+        } else {
+            setBackgroundColor(0xFF434343);
+        }
     }
 
     public void createCastPlayer(@NonNull final CastPlayer castPlayer, int themeColor, final ArrayList<SambaMedia.Caption> captions){

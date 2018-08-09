@@ -174,15 +174,26 @@ public class MainActivity extends Activity {
 		MediaInfo mediaInfo = new MediaInfo();
 
 
-		mediaInfo.setTitle("O Grinch - Trailer 2");
-		mediaInfo.setProjectHash("d56c159b54ede968ec7d0e34e46de1c0");
-		mediaInfo.setId("f91136ce802624b62dce063d1e923187");
+		mediaInfo.setTitle("Jornal da Record");
+		mediaInfo.setProjectHash("fad2b4a201ef2305d06cb817da1bd262");
+		mediaInfo.setId("ca60065f62e83445a4c5ae91abd3eacf");
 		mediaInfo.setEnvironment(SambaMediaRequest.Environment.PROD);
 		mediaInfo.setControlsEnabled(true);
 		mediaInfo.setAutoPlay(true);
 
-		mediaInfoList.add(mediaInfo);
+        MediaInfo mediaInfo2 = new MediaInfo();
 
+        mediaInfo2.setTitle("Teste Audio lento");
+        mediaInfo2.setProjectHash("4f25046e52b1b4643efd8a328b78fbf3");
+        mediaInfo2.setId("bc6e1ec855f8f1142232f4282bfe5ed9");
+        mediaInfo2.setEnvironment(SambaMediaRequest.Environment.PROD);
+        mediaInfo2.setControlsEnabled(true);
+        mediaInfo2.setAutoPlay(true);
+        mediaInfo2.setQualifier("AUDIO");
+
+
+		mediaInfoList.add(mediaInfo);
+        mediaInfoList.add(mediaInfo2);
 
 		showMediaList(mediaInfoList);
 	}
