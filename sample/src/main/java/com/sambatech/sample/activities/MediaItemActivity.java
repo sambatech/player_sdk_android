@@ -214,7 +214,7 @@ public class MediaItemActivity extends Activity {
 
 
 		if(!sambaCast.isCasting()) {
-			//if (player != null && player.hasStarted())
+			if (player != null && player.hasStarted())
 				player.pause();
 		}
     }

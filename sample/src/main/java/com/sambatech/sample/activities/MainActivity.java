@@ -171,6 +171,19 @@ public class MainActivity extends Activity {
 			mediaInfoList.add(mediaInfo);
 		}
 
+		MediaInfo mediaInfo = new MediaInfo();
+
+
+		mediaInfo.setTitle("O Grinch - Trailer 2");
+		mediaInfo.setProjectHash("d56c159b54ede968ec7d0e34e46de1c0");
+		mediaInfo.setId("f91136ce802624b62dce063d1e923187");
+		mediaInfo.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo.setControlsEnabled(true);
+		mediaInfo.setAutoPlay(true);
+
+		mediaInfoList.add(mediaInfo);
+
+
 		showMediaList(mediaInfoList);
 	}
 
