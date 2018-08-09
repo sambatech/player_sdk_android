@@ -21,4 +21,7 @@ limitations under the License.
     <color name="white">#FFFFFF</color>
     <color name="gray">#E6E6E6</color>
     <color name="transparent_white_hex_8">#88FFFFFF</color>
+    <color name="mask_audio_thumb_color">#80000000</color>
+    <color name="gradient_center">#CC000000</color>
+    <color name="gradient_end">#CC000000</color>
 </resources>

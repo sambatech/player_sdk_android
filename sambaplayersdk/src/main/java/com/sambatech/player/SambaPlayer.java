@@ -805,7 +805,11 @@ public class SambaPlayer extends FrameLayout {
         simplePlayerView.setThemeColor(media.themeColor);
 
         if (media.isAudioOnly) {
-            simplePlayerView.setBackgroundColor(0xFF434343);
+            if (media.thumbAudioURL != null && !media.thumbAudioURL.isEmpty()) {
+                simplePlayerView.setBackgroundImageThumb(media.thumbAudioURL);
+            } else {
+                simplePlayerView.setBackgroundColor(0xFF434343);
+            }
             simplePlayerView.setChromeColor(0x00000000);
         } else {
             simplePlayerView.setFullscreenCallback(fullscreenListener);
