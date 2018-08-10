@@ -258,7 +258,7 @@ public class MediaItemActivity extends Activity {
 			    media.isAudioOnly = mediaInfo.isAudioLive() || "audio".equalsIgnoreCase(mediaInfo.getQualifier());
 
 			    if (media.isAudioOnly) {
-			    	media.thumbAudioURL = "http://img-sambatech.akamaized.net/unsafe/x480/gbbrpvbps-sambavideos.akamaized.net/account/3170/18/2018-08-06/thumbnail/32021ea6dcc212425536e5ea88e182db/32021ea6dcc212425536e5ea88e182db_853x480.jpg";
+			    	media.thumbAudioURL = "http://img-sambatech.akamaized.net/unsafe/x480/gbbrpvbps-sambavideos.akamaized.net/account/3170/18/2018-08-09/thumbnail/3a249ef02e0b21e41daf98645f1e2aa8/3a249ef02e0b21e41daf98645f1e2aa8_853x480.jpg";
 				}
 
 			    loadPlayer(media);
