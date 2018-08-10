@@ -93,28 +93,30 @@ public class MainActivity extends Activity {
 	}
 
 	private void requestMediaList() {
-		Call<ArrayList<LiquidMedia>> call = LiquidApi.
-				getApi(mediaListApi).
-				getMedias(16);
+//		Call<ArrayList<LiquidMedia>> call = LiquidApi.
+//				getApi(mediaListApi).
+//				getMedias(16);
 
-		loading.setVisibility(View.VISIBLE);
+		loading.setVisibility(View.GONE);
 
-		call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
-			@Override
-			public void onResponse(retrofit.Response<ArrayList<LiquidMedia>> response, Retrofit retrofit) {
-				if (response.code() == 200)
-					extractMediaList(response.body());
-				else Log.e(MainActivity.class.getSimpleName(), String.format("Invalid response code: %s", response.code()));
+//		call.enqueue(new Callback<ArrayList<LiquidMedia>>() {
+//			@Override
+//			public void onResponse(retrofit.Response<ArrayList<LiquidMedia>> response, Retrofit retrofit) {
+//				if (response.code() == 200)
+//					extractMediaList(response.body());
+//				else Log.e(MainActivity.class.getSimpleName(), String.format("Invalid response code: %s", response.code()));
+//
+//				loading.setVisibility(View.GONE);
+//			}
+//
+//			@Override
+//			public void onFailure(Throwable t) {
+//				Log.e(MainActivity.class.getSimpleName(), "Something went wrong during the media list request.", t);
+//				loading.setVisibility(View.GONE);
+//			}
+//		});
 
-				loading.setVisibility(View.GONE);
-			}
-
-			@Override
-			public void onFailure(Throwable t) {
-				Log.e(MainActivity.class.getSimpleName(), "Something went wrong during the media list request.", t);
-				loading.setVisibility(View.GONE);
-			}
-		});
+		extractMediaList(new ArrayList<LiquidMedia>());
 	}
 
 	private void extractMediaList(ArrayList<LiquidMedia> mediaList) {
