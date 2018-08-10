@@ -257,6 +257,10 @@ public class MediaItemActivity extends Activity {
 
 			    media.isAudioOnly = mediaInfo.isAudioLive() || "audio".equalsIgnoreCase(mediaInfo.getQualifier());
 
+			    if (media.isAudioOnly) {
+			    	media.thumbAudioURL = "http://img-sambatech.akamaized.net/unsafe/x480/gbbrpvbps-sambavideos.akamaized.net/account/3170/18/2018-08-09/thumbnail/3a249ef02e0b21e41daf98645f1e2aa8/3a249ef02e0b21e41daf98645f1e2aa8_853x480.jpg";
+				}
+
 			    loadPlayer(media);
 		    }
 
@@ -308,10 +312,10 @@ public class MediaItemActivity extends Activity {
 		titleView.setText(media.title);
 
 		// If audio, we recommend you to customize the player's height
-		if (media.isAudioOnly) {
-			player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
-			player.setLayoutParams(player.getLayoutParams());
-		}
+//		if (media.isAudioOnly) {
+//			player.getLayoutParams().height = (int)(66.7f * getResources().getDisplayMetrics().density);
+//			player.setLayoutParams(player.getLayoutParams());
+//		}
 
 		final AdsSettings settings = new AdsSettings(20000f, 5);
 

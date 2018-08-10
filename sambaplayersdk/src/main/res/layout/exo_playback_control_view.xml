@@ -16,6 +16,26 @@
     android:layout_gravity="bottom"
     android:layoutDirection="ltr">
 
+    <FrameLayout
+        android:id="@+id/thumb_audio_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/black"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/thumb_audio_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="@android:color/transparent"
+            />
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/gradient_audio_thumb_mask"
+            />
+    </FrameLayout>    
+
     <LinearLayout
         android:id="@+id/exo_top_bar"
         android:layout_width="match_parent"
