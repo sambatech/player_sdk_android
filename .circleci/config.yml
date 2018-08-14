@@ -15,7 +15,7 @@ jobs:
             chmod +x jfrog
             cp -R assets/licenses $ANDROID_HOME/
       - restore_cache:
-         key: jars-{{ checksum "build.gradle" }}-{{ checksum  "sambaplayersdk/build.gradle" }}
+         key: jars-{{ checksum "sambaplayersdk/build.gradle" }}-{{ checksum  "sambaplayersdk/build.gradle" }}
       - run:
          name: Download Dependencies
          command: ./gradlew androidDependencies
@@ -56,9 +56,9 @@ jobs:
          name: Deploy Player to BINTRAY
          command: |
             if [ "${CIRCLE_BRANCH}" == "ft-circle_ci_2" ]; then
-              assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev
+              ~/assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev
             elif [ "${CIRCLE_BRANCH}" == "master" ]; then
-              assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
+              ~/assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
             fi
 
 workflows:
