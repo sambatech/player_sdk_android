@@ -52,7 +52,7 @@ jobs:
       - image: circleci/android:api-27-alpha
     environment:
       JVM_OPTS: -Xmx3200m
-      BASH_ENV: ~/.bashrc
+      BASH_ENV: /home/circleci/.bashrc
     steps:
       - checkout
       - run:
