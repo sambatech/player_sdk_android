@@ -36,6 +36,7 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
+      - checkout
       - run:
           name: Run Sonar
           command: |
@@ -53,6 +54,9 @@ jobs:
       JVM_OPTS: -Xmx3200m
     steps:
       - checkout
+      - run:
+         name: Generate Release
+         command: cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
       - run:
          name: Deploy Player to BINTRAY
          command: |
