@@ -52,13 +52,14 @@ jobs:
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
+      - checkout
       - run:
          name: Deploy Player to BINTRAY
          command: |
             if [ "${CIRCLE_BRANCH}" == "ft-circle_ci_2" ]; then
-              ~/player_sdk_android/assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev
+              assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev
             elif [ "${CIRCLE_BRANCH}" == "master" ]; then
-              ~/player_sdk_android/assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
+              assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
             fi
 
 workflows:
