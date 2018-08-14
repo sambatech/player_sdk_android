@@ -40,8 +40,6 @@ jobs:
       - run:
           name: Run Sonar
           command: |
-              wget https://s3.amazonaws.com/circleci-dependencies/player/sensitive-data/build-vars-enc
-              openssl aes-256-cbc -d -in build-vars-enc -k $SENS_DATA_KEY >> ~/.circlerc
               curl --header "Authorization:token $GITHUB_USER_TOKEN" --header "Accept:application/vnd.github.v3.raw" --remote-name --location https://api.github.com/repos/sambatech/devops/contents/circle-ci/run-sonar.sh
               chmod a+x run-sonar.sh
               ./run-sonar.sh install
@@ -52,14 +50,8 @@ jobs:
       - image: circleci/android:api-27-alpha
     environment:
       JVM_OPTS: -Xmx3200m
-      BASH_ENV: /home/circleci/.bashrc
     steps:
       - checkout
-      - run:
-          name: get env vars
-          command: |
-            wget https://s3.amazonaws.com/circleci-dependencies/player/sensitive-data/build-vars-enc
-            openssl aes-256-cbc -d -in build-vars-enc -k $SENS_DATA_KEY >> $BASH_ENV
       - run:
          name: Config Licenses
          command: |
