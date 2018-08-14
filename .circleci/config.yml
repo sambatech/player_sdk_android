@@ -52,13 +52,14 @@ jobs:
       - image: circleci/android:api-27-alpha
     environment:
       JVM_OPTS: -Xmx3200m
+      BASH_ENV: ~/.bashrc
     steps:
       - checkout
       - run:
           name: get env vars
           command: |
             wget https://s3.amazonaws.com/circleci-dependencies/player/sensitive-data/build-vars-enc
-            openssl aes-256-cbc -d -in build-vars-enc -k $SENS_DATA_KEY >> ~/.circlerc
+            openssl aes-256-cbc -d -in build-vars-enc -k $SENS_DATA_KEY >> $BASH_ENV
       - run:
          name: Config Licenses
          command: |
