@@ -6,8 +6,10 @@ jobs:
       - image: circleci/android:api-27-alpha
     environment:
       JVM_OPTS: -Xmx3200m
+      CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
     steps:
       - checkout
+      - run: mkdir -p $CIRCLE_ARTIFACTS
       - run:
          name: Config Licenses
          command: |
@@ -20,12 +22,13 @@ jobs:
       - run:
          name: Deploy Player to BINTRAY
          command: |
-            ls
             if [ "${CIRCLE_BRANCH}" == "ft-circle_ci_2" ]; then
               assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev
             elif [ "${CIRCLE_BRANCH}" == "master" ]; then
               assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
             fi
+      - store_artifacts:
+          path: /tmp/circleci-artifacts
 
 workflows:
   version: 2
