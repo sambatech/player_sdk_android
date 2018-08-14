@@ -1,49 +1,5 @@
 version: 2
 jobs:
-  build:
-    working_directory: ~/player_sdk_android
-    docker:
-      - image: circleci/android:api-27-alpha
-    environment:
-        JVM_OPTS: -Xmx3200m
-    steps:
-      - checkout
-      - run:
-          name: Config Licenses
-          command: |
-            curl -fL https://getcli.jfrog.io | sh
-            chmod +x jfrog
-            cp -R assets/licenses $ANDROID_HOME/
-      - restore_cache:
-         key: jars-{{ checksum "build.gradle" }}-{{ checksum  "sambaplayersdk/build.gradle" }}
-      - run:
-         name: Download Dependencies
-         command: ./gradlew androidDependencies
-      - save_cache:
-         paths:
-            - ~/.gradle
-         key: jars-{{ checksum "build.gradle" }}-{{ checksum  "sambaplayersdk/build.gradle" }}
-      - run:
-         name: Android Lint
-         command: ./gradlew sambaplayersdk:lintRelease
-      - run:
-         name: Generate Release
-         command: cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
-  sonar:
-    working_directory: ~/player_sdk_android
-    docker:
-      - image: circleci/android:api-27-alpha
-    environment:
-      JVM_OPTS: -Xmx3200m
-    steps:
-      - checkout
-      - run:
-          name: Run Sonar
-          command: |
-              curl --header "Authorization:token $GITHUB_USER_TOKEN" --header "Accept:application/vnd.github.v3.raw" --remote-name --location https://api.github.com/repos/sambatech/devops/contents/circle-ci/run-sonar.sh
-              chmod a+x run-sonar.sh
-              ./run-sonar.sh install
-              ./run-sonar.sh run
   deploy:
     working_directory: ~/player_sdk_android
     docker:
@@ -64,6 +20,7 @@ jobs:
       - run:
          name: Deploy Player to BINTRAY
          command: |
+            ls
             if [ "${CIRCLE_BRANCH}" == "ft-circle_ci_2" ]; then
               assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev
             elif [ "${CIRCLE_BRANCH}" == "master" ]; then
@@ -74,13 +31,7 @@ workflows:
   version: 2
   player-sdk-android:
     jobs:
-      - build
-      - sonar:
-          requires:
-            - build
       - deploy:
-          requires:
-            - build
           filters:
             branches:
               only:
