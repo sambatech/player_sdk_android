@@ -64,7 +64,7 @@ jobs:
       - run:
          name: Deploy Player to BINTRAY
          command: |
-            if [ "${CIRCLE_BRANCH}" == "ft-circle_ci_2" ]; then
+            if [ "${CIRCLE_BRANCH}" == "dev" ]; then
               assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY dev
             elif [ "${CIRCLE_BRANCH}" == "master" ]; then
               assets/publish.sh $BINTRAY_USER $BINTRAY_API_KEY
@@ -81,5 +81,5 @@ workflows:
           filters:
             branches:
               only:
-                - ft-circle_ci_2
+                - dev
                 - master
