@@ -356,7 +356,7 @@ public class SambaPlayer extends FrameLayout {
             mediaQueueItems[0] = new MediaQueueItem.Builder(mediaInfo).build();
 
             castPlayer.loadItems(mediaQueueItems, 0, 0, Player.REPEAT_MODE_OFF);
-            castPlayer.setPlayWhenReady(true);
+//            castPlayer.setPlayWhenReady(false);
 
             sambaCast.registerDeviceForProgress(true);
             castPlayer.setMessageListener(castSession);

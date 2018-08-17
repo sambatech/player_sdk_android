@@ -777,8 +777,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         } else {
             castControlView.findViewById(R.id.topbar_menu_button).setVisibility(View.GONE);
         }
-        castControlView.findViewById(R.id.exo_play).setVisibility(View.GONE);
-        castControlView.findViewById(R.id.exo_pause).setVisibility(View.GONE);
+        castControlView.findViewById(R.id.exo_play).setVisibility(View.VISIBLE);
+        castControlView.findViewById(R.id.exo_pause).setVisibility(View.INVISIBLE);
         castControlView.findViewById(R.id.cast_image_container).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
