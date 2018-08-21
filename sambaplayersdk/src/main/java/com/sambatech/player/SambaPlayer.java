@@ -332,6 +332,7 @@ public class SambaPlayer extends FrameLayout {
             if (remoteMediaClient == null) return;
 
             castPlayer.setRemoteMediaClient(remoteMediaClient);
+            castPlayer.setIsLive(media.isLive);
 
             // converting SambaMedia to MediaInfo
             MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
@@ -360,6 +361,7 @@ public class SambaPlayer extends FrameLayout {
 
 
             String tempMediaCasting = SambaCast.currentMediaCastingId(getContext());
+
 
             if (tempMediaCasting == null || !tempMediaCasting.equals(media.id)) {
                 castPlayer.loadItems(mediaQueueItems, 0, 0, Player.REPEAT_MODE_OFF);
