@@ -847,7 +847,7 @@ public class SambaPlayer extends FrameLayout {
                 SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.LOAD, this));
         }
 
-        if (media.isAudioOnly || media.isLive) {
+        if (media.isAudioOnly) {
             if (sambaCast != null && sambaCast.isCasting()) {
                 sambaCast.setEventListener(null);
                 sambaCast.stopCasting();
@@ -1050,7 +1050,7 @@ public class SambaPlayer extends FrameLayout {
     }
 
     private void setupCast() {
-        if (sambaCast == null || media.isLive || media.isAudioOnly) return;
+        if (sambaCast == null || media.isAudioOnly) return;
         sambaCast.setEventListener(castListener);
         castPlayer = new CastPlayer(sambaCast);
     }
