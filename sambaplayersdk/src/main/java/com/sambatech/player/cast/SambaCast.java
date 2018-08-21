@@ -3,6 +3,7 @@ package com.sambatech.player.cast;
 import android.app.MediaRouteButton;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.google.android.gms.common.api.ResultCallbacks;
 import com.google.android.gms.common.api.Status;
 import com.sambatech.player.R;
 import com.sambatech.player.event.SambaCastListener;
+import com.sambatech.player.utils.SharedPrefsUtils;
 
 import java.io.IOException;
 
@@ -120,6 +122,7 @@ public final class SambaCast {
 				listener.onDisconnected();
 		}
 	};
+	private Context context;
 
 	private MediaRouteButton castButton;
 	private SessionManager sessionManager;
@@ -137,6 +140,7 @@ public final class SambaCast {
 		if (status != ConnectionResult.SUCCESS)
 			return;
 
+		this.context = context;
 		LayoutInflater inflater = LayoutInflater.from(context);
 		castButton = (MediaRouteButton)inflater.inflate(R.layout.cast_button, null);
 		castContext = CastContext.getSharedInstance(context);
@@ -264,6 +268,7 @@ public final class SambaCast {
 	 */
 	public void stopCasting(){
         sessionManager.endCurrentSession(true);
+		cleanCacheDatas(context);
     }
 
 	/**
@@ -326,5 +331,18 @@ public final class SambaCast {
 
 	public CastContext getCastContext() {
 		return castContext;
+	}
+
+	@Nullable
+	public static String currentMediaCastingId(Context context) {
+		return SharedPrefsUtils.getStringPreference(context, SharedPrefsUtils.SharedPrefsKeys.MEDIA_CASTING_KEY);
+	}
+
+	public static void cleanCacheDatas(Context context) {
+		SharedPrefsUtils.clearPreferenceByKey(context, SharedPrefsUtils.SharedPrefsKeys.MEDIA_CASTING_KEY);
+	}
+
+	public static void setCurrentMediaCastingId(Context context, String mediaId) {
+		SharedPrefsUtils.setStringPreference(context, SharedPrefsUtils.SharedPrefsKeys.MEDIA_CASTING_KEY, mediaId);
 	}
 }

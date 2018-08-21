@@ -241,6 +241,14 @@ public final class CastPlayer implements Player {
     return null;
   }
 
+    public void resumeItems(MediaQueueItem[] items, int startIndex, @RepeatMode int repeatMode) {
+        if (remoteMediaClient != null) {
+            waitingForInitialTimeline = true;
+            mediaQueueItems = new ArrayList<>();
+            Collections.addAll(mediaQueueItems, items);
+        }
+    }
+
   /**
    * Appends a sequence of items to the media queue. If no media queue exists, does nothing.
    *
@@ -668,7 +676,7 @@ public final class CastPlayer implements Player {
     return false;
   }
 
-  private void setRemoteMediaClient(@Nullable RemoteMediaClient remoteMediaClient) {
+  public void setRemoteMediaClient(@Nullable RemoteMediaClient remoteMediaClient) {
     if (this.remoteMediaClient == remoteMediaClient) {
       // Do nothing.
       return;
