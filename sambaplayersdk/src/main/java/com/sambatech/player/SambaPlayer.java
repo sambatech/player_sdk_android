@@ -48,6 +48,7 @@ import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.player.plugins.PluginManager;
 import com.sambatech.player.utils.Helpers;
 import com.sambatech.player.utils.Orientation;
+import com.sambatech.player.utils.SharedPrefsUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -330,6 +331,8 @@ public class SambaPlayer extends FrameLayout {
             final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
             if (remoteMediaClient == null) return;
 
+            castPlayer.setRemoteMediaClient(remoteMediaClient);
+
             // converting SambaMedia to MediaInfo
             MediaMetadata movieMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
             movieMetadata.putString(MediaMetadata.KEY_TITLE, media.title);
@@ -355,8 +358,18 @@ public class SambaPlayer extends FrameLayout {
             MediaQueueItem[] mediaQueueItems = new MediaQueueItem[1];
             mediaQueueItems[0] = new MediaQueueItem.Builder(mediaInfo).build();
 
-            castPlayer.loadItems(mediaQueueItems, 0, 0, Player.REPEAT_MODE_OFF);
-            castPlayer.setPlayWhenReady(true);
+
+            String tempMediaCasting = SambaCast.currentMediaCastingId(getContext());
+
+            if (tempMediaCasting == null || !tempMediaCasting.equals(media.id)) {
+                castPlayer.loadItems(mediaQueueItems, 0, 0, Player.REPEAT_MODE_OFF);
+                SambaCast.setCurrentMediaCastingId(getContext(), media.id);
+                castPlayer.setPlayWhenReady(false);
+            } else {
+                castPlayer.resumeItems(mediaQueueItems, 0, Player.REPEAT_MODE_OFF);
+                castPlayer.setPlayWhenReady(true);
+            }
+
 
             sambaCast.registerDeviceForProgress(true);
             castPlayer.setMessageListener(castSession);
@@ -374,6 +387,7 @@ public class SambaPlayer extends FrameLayout {
 
         @Override
         public void onDisconnected() {
+            SambaCast.cleanCacheDatas(getContext());
             long lastPosition = castPlayer.getContentPosition();
             player.seekTo(lastPosition);
             play();
@@ -732,7 +746,7 @@ public class SambaPlayer extends FrameLayout {
         else destroyError();
     }
 
-	/* End Player API */
+    /* End Player API */
 
     private void applyAttributes(TypedArray attrs) {
         try {
@@ -837,14 +851,20 @@ public class SambaPlayer extends FrameLayout {
             if (sambaCast != null && sambaCast.isCasting()) {
                 sambaCast.setEventListener(null);
                 sambaCast.stopCasting();
+            } else {
+                SambaCast.cleanCacheDatas(getContext());
             }
         } else {
             setupCast();
 
             simplePlayerView.createCastPlayer(castPlayer, media.themeColor, media.captions);
 
-            if (sambaCast != null && sambaCast.isCasting())
+            if (sambaCast != null && sambaCast.isCasting()) {
                 castListener.onConnected(sambaCast.getCastSession());
+            } else {
+                SambaCast.cleanCacheDatas(getContext());
+            }
+
         }
 
 

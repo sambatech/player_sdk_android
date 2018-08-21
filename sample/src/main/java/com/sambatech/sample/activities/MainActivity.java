@@ -176,7 +176,7 @@ public class MainActivity extends Activity {
 		MediaInfo mediaInfo = new MediaInfo();
 
 
-		mediaInfo.setTitle("Jornal da Record");
+		mediaInfo.setTitle("Media Playplus");
 		mediaInfo.setProjectHash("fad2b4a201ef2305d06cb817da1bd262");
 		mediaInfo.setId("ca60065f62e83445a4c5ae91abd3eacf");
 		mediaInfo.setEnvironment(SambaMediaRequest.Environment.PROD);
@@ -193,9 +193,52 @@ public class MainActivity extends Activity {
         mediaInfo2.setAutoPlay(true);
         mediaInfo2.setQualifier("AUDIO");
 
+        MediaInfo mediaInfo3 = new MediaInfo();
+
+		mediaInfo3.setTitle("Teste Video Sem Bloqueio");
+		mediaInfo3.setProjectHash("13a157b86aa27510d0c373e447dab6ea");
+		mediaInfo3.setId("19310f3fcb5f515d1a44d5e709695c03");
+		mediaInfo3.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo3.setControlsEnabled(true);
+		mediaInfo3.setAutoPlay(true);
+
+		MediaInfo mediaInfo4 = new MediaInfo();
+
+		mediaInfo4.setTitle("Teste Video Com Bloqueio de Dominio");
+		mediaInfo4.setProjectHash("cf22fbd77a8df4023d80fd0d8d7e20e8");
+		mediaInfo4.setId("8dca74ec0c18b63a206fb9d46658159f");
+		mediaInfo4.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo4.setControlsEnabled(true);
+		mediaInfo4.setAutoPlay(true);
+
+
+		MediaInfo mediaInfo5 = new MediaInfo();
+
+		mediaInfo5.setTitle("Teste Video Playplus ESPN");
+		mediaInfo5.setProjectHash("548fd94beda15ebe2fa22adf1839b60c");
+		mediaInfo5.setId("64e477ca0dc1ecc035e02117b1d4514a");
+		mediaInfo5.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo5.setControlsEnabled(true);
+		mediaInfo5.setAutoPlay(true);
+
+		MediaInfo mediaInfo6 = new MediaInfo();
+
+		mediaInfo6.setTitle("Teste Live Playplus ESPN");
+		mediaInfo6.setProjectHash("548fd94beda15ebe2fa22adf1839b60c");
+		mediaInfo6.setId("3958f83a366a90dbbd093f8907129171");
+		mediaInfo6.setLiveChannelId("3958f83a366a90dbbd093f8907129171");
+		mediaInfo6.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo6.setControlsEnabled(true);
+		mediaInfo6.setAutoPlay(true);
+
+
 
 		mediaInfoList.add(mediaInfo);
         mediaInfoList.add(mediaInfo2);
+        mediaInfoList.add(mediaInfo3);
+		mediaInfoList.add(mediaInfo4);
+		mediaInfoList.add(mediaInfo5);
+		mediaInfoList.add(mediaInfo6);
 
 		showMediaList(mediaInfoList);
 	}
