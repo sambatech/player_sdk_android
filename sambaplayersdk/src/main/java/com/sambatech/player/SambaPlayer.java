@@ -46,9 +46,9 @@ import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaPlayerError;
 import com.sambatech.player.plugins.PluginManager;
+import com.sambatech.player.utils.CastLiveButtonListener;
 import com.sambatech.player.utils.Helpers;
 import com.sambatech.player.utils.Orientation;
-import com.sambatech.player.utils.SharedPrefsUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -376,7 +376,15 @@ public class SambaPlayer extends FrameLayout {
             sambaCast.registerDeviceForProgress(true);
             castPlayer.setMessageListener(castSession);
 
-            simplePlayerView.showCast();
+            simplePlayerView.showCast(media.isLive, new CastLiveButtonListener() {
+                @Override
+                public void onLiveButtonClicked(View view) {
+                    SambaCast.cleanCacheDatas(getContext());
+                    castPlayer.setPlayWhenReady(false);
+                    castPlayer.updateInternalState();
+                    castListener.onConnected();
+                }
+            });
 
 
             this.remoteMediaClient = remoteMediaClient;
