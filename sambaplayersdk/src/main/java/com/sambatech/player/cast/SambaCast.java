@@ -49,6 +49,8 @@ public final class SambaCast {
 		}
 	};
 
+	private static SambaCast globalInstance;
+
 	private final AppVisibilityListener appVisibilityListener = new AppVisibilityListener() {
 		@Override
 		public void onAppEnteredForeground() {
@@ -156,6 +158,23 @@ public final class SambaCast {
 
 		sessionManager = castContext.getSessionManager();
 	}
+
+
+	public static void init(@NonNull Context context){
+		if (globalInstance == null) {
+			globalInstance = new SambaCast(context);
+		}
+
+	}
+
+	public static SambaCast getGlobalInstance(@NonNull Context context) {
+		if (globalInstance == null) {
+			globalInstance = new SambaCast(context);
+		}
+
+		return globalInstance;
+	}
+
 
 	/**
 	 * Returns the cast button to be added on some view.
