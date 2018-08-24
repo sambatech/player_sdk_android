@@ -232,11 +232,9 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             optionsMenuButton.setVisibility(this.hasMenu ? View.VISIBLE : View.GONE);
             castButton.setVisibility(hasCast ? View.VISIBLE : View.GONE);
             if (isLive) {
-//                castButton.setVisibility(View.GONE);
                 progressControls.setVisibility(isDVR ? View.VISIBLE : View.INVISIBLE);
                 liveButton.setVisibility(View.VISIBLE);
             } else {
-//                castButton.setVisibility(hasCast ? View.VISIBLE : View.GONE);
                 progressControls.setVisibility(View.VISIBLE);
                 liveButton.setVisibility(View.GONE);
             }
