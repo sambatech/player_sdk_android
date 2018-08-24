@@ -130,10 +130,13 @@ public final class CastPlayer implements Player {
   private int pendingSeekWindowIndex;
   private long pendingSeekPositionMs;
   private boolean waitingForInitialTimeline;
+  private boolean isLive;
 
   private SambaCast sambaCast;
 
   private List<MediaQueueItem> mediaQueueItems;
+
+
 
   Cast.MessageReceivedCallback messageReceived = new Cast.MessageReceivedCallback() {
     @Override
@@ -372,6 +375,9 @@ public final class CastPlayer implements Player {
     if (sambaCast == null) {
       return;
     }
+
+    updateInternalState();
+
     if (playWhenReady) {
       sambaCast.playCast();
     } else {
@@ -870,6 +876,10 @@ public final class CastPlayer implements Player {
 
   public void sendSubtitle(String lenguage){
     sambaCast.changeSubtitle(lenguage);
+  }
+
+  public void setIsLive(boolean isLive) {
+    this.isLive = isLive;
   }
 
 }

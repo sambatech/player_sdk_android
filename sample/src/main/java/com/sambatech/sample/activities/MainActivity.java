@@ -231,6 +231,14 @@ public class MainActivity extends Activity {
 		mediaInfo6.setControlsEnabled(true);
 		mediaInfo6.setAutoPlay(true);
 
+		MediaInfo mediaInfo7 = new MediaInfo();
+
+		mediaInfo7.setTitle("Teste Media Fish TV Playplus");
+		mediaInfo7.setProjectHash("e566111d7f36df2c1e504bd946fbaece");
+		mediaInfo7.setId("f6283092dd18c52ebfc26d6710aec370");
+		mediaInfo7.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo7.setControlsEnabled(true);
+		mediaInfo7.setAutoPlay(true);
 
 
 		mediaInfoList.add(mediaInfo);
@@ -239,6 +247,7 @@ public class MainActivity extends Activity {
 		mediaInfoList.add(mediaInfo4);
 		mediaInfoList.add(mediaInfo5);
 		mediaInfoList.add(mediaInfo6);
+		mediaInfoList.add(mediaInfo7);
 
 		showMediaList(mediaInfoList);
 	}

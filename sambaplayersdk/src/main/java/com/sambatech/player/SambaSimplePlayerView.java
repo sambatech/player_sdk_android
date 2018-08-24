@@ -44,6 +44,7 @@ import com.sambatech.player.cast.CastOptionsMenu;
 import com.sambatech.player.cast.CastPlayer;
 import com.sambatech.player.mediasource.PlayerMediaSourceInterface;
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.utils.CastLiveButtonListener;
 import com.sambatech.player.utils.Controls;
 import com.sambatech.player.utils.OptionsMenuLayer;
 import com.sambatech.player.utils.Util;
@@ -229,12 +230,11 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             topBar.setVisibility(View.VISIBLE);
             smallPlayPauseContainer.setVisibility(View.GONE);
             optionsMenuButton.setVisibility(this.hasMenu ? View.VISIBLE : View.GONE);
+            castButton.setVisibility(hasCast ? View.VISIBLE : View.GONE);
             if (isLive) {
-                castButton.setVisibility(View.GONE);
                 progressControls.setVisibility(isDVR ? View.VISIBLE : View.INVISIBLE);
                 liveButton.setVisibility(View.VISIBLE);
             } else {
-                castButton.setVisibility(hasCast ? View.VISIBLE : View.GONE);
                 progressControls.setVisibility(View.VISIBLE);
                 liveButton.setVisibility(View.GONE);
             }
@@ -800,7 +800,27 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         sambaCastPlayer = null;
     }
 
-    public void showCast() {
+    public void showCast(boolean isLive, final CastLiveButtonListener castLiveButtonListener) {
+
+        if (isLive) {
+            castControlView.findViewById(R.id.exo_progress_controls).setVisibility(View.GONE);
+            View castButton = castControlView.findViewById(R.id.topbar_live_button);
+            castButton.setVisibility(View.VISIBLE);
+            castButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (castLiveButtonListener != null) {
+                        castLiveButtonListener.onLiveButtonClicked(view);
+                    }
+                }
+            });
+        } else {
+            castControlView.findViewById(R.id.exo_progress_controls).setVisibility(View.VISIBLE);
+            View castButton = castControlView.findViewById(R.id.topbar_live_button);
+            castButton.setVisibility(View.GONE);
+            castButton.setOnClickListener(null);
+        }
+
         castControlView.setVisibility(View.VISIBLE);
         playerView.setVisibility(View.GONE);
     }
@@ -812,3 +832,4 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         playerView.setVisibility(View.VISIBLE);
     }
 }
+
