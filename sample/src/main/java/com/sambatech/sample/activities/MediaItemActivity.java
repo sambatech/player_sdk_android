@@ -189,7 +189,7 @@ public class MediaItemActivity extends Activity {
 //		CastOptionsProvider.appId = "25C5341A";
 //		CastOptionsProvider.playerUrl = "192.168.2.33:8000/";
 
-		sambaCast = new SambaCast(this);
+		sambaCast = SambaCast.getGlobalInstance(this);
 
 		SambaEventBus.subscribe(playerListener);
 		requestMedia(activityMedia);

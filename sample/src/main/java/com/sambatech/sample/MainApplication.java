@@ -3,6 +3,7 @@ package com.sambatech.sample;
 import android.app.Application;
 import android.content.Context;
 
+import com.sambatech.player.cast.SambaCast;
 import com.sambatech.sample.utils.Helpers;
 
 public class MainApplication extends Application {
@@ -16,6 +17,8 @@ public class MainApplication extends Application {
         _instance = this;
 
 	    loadExternalIp();
+
+		SambaCast.init(getApplicationContext());
     }
 
     public static Context getAppContext() {
