@@ -375,6 +375,9 @@ public final class CastPlayer implements Player {
     if (sambaCast == null) {
       return;
     }
+
+    updateInternalState();
+
     if (playWhenReady) {
       sambaCast.playCast();
     } else {
