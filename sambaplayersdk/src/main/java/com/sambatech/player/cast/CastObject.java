@@ -10,6 +10,7 @@ public class CastObject {
 	
     private String title;
     private String m;
+    private String live;
     private long duration;
     private String theme;
     private String ph;
@@ -27,6 +28,7 @@ public class CastObject {
     
         this.title = json.optString("title");
         this.m = json.optString("m");
+        this.live = json.optString("live");
         this.duration = json.optLong("duration");
         this.theme = json.optString("theme");
         this.ph = json.optString("ph");
@@ -119,13 +121,20 @@ public class CastObject {
         return drm;
     }
 
+    public String getLive() {
+        return live;
+    }
 
+    public void setLive(String live) {
+        this.live = live;
+    }
 
     @Override
     public String toString() {
         return "{" +
                 "\"title\":\"" + title + '\"' +
                 ", \"m\":\"" + m + '\"' +
+                (live != null && !live.isEmpty() ? ", \"live\":\"" + live + '\"' : "") +
                 ", \"duration\":" + duration +
                 ", \"theme\":\"" + theme + '\"' +
                 ", \"ph\":\"" + ph + '\"' +

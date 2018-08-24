@@ -346,6 +346,13 @@ public class SambaPlayer extends FrameLayout {
                     (long) media.duration, media.themeColorHex,
                     media.projectHash, qs, "", CastOptionsProvider.playerUrl);
 
+            if (media.isLive) {
+                castObject.setLive(media.id);
+            } else {
+                castObject.setLive(null);
+            }
+
+
             if (media.drmRequest != null)
                 castObject.setDrm(new CastDRM(media.drmRequest.getLicenseParam("SessionId"),
                         media.drmRequest.getLicenseParam("Ticket")));
