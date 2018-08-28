@@ -23,6 +23,8 @@ public class SambaMediaConfig extends SambaMedia {
 	public String themeColorHex = "#72BE44";
 	public String sttmUrl;
 	public String sttmKey;
+	public String sttm2Url;
+	public String sttm2Key;
 	public SambaMediaRequest request;
 	public DrmRequest drmRequest;
 	public boolean blockIfRooted;
@@ -46,6 +48,8 @@ public class SambaMediaConfig extends SambaMedia {
 			themeColorHex = m.themeColorHex;
 			sttmUrl = m.sttmUrl;
 			sttmKey = m.sttmKey;
+			sttm2Url = m.sttm2Url;
+			sttm2Key = m.sttm2Key;
 			request = m.request;
 			drmRequest = m.drmRequest;
 			// TODO: Reabilitar após correção (https://github.com/sambatech-desenv/player/issues/589)
