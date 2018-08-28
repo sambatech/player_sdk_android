@@ -264,6 +264,10 @@ public class SambaApi {
 				if (json.has("id"))
 					media.id = json.getString("id");
 
+				if (json.has("clientId")) {
+					media.clientId = json.getInt("clientId");
+				}
+
 				if (json.has("categoryId"))
 					media.categoryId = json.getInt("categoryId");
 

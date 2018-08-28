@@ -17,6 +17,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public String projectHash;
 	public String qualifier;
 	public int projectId;
+	public  int clientId;
 	public int categoryId;
 	public String sessionId = Helpers.getSessionId();
 	public int themeColor = 0xFF72BE44;
@@ -42,6 +43,7 @@ public class SambaMediaConfig extends SambaMedia {
 			projectHash = m.projectHash;
 			qualifier = m.qualifier;
 			projectId = m.projectId;
+			clientId = m.clientId;
 			categoryId = m.categoryId;
 			sessionId = m.sessionId;
 			themeColor = m.themeColor;
