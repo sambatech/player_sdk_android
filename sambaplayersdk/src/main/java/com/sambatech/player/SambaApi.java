@@ -388,10 +388,10 @@ public class SambaApi {
 			// tries to fallback from HDS
 			media.url = normalizeProtocol(json.getJSONObject("liveOutput").getString("baseUrl").replaceAll(reHds, "playlist.m3u8"), request.protocol);
 
-			for (int i = 0; i < request.backupUrls.length; ++i)
-				request.backupUrls[i] = normalizeProtocol(request.backupUrls[i].replaceAll(reHds, "playlist.m3u8"), request.protocol);
+			if (json.getJSONObject("liveOutput").has("backupUrl")) {
+				media.backupUrls = new String[]{normalizeProtocol(json.getJSONObject("liveOutput").getString("backupUrl").replaceAll(reHds, "playlist.m3u8"), request.protocol)};
+			}
 
-			media.backupUrls = request.backupUrls;
 			media.isLive = true;
 			media.isDvr = json.getJSONObject("liveOutput").has("dvr") ? json.getJSONObject("liveOutput").getBoolean("dvr") : false;
 
