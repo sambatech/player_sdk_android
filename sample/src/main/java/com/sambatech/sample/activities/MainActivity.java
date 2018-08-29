@@ -240,6 +240,16 @@ public class MainActivity extends Activity {
 		mediaInfo7.setControlsEnabled(true);
 		mediaInfo7.setAutoPlay(true);
 
+		MediaInfo mediaInfo8 = new MediaInfo();
+
+		mediaInfo8.setTitle("Teste Live Analytics");
+		mediaInfo8.setProjectHash("964b56b4b184c2a29e3c2065a7a15038");
+		mediaInfo8.setId("46fe05239a330e011ea2d0f36b1f0702");
+		mediaInfo8.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo8.setLiveChannelId("46fe05239a330e011ea2d0f36b1f0702");
+		mediaInfo8.setControlsEnabled(true);
+		mediaInfo8.setAutoPlay(true);
+
 
 		mediaInfoList.add(mediaInfo);
         mediaInfoList.add(mediaInfo2);
@@ -248,6 +258,7 @@ public class MainActivity extends Activity {
 		mediaInfoList.add(mediaInfo5);
 		mediaInfoList.add(mediaInfo6);
 		mediaInfoList.add(mediaInfo7);
+		mediaInfoList.add(mediaInfo8);
 
 		showMediaList(mediaInfoList);
 	}
