@@ -36,6 +36,8 @@ class TrackingLive implements Tracking {
     private static final String EVENT_ONLINE = "on";
     private static final String EVENT_COMPLETE = "co";
 
+    private static final String ORIGIN_SDK_ANDROID = "player.sambatech.sdk.android";
+
     private SambaMediaConfig media;
     private SttmLive sttmLive;
 
@@ -199,14 +201,13 @@ class TrackingLive implements Tracking {
         @Override
         protected Void doInBackground(String... params) {
 
-
             try {
                 Sttm2 sttm2 = getSttm2();
 
                 String event = params[0];
 
                 if (sttm2 != null && !TextUtils.isEmpty(sttm2.key) && !TextUtils.isEmpty(sttm2.url)) {
-                    String sttmUrl = String.format("%s?event=%s&cid=%s&pid=%s&lid=%s&cat=%s", sttm2.url, event, media.clientId, media.projectId, media.id, media.categoryId);
+                    String sttmUrl = String.format("%s?event=%s&cid=%s&pid=%s&lid=%s&cat=%s&org=%s", sttm2.url, event, media.clientId, media.projectId, media.id, media.categoryId, ORIGIN_SDK_ANDROID);
 
                     URL url = new URL(sttmUrl);
 
@@ -214,6 +215,7 @@ class TrackingLive implements Tracking {
 
                     conn.setRequestMethod("GET");
                     conn.setRequestProperty("Authorization", "Bearer " + sttm2.key);
+                    conn.setRequestProperty("User-Agent", System.getProperty("http.agent"));
 
                     conn.getResponseCode();
 
