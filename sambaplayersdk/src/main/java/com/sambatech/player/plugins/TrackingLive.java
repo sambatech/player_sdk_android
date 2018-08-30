@@ -1,64 +1,87 @@
 package com.sambatech.player.plugins;
 
-import android.location.Location;
-import android.location.LocationManager;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.sambatech.player.R;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMediaConfig;
 
+import org.jose4j.base64url.internal.apache.commons.codec.binary.Base64;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
+import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.TreeSet;
 
 class TrackingLive implements Tracking {
+
+
+    private static final String EVENT_LOAD = "lo";
+    private static final String EVENT_PLAY = "pl";
+    private static final String EVENT_PAUSE = "pa";
+    private static final String EVENT_ONLINE = "on";
+    private static final String EVENT_COMPLETE = "co";
 
     private SambaMediaConfig media;
     private SttmLive sttmLive;
 
+    private Context context;
+
     private SambaPlayerListener playerListener = new SambaPlayerListener() {
-        @Override
-        public void onStart(SambaEvent event) {
-            Log.i("sttmLive", "onstart");
-            init();
 
-            if (sttmLive != null)
-                sttmLive.trackStart();
+        @Override
+        public void onLoad(SambaEvent event) {
+            super.onLoad(event);
+            sttmLive.trackLoadEvent();
         }
 
         @Override
-        public void onProgress(SambaEvent event) {
-            if (sttmLive != null)
-                sttmLive.trackProgress((float) event.getDataAll()[0], (float) event.getDataAll()[1]);
+        public void onPlay(SambaEvent event) {
+            super.onPlay(event);
+
+            if (!sttmLive.isOnEventTaskRunning()) {
+                sttmLive.trackPlayAndONEvent();
+                sttmLive.startOnEventTask();
+            }
+
         }
 
         @Override
-        public void onFinish(SambaEvent event) {
-            if (sttmLive != null)
-                sttmLive.trackComplete();
+        public void onPause(SambaEvent event) {
+            super.onPause(event);
+            sttmLive.cancelOnEventTask();
+            sttmLive.trackPauseEvent();
+        }
+
+        @Override
+        public void onError(SambaEvent event) {
+            super.onError(event);
+            sttmLive.cancelOnEventTask();
         }
     };
 
+
     public void onLoad(@NonNull SambaPlayer player) {
         Log.i("track", "load");
-        media = (SambaMediaConfig) player.getMedia();
 
-        if (media.projectHash != null && media.id != null)
-            SambaEventBus.subscribe(playerListener);
+        this.context = player.getContext();
+        this.media = (SambaMediaConfig) player.getMedia();
+
+        init();
 
         PluginManager.getInstance().notifyPluginLoaded(this);
     }
@@ -77,26 +100,126 @@ class TrackingLive implements Tracking {
     }
 
     private void init() {
-        if (media.sttmUrl != null && sttmLive == null)
+        if (media.sttmUrl != null && sttmLive == null) {
             sttmLive = new SttmLive();
+        }
+
+        if (media.projectHash != null && media.id != null) {
+            SambaEventBus.subscribe(playerListener);
+        }
     }
 
-    private class UrlTrackerLiveTask extends AsyncTask<String, Void, Void> {
+    private Sttm2 getSttm2() throws Exception {
+
+        InputStream inputStream = null;
+        Scanner scanner = null;
+
+        try {
+
+            URL myURL = new URL(getSttm2RequestUrl());
+            HttpURLConnection conn = (HttpURLConnection) myURL.openConnection();
+            conn.setRequestProperty("Content-Type", "text/plain");
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode >= 200 && responseCode < 299) {
+                inputStream = conn.getInputStream();
+                scanner = new Scanner(inputStream);
+                return getSttm2ResponseFromScanner(scanner);
+            }
+
+        } finally {
+            try {
+                if (inputStream != null)
+                    inputStream.close();
+
+                if (scanner != null)
+                    scanner.close();
+            } catch (IOException e) {
+                Log.w(getClass().getSimpleName(), "Error closing server request", e);
+            }
+        }
+
+        return null;
+    }
+
+
+    private Sttm2 getSttm2ResponseFromScanner(Scanner scanner) throws Exception {
+
+        int delimiter = media.id != null ? Integer.parseInt(media.id.split("(?=\\d[a-zA-Z]*$)")[1].substring(0, 1)) : 0;
+
+        Scanner scannerDelimited = scanner.useDelimiter("\\A");
+
+        if (scannerDelimited.hasNext()) {
+            String token = scannerDelimited.next();
+
+            token = token.substring(delimiter, token.length() - delimiter).replaceAll("-", "+").replaceAll("_", "/");
+
+            switch (token.length() % 4) {
+                case 0:
+                    break;
+                case 2:
+                    token += "==";
+                    break;
+                case 3:
+                    token += "=";
+                    break;
+                default:
+            }
+
+            byte[] tokenBytes = Base64.decodeBase64(token);
+            String jsonString = new String(tokenBytes);
+            JSONObject json = new JSONObject(jsonString);
+
+            if (json.has("key")) {
+                Sttm2 response = new Sttm2();
+                response.key = json.getString("key");
+
+                if (json.has("url")) {
+                    response.url = json.getString("url");
+                } else {
+                    response.url = media.sttm2Url;
+                }
+
+                return response;
+            }
+        }
+
+        return null;
+    }
+
+    private String getSttm2RequestUrl() {
+
+        String baseUrl = context.getString(R.string.player_endpoint_prod);
+
+        return String.format("%s%s/jwt/%s", baseUrl, media.projectHash, media.id);
+    }
+
+    private class RequestTrackerLiveTask extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... params) {
-            try {
-                Log.i(getClass().getSimpleName(), params[0]);
 
-                for (String url : params) {
-                    URL myURL = new URL(url);
-                    URLConnection conn = myURL.openConnection();
-                    conn.setRequestProperty("http.agent", "chrome");
-                    conn.setDoOutput(false);
-                    conn.setDoInput(true);
-                    conn.getInputStream();
+
+            try {
+                Sttm2 sttm2 = getSttm2();
+
+                String event = params[0];
+
+                if (sttm2 != null && !TextUtils.isEmpty(sttm2.key) && !TextUtils.isEmpty(sttm2.url)) {
+                    String sttmUrl = String.format("%s?event=%s&cid=%s&pid=%s&lid=%s&cat=%s", sttm2.url, event, media.clientId, media.projectId, media.id, media.categoryId);
+
+                    URL url = new URL(sttmUrl);
+
+                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+                    conn.setRequestMethod("GET");
+                    conn.setRequestProperty("Authorization", "Bearer " + sttm2.key);
+
+                    conn.getResponseCode();
+
                 }
-            } catch (IOException e) {
+
+            } catch (Exception e) {
                 Log.e(getClass().getSimpleName(), "Failed to fetch URL", e);
             }
 
@@ -104,73 +227,84 @@ class TrackingLive implements Tracking {
         }
     }
 
-    private class SttmLive extends TimerTask {
+    private class SttmLive {
 
         private List<String> targets = new ArrayList<>();
-        private Timer sttmTimer;
-        private TreeSet<String> progresses = new TreeSet<>();
-        private HashSet<Integer> trackedRetentions = new HashSet<>();
+        private Timer sttm2Timer;
 
-        SttmLive() {
-            sttmTimer = new Timer();
-            sttmTimer.scheduleAtFixedRate(this, 0, 5000);
+        private boolean isEventTimerTaskRunning;
+
+
+        public void startOnEventTask() {
+            sttm2Timer = new Timer();
+            sttm2Timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    trackOnEvent();
+                }
+            }, 60000, 60000);
+            isEventTimerTaskRunning = true;
         }
 
-        @Override
-        public void run() {
-            if (targets.size() == 0)
-                return;
-
-            // TODO: add version to STTM (BuildConfig.VERSION_NAME)
-            new UrlTrackerLiveTask().execute(String.format("%s?sttmm=%s&sttmk=%s&sttms=%s&sttmu=123&sttmw=%s",
-                    media.sttmUrl, TextUtils.join(",", targets), media.sttmKey, media.sessionId,
-                    String.format("pid:%s/cat:%s/mid:%s", media.projectId, media.categoryId, media.id)));
-
-
-            targets.clear();
-
+        public boolean isOnEventTaskRunning() {
+            return isEventTimerTaskRunning;
         }
 
-        void trackStart() {
-            targets.add("play");
-        }
-
-        void trackComplete() {
-            collectProgress();
-            targets.add("complete");
-        }
-
-        void trackProgress(float time, float duration) {
-            int p = (int) (100 * time / duration);
-
-            if (p > 99)
-                p = 99;
-
-            progresses.add(String.format(Locale.getDefault(), "p%02d", p));
-
-            if (!trackedRetentions.contains(p))
-                progresses.add(String.format(Locale.getDefault(), "r%02d", p));
-
-            trackedRetentions.add(p);
-
-            if (progresses.size() >= 5)
-                collectProgress();
-        }
-
-        void destroy() {
-            if (sttmTimer != null) {
-                sttmTimer.cancel();
-                sttmTimer.purge();
-                sttmTimer = null;
+        public void cancelOnEventTask() {
+            if (sttm2Timer != null) {
+                sttm2Timer.cancel();
+                sttm2Timer.purge();
+                sttm2Timer = null;
+                isEventTimerTaskRunning = false;
             }
         }
 
-        private void collectProgress() {
-            if (progresses.size() == 0)
-                return;
-
-            targets.add(TextUtils.join(",", progresses));
-            progresses.clear();
+        void trackPlayEvent() {
+            sendEvents(EVENT_PLAY);
         }
+
+        void trackPlayAndONEvent() {
+            sendEvents(EVENT_ONLINE, EVENT_PLAY);
+        }
+
+        void trackPauseEvent() {
+            sendEvents(EVENT_PAUSE);
+        }
+
+        void trackLoadEvent() {
+            sendEvents(EVENT_LOAD);
+        }
+
+        void trackComplete() {
+            sendEvents(EVENT_COMPLETE);
+        }
+
+        void trackOnEvent() {
+            sendEvents(EVENT_ONLINE);
+        }
+
+        private void sendEvents(String... events) {
+
+            String finalEvents = null;
+            if (events.length > 1) {
+                finalEvents = TextUtils.join(",", events);
+            } else {
+                finalEvents = events[0];
+            }
+
+            new RequestTrackerLiveTask().execute(finalEvents);
+        }
+
+        void destroy() {
+            cancelOnEventTask();
+        }
+
     }
+
+
+    private class Sttm2 {
+        public String key;
+        public String url;
+    }
+
 }
