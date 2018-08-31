@@ -36,6 +36,8 @@ class TrackingLive implements Tracking {
     private static final String EVENT_ONLINE = "on";
     private static final String EVENT_COMPLETE = "co";
 
+    private static  final long TASK_EVENT_ON_TIME = 60000;
+
     private static final String ORIGIN_SDK_ANDROID = "player.sambatech.sdk.android";
 
     private SambaMediaConfig media;
@@ -231,7 +233,6 @@ class TrackingLive implements Tracking {
 
     private class SttmLive {
 
-        private List<String> targets = new ArrayList<>();
         private Timer sttm2Timer;
 
         private boolean isEventTimerTaskRunning;
@@ -244,7 +245,7 @@ class TrackingLive implements Tracking {
                 public void run() {
                     trackOnEvent();
                 }
-            }, 60000, 60000);
+            }, TASK_EVENT_ON_TIME, TASK_EVENT_ON_TIME);
             isEventTimerTaskRunning = true;
         }
 

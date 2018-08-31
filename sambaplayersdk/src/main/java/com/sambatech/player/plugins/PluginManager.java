@@ -32,7 +32,6 @@ public class PluginManager implements Plugin {
         pluginsLoaded = 0;
 
         plugins = new Plugin[]{
-                //new ImaWrapper(),
                 TrackingFactory.getInstance(this.player.getMedia().isLive),
                 new Captions()
         };
