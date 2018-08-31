@@ -17,12 +17,15 @@ public class SambaMediaConfig extends SambaMedia {
 	public String projectHash;
 	public String qualifier;
 	public int projectId;
+	public  int clientId;
 	public int categoryId;
 	public String sessionId = Helpers.getSessionId();
 	public int themeColor = 0xFF72BE44;
 	public String themeColorHex = "#72BE44";
 	public String sttmUrl;
 	public String sttmKey;
+	public String sttm2Url;
+	public String sttm2Key;
 	public SambaMediaRequest request;
 	public DrmRequest drmRequest;
 	public boolean blockIfRooted;
@@ -40,12 +43,15 @@ public class SambaMediaConfig extends SambaMedia {
 			projectHash = m.projectHash;
 			qualifier = m.qualifier;
 			projectId = m.projectId;
+			clientId = m.clientId;
 			categoryId = m.categoryId;
 			sessionId = m.sessionId;
 			themeColor = m.themeColor;
 			themeColorHex = m.themeColorHex;
 			sttmUrl = m.sttmUrl;
 			sttmKey = m.sttmKey;
+			sttm2Url = m.sttm2Url;
+			sttm2Key = m.sttm2Key;
 			request = m.request;
 			drmRequest = m.drmRequest;
 			// TODO: Reabilitar após correção (https://github.com/sambatech-desenv/player/issues/589)

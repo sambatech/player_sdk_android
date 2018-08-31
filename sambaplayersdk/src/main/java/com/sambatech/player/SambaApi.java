@@ -264,6 +264,10 @@ public class SambaApi {
 				if (json.has("id"))
 					media.id = json.getString("id");
 
+				if (json.has("clientId")) {
+					media.clientId = json.getInt("clientId");
+				}
+
 				if (json.has("categoryId"))
 					media.categoryId = json.getInt("categoryId");
 
@@ -328,6 +332,13 @@ public class SambaApi {
 				JSONObject sttm = apiConfig.getJSONObject("sttm");
 				media.sttmUrl = normalizeProtocol(sttm.optString("url", "http://sttm.sambatech.com.br/collector/__sttm.gif"), request.protocol);
 				media.sttmKey = sttm.optString("key", "ae810ebc7f0654c4fadc50935adcf5ec");
+
+				JSONObject sttm2 = apiConfig.getJSONObject("sttm2");
+				if (sttm2 != null) {
+					media.sttm2Url = normalizeProtocol(sttm2.optString("url", "https://sttm2.sambatech.com/"), request.protocol);
+					media.sttm2Key = sttm2.optString("key", "eyJhbGciOiJIUzM4NCIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzYW1iYXRlY2gtcGxheWVyIiwibmJmIjoxNTM1NDgyNTY0LCJpYXQiOjE1MzU0ODI5ODQsImV4cCI6MTUzNTUyNjE4NH0.AjRlzx_V4z9RVZ0zW3RDc0H2yZOefPy1X7QskVENuQBwatiwnaJiQL26vhGB1mmo");
+				}
+
 			}
 		}
 
