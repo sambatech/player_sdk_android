@@ -12,75 +12,75 @@ import com.sambatech.player.SambaPlayer;
  */
 public class PluginManager implements Plugin {
 
-	private static PluginManager instance = new PluginManager();
+    private static PluginManager instance = new PluginManager();
 
-	private Plugin[] plugins;
-	private SambaPlayer player;
-	private int pluginsLoaded;
-	private boolean isLoaded;
-	private boolean pendingPlay;
+    private Plugin[] plugins;
+    private SambaPlayer player;
+    private int pluginsLoaded;
+    private boolean isLoaded;
+    private boolean pendingPlay;
 
-	private PluginManager() {}
+    private PluginManager() {
+    }
 
-	public static PluginManager getInstance() {
-		return instance;
-	}
+    public static PluginManager getInstance() {
+        return instance;
+    }
 
-	public void onLoad(@NonNull SambaPlayer player) {
-		this.player = player;
-		pluginsLoaded = 0;
+    public void onLoad(@NonNull SambaPlayer player) {
+        this.player = player;
+        pluginsLoaded = 0;
 
-		plugins = new Plugin[] {
-				//new ImaWrapper(),
-				new Tracking(),
-				new Captions()
-		};
+        plugins = new Plugin[]{
+                TrackingFactory.getInstance(this.player.getMedia().isLive),
+                new Captions()
+        };
 
-		for (Plugin plugin : plugins)
-			plugin.onLoad(player);
-	}
+        for (Plugin plugin : plugins)
+            plugin.onLoad(player);
+    }
 
-	public void onInternalPlayerCreated(@NonNull SimpleExoPlayerView internalPlayer) {
-		for (Plugin plugin : plugins)
-			plugin.onInternalPlayerCreated(internalPlayer);
-	}
+    public void onInternalPlayerCreated(@NonNull SimpleExoPlayerView internalPlayer) {
+        for (Plugin plugin : plugins)
+            plugin.onInternalPlayerCreated(internalPlayer);
+    }
 
-	public void onDestroy() {
-		if (plugins == null) return;
+    public void onDestroy() {
+        if (plugins == null) return;
 
-		for (Plugin plugin : plugins)
-			plugin.onDestroy();
+        for (Plugin plugin : plugins)
+            plugin.onDestroy();
 
-		plugins = null;
-	}
+        plugins = null;
+    }
 
-	public boolean isLoaded() {
-		return isLoaded;
-	}
+    public boolean isLoaded() {
+        return isLoaded;
+    }
 
-	public void setPendingPlay(boolean value) {
-		pendingPlay = value;
-	}
+    public void setPendingPlay(boolean value) {
+        pendingPlay = value;
+    }
 
-	public Plugin getPlugin(Class PluginRef) {
-		for (Plugin plugin : plugins)
-			if (plugin.getClass() == PluginRef)
-				return plugin;
+    public Plugin getPlugin(Class PluginRef) {
+        for (Plugin plugin : plugins)
+            if (plugin.getClass() == PluginRef)
+                return plugin;
 
-		return null;
-	}
+        return null;
+    }
 
-	/**
-	 * Notifies plugin load to player.
-	 */
-	void notifyPluginLoaded(Plugin plugin) {
-		if (++pluginsLoaded >= plugins.length) {
-			isLoaded = true;
+    /**
+     * Notifies plugin load to player.
+     */
+    void notifyPluginLoaded(Plugin plugin) {
+        if (++pluginsLoaded >= plugins.length) {
+            isLoaded = true;
 
-			if (pendingPlay) {
-				pendingPlay = false;
-				player.play();
-			}
-		}
-	}
+            if (pendingPlay) {
+                pendingPlay = false;
+                player.play();
+            }
+        }
+    }
 }
