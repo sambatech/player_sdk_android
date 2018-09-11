@@ -406,6 +406,7 @@ public class SambaPlayer extends FrameLayout {
         public void onDisconnected() {
             SambaCast.cleanCacheDatas(getContext());
             long lastPosition = castPlayer.getContentPosition();
+            simplePlayerView.setupCastButton(false);
             player.seekTo(lastPosition);
             play();
             startProgressTimer();

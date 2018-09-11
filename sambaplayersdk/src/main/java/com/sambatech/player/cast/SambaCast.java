@@ -49,8 +49,6 @@ public final class SambaCast {
 		}
 	};
 
-	private static SambaCast globalInstance;
-
 	private final AppVisibilityListener appVisibilityListener = new AppVisibilityListener() {
 		@Override
 		public void onAppEnteredForeground() {
@@ -126,7 +124,6 @@ public final class SambaCast {
 	};
 	private Context context;
 
-	private MediaRouteButton castButton;
 	private SessionManager sessionManager;
 	private CastContext castContext;
 	private SambaCastListener listener;
@@ -143,45 +140,8 @@ public final class SambaCast {
 			return;
 
 		this.context = context;
-		LayoutInflater inflater = LayoutInflater.from(context);
-		castButton = (MediaRouteButton)inflater.inflate(R.layout.cast_button, null);
 		castContext = CastContext.getSharedInstance(context);
-
-//		Context castContextTest = new ContextThemeWrapper(context, android.support.v7.mediarouter.R.style.Theme_MediaRouter);
-//		Drawable drawable = null;
-//		TypedArray a = castContextTest.obtainStyledAttributes(null,
-//				android.support.v7.mediarouter.R.styleable.MediaRouteButton, android.support.v7.mediarouter.R.attr.mediaRouteButtonStyle, 0);
-//		drawable = a.getDrawable(android.support.v7.mediarouter.R.styleable.MediaRouteButton_externalRouteEnabledDrawable);
-//		a.recycle();
-//
-//		DrawableCompat.setTint(drawable, Color.YELLOW);
-
 		sessionManager = castContext.getSessionManager();
-	}
-
-
-	public static void init(@NonNull Context context){
-		if (globalInstance == null) {
-			globalInstance = new SambaCast(context);
-		}
-
-	}
-
-	public static SambaCast getGlobalInstance(@NonNull Context context) {
-		if (globalInstance == null) {
-			globalInstance = new SambaCast(context);
-		}
-
-		return globalInstance;
-	}
-
-
-	/**
-	 * Returns the cast button to be added on some view.
-	 * @return The cast button instance
-	 */
-	public MediaRouteButton getButton() {
-		return castButton;
 	}
 
 	/**

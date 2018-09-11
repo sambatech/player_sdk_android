@@ -3,6 +3,7 @@ package com.sambatech.sample.activities;
 import android.app.Activity;
 import android.drm.DrmInfoRequest;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -49,7 +50,7 @@ import de.greenrobot.event.EventBus;
 /**
  * The activity where the media player is shown.
  */
-public class MediaItemActivity extends Activity {
+public class MediaItemActivity extends AppCompatActivity {
 
     private MediaInfo activityMedia;
 
@@ -189,7 +190,7 @@ public class MediaItemActivity extends Activity {
 //		CastOptionsProvider.appId = "25C5341A";
 //		CastOptionsProvider.playerUrl = "192.168.2.33:8000/";
 
-		sambaCast = SambaCast.getGlobalInstance(this);
+		sambaCast = new SambaCast(this);
 
 		SambaEventBus.subscribe(playerListener);
 		requestMedia(activityMedia);
