@@ -9,7 +9,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 27
         versionCode 41
-        versionName "v0.12.3-beta"
+        versionName "v0.12.4-beta"
     }
     buildTypes {
         release {
@@ -42,6 +42,8 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     compile 'com.google.android.gms:play-services-cast-framework:16.0.1'
+    compile 'com.android.support:appcompat-v7:27.1.1'
+    compile 'com.android.support:mediarouter-v7:27.1.1'
     compile 'org.bitbucket.b_c:jose4j:0.6.3'
     compile 'com.google.android.exoplayer:exoplayer:2.6.1'
     compile 'com.google.android.exoplayer:extension-ima:2.6.1'

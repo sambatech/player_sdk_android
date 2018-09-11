@@ -3,6 +3,7 @@ package com.sambatech.sample.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,7 +35,7 @@ import retrofit.Retrofit;
 /**
  * The main activity to be shown when the app launches.
  */
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
 	@BindView(R.id.media_list) ListView list;
 	@BindView(R.id.progressbar_view) LinearLayout loading;
