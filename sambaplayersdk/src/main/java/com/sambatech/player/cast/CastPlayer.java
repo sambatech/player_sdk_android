@@ -159,8 +159,11 @@ public final class CastPlayer implements Player {
           jsonObject = new JSONObject(message);
           String type = jsonObject.getString("type");
 
-          if (type.equalsIgnoreCase("finish"))
-            sambaCast.stopCasting();
+          if (type.equalsIgnoreCase("finish")) {
+            loadItem(mediaQueueItems.get(0), 0);
+            seekTo(0);
+            setPlayWhenReady(false);
+          }
         }
       } catch (JSONException e) {
         e.printStackTrace();
