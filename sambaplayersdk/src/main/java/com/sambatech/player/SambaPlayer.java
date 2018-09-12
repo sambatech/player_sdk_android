@@ -411,11 +411,21 @@ public class SambaPlayer extends FrameLayout {
             SambaCast.cleanCacheDatas(getContext());
             SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.CAST_DISCONNECT));
             long lastPosition = castPlayer.getContentPosition();
-            simplePlayerView.setupCastButton(false);
-            player.seekTo(lastPosition);
+
+            if (simplePlayerView != null) {
+                simplePlayerView.setupCastButton(false);
+            }
+
+            if (player != null) {
+                player.seekTo(lastPosition);
+            }
+
             play();
             startProgressTimer();
-            simplePlayerView.hideCast();
+
+            if (simplePlayerView != null) {
+                simplePlayerView.hideCast();
+            }
         }
     };
 
