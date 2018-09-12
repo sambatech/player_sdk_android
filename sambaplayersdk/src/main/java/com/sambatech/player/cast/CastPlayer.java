@@ -15,6 +15,7 @@
  */
 package com.sambatech.player.cast;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -29,7 +30,6 @@ import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.MimeTypes;
-import com.google.android.exoplayer2.util.Util;
 import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.CastStatusCodes;
@@ -45,6 +45,9 @@ import com.google.android.gms.cast.framework.media.RemoteMediaClient;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient.MediaChannelResult;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.sambatech.player.event.SambaEvent;
+import com.sambatech.player.event.SambaEventBus;
+import com.sambatech.player.event.SambaPlayerListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,6 +73,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * <p>Methods should be called on the application's main thread.</p>
  */
 public final class CastPlayer implements Player {
+
+  private final Context context;
 
   /**
    * Listener of changes in the cast session availability.
@@ -162,7 +167,10 @@ public final class CastPlayer implements Player {
           if (type.equalsIgnoreCase("finish")) {
             loadItem(mediaQueueItems.get(0), 0);
             seekTo(0);
-            setPlayWhenReady(false);
+            playWhenReady = false;
+            SambaCast.setCurrentStatus(context, playWhenReady);
+            updateInternalState();
+            SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.CAST_FINISH));
           }
         }
       } catch (JSONException e) {
@@ -172,9 +180,11 @@ public final class CastPlayer implements Player {
   };
 
   /**
+   * @param context
    * @param sambaCast The context from which the cast session is obtained.
    */
-  public CastPlayer(SambaCast sambaCast) {
+  public CastPlayer(Context context, SambaCast sambaCast) {
+    this.context = context;
     this.sambaCast = sambaCast;
     this.castContext = sambaCast.getCastContext();
     timelineTracker = new CastTimelineTracker();
@@ -375,17 +385,24 @@ public final class CastPlayer implements Player {
   @Override
   public void setPlayWhenReady(boolean playWhenReady) {
     this.playWhenReady = playWhenReady;
+    SambaCast.setCurrentStatus(context, this.playWhenReady);
     if (sambaCast == null) {
       return;
     }
-
     updateInternalState();
 
     if (playWhenReady) {
       sambaCast.playCast();
+      SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.CAST_PLAY));
     } else {
       sambaCast.pauseCast();
+      SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.CAST_PAUSE));
     }
+  }
+
+  public void syncInternalState() {
+      this.playWhenReady = SambaCast.getCurrentStatus(context);
+      updateInternalState();
   }
 
   @Override

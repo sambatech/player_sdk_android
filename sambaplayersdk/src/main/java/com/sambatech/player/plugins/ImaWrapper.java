@@ -260,7 +260,7 @@ public class ImaWrapper implements Plugin {
 					}
 					break;
 				case ALL_ADS_COMPLETED:
-					onDestroy();
+					onDestroyPlayer();
 					break;
 				case STARTED:
 					if(adPlayer != null) {
@@ -447,7 +447,7 @@ public class ImaWrapper implements Plugin {
 
 	public void onInternalPlayerCreated(@NonNull SimpleVideoPlayer internalPlayer) {}
 
-	public void onDestroy() {
+	public void onDestroyPlayer() {
 		Log.i("ima:", String.valueOf(adsLoader == null));
 		if (adsLoader == null)
 			return;

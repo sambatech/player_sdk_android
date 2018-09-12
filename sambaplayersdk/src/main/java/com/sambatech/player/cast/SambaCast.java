@@ -319,9 +319,18 @@ public final class SambaCast {
 
 	public static void cleanCacheDatas(Context context) {
 		SharedPrefsUtils.clearPreferenceByKey(context, SharedPrefsUtils.SharedPrefsKeys.MEDIA_CASTING_KEY);
+		SharedPrefsUtils.clearPreferenceByKey(context, SharedPrefsUtils.SharedPrefsKeys.PLAYER_STATUS);
 	}
 
 	public static void setCurrentMediaCastingId(Context context, String mediaId) {
 		SharedPrefsUtils.setStringPreference(context, SharedPrefsUtils.SharedPrefsKeys.MEDIA_CASTING_KEY, mediaId);
+	}
+
+	public static void setCurrentStatus(Context context, boolean playWhenReady) {
+		SharedPrefsUtils.setBooleanPreference(context, SharedPrefsUtils.SharedPrefsKeys.PLAYER_STATUS, playWhenReady);
+	}
+
+	public static boolean getCurrentStatus(Context context) {
+		return SharedPrefsUtils.getBooleanPreference(context, SharedPrefsUtils.SharedPrefsKeys.PLAYER_STATUS);
 	}
 }
