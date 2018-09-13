@@ -1,7 +1,5 @@
 package com.sambatech.sample.activities;
 
-import android.app.Activity;
-import android.drm.DrmInfoRequest;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -166,6 +164,36 @@ public class MediaItemActivity extends AppCompatActivity {
 
 			Log.d("Player CurrentCap", "current cap: " + player.getCurrentCaptionIndex() + " lenguage: " + player.getCaption());
 		}
+
+		@Override
+		public void onDestroy(SambaEvent event) {
+			super.onDestroy(event);
+		}
+
+		@Override
+		public void onCastConnect(SambaEvent event) {
+			super.onCastConnect(event);
+		}
+
+		@Override
+		public void onCastDisconnect(SambaEvent event) {
+			super.onCastDisconnect(event);
+		}
+
+		@Override
+		public void onCastPlay(SambaEvent event) {
+			super.onCastPlay(event);
+		}
+
+		@Override
+		public void onCastPause(SambaEvent event) {
+			super.onCastPause(event);
+		}
+
+		@Override
+		public void onCastFinish(SambaEvent event) {
+			super.onCastFinish(event);
+		}
 	};
 
 	@Override
@@ -193,13 +221,15 @@ public class MediaItemActivity extends AppCompatActivity {
 		sambaCast = new SambaCast(this);
 
 		SambaEventBus.subscribe(playerListener);
+
 		requestMedia(activityMedia);
+
+
 	}
 
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		player.pause();
     }
 
 	@Override

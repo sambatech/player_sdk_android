@@ -251,6 +251,15 @@ public class MainActivity extends AppCompatActivity {
 		mediaInfo8.setControlsEnabled(true);
 		mediaInfo8.setAutoPlay(true);
 
+		MediaInfo mediaInfo9 = new MediaInfo();
+
+		mediaInfo9.setTitle("Teste Media Ricardo Eletro");
+		mediaInfo9.setProjectHash("31044efbcb9b4ac1df2190f3e902e25f");
+		mediaInfo9.setId("517b82ca6ab11f280a62e636555d2481");
+		mediaInfo9.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo9.setControlsEnabled(true);
+		mediaInfo9.setAutoPlay(true);
+
 
 		mediaInfoList.add(mediaInfo);
         mediaInfoList.add(mediaInfo2);
@@ -260,6 +269,7 @@ public class MainActivity extends AppCompatActivity {
 		mediaInfoList.add(mediaInfo6);
 		mediaInfoList.add(mediaInfo7);
 		mediaInfoList.add(mediaInfo8);
+		mediaInfoList.add(mediaInfo9);
 
 		showMediaList(mediaInfoList);
 	}

@@ -464,11 +464,14 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         bottomSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
-                if (optionsMenuLayer != null) optionsMenuLayer.hideMenu();
-                if (menuWasPlaying) {
+                if (optionsMenuLayer != null) {
+                    optionsMenuLayer.hideMenu();
+                }
+
+                if (menuWasPlaying && player != null && playerView != null) {
                     player.setPlayWhenReady(true);
                     playerView.hideController();
-                } else {
+                } else if (playerView != null) {
                     playerView.showController();
                 }
                 if (isFullscreen) {

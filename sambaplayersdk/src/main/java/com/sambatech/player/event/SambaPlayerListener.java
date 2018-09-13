@@ -12,7 +12,7 @@ public abstract class SambaPlayerListener {
 	 */
 	public enum EventType implements SambaEventType {
 		LOAD,
-		UNLOAD,
+		DESTROY,
 		START,
 		PLAY,
 		PAUSE,
@@ -25,7 +25,12 @@ public abstract class SambaPlayerListener {
 		CLICK,
 		ERROR,
 		PORTRAIT,
-		LANDSCAPE
+		LANDSCAPE,
+		CAST_CONNECT,
+		CAST_DISCONNECT,
+		CAST_PLAY,
+		CAST_PAUSE,
+		CAST_FINISH
 	}
 
 	/**
@@ -35,10 +40,10 @@ public abstract class SambaPlayerListener {
 	public void onLoad(SambaEvent event) {}
 
 	/**
-	 * Unload player fired when the player is destroyed.
-	 * @param event UNLOAD EventType.event
+	 * onDestroy player fired when the player is destroyed.
+	 * @param event DESTROY EventType.event
 	 */
-	public void onUnload(SambaEvent event) {}
+	public void onDestroy(SambaEvent event) {}
 
 	/**
 	 * OnStart player fired when the media starts to play for the first time.
@@ -117,5 +122,15 @@ public abstract class SambaPlayerListener {
 	 * @param event LANDSCAPE EventType.event
 	 */
 	public void onLandscape(SambaEvent event) {}
+
+	public void onCastConnect(SambaEvent event) {}
+
+	public void onCastDisconnect(SambaEvent event) {}
+
+	public void onCastPlay(SambaEvent event) {}
+
+	public void onCastPause(SambaEvent event) {}
+
+	public void onCastFinish(SambaEvent event) {}
 
 }
