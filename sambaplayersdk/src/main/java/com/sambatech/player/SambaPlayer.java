@@ -656,6 +656,11 @@ public class SambaPlayer extends FrameLayout {
      * @return Float Current time
      */
     public float getCurrentTime() {
+
+        if (sambaCast != null && sambaCast.isCasting() && castPlayer != null) {
+            return castPlayer.getCurrentPosition() / 1000f;
+        }
+
         return player != null ? player.getCurrentPosition() / 1000f : 0f;
     }
 
@@ -665,6 +670,11 @@ public class SambaPlayer extends FrameLayout {
      * @return Float total duration
      */
     public float getDuration() {
+
+        if (sambaCast != null && sambaCast.isCasting() && castPlayer != null) {
+            return castPlayer.getDuration() / 1000f;
+        }
+
         return player != null ? player.getDuration() / 1000f : media.duration;
     }
 
