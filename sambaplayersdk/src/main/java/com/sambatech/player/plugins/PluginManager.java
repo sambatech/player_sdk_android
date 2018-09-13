@@ -41,6 +41,8 @@ public class PluginManager implements Plugin {
     }
 
     public void onInternalPlayerCreated(@NonNull SimpleExoPlayerView internalPlayer) {
+        if (plugins == null) return;
+
         for (Plugin plugin : plugins)
             plugin.onInternalPlayerCreated(internalPlayer);
     }

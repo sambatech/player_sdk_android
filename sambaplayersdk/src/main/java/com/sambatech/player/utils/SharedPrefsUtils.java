@@ -9,6 +9,7 @@ final public class SharedPrefsUtils {
 
     public class SharedPrefsKeys {
         public static final String MEDIA_CASTING_KEY = "MEDIA_CASTING_KEY";
+        public static final String PLAYER_STATUS = "PLAYER_STATUS";
     }
 
     private SharedPrefsUtils() {}
@@ -40,5 +41,24 @@ final public class SharedPrefsUtils {
             editor.remove(key);
             editor.commit();
         }
+    }
+
+    public static boolean setBooleanPreference(Context context, String key, boolean value) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences != null && !TextUtils.isEmpty(key)) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(key, value);
+            return editor.commit();
+        }
+        return false;
+    }
+
+    public static boolean getBooleanPreference(Context context, String key) {
+        boolean value = false;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        if (preferences != null) {
+            value = preferences.getBoolean(key, false);
+        }
+        return value;
     }
 }

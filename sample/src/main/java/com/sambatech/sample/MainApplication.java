@@ -17,8 +17,6 @@ public class MainApplication extends Application {
         _instance = this;
 
 	    loadExternalIp();
-
-		SambaCast.init(getApplicationContext());
     }
 
     public static Context getAppContext() {

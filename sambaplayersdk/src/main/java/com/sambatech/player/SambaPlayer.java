@@ -94,6 +94,8 @@ public class SambaPlayer extends FrameLayout {
             switch (playbackState) {
                 case Player.STATE_READY:
                     if (playWhenReady) {
+
+
                         if (!_hasStarted) {
                             _hasStarted = true;
                             _currentRetryIndex = 0;
@@ -328,6 +330,8 @@ public class SambaPlayer extends FrameLayout {
             stopProgressTimer();
             player.setPlayWhenReady(false);
 
+            SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.CAST_CONNECT));
+
             final RemoteMediaClient remoteMediaClient = castSession.getRemoteMediaClient();
             if (remoteMediaClient == null) return;
 
@@ -376,7 +380,7 @@ public class SambaPlayer extends FrameLayout {
                 castPlayer.setPlayWhenReady(false);
             } else {
                 castPlayer.resumeItems(mediaQueueItems, 0, Player.REPEAT_MODE_OFF);
-                castPlayer.setPlayWhenReady(true);
+                castPlayer.syncInternalState();
             }
 
 
@@ -405,11 +409,23 @@ public class SambaPlayer extends FrameLayout {
         @Override
         public void onDisconnected() {
             SambaCast.cleanCacheDatas(getContext());
+            SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.CAST_DISCONNECT));
             long lastPosition = castPlayer.getContentPosition();
-            player.seekTo(lastPosition);
+
+            if (simplePlayerView != null) {
+                simplePlayerView.setupCastButton(false);
+            }
+
+            if (player != null) {
+                player.seekTo(lastPosition);
+            }
+
             play();
             startProgressTimer();
-            simplePlayerView.hideCast();
+
+            if (simplePlayerView != null) {
+                simplePlayerView.hideCast();
+            }
         }
     };
 
@@ -520,14 +536,14 @@ public class SambaPlayer extends FrameLayout {
             _forceOutputIndexTo = -1;
         }
 
-        if (sambaCast != null && sambaCast.isCasting()) {
-            sambaCast.playCast();
+        if (sambaCast != null && sambaCast.isCasting() && castPlayer != null) {
+            castPlayer.setPlayWhenReady(true);
             stopProgressTimer();
             player.setPlayWhenReady(false);
         } else {
             player.setPlayWhenReady(true);
+            SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
         }
-        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PLAY));
     }
 
     /**
@@ -542,12 +558,12 @@ public class SambaPlayer extends FrameLayout {
      */
     public void pause() {
         if (player == null) return;
-        if (sambaCast != null && sambaCast.isCasting()) {
-            sambaCast.pauseCast();
+        if (sambaCast != null && sambaCast.isCasting() && castPlayer != null) {
+            castPlayer.setPlayWhenReady(false);
         } else {
             player.setPlayWhenReady(false);
+            SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
         }
-        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
     }
 
     /**
@@ -640,6 +656,11 @@ public class SambaPlayer extends FrameLayout {
      * @return Float Current time
      */
     public float getCurrentTime() {
+
+        if (sambaCast != null && sambaCast.isCasting() && castPlayer != null) {
+            return castPlayer.getCurrentPosition() / 1000f;
+        }
+
         return player != null ? player.getCurrentPosition() / 1000f : 0f;
     }
 
@@ -649,6 +670,11 @@ public class SambaPlayer extends FrameLayout {
      * @return Float total duration
      */
     public float getDuration() {
+
+        if (sambaCast != null && sambaCast.isCasting() && castPlayer != null) {
+            return castPlayer.getDuration() / 1000f;
+        }
+
         return player != null ? player.getDuration() / 1000f : media.duration;
     }
 
@@ -756,7 +782,7 @@ public class SambaPlayer extends FrameLayout {
     public void destroy(SambaPlayerError error) {
         PluginManager.getInstance().onDestroy();
         destroyInternal();
-        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.UNLOAD));
+        SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.DESTROY));
 
         if (error != null)
             showError(error);
@@ -1048,6 +1074,7 @@ public class SambaPlayer extends FrameLayout {
     private void dispatchPause() {
         stopProgressTimer();
         SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
+        Log.i("Teste", "" + sambaCast.isCasting());
     }
 
     private void dispatchError(@NonNull SambaPlayerError error) {
@@ -1069,6 +1096,6 @@ public class SambaPlayer extends FrameLayout {
     private void setupCast() {
         if (sambaCast == null || media.isAudioOnly) return;
         sambaCast.setEventListener(castListener);
-        castPlayer = new CastPlayer(sambaCast);
+        castPlayer = new CastPlayer(getContext(), sambaCast);
     }
 }

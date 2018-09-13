@@ -3,6 +3,7 @@ package com.sambatech.sample.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,7 +35,7 @@ import retrofit.Retrofit;
 /**
  * The main activity to be shown when the app launches.
  */
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
 	@BindView(R.id.media_list) ListView list;
 	@BindView(R.id.progressbar_view) LinearLayout loading;
@@ -250,6 +251,15 @@ public class MainActivity extends Activity {
 		mediaInfo8.setControlsEnabled(true);
 		mediaInfo8.setAutoPlay(true);
 
+		MediaInfo mediaInfo9 = new MediaInfo();
+
+		mediaInfo9.setTitle("Teste Media Ricardo Eletro");
+		mediaInfo9.setProjectHash("31044efbcb9b4ac1df2190f3e902e25f");
+		mediaInfo9.setId("517b82ca6ab11f280a62e636555d2481");
+		mediaInfo9.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo9.setControlsEnabled(true);
+		mediaInfo9.setAutoPlay(true);
+
 
 		mediaInfoList.add(mediaInfo);
         mediaInfoList.add(mediaInfo2);
@@ -259,6 +269,7 @@ public class MainActivity extends Activity {
 		mediaInfoList.add(mediaInfo6);
 		mediaInfoList.add(mediaInfo7);
 		mediaInfoList.add(mediaInfo8);
+		mediaInfoList.add(mediaInfo9);
 
 		showMediaList(mediaInfoList);
 	}

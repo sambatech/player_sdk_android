@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.v7.app.MediaRouteButton;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -37,6 +38,7 @@ import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.text.CaptionStyleCompat;
 import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.sambatech.player.adapter.CaptionsSheetAdapter;
 import com.sambatech.player.adapter.OutputSheetAdapter;
 import com.sambatech.player.adapter.SpeedSheetAdapter;
@@ -87,7 +89,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
     //topbar buttons e texto
     private ImageButton optionsMenuButton;
     private ImageButton liveButton;
-    private FrameLayout castButton;
+    private MediaRouteButton castButton;
     private TextView videoTitle;
 
     private boolean isFullscreen = false;
@@ -174,7 +176,8 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         videoTitle = playerView.findViewById(R.id.video_title_text);
         optionsMenuButton = playerView.findViewById(R.id.topbar_menu_button);
         liveButton = playerView.findViewById(R.id.topbar_live_button);
-        castButton = playerView.findViewById(R.id.topbar_cast_button);
+        castButton = playerView.findViewById(R.id.media_route_button);
+        setupCastButton(false);
         fullscreenButton = playerView.findViewById(R.id.fullscreen_button);
         loadingView = playerView.findViewById(R.id.exo_progress_view);
         controlsView = playerView.findViewById(R.id.exo_control_bar);
@@ -193,7 +196,6 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         fullscreenButton.setOnClickListener(this);
         optionsMenuButton.setOnClickListener(this);
         liveButton.setOnClickListener(this);
-        playerView.findViewById(R.id.cast_image_container).setOnClickListener(this);
         playSmallButton.setOnClickListener(playPauseClickLisner);
         pauseSmallButton.setOnClickListener(playPauseClickLisner);
     }
@@ -300,8 +302,6 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             menuWasPlaying = player.isPlayingAd() || (player.getPlayWhenReady() && (player.getPlaybackState() == Player.STATE_READY || player.getPlaybackState() == Player.STATE_BUFFERING));
             player.setPlayWhenReady(false);
             playerView.hideController();
-        } else if (viewId == R.id.cast_image_container) {
-            playerView.findViewById(R.id.cast_dummy_button).performClick();
         } else if (viewId == R.id.topbar_live_button) {
             if(player != null)
                 player.seekToDefaultPosition();
@@ -464,11 +464,14 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         bottomSheetDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
-                if (optionsMenuLayer != null) optionsMenuLayer.hideMenu();
-                if (menuWasPlaying) {
+                if (optionsMenuLayer != null) {
+                    optionsMenuLayer.hideMenu();
+                }
+
+                if (menuWasPlaying && player != null && playerView != null) {
                     player.setPlayWhenReady(true);
                     playerView.hideController();
-                } else {
+                } else if (playerView != null) {
                     playerView.showController();
                 }
                 if (isFullscreen) {
@@ -763,6 +766,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         castControlView.findViewById(R.id.play_pause_container).setVisibility(View.GONE);
         castControlView.findViewById(R.id.topbar_live_button).setVisibility(View.GONE);
         castControlView.findViewById(R.id.fullscreen_button).setVisibility(View.GONE);
+
         if(captions != null && captions.size() > 1) {
             castControlView.findViewById(R.id.topbar_menu_button).setVisibility(View.VISIBLE);
             castControlView.findViewById(R.id.topbar_menu_button).setOnClickListener(new View.OnClickListener() {
@@ -779,14 +783,9 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         }
         castControlView.findViewById(R.id.exo_play).setVisibility(View.VISIBLE);
         castControlView.findViewById(R.id.exo_pause).setVisibility(View.INVISIBLE);
-        castControlView.findViewById(R.id.cast_image_container).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                castControlView.findViewById(R.id.cast_dummy_button).performClick();
-            }
-        });
 
-        ((ImageButton) castControlView.findViewById(R.id.cast_image_container)).setImageDrawable(context.getResources().getDrawable(R.drawable.sambaplayer_cast_connected));
+
+
         ((TextView) castControlView.findViewById(R.id.video_title_text)).setText(videoTitle.getText());
     }
 
@@ -820,9 +819,18 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             castButton.setVisibility(View.GONE);
             castButton.setOnClickListener(null);
         }
-
+        setupCastButton(true);
         castControlView.setVisibility(View.VISIBLE);
+
         playerView.setVisibility(View.GONE);
+    }
+
+    public void setupCastButton(boolean isCastPlayer) {
+        if (isCastPlayer) {
+            CastButtonFactory.setUpMediaRouteButton(context.getApplicationContext(), (MediaRouteButton) castControlView.findViewById(R.id.media_route_button));
+        } else {
+            CastButtonFactory.setUpMediaRouteButton(context.getApplicationContext(), castButton);
+        }
     }
 
     public void hideCast() {
