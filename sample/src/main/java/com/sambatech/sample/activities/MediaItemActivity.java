@@ -222,6 +222,9 @@ public class MediaItemActivity extends AppCompatActivity {
 
 		SambaEventBus.subscribe(playerListener);
 
+		requestMedia(activityMedia);
+
+
 	}
 
 	@Override
@@ -233,7 +236,6 @@ public class MediaItemActivity extends AppCompatActivity {
 	protected void onResume() {
 		super.onResume();
 		sambaCast.notifyActivityResume();
-		requestMedia(activityMedia);
 	}
 
 	@Override
