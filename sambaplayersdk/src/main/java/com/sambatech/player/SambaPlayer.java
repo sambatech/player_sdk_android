@@ -385,7 +385,7 @@ public class SambaPlayer extends FrameLayout {
                         SambaCast.setCurrentMediaCastingId(getContext(), media.id);
                         castPlayer.setPlayWhenReady(true);
                     }
-                }, 4, TimeUnit.SECONDS);
+                }, 5, TimeUnit.SECONDS);
             } else {
                 castPlayer.resumeItems(mediaQueueItems, 0, Player.REPEAT_MODE_OFF);
                 castPlayer.syncInternalState();
