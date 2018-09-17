@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import com.google.android.gms.cast.framework.CastButtonFactory;
+import com.sambatech.player.cast.SambaCast;
 import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasAdapter;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
 	private MediasAdapter mAdapter;
 	private Unbinder unbinder;
+	private SambaCast mSambaCast;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
 
 		unbinder = ButterKnife.bind(this);
 		requestMediaList();
+		mSambaCast = new SambaCast(this);
 	}
 
 	@Override
@@ -63,7 +67,23 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.main_menu, menu);
-		return super.onCreateOptionsMenu(menu);
+
+		CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
+				R.id.media_route_menu_item);
+
+		return true;
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		mSambaCast.notifyActivityResume();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		mSambaCast.notifyActivityPause();
 	}
 
 	@Override
