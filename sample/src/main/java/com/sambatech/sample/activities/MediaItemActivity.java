@@ -3,12 +3,14 @@ package com.sambatech.sample.activities;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.cast.framework.CastButtonFactory;
 import com.sambatech.player.SambaApi;
 import com.sambatech.player.SambaPlayer;
 import com.sambatech.player.cast.CastOptionsProvider;
@@ -219,12 +221,24 @@ public class MediaItemActivity extends AppCompatActivity {
 //		CastOptionsProvider.playerUrl = "192.168.2.33:8000/";
 
 		sambaCast = new SambaCast(this);
+		sambaCast.setCastButtonOut(true);
 
 		SambaEventBus.subscribe(playerListener);
 
 		requestMedia(activityMedia);
 
 
+	}
+
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main_menu, menu);
+
+		CastButtonFactory.setUpMediaRouteButton(getApplicationContext(), menu,
+				R.id.media_route_menu_item);
+
+		return true;
 	}
 
 	@Override
