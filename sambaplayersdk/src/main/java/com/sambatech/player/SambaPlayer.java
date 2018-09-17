@@ -27,6 +27,8 @@ import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.gms.cast.MediaQueueItem;
 import com.google.android.gms.cast.framework.CastSession;
 import com.google.android.gms.cast.framework.media.RemoteMediaClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.sambatech.player.cast.CastDRM;
 import com.sambatech.player.cast.CastObject;
 import com.sambatech.player.cast.CastOptionsProvider;
@@ -58,6 +60,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static android.content.ContentValues.TAG;
@@ -375,9 +378,14 @@ public class SambaPlayer extends FrameLayout {
 
 
             if (tempMediaCasting == null || !tempMediaCasting.equals(media.id)) {
-                castPlayer.loadItems(mediaQueueItems, 0, 0, Player.REPEAT_MODE_OFF);
-                SambaCast.setCurrentMediaCastingId(getContext(), media.id);
-                castPlayer.setPlayWhenReady(false);
+                PendingResult<RemoteMediaClient.MediaChannelResult> result = castPlayer.loadItems(mediaQueueItems, 0, 0, Player.REPEAT_MODE_OFF);
+                result.setResultCallback(new ResultCallback<RemoteMediaClient.MediaChannelResult>() {
+                    @Override
+                    public void onResult(@NonNull RemoteMediaClient.MediaChannelResult mediaChannelResult) {
+                        SambaCast.setCurrentMediaCastingId(getContext(), media.id);
+                        castPlayer.setPlayWhenReady(true);
+                    }
+                }, 5, TimeUnit.SECONDS);
             } else {
                 castPlayer.resumeItems(mediaQueueItems, 0, Player.REPEAT_MODE_OFF);
                 castPlayer.syncInternalState();
@@ -825,7 +833,7 @@ public class SambaPlayer extends FrameLayout {
         simplePlayerView.setPlayer(player);
         simplePlayerView.setVideoTitle(media.title);
         simplePlayerView.configureSubTitle(media.captionsConfig);
-        simplePlayerView.configView(!media.isAudioOnly, media.isLive, media.isDvr, sambaCast != null);
+        simplePlayerView.configView(!media.isAudioOnly, media.isLive, media.isDvr, sambaCast != null && !sambaCast.isCastButtonOut());
         simplePlayerView.setEnableControls(_enableControls);
 
         if (media.url.toLowerCase().endsWith(".mp3"))

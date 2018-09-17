@@ -1,4 +1,5 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/all"
@@ -24,4 +25,11 @@
         android:id="@+id/about"
         android:title="@string/about"
         android:orderInCategory="100" />
+
+    <item
+        android:id="@+id/media_route_menu_item"
+        android:title="cast"
+        app:actionProviderClass="android.support.v7.app.MediaRouteActionProvider"
+        android:orderInCategory="101"
+        app:showAsAction="always" />
 </menu>

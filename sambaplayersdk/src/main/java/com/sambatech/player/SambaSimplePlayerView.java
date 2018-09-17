@@ -819,6 +819,13 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             castButton.setVisibility(View.GONE);
             castButton.setOnClickListener(null);
         }
+
+        if (hasCast) {
+            castControlView.findViewById(R.id.media_route_button).setVisibility(View.VISIBLE);
+        } else {
+            castControlView.findViewById(R.id.media_route_button).setVisibility(View.GONE);
+        }
+
         setupCastButton(true);
         castControlView.setVisibility(View.VISIBLE);
 

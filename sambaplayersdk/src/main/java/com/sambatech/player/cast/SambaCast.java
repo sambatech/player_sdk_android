@@ -118,6 +118,7 @@ public final class SambaCast {
 		}
 
 		private void onApplicationDisconnected() {
+			SambaCast.cleanCacheDatas(SambaCast.this.context.getApplicationContext());
 			if (listener != null)
 				listener.onDisconnected();
 		}
@@ -127,6 +128,7 @@ public final class SambaCast {
 	private SessionManager sessionManager;
 	private CastContext castContext;
 	private SambaCastListener listener;
+	private boolean isCastButtonOut;
 
 	/**
 	 * Initializes Chromecast SDK.
@@ -333,4 +335,12 @@ public final class SambaCast {
 	public static boolean getCurrentStatus(Context context) {
 		return SharedPrefsUtils.getBooleanPreference(context, SharedPrefsUtils.SharedPrefsKeys.PLAYER_STATUS);
 	}
+
+    public boolean isCastButtonOut() {
+        return isCastButtonOut;
+    }
+
+    public void setCastButtonOut(boolean castButtonOut) {
+        isCastButtonOut = castButtonOut;
+    }
 }
