@@ -330,6 +330,10 @@ public class SambaPlayer extends FrameLayout {
         @Override
         public void onConnected(final CastSession castSession) {
 
+            if (player == null) {
+                return;
+            }
+
             stopProgressTimer();
             player.setPlayWhenReady(false);
 
@@ -1082,7 +1086,6 @@ public class SambaPlayer extends FrameLayout {
     private void dispatchPause() {
         stopProgressTimer();
         SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PAUSE));
-        Log.i("Teste", "" + sambaCast.isCasting());
     }
 
     private void dispatchError(@NonNull SambaPlayerError error) {
