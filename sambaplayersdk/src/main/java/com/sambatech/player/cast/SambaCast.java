@@ -159,18 +159,22 @@ public final class SambaCast {
 	 * Called within "Activity.onResume()".
 	 */
 	public void notifyActivityResume() {
-		castContext.addCastStateListener(stateListener);
-		castContext.addAppVisibilityListener(appVisibilityListener);
-		sessionManager.addSessionManagerListener(sessionManagerListener, CastSession.class);
+		if (castContext != null && sessionManager != null) {
+			castContext.addCastStateListener(stateListener);
+			castContext.addAppVisibilityListener(appVisibilityListener);
+			sessionManager.addSessionManagerListener(sessionManagerListener, CastSession.class);
+		}
 	}
 
 	/**
 	 * Called within "Activity.onPause()".
 	 */
 	public void notifyActivityPause() {
-		castContext.removeCastStateListener(stateListener);
-		castContext.removeAppVisibilityListener(appVisibilityListener);
-		sessionManager.removeSessionManagerListener(sessionManagerListener, CastSession.class);
+		if (castContext != null && sessionManager != null) {
+			castContext.removeCastStateListener(stateListener);
+			castContext.removeAppVisibilityListener(appVisibilityListener);
+			sessionManager.removeSessionManagerListener(sessionManagerListener, CastSession.class);
+		}
 	}
 
 	/**
