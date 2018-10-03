@@ -17,6 +17,7 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.drm.DrmSession;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -190,7 +191,7 @@ public class SambaPlayer extends FrameLayout {
             destroyInternal();
 
             // unauthorized DRM content
-            if (error.getCause() instanceof UnsupportedDrmException) {
+            if (error instanceof DrmSession.DrmSessionException || error.getCause() instanceof UnsupportedDrmException) {
                 msg = String.format("Você não tem permissão para %s", media.isAudioOnly ? "ouvir este áudio." : "assistir este vídeo.");
                 severity = SambaPlayerError.Severity.critical;
             }
@@ -831,7 +832,7 @@ public class SambaPlayer extends FrameLayout {
             return;
         }
 
-        playerInstanceDefault = new PlayerInstanceDefault(getContext());
+        playerInstanceDefault = new PlayerInstanceDefault(getContext(), media);
         simplePlayerView = new SambaSimplePlayerView(getContext(), this);
         player = playerInstanceDefault.createPlayerInstance();
         simplePlayerView.setPlayer(player);
