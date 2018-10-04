@@ -340,7 +340,7 @@ public class MediaItemActivity extends AppCompatActivity {
 
 	    descView.setText((mediaInfo.getDescription() != null ? mediaInfo.getDescription() : ""));
 
-        sbRequest.protocol = SambaMediaRequest.Protocol.HTTPS;
+        sbRequest.protocol = SambaMediaRequest.Protocol.HTTP;
         api.requestMedia(sbRequest, callback);
     }
 
