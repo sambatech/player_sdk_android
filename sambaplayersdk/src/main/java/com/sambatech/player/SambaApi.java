@@ -315,12 +315,15 @@ public class SambaApi {
 				JSONObject drm = playerSecurity.optJSONObject("drmSecurity");
 
 				if (drm != null) {
-//					media.drmRequest = new DrmRequest(drm.optString("widevineSignatureURL"));
-//					media.drmRequest.addLicenseParam("SubContentType", drm.optString("subContentType", "Default"));
-//					media.drmRequest.addLicenseParam("CrmId", drm.optString("crmId"));
-//					media.drmRequest.addLicenseParam("AccountId", drm.optString("accountId"));
-//					media.drmRequest.addLicenseParam("ContentId", drm.optString("contentId"));
-//					media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
+					media.drmRequest = new DrmRequest(drm.optString("widevineSignatureURL"));
+					media.drmRequest.addLicenseParam("SubContentType", drm.optString("subContentType", "Default"));
+					media.drmRequest.addLicenseParam("CrmId", drm.optString("crmId"));
+					media.drmRequest.addLicenseParam("AccountId", drm.optString("accountId"));
+					media.drmRequest.addLicenseParam("ContentId", drm.optString("contentId"));
+                    media.drmRequest.addLicenseParam("ApplicationId", drm.optString("applicationId"));
+					media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
+					media.drmRequest.setProvider(drm.optString("provider"));
+
 				}
 
 				media.blockIfRooted = playerSecurity.optBoolean("rootedDevices", false);

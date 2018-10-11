@@ -280,6 +280,14 @@ public class MainActivity extends AppCompatActivity {
 		mediaInfo9.setControlsEnabled(true);
 		mediaInfo9.setAutoPlay(true);
 
+		MediaInfo mediaInfo10 = new MediaInfo();
+
+		mediaInfo10.setTitle("Media DRM");
+		mediaInfo10.setProjectHash("61a1c1faa23eb27de9110368e551de73");
+		mediaInfo10.setId("2e323f019ccc61f5bfac0a3be28b8f70");
+		mediaInfo10.setEnvironment(SambaMediaRequest.Environment.STAGING);
+		mediaInfo10.setControlsEnabled(true);
+		mediaInfo10.setAutoPlay(true);
 
 		mediaInfoList.add(mediaInfo);
         mediaInfoList.add(mediaInfo2);
@@ -290,6 +298,7 @@ public class MainActivity extends AppCompatActivity {
 		mediaInfoList.add(mediaInfo7);
 		mediaInfoList.add(mediaInfo8);
 		mediaInfoList.add(mediaInfo9);
+		mediaInfoList.add(mediaInfo10);
 
 		showMediaList(mediaInfoList);
 	}
