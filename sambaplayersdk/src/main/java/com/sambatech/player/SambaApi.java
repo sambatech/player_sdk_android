@@ -321,8 +321,9 @@ public class SambaApi {
 					media.drmRequest.addLicenseParam("AccountId", drm.optString("accountId"));
 					media.drmRequest.addLicenseParam("ContentId", drm.optString("contentId"));
                     media.drmRequest.addLicenseParam("ApplicationId", drm.optString("applicationId"));
-                    media.drmRequest.addLicenseParam("Provider", drm.optString("provider"));
 					media.drmRequest.addHeaderParam("Content-Type", "application/octet-stream");
+					media.drmRequest.setProvider(drm.optString("provider"));
+
 				}
 
 				media.blockIfRooted = playerSecurity.optBoolean("rootedDevices", false);

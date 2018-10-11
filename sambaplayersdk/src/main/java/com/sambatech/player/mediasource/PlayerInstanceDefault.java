@@ -51,7 +51,10 @@ public class PlayerInstanceDefault {
 
         if (isDRM) {
             drmCallback = new HttpMediaDrmCallback(media.drmRequest.getLicenseUrl(), new DefaultHttpDataSourceFactory("user-agent"));
-            drmCallback.setKeyRequestProperty("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjA1MjMzZDZjLWUxZTEtNDMyYi04M2E3LTg5YTg5ODcwMjg3YSJ9.eyJzdWIiOiJnb211c2ljLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTM4NTg2ODg2LCJpYXQiOjE1Mzg1ODUwODYsImFpZCI6ImdvbXVzaWMifQ.jU5fso2-l4q5wim7PfuHqvOAPkjBR4UrUiA9lU0Vsxg");
+            if (media.drmRequest.getProvider() != null && media.drmRequest.getProvider().equals("SAMBA_DRM")) {
+                drmCallback.setKeyRequestProperty("Authorization", "Bearer " + media.drmRequest.getToken());
+            }
+
             try {
                 drmSessionManager = new DefaultDrmSessionManager(C.WIDEVINE_UUID,
                         FrameworkMediaDrm.newInstance(C.WIDEVINE_UUID), drmCallback, null, mainHandler, null);

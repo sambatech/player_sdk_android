@@ -300,6 +300,10 @@ public class MediaItemActivity extends AppCompatActivity {
 				    return;
 			    }
 
+                if (((SambaMediaConfig) media).drmRequest != null) {
+                    ((SambaMediaConfig) media).drmRequest.setToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjA1MjMzZDZjLWUxZTEtNDMyYi04M2E3LTg5YTg5ODcwMjg3YSJ9.eyJzdWIiOiJnb211c2ljLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTM5MzA2MTk5LCJpYXQiOjE1MzkyNjI5OTksImFpZCI6ImdvbXVzaWMifQ.AlE6J9HPsyoB2Bzg1I8W60mexkBY5IZ2Slz4WXVHS30");
+                }
+
 			    media.isAudioOnly = mediaInfo.isAudioLive() || "audio".equalsIgnoreCase(mediaInfo.getQualifier());
 
 			    if (media.isAudioOnly) {

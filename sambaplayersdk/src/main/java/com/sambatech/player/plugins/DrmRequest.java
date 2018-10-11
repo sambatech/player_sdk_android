@@ -8,6 +8,8 @@ public class DrmRequest {
 	private String licenseUrl;
 	private HashMap<String, String> urlParams = new HashMap<>();
 	private HashMap<String, String> headerParams = new HashMap<>();
+	private String token;
+	private String provider;
 
 	/**
 	 * @param licenseUrl The URL for the license server.
@@ -42,5 +44,21 @@ public class DrmRequest {
 
 	public String getLicenseParam(String k) {
 		return urlParams.get(k);
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public String getProvider() {
+		return provider;
+	}
+
+	public void setProvider(String provider) {
+		this.provider = provider;
 	}
 }

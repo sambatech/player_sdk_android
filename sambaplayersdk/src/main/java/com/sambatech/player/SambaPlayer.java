@@ -365,9 +365,16 @@ public class SambaPlayer extends FrameLayout {
             }
 
 
-            if (media.drmRequest != null)
-                castObject.setDrm(new CastDRM(media.drmRequest.getLicenseParam("SessionId"),
-                        media.drmRequest.getLicenseParam("Ticket")));
+            if (media.drmRequest != null) {
+                CastDRM castDRM = new CastDRM(media.drmRequest.getLicenseParam("SessionId"),
+                        media.drmRequest.getLicenseParam("Ticket"));
+                if (media.drmRequest.getProvider() != null && media.drmRequest.getProvider().equals("SAMBA_DRM") && media.drmRequest.getToken() != null) {
+                    castDRM.setToken(media.drmRequest.getToken());
+                }
+
+                castObject.setDrm(castDRM);
+            }
+
 
             MediaInfo mediaInfo = new MediaInfo.Builder(castObject.toString())
                     .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
