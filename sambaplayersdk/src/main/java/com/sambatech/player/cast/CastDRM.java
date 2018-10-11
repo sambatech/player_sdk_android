@@ -6,6 +6,7 @@ public class CastDRM {
 
     private String sessionId;
     private String ticket;
+    private String token;
 
 
     public CastDRM () {
@@ -39,11 +40,20 @@ public class CastDRM {
         this.ticket = ticket;
     }
 
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
     @Override
     public String toString() {
         return "{" +
                 "\"SessionId\":\"" + sessionId + '\"' +
                 ", \"Ticket\":\"" + ticket + '\"' +
+                (token != null ? ", \"Token\":\"" + token + '\"' : "") +
                 '}';
     }
 }
