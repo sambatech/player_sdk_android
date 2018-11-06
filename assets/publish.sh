@@ -41,7 +41,7 @@ publish() {
 	# configuring repo client tool
 	./jfrog bt c --user=$repoUser --key=$repoApiKey --licenses=MIT
 	# uploading artifacts to repo
-	./jfrog bt u "$output/$2*" "sambatech/maven/sdk-android/beta2" "com/sambatech/player/$2/$v/" --publish=true --override=true
+	./jfrog bt u "$output/$2*" "sambatech/maven/sdk-android/beta3" "com/sambatech/player/$2/$v/" --publish=true --override=true
 
 	ret=$v
 }

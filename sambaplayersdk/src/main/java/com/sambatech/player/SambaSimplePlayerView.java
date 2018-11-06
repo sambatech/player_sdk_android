@@ -761,6 +761,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
             ((CustomTimeBar) castControlView.findViewById(R.id.exo_progress)).setDefaultBarColor(themeColor);
             this.playerContainer.addView(castControlView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         }
+        castControlView.setBackgroundColor(Color.BLACK);
         castControlView.setPlayer(sambaCastPlayer);
         castControlView.setShowTimeoutMs(-1);
         castControlView.findViewById(R.id.play_pause_container).setVisibility(View.GONE);
@@ -829,7 +830,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         setupCastButton(true);
         castControlView.setVisibility(View.VISIBLE);
 
-        playerView.setVisibility(View.GONE);
+//        playerView.setVisibility(View.GONE);
     }
 
     public void setupCastButton(boolean isCastPlayer) {
@@ -844,7 +845,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
         if(castOptionsMenu != null)
             castOptionsMenu.hide();
         castControlView.setVisibility(View.GONE);
-        playerView.setVisibility(View.VISIBLE);
+//        playerView.setVisibility(View.VISIBLE);
     }
 }
 

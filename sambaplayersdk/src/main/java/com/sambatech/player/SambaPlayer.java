@@ -176,6 +176,20 @@ public class SambaPlayer extends FrameLayout {
             SambaPlayerError.Severity severity = SambaPlayerError.Severity.recoverable;
             final boolean isBehindLiveWindowException = error instanceof BehindLiveWindowException;
 
+
+            for (StackTraceElement element : e.getCause().getStackTrace()) {
+                if (element.toString().contains("MediaCodecRenderer.feedInputBuffer") || element.toString().contains("native_dequeueOutputBuffer")) {
+                    postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            destroyInternal();
+                            create(false);
+                        }
+                    }, 1000);
+                    return;
+                }
+            }
+
             if (_initialTime == 0f)
                 _initialTime = getCurrentTime();
 
@@ -417,6 +431,8 @@ public class SambaPlayer extends FrameLayout {
                 }
             });
 
+            setFullscreen(false);
+
 
             this.remoteMediaClient = remoteMediaClient;
         }
@@ -440,12 +456,13 @@ public class SambaPlayer extends FrameLayout {
                 player.seekTo(lastPosition);
             }
 
-            play();
-            startProgressTimer();
-
             if (simplePlayerView != null) {
                 simplePlayerView.hideCast();
             }
+
+            play();
+            startProgressTimer();
+
         }
     };
 

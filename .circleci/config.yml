@@ -26,13 +26,13 @@ jobs:
        - run:
           name: Generate Release
           command: cd sambaplayersdk && ../gradlew assembleRelease --stacktrace
-       - run:
-          name: Run Sonar
-          command: |
-            curl --header "Authorization:token $GITHUB_USER_TOKEN" --header "Accept:application/vnd.github.v3.raw" --remote-name --location https://api.github.com/repos/sambatech/devops/contents/circle-ci/run-sonar.sh
-            chmod a+x run-sonar.sh
-            ./run-sonar.sh install
-            ./run-sonar.sh run
+#       - run:
+#          name: Run Sonar
+#          command: |
+#            curl --header "Authorization:token $GITHUB_USER_TOKEN" --header "Accept:application/vnd.github.v3.raw" --remote-name --location https://api.github.com/repos/sambatech/devops/contents/circle-ci/run-sonar.sh
+#            chmod a+x run-sonar.sh
+#            ./run-sonar.sh install
+#            ./run-sonar.sh run
    deploy:
     working_directory: ~/player_sdk_android
     docker:
