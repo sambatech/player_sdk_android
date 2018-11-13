@@ -93,6 +93,11 @@ public class MainActivity extends AppCompatActivity {
 				Intent about = new Intent(this, AboutActivity.class);
 				startActivity(about);
 				break;
+			case R.id.offline:
+				Intent offline = new Intent(this, OfflineActivity.class);
+				startActivity(offline);
+				break;
+
 			default: break;
 		}
 

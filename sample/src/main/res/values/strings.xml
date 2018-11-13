@@ -24,6 +24,7 @@
     <string name="prod">Prod</string>
     <string name="staging">Staging</string>
     <string name="dev">QA</string>
+    <string name="offline">Offline</string>
 
     <string-array name="policies">
         <item>Aluguel 48h (p5)</item>

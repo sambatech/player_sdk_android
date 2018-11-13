@@ -115,6 +115,10 @@ public class MediasAdapter extends BaseAdapter {
 	    @BindView(R.id.description)
 	    TextView description;
 
+	    String mediaID;
+
+	    String drmToken;
+
         MediaItem(View view) {
             ButterKnife.bind(this, view);
         }
