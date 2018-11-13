@@ -25,6 +25,8 @@ public class MediasOfflineAdapter extends RecyclerView.Adapter<MediasOfflineAdap
     public  MediasOfflineAdapter(List<MediaInfo> mediaItems, OnMediaClickListener listener) {
 
         this.mediaItems = mediaItems;
+
+
         this.listener = listener;
     }
 
@@ -57,6 +59,8 @@ public class MediasOfflineAdapter extends RecyclerView.Adapter<MediasOfflineAdap
                 listener.onDownloadButtonClicked(mediaInfo, view);
             }
         });
+
+        holder.downloadButton.setColorFilter(true ? 0xFF42A5F5 : 0xFFBDBDBD);
 
     }
 

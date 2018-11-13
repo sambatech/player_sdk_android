@@ -26,6 +26,15 @@ public final class MediaInfo {
 	private String liveChannelId;
 	private boolean audioLive;
 	private boolean controlsEnabled;
+	private String drmToken;
+
+	public String getDrmToken() {
+		return drmToken;
+	}
+
+	public void setDrmToken(String drmToken) {
+		this.drmToken = drmToken;
+	}
 
 	public String getProjectHash() {
 		return projectHash;
