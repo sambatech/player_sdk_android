@@ -471,6 +471,26 @@ public final class CastPlayer implements Player {
   }
 
   @Override
+  public boolean hasPrevious() {
+    return false;
+  }
+
+  @Override
+  public void previous() {
+
+  }
+
+  @Override
+  public boolean hasNext() {
+    return false;
+  }
+
+  @Override
+  public void next() {
+
+  }
+
+  @Override
   public void setPlaybackParameters(@Nullable PlaybackParameters playbackParameters) {
     // Unsupported by the RemoteMediaClient API. Do nothing.
   }
