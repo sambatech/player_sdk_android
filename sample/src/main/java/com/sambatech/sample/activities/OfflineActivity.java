@@ -134,7 +134,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         mediaInfo1.setId("1171319f6347a0a9c19b0278c0956eb6");
         mediaInfo1.setEnvironment(SambaMediaRequest.Environment.STAGING);
         mediaInfo1.setControlsEnabled(true);
-        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyMTM1MDk3LCJpYXQiOjE1NDIxMzMyOTcsImFpZCI6ImRhbWFzaW8ifQ.TjxzHLx5jONAVHUYYqh2NHSOw7K79ZYxyxIOKlxQoPQ");
+        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyMTk2NzMwLCJpYXQiOjE1NDIxOTQ5MzAsImFpZCI6ImRhbWFzaW8ifQ.l92JQ6EA6q4G4NsGdQC_QgMoaeO2dFZCs3nnHZ7aDwg");
         mediaInfo1.setAutoPlay(true);
 
 

@@ -51,9 +51,6 @@ public class PlayerInstanceDefault {
 
         if (isDRM) {
             drmCallback = new HttpMediaDrmCallback(media.drmRequest.getLicenseUrl(), new DefaultHttpDataSourceFactory("user-agent"));
-            if (media.drmRequest.getProvider() != null && media.drmRequest.getProvider().equals("SAMBA_DRM")) {
-                drmCallback.setKeyRequestProperty("Authorization", "Bearer " + media.drmRequest.getToken());
-            }
 
             try {
                 drmSessionManager = new DefaultDrmSessionManager(C.WIDEVINE_UUID,

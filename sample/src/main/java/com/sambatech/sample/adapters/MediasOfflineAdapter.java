@@ -82,7 +82,6 @@ public class MediasOfflineAdapter extends RecyclerView.Adapter<MediasOfflineAdap
             progressBar =  v.findViewById(R.id.mProgress);
             downloadButton =  v.findViewById(R.id.mButton);
 
-
         }
     }
 

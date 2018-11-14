@@ -27,6 +27,10 @@ public class DrmRequest {
 			sep = "&";
 		}
 
+		if (token != null && !token.isEmpty()) {
+			params += "&ls_session=" + token;
+		}
+
 		return licenseUrl + params;
 	}
 
