@@ -16,7 +16,6 @@
 package com.sambatech.player.offline;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -60,6 +59,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
 import com.sambatech.player.R;
+import com.sambatech.player.offline.model.SambaDownloadListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,23 +78,12 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public class SambaDownloadTracker implements DownloadManager.Listener {
 
-    /**
-     * Listens for changes in the tracked downloads.
-     */
-    public interface Listener {
-
-        /**
-         * Called when the tracked downloads changed.
-         */
-        void onDownloadsChanged();
-    }
 
     private static final String TAG = "SambaDownloadTracker";
 
     private final Context context;
     private final DataSource.Factory dataSourceFactory;
-    private final TrackNameProvider trackNameProvider;
-    private final CopyOnWriteArraySet<Listener> listeners;
+    private final CopyOnWriteArraySet<SambaDownloadListener> listeners;
     private final HashMap<Uri, DownloadAction> trackedDownloadStates;
     private final ActionFile actionFile;
     private final Handler actionFileWriteHandler;
@@ -107,7 +96,6 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         this.context = context.getApplicationContext();
         this.dataSourceFactory = dataSourceFactory;
         this.actionFile = new ActionFile(actionFile);
-        trackNameProvider = new DefaultTrackNameProvider(context.getResources());
         listeners = new CopyOnWriteArraySet<>();
         trackedDownloadStates = new HashMap<>();
         HandlerThread actionFileWriteThread = new HandlerThread("SambaDownloadTracker");
@@ -117,11 +105,11 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
                 deserializers.length > 0 ? deserializers : DownloadAction.getDefaultDeserializers());
     }
 
-    public void addListener(Listener listener) {
+    public void addListener(SambaDownloadListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(Listener listener) {
+    public void removeListener(SambaDownloadListener listener) {
         listeners.remove(listener);
     }
 
@@ -137,15 +125,14 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         return trackedDownloadStates.get(uri).getKeys();
     }
 
-    public void toggleDownload(Activity activity, String name, Uri uri, String extension) {
+    public void requestDownload(Context context, String name, Uri uri, String extension) {
         if (isDownloaded(uri)) {
             DownloadAction removeAction =
                     getDownloadHelper(uri, extension).getRemoveAction(Util.getUtf8Bytes(name));
             startServiceWithAction(removeAction);
             SambaDownloadManager.getInstance().getSharedPreferences().edit().clear().apply();
         } else {
-            StartDownloadDialogHelper helper =
-                    new StartDownloadDialogHelper(activity, getDownloadHelper(uri, extension), name);
+            StartDownloadHelper helper = new StartDownloadHelper(context, getDownloadHelper(uri, extension), name);
             helper.prepare();
 
             @SuppressLint("StaticFieldLeak") AsyncTask<Uri, String, String> task = new AsyncTask<Uri, String, String>() {
@@ -249,6 +236,12 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
                 handleTrackedDownloadStatesChanged();
             }
         }
+
+
+
+//        for (SambaDownloadListener listener : listeners) {
+//            listener.onDownloadStateChanged();
+//        }
     }
 
     @Override
@@ -270,9 +263,6 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
     }
 
     private void handleTrackedDownloadStatesChanged() {
-        for (Listener listener : listeners) {
-            listener.onDownloadsChanged();
-        }
         final DownloadAction[] actions = trackedDownloadStates.values().toArray(new DownloadAction[0]);
         actionFileWriteHandler.post(
                 () -> {
@@ -314,85 +304,5 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         }
     }
 
-    private final class StartDownloadDialogHelper
-            implements DownloadHelper.Callback, DialogInterface.OnClickListener {
 
-        private final DownloadHelper downloadHelper;
-        private final String name;
-
-        private final AlertDialog.Builder builder;
-        private final View dialogView;
-        private final List<TrackKey> trackKeys;
-        private final ArrayAdapter<String> trackTitles;
-        private final ListView representationList;
-
-        public StartDownloadDialogHelper(
-                Activity activity, DownloadHelper downloadHelper, String name) {
-            this.downloadHelper = downloadHelper;
-            this.name = name;
-            builder =
-                    new AlertDialog.Builder(activity)
-                            .setTitle(R.string.exo_download_description)
-                            .setPositiveButton(android.R.string.ok, this)
-                            .setNegativeButton(android.R.string.cancel, null);
-
-            // Inflate with the builder's context to ensure the correct style is used.
-            LayoutInflater dialogInflater = LayoutInflater.from(builder.getContext());
-            dialogView = dialogInflater.inflate(R.layout.start_download_dialog, null);
-
-            trackKeys = new ArrayList<>();
-            trackTitles =
-                    new ArrayAdapter<>(
-                            builder.getContext(), android.R.layout.simple_list_item_multiple_choice);
-            representationList = dialogView.findViewById(R.id.representation_list);
-            representationList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-            representationList.setAdapter(trackTitles);
-        }
-
-        public void prepare() {
-            downloadHelper.prepare(this);
-        }
-
-        @Override
-        public void onPrepared(DownloadHelper helper) {
-            for (int i = 0; i < downloadHelper.getPeriodCount(); i++) {
-                TrackGroupArray trackGroups = downloadHelper.getTrackGroups(i);
-                for (int j = 0; j < trackGroups.length; j++) {
-                    TrackGroup trackGroup = trackGroups.get(j);
-                    for (int k = 0; k < trackGroup.length; k++) {
-                        trackKeys.add(new TrackKey(i, j, k));
-                        trackTitles.add(trackNameProvider.getTrackName(trackGroup.getFormat(k)));
-                    }
-                }
-            }
-            if (!trackKeys.isEmpty()) {
-                builder.setView(dialogView);
-            }
-            builder.create().show();
-        }
-
-        @Override
-        public void onPrepareError(DownloadHelper helper, IOException e) {
-            Toast.makeText(
-                    context.getApplicationContext(), "Failed to start download", Toast.LENGTH_LONG)
-                    .show();
-            Log.e(TAG, "Failed to start download", e);
-        }
-
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            ArrayList<TrackKey> selectedTrackKeys = new ArrayList<>();
-            for (int i = 0; i < representationList.getChildCount(); i++) {
-                if (representationList.isItemChecked(i)) {
-                    selectedTrackKeys.add(trackKeys.get(i));
-                }
-            }
-            if (!selectedTrackKeys.isEmpty() || trackKeys.isEmpty()) {
-                // We have selected keys, or we're dealing with single stream content.
-                DownloadAction downloadAction =
-                        downloadHelper.getDownloadAction(Util.getUtf8Bytes(name), selectedTrackKeys);
-                startDownload(downloadAction);
-            }
-        }
-    }
 }
