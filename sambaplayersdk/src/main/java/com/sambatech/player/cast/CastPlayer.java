@@ -16,6 +16,7 @@
 package com.sambatech.player.cast;
 
 import android.content.Context;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -370,6 +371,12 @@ public final class CastPlayer implements Player {
 
   @Nullable
   @Override
+  public AudioComponent getAudioComponent() {
+    return null;
+  }
+
+  @Nullable
+  @Override
   public VideoComponent getVideoComponent() {
     return null;
   }
@@ -378,6 +385,11 @@ public final class CastPlayer implements Player {
   @Override
   public TextComponent getTextComponent() {
     return null;
+  }
+
+  @Override
+  public Looper getApplicationLooper() {
+    return Looper.getMainLooper();
   }
 
   @Override
@@ -598,6 +610,11 @@ public final class CastPlayer implements Player {
   }
 
   @Override
+  public long getTotalBufferedDuration() {
+    return 0;
+  }
+
+  @Override
   public boolean isCurrentWindowDynamic() {
     return true;
   }
@@ -623,6 +640,11 @@ public final class CastPlayer implements Player {
   }
 
   @Override
+  public long getContentDuration() {
+    return 0;
+  }
+
+  @Override
   public boolean isLoading() {
     return false;
   }
@@ -630,6 +652,11 @@ public final class CastPlayer implements Player {
   @Override
   public long getContentPosition() {
     return getCurrentPosition();
+  }
+
+  @Override
+  public long getContentBufferedPosition() {
+    return 0;
   }
 
   // Internal methods.
