@@ -64,7 +64,7 @@ public class PlayerInstanceDefault {
         }
 
 //        this.mediaDataSourceFactory = new SambaDataSourceFactory(this.context, Util.getUserAgent(this.context, "mediaPlayerSample"), (TransferListener<? super DataSource>) bandwidthMeter);
-        this.mediaDataSourceFactory = new DefaultDataSourceFactory(this.context, Util.getUserAgent(this.context, "mediaPlayerSample"), (TransferListener<? super DataSource>) bandwidthMeter);
+        this.mediaDataSourceFactory = new DefaultDataSourceFactory(this.context, Util.getUserAgent(this.context, "mediaPlayerSample"), (TransferListener) bandwidthMeter);
     }
 
     public SimpleExoPlayer createPlayerInstance() {

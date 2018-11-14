@@ -294,6 +294,15 @@ public class MainActivity extends AppCompatActivity {
 		mediaInfo10.setControlsEnabled(true);
 		mediaInfo10.setAutoPlay(true);
 
+		MediaInfo mediaInfo11 = new MediaInfo();
+
+		mediaInfo11.setTitle("Media Legenda");
+		mediaInfo11.setProjectHash("964b56b4b184c2a29e3c2065a7a15038");
+		mediaInfo11.setId("b4c134b2a297d9eacfe7c7852fa86312");
+		mediaInfo11.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo11.setControlsEnabled(true);
+		mediaInfo11.setAutoPlay(true);
+
 		mediaInfoList.add(mediaInfo);
         mediaInfoList.add(mediaInfo2);
         mediaInfoList.add(mediaInfo3);
@@ -304,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
 		mediaInfoList.add(mediaInfo8);
 		mediaInfoList.add(mediaInfo9);
 		mediaInfoList.add(mediaInfo10);
+		mediaInfoList.add(mediaInfo11);
 
 		showMediaList(mediaInfoList);
 	}

@@ -788,6 +788,7 @@ public class SambaSimplePlayerView implements View.OnClickListener {
 
 
         ((TextView) castControlView.findViewById(R.id.video_title_text)).setText(videoTitle.getText());
+        castControlView.setVisibility(View.GONE);
     }
 
     public void destroyCastPlayer(){

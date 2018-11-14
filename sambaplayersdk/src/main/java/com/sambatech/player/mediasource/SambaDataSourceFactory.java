@@ -11,11 +11,11 @@ import com.google.android.exoplayer2.util.Util;
 
 public class SambaDataSourceFactory implements DataSource.Factory {
 
-    private final TransferListener<? super DataSource> bandwidthMeter;
+    private final TransferListener bandwidthMeter;
     private DefaultHttpDataSourceFactory defaultHttpDataSourceFactory;
     private Context context;
 
-    public SambaDataSourceFactory(Context context, String agent, TransferListener<? super DataSource> bandwidthMeter) {
+    public SambaDataSourceFactory(Context context, String agent, TransferListener bandwidthMeter) {
         this.context = context;
         this.bandwidthMeter = bandwidthMeter;
         this.defaultHttpDataSourceFactory = new DefaultHttpDataSourceFactory(Util.getUserAgent(context, "mediaPlayerSample"), bandwidthMeter);
