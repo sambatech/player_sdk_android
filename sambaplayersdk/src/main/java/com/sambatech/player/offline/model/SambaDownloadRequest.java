@@ -12,9 +12,10 @@ public class SambaDownloadRequest {
     private String projectHash;
     private String drmToken;
 
-    private List<SambaTrack> sambaTracks;
     private SambaMedia sambaMedia;
-    private List<SambaTrack> audioTracks;
+
+    private List<SambaTrack> sambaVideoTracks;
+    private List<SambaTrack> sambaAudioTracks;
 
 
     public SambaDownloadRequest(@NonNull String projectHash,@NonNull  String mediaId) {
@@ -46,12 +47,12 @@ public class SambaDownloadRequest {
         this.drmToken = drmToken;
     }
 
-    public List<SambaTrack> getSambaTracks() {
-        return sambaTracks;
+    public List<SambaTrack> getSambaVideoTracks() {
+        return sambaVideoTracks;
     }
 
-    public void setSambaTracks(List<SambaTrack> sambaTracks) {
-        this.sambaTracks = sambaTracks;
+    public void setSambaVideoTracks(List<SambaTrack> sambaVideoTracks) {
+        this.sambaVideoTracks = sambaVideoTracks;
     }
 
     public SambaMedia getSambaMedia() {
@@ -62,11 +63,11 @@ public class SambaDownloadRequest {
         this.sambaMedia = sambaMedia;
     }
 
-    public List<SambaTrack> getAudioTracks() {
-        return audioTracks;
+    public List<SambaTrack> getSambaAudioTracks() {
+        return sambaAudioTracks;
     }
 
-    public void setAudioTracks(List<SambaTrack> audioTracks) {
-        this.audioTracks = audioTracks;
+    public void setSambaAudioTracks(List<SambaTrack> sambaAudioTracks) {
+        this.sambaAudioTracks = sambaAudioTracks;
     }
 }

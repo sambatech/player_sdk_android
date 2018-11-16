@@ -1,13 +1,12 @@
 package com.sambatech.player.offline;
 
 import android.annotation.SuppressLint;
-import android.app.DownloadManager;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.util.Base64;
 import android.util.Pair;
 
+import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.drm.DrmInitData;
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.OfflineLicenseHelper;
@@ -15,20 +14,18 @@ import com.google.android.exoplayer2.source.dash.DashUtil;
 import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
-import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.offline.listeners.LicenceDrmCallback;
 import com.sambatech.player.utils.SharedPrefsUtils;
 
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OfflineUtils {
+class OfflineUtils {
 
     private static final String MEDIAS_PERSISTED_KEY = "MEDIAS_PERSISTED_KEY";
 
@@ -38,7 +35,7 @@ public class OfflineUtils {
 
 
 
-    public static void getLicenseDrm(SambaMediaConfig sambaMediaConfig, LicenceDrmCallback drmCallback) {
+    static void getLicenseDrm(SambaMediaConfig sambaMediaConfig, LicenceDrmCallback drmCallback) {
 
         if (sambaMediaConfig.drmRequest == null) {
             drmCallback.onLicenceError(new Error("Media without DRM datas"));
@@ -89,7 +86,7 @@ public class OfflineUtils {
     }
 
 
-    public static void persistSambaMedias(List<SambaMediaConfig> sambaMediaConfigList) {
+    static void persistSambaMedias(List<SambaMediaConfig> sambaMediaConfigList) {
 
         Type listType = new TypeToken<List<SambaMediaConfig>>() {}.getType();
         Gson gson = new Gson();
@@ -101,7 +98,7 @@ public class OfflineUtils {
         );
     }
 
-    public static List<SambaMediaConfig>  getPersistedSambaMedias() {
+    static List<SambaMediaConfig>  getPersistedSambaMedias() {
         String json = SharedPrefsUtils.getStringPreference(
                 SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(),
                 MEDIAS_PERSISTED_KEY
@@ -115,6 +112,30 @@ public class OfflineUtils {
             return gson.fromJson(json, listType);
         }
 
+    }
+
+    static int inferPrimaryTrackType(Format format) {
+        int trackType = MimeTypes.getTrackType(format.sampleMimeType);
+        if (trackType != C.TRACK_TYPE_UNKNOWN) {
+            return trackType;
+        }
+        if (MimeTypes.getVideoMediaMimeType(format.codecs) != null) {
+            return C.TRACK_TYPE_VIDEO;
+        }
+        if (MimeTypes.getAudioMediaMimeType(format.codecs) != null) {
+            return C.TRACK_TYPE_AUDIO;
+        }
+        if (format.width != Format.NO_VALUE || format.height != Format.NO_VALUE) {
+            return C.TRACK_TYPE_VIDEO;
+        }
+        if (format.channelCount != Format.NO_VALUE || format.sampleRate != Format.NO_VALUE) {
+            return C.TRACK_TYPE_AUDIO;
+        }
+        return C.TRACK_TYPE_UNKNOWN;
+    }
+
+    static Double getSizeInMB(long bitrate, long duration){
+        return (double) (((bitrate / 1000000f) * duration) / 8);
     }
 
 }

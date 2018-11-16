@@ -5,14 +5,15 @@ import com.google.android.exoplayer2.offline.TrackKey;
 public class SambaTrack {
 
     private String title;
-    private long sizeInMB;
+    private Double sizeInMB;
     private TrackKey trackKey;
     private boolean isAudio;
 
 
-    public SambaTrack(String title, long sizeInMB) {
+    public SambaTrack(String title, Double sizeInMB, TrackKey trackKey) {
         this.title = title;
         this.sizeInMB = sizeInMB;
+        this.trackKey = trackKey;
     }
 
     public String getTitle() {
@@ -23,11 +24,11 @@ public class SambaTrack {
         this.title = title;
     }
 
-    public long getSizeInMB() {
+    public Double getSizeInMB() {
         return sizeInMB;
     }
 
-    public void setSizeInMB(long sizeInMB) {
+    public void setSizeInMB(Double sizeInMB) {
         this.sizeInMB = sizeInMB;
     }
 

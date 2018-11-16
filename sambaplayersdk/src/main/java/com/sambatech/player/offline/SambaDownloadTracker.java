@@ -15,38 +15,20 @@
  */
 package com.sambatech.player.offline;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
-import android.util.Base64;
-import android.util.Pair;
 
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.drm.DrmInitData;
-import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
-import com.google.android.exoplayer2.drm.OfflineLicenseHelper;
 import com.google.android.exoplayer2.offline.ActionFile;
 import com.google.android.exoplayer2.offline.DownloadAction;
-import com.google.android.exoplayer2.offline.DownloadHelper;
 import com.google.android.exoplayer2.offline.DownloadManager;
 import com.google.android.exoplayer2.offline.DownloadManager.TaskState;
 import com.google.android.exoplayer2.offline.DownloadService;
-import com.google.android.exoplayer2.offline.ProgressiveDownloadHelper;
 import com.google.android.exoplayer2.offline.StreamKey;
-import com.google.android.exoplayer2.source.dash.DashUtil;
-import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
-import com.google.android.exoplayer2.source.dash.offline.DashDownloadHelper;
-import com.google.android.exoplayer2.source.hls.offline.HlsDownloadHelper;
-import com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloadHelper;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Log;
-import com.google.android.exoplayer2.util.Util;
 import com.sambatech.player.SambaApi;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
@@ -58,11 +40,9 @@ import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.Predicate;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -133,7 +113,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         return trackedDownloadStates.get(uri).getKeys();
     }
 
-    public void requestDownload(@NonNull SambaDownloadRequest sambaDownloadRequest, @NonNull SambaDownloadRequestListener requestListener) {
+    public void prepareDownload(@NonNull SambaDownloadRequest sambaDownloadRequest, @NonNull SambaDownloadRequestListener requestListener) {
 
         SambaApi api = new SambaApi(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), "");
         api.requestMedia(new SambaMediaRequest(sambaDownloadRequest.getProjectHash(), sambaDownloadRequest.getMediaId()), new SambaApiCallback() {
@@ -156,6 +136,8 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
                             @Override
                             public void onLicencePrepared(byte[] licencePayload) {
                                 sambaMediaConfig.drmRequest.setDrmOfflinePayload(licencePayload);
+                                StartDownloadHelper startDownloadHelper = new StartDownloadHelper(context, dataSourceFactory, sambaDownloadRequest, requestListener);
+                                startDownloadHelper.start();
                             }
 
                             @Override
@@ -165,7 +147,8 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
                         });
 
                     } else {
-
+                        StartDownloadHelper startDownloadHelper = new StartDownloadHelper(context, dataSourceFactory, sambaDownloadRequest, requestListener);
+                        startDownloadHelper.start();
                     }
                 }
 
@@ -187,7 +170,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
 //            SambaDownloadManager.getInstance().getSharedPreferences().edit().clear().apply();
 //        } else {
 //            StartDownloadHelper helper = new StartDownloadHelper(context, getDownloadHelper(uri, extension), name);
-//            helper.prepare();
+//            helper.start();
 //        }
     }
 

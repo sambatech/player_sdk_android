@@ -1,17 +1,10 @@
 package com.sambatech.player.offline;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.offline.DownloadAction;
 import com.google.android.exoplayer2.offline.DownloadHelper;
 import com.google.android.exoplayer2.offline.ProgressiveDownloadHelper;
 import com.google.android.exoplayer2.offline.TrackKey;
@@ -19,17 +12,13 @@ import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.offline.DashDownloadHelper;
 import com.google.android.exoplayer2.source.hls.offline.HlsDownloadHelper;
-import com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloadHelper;
 import com.google.android.exoplayer2.ui.DefaultTrackNameProvider;
 import com.google.android.exoplayer2.ui.TrackNameProvider;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.util.Log;
-import com.google.android.exoplayer2.util.Util;
-import com.sambatech.player.R;
-import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
+import com.sambatech.player.offline.model.SambaTrack;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +37,9 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
     private final DataSource.Factory dataSourceFactory;
     private final SambaDownloadRequest sambaDownloadRequest;
     private final SambaDownloadRequestListener requestListener;
+    private final List<SambaTrack> sambaVideoTracks;
+    private final List<SambaTrack> sambaAudioTracks;
+    private final SambaMediaConfig sambaMediaConfig;
 
     public StartDownloadHelper(
             Context context,
@@ -57,16 +49,18 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
     ) {
         this.sambaDownloadRequest = sambaDownloadRequest;
         this.requestListener = requestListener;
-        SambaMediaConfig sambaMediaConfig = (SambaMediaConfig) sambaDownloadRequest.getSambaMedia();
+        this.sambaMediaConfig = (SambaMediaConfig) sambaDownloadRequest.getSambaMedia();
         this.context = context;
         this.dataSourceFactory = dataSourceFactory;
         this.downloadHelper = getDownloadHelper(Uri.parse(sambaMediaConfig.url), sambaMediaConfig.type);
         this.name = sambaMediaConfig.title;
         trackNameProvider = new DefaultTrackNameProvider(context.getResources());
         trackKeys = new ArrayList<>();
+        this.sambaVideoTracks = new ArrayList<>();
+        this.sambaAudioTracks = new ArrayList<>();
     }
 
-    public void prepare() {
+    public void start() {
         downloadHelper.prepare(this);
     }
 
@@ -77,18 +71,33 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
             for (int j = 0; j < trackGroups.length; j++) {
                 TrackGroup trackGroup = trackGroups.get(j);
                 for (int k = 0; k < trackGroup.length; k++) {
-                    trackKeys.add(new TrackKey(i, j, k));
-//                    trackTitles.add(trackNameProvider.getTrackName(trackGroup.getFormat(k)));
+                    TrackKey trackKey = new TrackKey(i, j, k);
+                    SambaTrack sambaTrack = new SambaTrack(
+                            trackNameProvider.getTrackName(trackGroup.getFormat(k)),
+                            OfflineUtils.getSizeInMB(trackGroup.getFormat(k).bitrate, (long) sambaMediaConfig.duration),
+                            trackKey
+                            );
+
+                    if (OfflineUtils.inferPrimaryTrackType(trackGroup.getFormat(k)) == C.TRACK_TYPE_AUDIO) {
+                        sambaTrack.setAudio(true);
+                        sambaAudioTracks.add(sambaTrack);
+                    } else {
+                        sambaVideoTracks.add(sambaTrack);
+                    }
+
                 }
             }
         }
-        if (!trackKeys.isEmpty()) {
-        }
+
+        sambaDownloadRequest.setSambaVideoTracks(sambaVideoTracks);
+        sambaDownloadRequest.setSambaAudioTracks(sambaAudioTracks);
+
+        requestListener.onDownloadRequestPrepared(sambaDownloadRequest);
     }
 
     @Override
     public void onPrepareError(DownloadHelper helper, IOException e) {
-        requestListener.onDownloadRequestFailed(new Error(e), "Error to prepare download");
+        requestListener.onDownloadRequestFailed(new Error(e), "Error to start download");
     }
 
 
@@ -109,18 +118,13 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
 
 
     private DownloadHelper getDownloadHelper(Uri uri, String extension) {
-        int type = Util.inferContentType(uri, extension);
-        switch (type) {
-            case C.TYPE_DASH:
+        switch (extension.toLowerCase()) {
+            case "dash":
                 return new DashDownloadHelper(uri, dataSourceFactory);
-            case C.TYPE_SS:
-                return new SsDownloadHelper(uri, dataSourceFactory);
-            case C.TYPE_HLS:
+            case "hls":
                 return new HlsDownloadHelper(uri, dataSourceFactory);
-            case C.TYPE_OTHER:
-                return new ProgressiveDownloadHelper(uri);
             default:
-                throw new IllegalStateException("Unsupported type: " + type);
+                return new ProgressiveDownloadHelper(uri);
         }
     }
 }

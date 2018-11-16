@@ -16,6 +16,9 @@ import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
+import com.sambatech.player.offline.SambaDownloadManager;
+import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
+import com.sambatech.player.offline.model.SambaDownloadRequest;
 import com.sambatech.player.plugins.DrmRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasOfflineAdapter;
@@ -134,7 +137,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         mediaInfo1.setId("1171319f6347a0a9c19b0278c0956eb6");
         mediaInfo1.setEnvironment(SambaMediaRequest.Environment.STAGING);
         mediaInfo1.setControlsEnabled(true);
-        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyMjExMDM0LCJpYXQiOjE1NDIyMDkyMzQsImFpZCI6ImRhbWFzaW8ifQ.I0F4wPRqQGF_I-2R0luyor6Abih9JTI60qnVVZBw6Vw");
+        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyMzkwNzY1LCJpYXQiOjE1NDIzODg5NjUsImFpZCI6ImRhbWFzaW8ifQ.6TjSCnkGCU5g7cgMV4h0EQRsn8nS35twHNgEqsPQrW4");
         mediaInfo1.setAutoPlay(true);
 
 
@@ -183,7 +186,23 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
 
     @Override
     public void onDownloadButtonClicked(MediaInfo mediaInfo, View view) {
+        SambaDownloadRequest sambaDownloadRequest = new SambaDownloadRequest(mediaInfo.getProjectHash(), mediaInfo.getId());
 
+        if (mediaInfo.getDrmToken() != null && !mediaInfo.getDrmToken().isEmpty()) {
+            sambaDownloadRequest.setDrmToken(mediaInfo.getDrmToken());
+        }
+
+        SambaDownloadManager.getInstance().prepareDownload(sambaDownloadRequest, new SambaDownloadRequestListener() {
+            @Override
+            public void onDownloadRequestPrepared(SambaDownloadRequest sambaDownloadRequest) {
+
+            }
+
+            @Override
+            public void onDownloadRequestFailed(Error error, String msg) {
+
+            }
+        });
     }
 
     @Override
