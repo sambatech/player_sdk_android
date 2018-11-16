@@ -1,6 +1,7 @@
 package com.sambatech.player;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -34,7 +35,7 @@ import java.util.Scanner;
  */
 public class SambaApi {
 
-	private Activity activity;
+	private Context context;
 	private String accessToken;
 
 	/**
@@ -56,11 +57,11 @@ public class SambaApi {
 	/**
 	 * SambaApi constructor
 	 *
-	 * @param activity Reference to the current Activity
+	 * @param context Reference to the current context
 	 * @param accessToken Configured SambaTech access token (ignored for now, pass an empty string or null)
 	 */
-	public SambaApi(Activity activity, String accessToken) {
-		this.activity = activity;
+	public SambaApi(Context context, String accessToken) {
+		this.context = context;
 		this.accessToken = accessToken;
 	}
 
@@ -190,20 +191,20 @@ public class SambaApi {
 
 			switch (request.environment) {
 				case LOCAL:
-					endpoint = activity.getString(R.string.player_endpoint_local);
+					endpoint = context.getString(R.string.player_endpoint_local);
 					break;
 
 				case DEV:
-					endpoint = activity.getString(R.string.player_endpoint_test);
+					endpoint = context.getString(R.string.player_endpoint_test);
 					break;
 
 				case STAGING:
-					endpoint = normalizeProtocol(activity.getString(R.string.player_endpoint_staging), request.protocol);
+					endpoint = normalizeProtocol(context.getString(R.string.player_endpoint_staging), request.protocol);
 					break;
 
 				case PROD:
 				default:
-					endpoint = normalizeProtocol(activity.getString(R.string.player_endpoint_prod), request.protocol);
+					endpoint = normalizeProtocol(context.getString(R.string.player_endpoint_prod), request.protocol);
 			}
 
 			String url = String.format("%s%s/", endpoint, request.projectHash);

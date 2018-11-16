@@ -10,6 +10,7 @@ public class DrmRequest {
 	private HashMap<String, String> headerParams = new HashMap<>();
 	private String token;
 	private String provider;
+	private byte[] drmOfflinePayload;
 
 	/**
 	 * @param licenseUrl The URL for the license server.
@@ -64,5 +65,13 @@ public class DrmRequest {
 
 	public void setProvider(String provider) {
 		this.provider = provider;
+	}
+
+	public byte[] getDrmOfflinePayload() {
+		return drmOfflinePayload;
+	}
+
+	public void setDrmOfflinePayload(byte[] drmOfflinePayload) {
+		this.drmOfflinePayload = drmOfflinePayload;
 	}
 }

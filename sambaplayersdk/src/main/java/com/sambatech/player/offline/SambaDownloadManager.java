@@ -1,23 +1,9 @@
-/*
- * Copyright (C) 2016 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.sambatech.player.offline;
 
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 
 import com.google.android.exoplayer2.offline.DownloadManager;
 import com.google.android.exoplayer2.offline.DownloaderConstructorHelper;
@@ -32,12 +18,16 @@ import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
 import com.google.android.exoplayer2.upstream.cache.NoOpCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
 import com.google.android.exoplayer2.util.Util;
+import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaMediaConfig;
+import com.sambatech.player.offline.listeners.SambaDownloadListener;
+import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
+import com.sambatech.player.offline.model.SambaDownloadRequest;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.File;
 
-/**
- * Placeholder application to facilitate overriding Application methods for debugging and testing.
- */
 public class SambaDownloadManager {
 
     private static final String DOWNLOAD_ACTION_FILE = "actions";
@@ -79,14 +69,29 @@ public class SambaDownloadManager {
         userAgent = Util.getUserAgent(applicationInstance.getApplicationContext(), "SambaPlayer");
     }
 
+    public void addDownloadListener(SambaDownloadListener listener) {
+        getSambaDownloadTracker().addListener(listener);
+    }
+
+    public void removeDownloadListener(SambaDownloadListener listener) {
+        getSambaDownloadTracker().removeListener(listener);
+    }
+
+
+    public void requestDownload(SambaDownloadRequest sambaDownloadRequest, SambaDownloadRequestListener requestListener) {
+        getSambaDownloadTracker().requestDownload(sambaDownloadRequest, requestListener);
+    }
+
+    public boolean isDownloaded(SambaMedia sambaMedia) {
+        return getSambaDownloadTracker().isDownloaded(sambaMedia);
+    }
+
 
     public Application getAppInstance() {
         return applicationInstance;
     }
 
-    /**
-     * Returns a {@link DataSource.Factory}.
-     */
+
     public DataSource.Factory buildDataSourceFactory() {
         DefaultDataSourceFactory upstreamFactory = new DefaultDataSourceFactory(
                 applicationInstance.getApplicationContext(), buildHttpDataSourceFactory()
@@ -94,9 +99,7 @@ public class SambaDownloadManager {
         return buildReadOnlyCacheDataSource(upstreamFactory, getDownloadCache());
     }
 
-    /**
-     * Returns a {@link HttpDataSource.Factory}.
-     */
+
     public HttpDataSource.Factory buildHttpDataSourceFactory() {
         return new DefaultHttpDataSourceFactory(userAgent);
     }
@@ -162,5 +165,9 @@ public class SambaDownloadManager {
 
     public SharedPreferences getSharedPreferences() {
         return applicationInstance.getSharedPreferences(SAMBA_PREF, Context.MODE_PRIVATE);
+    }
+
+    public String getUserAgent() {
+        return userAgent;
     }
 }

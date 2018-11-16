@@ -16,21 +16,15 @@
 package com.sambatech.player.offline;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Pair;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.drm.DrmInitData;
@@ -44,22 +38,27 @@ import com.google.android.exoplayer2.offline.DownloadManager.TaskState;
 import com.google.android.exoplayer2.offline.DownloadService;
 import com.google.android.exoplayer2.offline.ProgressiveDownloadHelper;
 import com.google.android.exoplayer2.offline.StreamKey;
-import com.google.android.exoplayer2.offline.TrackKey;
-import com.google.android.exoplayer2.source.TrackGroup;
-import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashUtil;
 import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
 import com.google.android.exoplayer2.source.dash.offline.DashDownloadHelper;
 import com.google.android.exoplayer2.source.hls.offline.HlsDownloadHelper;
 import com.google.android.exoplayer2.source.smoothstreaming.offline.SsDownloadHelper;
-import com.google.android.exoplayer2.ui.DefaultTrackNameProvider;
-import com.google.android.exoplayer2.ui.TrackNameProvider;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
-import com.sambatech.player.R;
-import com.sambatech.player.offline.model.SambaDownloadListener;
+import com.sambatech.player.SambaApi;
+import com.sambatech.player.event.SambaApiCallback;
+import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.model.SambaMediaConfig;
+import com.sambatech.player.model.SambaMediaRequest;
+import com.sambatech.player.offline.listeners.LicenceDrmCallback;
+import com.sambatech.player.offline.listeners.SambaDownloadListener;
+import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
+import com.sambatech.player.offline.model.SambaDownloadRequest;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Predicate;
 
 import java.io.File;
 import java.io.IOException;
@@ -85,6 +84,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
     private final DataSource.Factory dataSourceFactory;
     private final CopyOnWriteArraySet<SambaDownloadListener> listeners;
     private final HashMap<Uri, DownloadAction> trackedDownloadStates;
+    private List<SambaMediaConfig> sambaMedias;
     private final ActionFile actionFile;
     private final Handler actionFileWriteHandler;
 
@@ -98,11 +98,12 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         this.actionFile = new ActionFile(actionFile);
         listeners = new CopyOnWriteArraySet<>();
         trackedDownloadStates = new HashMap<>();
+        sambaMedias = OfflineUtils.getPersistedSambaMedias();
         HandlerThread actionFileWriteThread = new HandlerThread("SambaDownloadTracker");
         actionFileWriteThread.start();
         actionFileWriteHandler = new Handler(actionFileWriteThread.getLooper());
-        loadTrackedActions(
-                deserializers.length > 0 ? deserializers : DownloadAction.getDefaultDeserializers());
+
+        loadTrackedActions(deserializers.length > 0 ? deserializers : DownloadAction.getDefaultDeserializers());
     }
 
     public void addListener(SambaDownloadListener listener) {
@@ -117,6 +118,13 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         return trackedDownloadStates.containsKey(uri);
     }
 
+    public boolean isDownloaded(SambaMedia sambaMedia) {
+        SambaMediaConfig sambaMediaConfig = (SambaMediaConfig) sambaMedia;
+        Uri uri = Uri.parse(sambaMediaConfig.url);
+
+        return trackedDownloadStates.containsKey(uri) && CollectionUtils.exists(sambaMedias, media -> media.id.equals(sambaMediaConfig.id));
+    }
+
     @SuppressWarnings("unchecked")
     public List<StreamKey> getOfflineStreamKeys(Uri uri) {
         if (!trackedDownloadStates.containsKey(uri)) {
@@ -125,97 +133,62 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         return trackedDownloadStates.get(uri).getKeys();
     }
 
-    public void requestDownload(Context context, String name, Uri uri, String extension) {
-        if (isDownloaded(uri)) {
-            DownloadAction removeAction =
-                    getDownloadHelper(uri, extension).getRemoveAction(Util.getUtf8Bytes(name));
-            startServiceWithAction(removeAction);
-            SambaDownloadManager.getInstance().getSharedPreferences().edit().clear().apply();
-        } else {
-            StartDownloadHelper helper = new StartDownloadHelper(context, getDownloadHelper(uri, extension), name);
-            helper.prepare();
+    public void requestDownload(@NonNull SambaDownloadRequest sambaDownloadRequest, @NonNull SambaDownloadRequestListener requestListener) {
 
-            @SuppressLint("StaticFieldLeak") AsyncTask<Uri, String, String> task = new AsyncTask<Uri, String, String>() {
-                @Override
-                protected String doInBackground(Uri... uris) {
+        SambaApi api = new SambaApi(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), "");
+        api.requestMedia(new SambaMediaRequest(sambaDownloadRequest.getProjectHash(), sambaDownloadRequest.getMediaId()), new SambaApiCallback() {
+            @Override
+            public void onMediaResponse(SambaMedia media) {
 
-                    try {
-                        Uri uri = uris[0];
+                if (isDownloaded(media)) {
+                    requestListener.onDownloadRequestFailed(new Error("Media already downloaded"), "Media already downloaded");
+                } else {
+                    SambaMediaConfig sambaMediaConfig = (SambaMediaConfig) media;
+                    sambaDownloadRequest.setSambaMedia(sambaMediaConfig);
 
-                        String licenseUrl = "https://samba-drm.live.ott.irdeto.com/licenseServer/widevine/v1/record/license?ls_session=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjdlN2Q5YmE4LWUzNzctNGFkMi1iZGIzLTdmOWRiOWYzZGI2ZiJ9.eyJzdWIiOiJyZWNvcmQtdXNlciIsImlzcyI6ImRpZWdvLmR1YXJ0ZUBzYW1iYXRlY2guY29tLmJyIiwianRpIjoiSUhHOUpmTVpQWkhLb0x4c28wWG95LUFkbzdtOHNaQ2Y1bk5VZ1Z4WFZJOD0iLCJleHAiOjE1NDI2NTY3NjEsImlhdCI6MTU0MjA1MTk2MSwiYWlkIjoicmVjb3JkIn0.w_0gr1zTOuD7dx7vEMOUbPXzqSxXuyULmHj09PJM46M&SubContentType=Default&CrmId=record&AccountId=record&ContentId=5fdb1a23aeb42f71f5734dce028cc458";
+                    if (sambaMediaConfig.drmRequest != null) {
 
-
-                        if (Util.SDK_INT < 18) {
-                            return null;
+                        if (sambaDownloadRequest.getDrmToken() != null && !sambaDownloadRequest.getDrmToken().isEmpty()) {
+                            sambaMediaConfig.drmRequest.setToken(sambaDownloadRequest.getDrmToken());
                         }
 
-                        CustomDrmCallback customDrmCallback = new CustomDrmCallback(
-                                SambaDownloadManager.getInstance().buildHttpDataSourceFactory(),
-                                licenseUrl
-                        );
+                        OfflineUtils.getLicenseDrm(sambaMediaConfig, new LicenceDrmCallback() {
+                            @Override
+                            public void onLicencePrepared(byte[] licencePayload) {
+                                sambaMediaConfig.drmRequest.setDrmOfflinePayload(licencePayload);
+                            }
 
+                            @Override
+                            public void onLicenceError(Error error) {
+                                requestListener.onDownloadRequestFailed(error, "Error to request DRM licence");
+                            }
+                        });
 
-                        String offlineAssetKeyIdStr = SambaDownloadManager.getInstance().
-                                getSharedPreferences().getString(SambaDownloadManager.KEY_OFFLINE_OFFSET_ID, SambaDownloadManager.EMPTY);
+                    } else {
 
-                        byte[] offlineAssetKeyId = Base64.decode(offlineAssetKeyIdStr, Base64.DEFAULT);
-
-                        DefaultHttpDataSourceFactory httpDataSourceFactory = new DefaultHttpDataSourceFactory("EXO-TEST");
-                        OfflineLicenseHelper<FrameworkMediaCrypto> offlineLicenseHelper = OfflineLicenseHelper.newWidevineInstance(licenseUrl, httpDataSourceFactory);
-
-//                        OfflineLicenseHelper<FrameworkMediaCrypto> offlineLicenseHelper =
-//                                new OfflineLicenseHelper<>(C.WIDEVINE_UUID, mediaDrm, mediaDrmCallback, null);
-
-                        Pair<Long, Long> remainingSecPair = null;
-                        try {
-                            remainingSecPair = offlineLicenseHelper.getLicenseDurationRemainingSec(offlineAssetKeyId);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-//        Log.e(TAG, " License remaining Play time : " + remainingSecPair.first + ", Purchase time : " + remainingSecPair.second);
-                        if (SambaDownloadManager.EMPTY.equals(offlineAssetKeyIdStr) || remainingSecPair == null || (remainingSecPair.first == 0 || remainingSecPair.second == 0)) {
-                            //            String path = getIntent().getStringExtra(EXTRA_OFFLINE_URI);
-                            //            File file = getUriForManifest(path);
-                            //            Uri uri = Uri.fromFile(file);
-                            //            InputStream is = new FileInputStream(file);
-                            //            Log.e(TAG, "will start download now");
-
-
-                            DataSource dataSource = httpDataSourceFactory.createDataSource();
-
-                            DashManifest dashManifest = DashUtil.loadManifest(dataSource, uri); //movie url
-                            DrmInitData drmInitData = DashUtil.loadDrmInitData(dataSource, dashManifest.getPeriod(0));
-                            offlineAssetKeyId = offlineLicenseHelper.downloadLicense(drmInitData);
-                            Pair<Long, Long> p = offlineLicenseHelper.getLicenseDurationRemainingSec(offlineAssetKeyId);
-                            android.util.Log.e(TAG, "download done : " + p.toString());
-
-                            SharedPreferences sharedPreferences = SambaDownloadManager.getInstance().getSharedPreferences();
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putString(SambaDownloadManager.KEY_OFFLINE_OFFSET_ID,
-                                    Base64.encodeToString(offlineAssetKeyId, Base64.DEFAULT));
-                            editor.commit();
-
-                        }
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
-
-                    return "";
                 }
 
-                @Override
-                protected void onPostExecute(String s) {
-                    super.onPostExecute(s);
-                }
-            };
+            }
 
+            @Override
+            public void onMediaResponseError(Exception e, SambaMediaRequest request) {
+                requestListener.onDownloadRequestFailed(new Error(e), "Error to request SambaMedia");
+            }
+        });
 
-            task.execute(uri);
+    }
 
-
-        }
+    public void requestDownload(Context context, String name, Uri uri, String extension) {
+//        if (isDownloaded(uri)) {
+//            DownloadAction removeAction =
+//                    getDownloadHelper(uri, extension).getRemoveAction(Util.getUtf8Bytes(name));
+//            startServiceWithAction(removeAction);
+//            SambaDownloadManager.getInstance().getSharedPreferences().edit().clear().apply();
+//        } else {
+//            StartDownloadHelper helper = new StartDownloadHelper(context, getDownloadHelper(uri, extension), name);
+//            helper.prepare();
+//        }
     }
 
     // DownloadManager.Listener
@@ -236,7 +209,6 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
                 handleTrackedDownloadStatesChanged();
             }
         }
-
 
 
 //        for (SambaDownloadListener listener : listeners) {
@@ -288,21 +260,6 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         DownloadService.startWithAction(context, SambaDownloadService.class, action, false);
     }
 
-    private DownloadHelper getDownloadHelper(Uri uri, String extension) {
-        int type = Util.inferContentType(uri, extension);
-        switch (type) {
-            case C.TYPE_DASH:
-                return new DashDownloadHelper(uri, dataSourceFactory);
-            case C.TYPE_SS:
-                return new SsDownloadHelper(uri, dataSourceFactory);
-            case C.TYPE_HLS:
-                return new HlsDownloadHelper(uri, dataSourceFactory);
-            case C.TYPE_OTHER:
-                return new ProgressiveDownloadHelper(uri);
-            default:
-                throw new IllegalStateException("Unsupported type: " + type);
-        }
-    }
 
 
 }
