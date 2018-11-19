@@ -3,13 +3,15 @@ package com.sambatech.player.offline;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 
 import com.google.android.exoplayer2.offline.DownloadManager;
 import com.google.android.exoplayer2.offline.DownloaderConstructorHelper;
+import com.google.android.exoplayer2.offline.StreamKey;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
-import com.google.android.exoplayer2.upstream.FileDataSourceFactory;
 import com.google.android.exoplayer2.upstream.HttpDataSource;
 import com.google.android.exoplayer2.upstream.cache.Cache;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
@@ -23,6 +25,7 @@ import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
 
 import java.io.File;
+import java.util.List;
 
 public class SambaDownloadManager {
 
@@ -74,11 +77,15 @@ public class SambaDownloadManager {
     }
 
 
-    public void prepareDownload(SambaDownloadRequest sambaDownloadRequest, SambaDownloadRequestListener requestListener) {
+    public void prepareDownload(@NonNull SambaDownloadRequest sambaDownloadRequest, @NonNull SambaDownloadRequestListener requestListener) {
         getSambaDownloadTracker().prepareDownload(sambaDownloadRequest, requestListener);
     }
 
-    public boolean isDownloaded(SambaMedia sambaMedia) {
+    public void performDownload(@NonNull SambaDownloadRequest sambaDownloadRequest) {
+        getSambaDownloadTracker().performDownload(sambaDownloadRequest);
+    }
+
+    public boolean isDownloaded(@NonNull SambaMedia sambaMedia) {
         return getSambaDownloadTracker().isDownloaded(sambaMedia);
     }
 
@@ -88,7 +95,7 @@ public class SambaDownloadManager {
     }
 
 
-    DataSource.Factory buildDataSourceFactory() {
+    public DataSource.Factory buildDataSourceFactory() {
         DefaultDataSourceFactory upstreamFactory = new DefaultDataSourceFactory(
                 applicationInstance.getApplicationContext(), buildHttpDataSourceFactory()
         );
@@ -116,7 +123,7 @@ public class SambaDownloadManager {
             DownloaderConstructorHelper downloaderConstructorHelper = new DownloaderConstructorHelper(getDownloadCache(), buildHttpDataSourceFactory());
             downloadManager = new DownloadManager(
                     downloaderConstructorHelper,
-                    MAX_SIMULTANEOUS_DOWNLOADS,
+                    DownloadManager.DEFAULT_MAX_SIMULTANEOUS_DOWNLOADS,
                     DownloadManager.DEFAULT_MIN_RETRY_COUNT,
                     new File(getDownloadDirectory(), DOWNLOAD_ACTION_FILE)
             );
@@ -152,10 +159,8 @@ public class SambaDownloadManager {
         return new CacheDataSourceFactory(
                 cache,
                 upstreamFactory,
-                new FileDataSourceFactory(),
-                null,
                 CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR,
-                null
+                4 * 1024 * 1024
         );
     }
 
@@ -165,5 +170,9 @@ public class SambaDownloadManager {
 
     String getUserAgent() {
         return userAgent;
+    }
+
+    public List<StreamKey> getOfflineStreamKeys(Uri uri) {
+        return getSambaDownloadTracker().getOfflineStreamKeys(uri);
     }
 }

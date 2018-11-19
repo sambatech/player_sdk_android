@@ -63,6 +63,17 @@ public class SambaDownloadService extends DownloadService {
 
         PackageManager manager = SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageManager();
 
+        float downloadPercentage =  taskStates[0].downloadPercentage >= 0 ?  taskStates[0].downloadPercentage : 0;
+        String mediaTitle = null;
+
+        if ( taskStates[0].action.data != null) {
+            mediaTitle = Util.fromUtf8Bytes(taskStates[0].action.data);
+            if (!mediaTitle.isEmpty()) {
+                mediaTitle = "\n\n" +  Util.fromUtf8Bytes(taskStates[0].action.data);
+            } else {
+                mediaTitle = "";
+            }
+        }
 
         Intent intent = manager.getLaunchIntentForPackage(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageName());
         PendingIntent pedingintent = PendingIntent.getActivity(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), 0, intent, 0);
@@ -72,7 +83,7 @@ public class SambaDownloadService extends DownloadService {
                 R.drawable.exo_controls_play,
                 CHANNEL_ID,
                 /* contentIntent= */ pedingintent,
-                /* message= */ null,
+                /* message= */ String.format("%.1f%%", downloadPercentage ) + mediaTitle,
                 taskStates);
     }
 

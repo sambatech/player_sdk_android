@@ -1,6 +1,7 @@
 package com.sambatech.player.model;
 
 
+import com.google.android.exoplayer2.util.UriUtil;
 import com.sambatech.player.plugins.DrmRequest;
 import com.sambatech.player.utils.Helpers;
 
@@ -15,6 +16,7 @@ public class SambaMediaConfig extends SambaMedia {
 
 	public String id;
 	public String projectHash;
+	public String downloadUrl;
 	public String qualifier;
 	public int projectId;
 	public  int clientId;
@@ -57,6 +59,7 @@ public class SambaMediaConfig extends SambaMedia {
 			// TODO: Reabilitar após correção (https://github.com/sambatech-desenv/player/issues/589)
 			//blockIfRooted = m.blockIfRooted;
 			retriesTotal = m.retriesTotal;
+			downloadUrl = m.downloadUrl;
 		}
 	}
 

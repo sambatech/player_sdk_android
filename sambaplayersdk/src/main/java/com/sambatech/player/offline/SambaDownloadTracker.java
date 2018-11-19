@@ -20,6 +20,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
+import android.util.Base64;
+import android.widget.Toast;
 
 import com.google.android.exoplayer2.offline.ActionFile;
 import com.google.android.exoplayer2.offline.DownloadAction;
@@ -27,8 +29,10 @@ import com.google.android.exoplayer2.offline.DownloadManager;
 import com.google.android.exoplayer2.offline.DownloadManager.TaskState;
 import com.google.android.exoplayer2.offline.DownloadService;
 import com.google.android.exoplayer2.offline.StreamKey;
+import com.google.android.exoplayer2.offline.TrackKey;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.util.Log;
+import com.google.android.exoplayer2.util.Util;
 import com.sambatech.player.SambaApi;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
@@ -38,11 +42,13 @@ import com.sambatech.player.offline.listeners.LicenceDrmCallback;
 import com.sambatech.player.offline.listeners.SambaDownloadListener;
 import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
+import com.sambatech.player.offline.model.SambaTrack;
 
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -98,9 +104,9 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         return trackedDownloadStates.containsKey(uri);
     }
 
-    public boolean isDownloaded(SambaMedia sambaMedia) {
+    public boolean isDownloaded(@NonNull SambaMedia sambaMedia) {
         SambaMediaConfig sambaMediaConfig = (SambaMediaConfig) sambaMedia;
-        Uri uri = Uri.parse(sambaMediaConfig.url);
+        Uri uri = Uri.parse(sambaMediaConfig.downloadUrl);
 
         return trackedDownloadStates.containsKey(uri) && CollectionUtils.exists(sambaMedias, media -> media.id.equals(sambaMediaConfig.id));
     }
@@ -135,7 +141,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
                         OfflineUtils.getLicenseDrm(sambaMediaConfig, new LicenceDrmCallback() {
                             @Override
                             public void onLicencePrepared(byte[] licencePayload) {
-                                sambaMediaConfig.drmRequest.setDrmOfflinePayload(licencePayload);
+                                sambaMediaConfig.drmRequest.setDrmOfflinePayload(Base64.encodeToString(licencePayload, Base64.DEFAULT));
                                 StartDownloadHelper startDownloadHelper = new StartDownloadHelper(context, dataSourceFactory, sambaDownloadRequest, requestListener);
                                 startDownloadHelper.start();
                             }
@@ -162,16 +168,47 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
 
     }
 
-    public void requestDownload(Context context, String name, Uri uri, String extension) {
-//        if (isDownloaded(uri)) {
-//            DownloadAction removeAction =
-//                    getDownloadHelper(uri, extension).getRemoveAction(Util.getUtf8Bytes(name));
-//            startServiceWithAction(removeAction);
-//            SambaDownloadManager.getInstance().getSharedPreferences().edit().clear().apply();
-//        } else {
-//            StartDownloadHelper helper = new StartDownloadHelper(context, getDownloadHelper(uri, extension), name);
-//            helper.start();
-//        }
+    public void performDownload(@NonNull SambaDownloadRequest sambaDownloadRequest) {
+
+        if (isDownloaded(sambaDownloadRequest.getSambaMedia())) {
+            Toast.makeText(context, "Media já baixada", Toast.LENGTH_SHORT).show();
+        } else {
+            if (isValidRequest(sambaDownloadRequest)) {
+                startDownload(sambaDownloadRequest);
+            }
+        }
+
+    }
+
+    private boolean isValidRequest(SambaDownloadRequest sambaDownloadRequest) {
+
+        return sambaDownloadRequest.getDownloadHelper() != null
+                && sambaDownloadRequest.getSambaMedia() != null
+                && sambaDownloadRequest.getSambaTracksForDownload() != null
+                && !sambaDownloadRequest.getSambaTracksForDownload().isEmpty();
+
+    }
+
+    private List<TrackKey> buildTrackkeys(SambaDownloadRequest sambaDownloadRequest) {
+
+        List<SambaTrack> selectedTracks = sambaDownloadRequest.getSambaTracksForDownload();
+        List<SambaTrack> audioTracks = sambaDownloadRequest.getSambaAudioTracks();
+
+        if (selectedTracks != null && !selectedTracks.isEmpty()) {
+            if (audioTracks != null && !audioTracks.isEmpty()) {
+
+                for (SambaTrack audioTrack : audioTracks) {
+                    if (!selectedTracks.contains(audioTrack)) {
+                        selectedTracks.add(audioTrack);
+                    }
+                }
+            }
+
+        } else {
+            selectedTracks = new ArrayList<>();
+        }
+
+        return new ArrayList<>(CollectionUtils.collect(selectedTracks, input -> input.getTrackKey()));
     }
 
     // DownloadManager.Listener
@@ -191,6 +228,13 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
             if (trackedDownloadStates.remove(uri) != null) {
                 handleTrackedDownloadStatesChanged();
             }
+
+            SambaMediaConfig sambaMediaConfig = CollectionUtils.find(sambaMedias, media -> media.downloadUrl.equals(uri.toString()));
+
+            if (sambaMediaConfig != null && sambaMedias.remove(sambaMediaConfig)) {
+                OfflineUtils.persistSambaMedias(sambaMedias);
+            }
+
         }
 
 
@@ -229,20 +273,24 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
                 });
     }
 
-    private void startDownload(DownloadAction action) {
-        if (trackedDownloadStates.containsKey(action.uri)) {
+    private void startDownload(SambaDownloadRequest sambaDownloadRequest) {
+        DownloadAction downloadAction = sambaDownloadRequest.getDownloadHelper().getDownloadAction(Util.getUtf8Bytes(sambaDownloadRequest.getSambaMedia().title), buildTrackkeys(sambaDownloadRequest));
+
+        if (trackedDownloadStates.containsKey(downloadAction.uri)) {
             // This content is already being downloaded. Do nothing.
             return;
         }
-        trackedDownloadStates.put(action.uri, action);
+        trackedDownloadStates.put(downloadAction.uri, downloadAction);
+        sambaMedias.add((SambaMediaConfig) sambaDownloadRequest.getSambaMedia());
+        OfflineUtils.persistSambaMedias(sambaMedias);
+
         handleTrackedDownloadStatesChanged();
-        startServiceWithAction(action);
+        startServiceWithAction(downloadAction);
     }
 
     private void startServiceWithAction(DownloadAction action) {
         DownloadService.startWithAction(context, SambaDownloadService.class, action, false);
     }
-
 
 
 }

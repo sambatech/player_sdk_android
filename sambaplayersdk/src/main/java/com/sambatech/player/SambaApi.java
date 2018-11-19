@@ -1,8 +1,8 @@
 package com.sambatech.player;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -35,6 +35,7 @@ import java.util.Scanner;
  */
 public class SambaApi {
 
+	public static final String SVBPS_SAMBAVIDEOS = "svbps-sambavideos.akamaized.net";
 	private Context context;
 	private String accessToken;
 
@@ -491,8 +492,10 @@ public class SambaApi {
 
 				// was it a valid iteration?
 				if (!mediaOutputs.isEmpty()) {
-					if (media.url == null)
+					if (media.url == null) {
 						media.url = normalizeProtocol(mediaOutputs.get(0).url, request.protocol);
+					}
+
 
 					media.outputs = mediaOutputs;
 					filledRules.add(media.type);
@@ -501,6 +504,13 @@ public class SambaApi {
 
 			if (media.outputs != null)
 				sortOutputs(media.outputs);
+
+
+			if (!media.url.contains(SVBPS_SAMBAVIDEOS)) {
+				media.downloadUrl = buildDownloadUrl(media.url);
+			} else {
+				media.downloadUrl = media.url;
+			}
 		}
 
 		/**
@@ -517,5 +527,14 @@ public class SambaApi {
         private String normalizeProtocol(String url, SambaMediaRequest.Protocol protocol) {
             return url.replaceAll("(https?)", protocol.toString().toLowerCase());
         }
+
+        private String buildDownloadUrl(String url) {
+			Uri downloadUri = Uri.parse(url);
+			Uri.Builder builder = downloadUri.buildUpon();
+			builder.clearQuery();
+			builder.authority("svbps-sambavideos.akamaized.net");
+			Uri finalDownloadUri = builder.build();
+			return finalDownloadUri.toString();
+		}
 	}
 }

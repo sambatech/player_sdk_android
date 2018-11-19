@@ -2,6 +2,7 @@ package com.sambatech.player.offline.model;
 
 import android.support.annotation.NonNull;
 
+import com.google.android.exoplayer2.offline.DownloadHelper;
 import com.sambatech.player.model.SambaMedia;
 
 import java.util.List;
@@ -16,6 +17,10 @@ public class SambaDownloadRequest {
 
     private List<SambaTrack> sambaVideoTracks;
     private List<SambaTrack> sambaAudioTracks;
+
+    private List<SambaTrack> sambaTracksForDownload;
+
+    private DownloadHelper downloadHelper;
 
 
     public SambaDownloadRequest(@NonNull String projectHash,@NonNull  String mediaId) {
@@ -69,5 +74,21 @@ public class SambaDownloadRequest {
 
     public void setSambaAudioTracks(List<SambaTrack> sambaAudioTracks) {
         this.sambaAudioTracks = sambaAudioTracks;
+    }
+
+    public List<SambaTrack> getSambaTracksForDownload() {
+        return sambaTracksForDownload;
+    }
+
+    public void setSambaTracksForDownload(List<SambaTrack> sambaTracksForDownload) {
+        this.sambaTracksForDownload = sambaTracksForDownload;
+    }
+
+    public DownloadHelper getDownloadHelper() {
+        return downloadHelper;
+    }
+
+    public void setDownloadHelper(DownloadHelper downloadHelper) {
+        this.downloadHelper = downloadHelper;
     }
 }

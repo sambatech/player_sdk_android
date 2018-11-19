@@ -1,11 +1,16 @@
 package com.sambatech.sample.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import com.sambatech.player.SambaApi;
 import com.sambatech.player.SambaPlayer;
@@ -19,21 +24,26 @@ import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.offline.SambaDownloadManager;
 import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
+import com.sambatech.player.offline.model.SambaTrack;
 import com.sambatech.player.plugins.DrmRequest;
 import com.sambatech.sample.R;
 import com.sambatech.sample.adapters.MediasOfflineAdapter;
 import com.sambatech.sample.model.MediaInfo;
 import com.sambatech.sample.model.OnMediaClickListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class OfflineActivity extends AppCompatActivity implements OnMediaClickListener {
+public class OfflineActivity extends AppCompatActivity implements OnMediaClickListener, DialogInterface.OnClickListener {
 
 
     private RecyclerView recyclerView;
     private SambaPlayer sambaPlayer;
     private MediasOfflineAdapter adapter;
+    private ListView tracksDialogList;
+    private ArrayAdapter<Object> tracksAdapter;
+    private SambaDownloadRequest actualDownloadRequest;
 
 
     private SambaPlayerListener playerListener = new SambaPlayerListener() {
@@ -130,14 +140,13 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
 
-
         MediaInfo mediaInfo1 = new MediaInfo();
         mediaInfo1.setTitle("Media DRM 1");
         mediaInfo1.setProjectHash("f596f53018dc9150eee6661d891fb1d2");
         mediaInfo1.setId("1171319f6347a0a9c19b0278c0956eb6");
         mediaInfo1.setEnvironment(SambaMediaRequest.Environment.STAGING);
         mediaInfo1.setControlsEnabled(true);
-        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyMzkwNzY1LCJpYXQiOjE1NDIzODg5NjUsImFpZCI6ImRhbWFzaW8ifQ.6TjSCnkGCU5g7cgMV4h0EQRsn8nS35twHNgEqsPQrW4");
+        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyNzE2NDYzLCJpYXQiOjE1NDI2MzAwNjMsImFpZCI6ImRhbWFzaW8ifQ.dRirQDCc4JZsqMbO5izZsbNQaRq-_vCgG_bj_eu3ssE");
         mediaInfo1.setAutoPlay(true);
 
 
@@ -149,9 +158,19 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         mediaInfo2.setControlsEnabled(true);
         mediaInfo2.setAutoPlay(true);
 
+        MediaInfo mediaInfo3 = new MediaInfo();
+
+        mediaInfo3.setTitle("Media Legenda");
+        mediaInfo3.setProjectHash("964b56b4b184c2a29e3c2065a7a15038");
+        mediaInfo3.setId("b4c134b2a297d9eacfe7c7852fa86312");
+        mediaInfo3.setEnvironment(SambaMediaRequest.Environment.PROD);
+        mediaInfo3.setControlsEnabled(true);
+        mediaInfo3.setAutoPlay(true);
+
         List<MediaInfo> mediaInfos = Arrays.asList(
                 mediaInfo1,
-                mediaInfo2
+                mediaInfo2,
+                mediaInfo3
         );
 
         adapter = new MediasOfflineAdapter(mediaInfos, this);
@@ -195,7 +214,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         SambaDownloadManager.getInstance().prepareDownload(sambaDownloadRequest, new SambaDownloadRequestListener() {
             @Override
             public void onDownloadRequestPrepared(SambaDownloadRequest sambaDownloadRequest) {
-
+                buildDialog(sambaDownloadRequest);
             }
 
             @Override
@@ -216,5 +235,50 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
     protected void onDestroy() {
         super.onDestroy();
         SambaEventBus.unsubscribe(playerListener);
+    }
+
+    private void buildDialog(SambaDownloadRequest sambaDownloadRequest) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(R.string.exo_download_description)
+                .setPositiveButton(android.R.string.ok, this)
+                .setNegativeButton(android.R.string.cancel, null);
+
+        actualDownloadRequest = sambaDownloadRequest;
+
+        LayoutInflater dialogInflater = LayoutInflater.from(builder.getContext());
+        View dialogView = dialogInflater.inflate(R.layout.start_download_dialog, null);
+
+        tracksAdapter = new ArrayAdapter<>(
+                builder.getContext(), android.R.layout.simple_list_item_multiple_choice);
+        tracksDialogList = dialogView.findViewById(R.id.representation_list);
+        tracksDialogList.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+
+        tracksAdapter.addAll(sambaDownloadRequest.getSambaVideoTracks());
+        tracksAdapter.addAll(sambaDownloadRequest.getSambaAudioTracks());
+
+        tracksDialogList.setAdapter(tracksAdapter);
+
+        if ((sambaDownloadRequest.getSambaVideoTracks().size() + sambaDownloadRequest.getSambaAudioTracks().size()) > 0) {
+            builder.setView(dialogView);
+        }
+
+        builder.create().show();
+
+    }
+
+
+    @Override
+    public void onClick(DialogInterface dialogInterface, int i) {
+
+        List<SambaTrack> selectedTracks = new ArrayList<>();
+        for (int j = 0; j < tracksDialogList.getChildCount(); j++) {
+            if (tracksDialogList.isItemChecked(j)) {
+                selectedTracks.add((SambaTrack) tracksAdapter.getItem(j));
+            }
+        }
+
+        actualDownloadRequest.setSambaTracksForDownload(selectedTracks);
+        SambaDownloadManager.getInstance().performDownload(actualDownloadRequest);
+
     }
 }

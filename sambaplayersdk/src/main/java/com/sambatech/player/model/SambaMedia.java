@@ -3,6 +3,8 @@ package com.sambatech.player.model;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.ArrayList;
 
 /**
@@ -16,8 +18,10 @@ public class SambaMedia {
 	public String url;
 	public String type = "";
 	public String adUrl;
-	public @NonNull AdsSettings adsSettings = new AdsSettings();
-	public Drawable thumb;
+	@Expose
+	public @NonNull transient AdsSettings adsSettings = new AdsSettings();
+	@Expose
+	public transient Drawable thumb;
 	public float initialTime = 0f;
 	public float duration = 0f;
 	public boolean isLive;

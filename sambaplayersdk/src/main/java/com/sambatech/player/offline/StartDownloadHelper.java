@@ -1,7 +1,6 @@
 package com.sambatech.player.offline;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.net.Uri;
 
 import com.google.android.exoplayer2.C;
@@ -12,7 +11,6 @@ import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.offline.DashDownloadHelper;
 import com.google.android.exoplayer2.source.hls.offline.HlsDownloadHelper;
-import com.google.android.exoplayer2.ui.DefaultTrackNameProvider;
 import com.google.android.exoplayer2.ui.TrackNameProvider;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.sambatech.player.model.SambaMediaConfig;
@@ -52,9 +50,9 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
         this.sambaMediaConfig = (SambaMediaConfig) sambaDownloadRequest.getSambaMedia();
         this.context = context;
         this.dataSourceFactory = dataSourceFactory;
-        this.downloadHelper = getDownloadHelper(Uri.parse(sambaMediaConfig.url), sambaMediaConfig.type);
+        this.downloadHelper = getDownloadHelper(Uri.parse(sambaMediaConfig.downloadUrl), sambaMediaConfig.type);
         this.name = sambaMediaConfig.title;
-        trackNameProvider = new DefaultTrackNameProvider(context.getResources());
+        trackNameProvider = new SambaTrackNameProvider(context.getResources());
         trackKeys = new ArrayList<>();
         this.sambaVideoTracks = new ArrayList<>();
         this.sambaAudioTracks = new ArrayList<>();
@@ -75,7 +73,9 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
                     SambaTrack sambaTrack = new SambaTrack(
                             trackNameProvider.getTrackName(trackGroup.getFormat(k)),
                             OfflineUtils.getSizeInMB(trackGroup.getFormat(k).bitrate, (long) sambaMediaConfig.duration),
-                            trackKey
+                            trackKey,
+                            trackGroup.getFormat(k).width,
+                            trackGroup.getFormat(k).height
                             );
 
                     if (OfflineUtils.inferPrimaryTrackType(trackGroup.getFormat(k)) == C.TRACK_TYPE_AUDIO) {
@@ -91,6 +91,7 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
 
         sambaDownloadRequest.setSambaVideoTracks(sambaVideoTracks);
         sambaDownloadRequest.setSambaAudioTracks(sambaAudioTracks);
+        sambaDownloadRequest.setDownloadHelper(downloadHelper);
 
         requestListener.onDownloadRequestPrepared(sambaDownloadRequest);
     }
@@ -98,22 +99,6 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
     @Override
     public void onPrepareError(DownloadHelper helper, IOException e) {
         requestListener.onDownloadRequestFailed(new Error(e), "Error to start download");
-    }
-
-
-    public void onClick(DialogInterface dialog, int which) {
-//        ArrayList<TrackKey> selectedTrackKeys = new ArrayList<>();
-//        for (int i = 0; i < representationList.getChildCount(); i++) {
-//            if (representationList.isItemChecked(i)) {
-//                selectedTrackKeys.add(trackKeys.get(i));
-//            }
-//        }
-//        if (!selectedTrackKeys.isEmpty() || trackKeys.isEmpty()) {
-//            // We have selected keys, or we're dealing with single stream content.
-//            DownloadAction downloadAction =
-//                    downloadHelper.getDownloadAction(Util.getUtf8Bytes(name), selectedTrackKeys);
-////            startDownload(downloadAction);
-//        }
     }
 
 
