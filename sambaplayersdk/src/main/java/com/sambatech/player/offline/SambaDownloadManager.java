@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 
 import com.google.android.exoplayer2.offline.DownloadManager;
+import com.google.android.exoplayer2.offline.DownloadService;
 import com.google.android.exoplayer2.offline.DownloaderConstructorHelper;
 import com.google.android.exoplayer2.offline.StreamKey;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -95,6 +96,22 @@ public class SambaDownloadManager {
 
     public void cancelAllDownloads() {
         getSambaDownloadTracker().cancelAllDownloads();
+    }
+
+    public void cancelDownload(String mediaId) {
+        getSambaDownloadTracker().cancelDownload(mediaId);
+    }
+
+    public void deleteDownload(String mediaId) {
+        getSambaDownloadTracker().deleteDownload(mediaId);
+    }
+
+    public void startStoppedDownloads() {
+        getSambaDownloadTracker().startStoppedDownloads();
+    }
+
+    public void stopAllDownloads() {
+        getSambaDownloadTracker().stopAllDownloads();
     }
 
     public Application getAppInstance() {

@@ -48,6 +48,13 @@ public class MediasOfflineAdapter extends RecyclerView.Adapter<MediasOfflineAdap
 
         holder.titleTextView.setText(mediaInfo.getTitle());
 
+        View.OnClickListener clickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                listener.onDownloadButtonClicked(mediaInfo, view);
+            }
+        };
+
         holder.container.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -55,12 +62,8 @@ public class MediasOfflineAdapter extends RecyclerView.Adapter<MediasOfflineAdap
             }
         });
 
-        holder.downloadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                listener.onDownloadButtonClicked(mediaInfo, view);
-            }
-        });
+        holder.downloadButton.setOnClickListener(clickListener);
+        holder.progressBar.setOnClickListener(clickListener);
 
         if (mediaInfo.getDownloadState() != null) {
             DownloadState downloadState = mediaInfo.getDownloadState();
@@ -92,6 +95,7 @@ public class MediasOfflineAdapter extends RecyclerView.Adapter<MediasOfflineAdap
                     holder.progressBar.setVisibility(View.GONE);
                     break;
                 case CANCELED:
+                case DELETED:
                     holder.downloadButton.setVisibility(View.VISIBLE);
                     holder.downloadButton.setColorFilter(0xFF42A5F5);
                     holder.progressBar.setVisibility(View.GONE);

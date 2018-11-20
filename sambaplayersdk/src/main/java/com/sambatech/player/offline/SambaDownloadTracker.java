@@ -80,7 +80,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
     private final ActionFile actionFile;
     private final Handler actionFileWriteHandler;
 
-    public SambaDownloadTracker(
+    SambaDownloadTracker(
             Context context,
             DataSource.Factory dataSourceFactory,
             File actionFile,
@@ -100,19 +100,15 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         EventBus.getDefault().register(this);
     }
 
-    public void addListener(SambaDownloadListener listener) {
+    void addListener(SambaDownloadListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(SambaDownloadListener listener) {
+    void removeListener(SambaDownloadListener listener) {
         listeners.remove(listener);
     }
 
-    public boolean isDownloaded(Uri uri) {
-        return trackedDownloadStates.containsKey(uri);
-    }
-
-    public boolean isDownloaded(@NonNull String mediaId) {
+    boolean isDownloaded(@NonNull String mediaId) {
 
         SambaMediaConfig sambaMediaConfig = CollectionUtils.find(sambaMedias, media -> media.id.equals(mediaId));
 
@@ -124,7 +120,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         }
     }
 
-    public boolean isDownloading(@NonNull String mediaId) {
+    boolean isDownloading(@NonNull String mediaId) {
         if (SambaDownloadManager.getInstance().getDownloadManager().getTaskCount() > 0) {
             TaskState[] taskStates = SambaDownloadManager.getInstance().getDownloadManager().getAllTaskStates();
 
@@ -141,7 +137,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         return false;
     }
 
-    public void cancelAllDownloads() {
+    void cancelAllDownloads() {
         if (SambaDownloadManager.getInstance().getDownloadManager().getTaskCount() > 0) {
             TaskState[] taskStates = SambaDownloadManager.getInstance().getDownloadManager().getAllTaskStates();
 
@@ -156,6 +152,41 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         }
     }
 
+    void cancelDownload(String mediaId) {
+
+        if (SambaDownloadManager.getInstance().getDownloadManager().getTaskCount() > 0) {
+            TaskState[] taskStates = SambaDownloadManager.getInstance().getDownloadManager().getAllTaskStates();
+
+            for (TaskState taskState : taskStates) {
+                DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
+                if (downloadData.getMediaId().equals(mediaId)) {
+                    Uri uri = taskState.action.uri;
+                    String extension = downloadData.getSambaMedia().type;
+                    DownloadAction removeAction = OfflineUtils.getDownloadHelper(uri, extension, dataSourceFactory).getRemoveAction(taskState.action.data);
+                    startServiceWithAction(removeAction);
+                }
+            }
+
+        }
+    }
+
+    void deleteDownload(String mediaId) {
+
+        if (sambaMedias != null && sambaMedias.size() > 0) {
+
+            SambaMediaConfig sambaMediaConfig = CollectionUtils.find(sambaMedias, item -> item.id.equals(mediaId));
+
+            if (sambaMediaConfig != null) {
+                byte[] downloadData = OfflineUtils.buildDownloadData(sambaMediaConfig.id, sambaMediaConfig.title, 0D, sambaMediaConfig);
+                Uri uri = Uri.parse(sambaMediaConfig.downloadUrl);
+                String extension = sambaMediaConfig.type;
+                DownloadAction removeAction = OfflineUtils.getDownloadHelper(uri, extension, dataSourceFactory).getRemoveAction(downloadData);
+                startServiceWithAction(removeAction);
+            }
+
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public List<StreamKey> getOfflineStreamKeys(Uri uri) {
         if (!trackedDownloadStates.containsKey(uri)) {
@@ -164,7 +195,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         return trackedDownloadStates.get(uri).getKeys();
     }
 
-    public void prepareDownload(@NonNull SambaDownloadRequest sambaDownloadRequest, @NonNull SambaDownloadRequestListener requestListener) {
+    void prepareDownload(@NonNull SambaDownloadRequest sambaDownloadRequest, @NonNull SambaDownloadRequestListener requestListener) {
 
         SambaApi api = new SambaApi(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), "");
         api.requestMedia(new SambaMediaRequest(sambaDownloadRequest.getProjectHash(), sambaDownloadRequest.getMediaId()), new SambaApiCallback() {
@@ -216,7 +247,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
 
     }
 
-    public void performDownload(@NonNull SambaDownloadRequest sambaDownloadRequest) {
+    void performDownload(@NonNull SambaDownloadRequest sambaDownloadRequest) {
 
         SambaMediaConfig sambaMediaConfig = (SambaMediaConfig) sambaDownloadRequest.getSambaMedia();
 
@@ -251,9 +282,20 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
             // A download has been removed, or has failed. Stop tracking it.
             if (trackedDownloadStates.remove(uri) != null) {
                 handleTrackedDownloadStatesChanged();
+
+                DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(action.data);
+                SambaMediaConfig sambaMediaConfig = CollectionUtils.find(sambaMedias, item -> item.id.equals(downloadData.getMediaId()));
+                if (sambaMediaConfig != null && sambaMedias.remove(sambaMediaConfig)) {
+                    OfflineUtils.persistSambaMedias(sambaMedias);
+                }
+
             }
 
-            state = DownloadState.State.FAILED;
+            if (!action.isRemoveAction) {
+                state = DownloadState.State.FAILED;
+            } else {
+                state = DownloadState.State.DELETED;
+            }
 
         } else if (taskState.state == TaskState.STATE_COMPLETED) {
             DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
@@ -341,5 +383,19 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
     protected void finalize() throws Throwable {
         super.finalize();
         EventBus.getDefault().unregister(this);
+    }
+
+    void startStoppedDownloads() {
+
+        if (SambaDownloadManager.getInstance().getDownloadManager().getTaskCount() > 0) {
+            TaskState[] taskStates = SambaDownloadManager.getInstance().getDownloadManager().getAllTaskStates();
+            for (TaskState taskState : taskStates) {
+                startServiceWithAction(taskState.action);
+            }
+        }
+    }
+
+    void stopAllDownloads() {
+        SambaDownloadManager.getInstance().getDownloadManager().stopDownloads();
     }
 }

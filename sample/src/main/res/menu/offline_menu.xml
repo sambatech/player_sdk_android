@@ -6,4 +6,10 @@
         android:title="Cancelar todos Downloads"
         android:orderInCategory="100" />
 
+    <item
+        android:id="@+id/stopAll"
+        android:title="@string/pausar_todos_downloads"
+        android:orderInCategory="101" />
+
+
 </menu>

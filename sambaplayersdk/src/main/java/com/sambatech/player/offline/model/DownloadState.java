@@ -20,7 +20,8 @@ public class DownloadState {
         COMPLETED,
         CANCELED,
         IN_PROGRESS,
-        FAILED
+        FAILED,
+        DELETED
     }
 
 }

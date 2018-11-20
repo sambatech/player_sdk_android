@@ -2,7 +2,6 @@ package com.sambatech.sample.activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
@@ -199,6 +198,14 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
             case R.id.cancelAll:
                 SambaDownloadManager.getInstance().cancelAllDownloads();
                 break;
+            case R.id.stopAll:
+                if (item.getTitle().equals(getString(R.string.pausar_todos_downloads))) {
+                    SambaDownloadManager.getInstance().stopAllDownloads();
+                    item.setTitle(getString(R.string.reiniciar_todos_downloads));
+                } else {
+                    SambaDownloadManager.getInstance().startStoppedDownloads();
+                    item.setTitle(getString(R.string.pausar_todos_downloads));
+                }
         }
 
         return super.onOptionsItemSelected(item);
@@ -229,23 +236,52 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
 
     @Override
     public void onDownloadButtonClicked(MediaInfo mediaInfo, View view) {
-        SambaDownloadRequest sambaDownloadRequest = new SambaDownloadRequest(mediaInfo.getProjectHash(), mediaInfo.getId());
 
-        if (mediaInfo.getDrmToken() != null && !mediaInfo.getDrmToken().isEmpty()) {
-            sambaDownloadRequest.setDrmToken(mediaInfo.getDrmToken());
+
+        if (SambaDownloadManager.getInstance().isDownloading(mediaInfo.getId())) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                    .setTitle("Pergunta")
+                    .setMessage("Deseja cancelar o download de: \n\n" + mediaInfo.getTitle())
+                    .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
+                        SambaDownloadManager.getInstance().cancelDownload(mediaInfo.getId());
+                    })
+                    .setNegativeButton(android.R.string.cancel, null);
+
+            builder.create().show();
+
+        } else if (SambaDownloadManager.getInstance().isDownloaded(mediaInfo.getId())) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                    .setTitle("Pergunta")
+                    .setMessage("Deseja apagar o download de: \n\n" + mediaInfo.getTitle())
+                    .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
+                        SambaDownloadManager.getInstance().deleteDownload(mediaInfo.getId());
+                    })
+                    .setNegativeButton(android.R.string.cancel, null);
+
+            builder.create().show();
+
+        } else {
+            SambaDownloadRequest sambaDownloadRequest = new SambaDownloadRequest(mediaInfo.getProjectHash(), mediaInfo.getId());
+
+            if (mediaInfo.getDrmToken() != null && !mediaInfo.getDrmToken().isEmpty()) {
+                sambaDownloadRequest.setDrmToken(mediaInfo.getDrmToken());
+            }
+
+            SambaDownloadManager.getInstance().prepareDownload(sambaDownloadRequest, new SambaDownloadRequestListener() {
+                @Override
+                public void onDownloadRequestPrepared(SambaDownloadRequest sambaDownloadRequest) {
+                    buildDialog(sambaDownloadRequest);
+                }
+
+                @Override
+                public void onDownloadRequestFailed(Error error, String msg) {
+
+                }
+            });
         }
 
-        SambaDownloadManager.getInstance().prepareDownload(sambaDownloadRequest, new SambaDownloadRequestListener() {
-            @Override
-            public void onDownloadRequestPrepared(SambaDownloadRequest sambaDownloadRequest) {
-                buildDialog(sambaDownloadRequest);
-            }
-
-            @Override
-            public void onDownloadRequestFailed(Error error, String msg) {
-
-            }
-        });
     }
 
     @Override
@@ -314,7 +350,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         DownloadData downloadData = downloadState.downloadData;
         MediaInfo mediaInfo = null;
         int position = 0;
-        for (int i = 0 ; i < mediaInfos.size(); i++) {
+        for (int i = 0; i < mediaInfos.size(); i++) {
             if (mediaInfos.get(i).getId().equals(downloadData.getMediaId())) {
                 mediaInfo = mediaInfos.get(i);
                 position = i;
