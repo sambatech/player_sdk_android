@@ -4,14 +4,12 @@ import com.sambatech.player.model.SambaMedia;
 
 public class DownloadState {
 
-    public SambaMedia sambaMedia;
     public float downloadPercentage;
     public DownloadData downloadData;
     public State state;
 
 
-    public DownloadState(SambaMedia sambaMedia, float downloadPercentage, DownloadData downloadData, State state) {
-        this.sambaMedia = sambaMedia;
+    public DownloadState(float downloadPercentage, DownloadData downloadData, State state) {
         this.downloadPercentage = downloadPercentage;
         this.downloadData = downloadData;
         this.state = state;

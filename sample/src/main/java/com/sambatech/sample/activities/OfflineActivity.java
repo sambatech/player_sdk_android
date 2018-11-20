@@ -2,13 +2,15 @@ package com.sambatech.sample.activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -25,6 +27,7 @@ import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.offline.SambaDownloadManager;
 import com.sambatech.player.offline.listeners.SambaDownloadListener;
 import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
+import com.sambatech.player.offline.model.DownloadData;
 import com.sambatech.player.offline.model.DownloadState;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
 import com.sambatech.player.offline.model.SambaTrack;
@@ -45,8 +48,9 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
     private SambaPlayer sambaPlayer;
     private MediasOfflineAdapter adapter;
     private ListView tracksDialogList;
-    private ArrayAdapter<Object> tracksAdapter;
+    private ArrayAdapter<SambaTrack> tracksAdapter;
     private SambaDownloadRequest actualDownloadRequest;
+    private List<MediaInfo> mediaInfos;
 
 
     private SambaPlayerListener playerListener = new SambaPlayerListener() {
@@ -129,7 +133,6 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
     };
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -170,7 +173,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         mediaInfo3.setControlsEnabled(true);
         mediaInfo3.setAutoPlay(true);
 
-        List<MediaInfo> mediaInfos = Arrays.asList(
+        mediaInfos = Arrays.asList(
                 mediaInfo1,
                 mediaInfo2,
                 mediaInfo3
@@ -182,6 +185,23 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         SambaEventBus.subscribe(playerListener);
         SambaDownloadManager.getInstance().addDownloadListener(this);
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.offline_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.cancelAll:
+                SambaDownloadManager.getInstance().cancelAllDownloads();
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -290,6 +310,23 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
 
     @Override
     public void onDownloadStateChanged(DownloadState downloadState) {
-        Log.i("Download teste", "#### State => " + downloadState.state);
+
+        DownloadData downloadData = downloadState.downloadData;
+        MediaInfo mediaInfo = null;
+        int position = 0;
+        for (int i = 0 ; i < mediaInfos.size(); i++) {
+            if (mediaInfos.get(i).getId().equals(downloadData.getMediaId())) {
+                mediaInfo = mediaInfos.get(i);
+                position = i;
+                break;
+            }
+        }
+
+        if (mediaInfo != null) {
+            mediaInfo.setDownloadState(downloadState);
+        }
+
+        adapter.notifyItemChanged(position);
+
     }
 }

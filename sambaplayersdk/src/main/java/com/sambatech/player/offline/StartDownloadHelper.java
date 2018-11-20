@@ -32,7 +32,6 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
     private final TrackNameProvider trackNameProvider;
     private final Context context;
 
-    private final DataSource.Factory dataSourceFactory;
     private final SambaDownloadRequest sambaDownloadRequest;
     private final SambaDownloadRequestListener requestListener;
     private final List<SambaTrack> sambaVideoTracks;
@@ -49,8 +48,7 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
         this.requestListener = requestListener;
         this.sambaMediaConfig = (SambaMediaConfig) sambaDownloadRequest.getSambaMedia();
         this.context = context;
-        this.dataSourceFactory = dataSourceFactory;
-        this.downloadHelper = getDownloadHelper(Uri.parse(sambaMediaConfig.downloadUrl), sambaMediaConfig.type);
+        this.downloadHelper = OfflineUtils.getDownloadHelper(Uri.parse(sambaMediaConfig.downloadUrl), sambaMediaConfig.type, dataSourceFactory);
         this.name = sambaMediaConfig.title;
         trackNameProvider = new SambaTrackNameProvider(context.getResources());
         trackKeys = new ArrayList<>();
@@ -101,15 +99,4 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
         requestListener.onDownloadRequestFailed(new Error(e), "Error to start download");
     }
 
-
-    private DownloadHelper getDownloadHelper(Uri uri, String extension) {
-        switch (extension.toLowerCase()) {
-            case "dash":
-                return new DashDownloadHelper(uri, dataSourceFactory);
-            case "hls":
-                return new HlsDownloadHelper(uri, dataSourceFactory);
-            default:
-                return new ProgressiveDownloadHelper(uri);
-        }
-    }
 }

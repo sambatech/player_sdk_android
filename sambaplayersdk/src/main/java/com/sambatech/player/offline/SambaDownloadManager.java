@@ -85,10 +85,17 @@ public class SambaDownloadManager {
         getSambaDownloadTracker().performDownload(sambaDownloadRequest);
     }
 
-    public boolean isDownloaded(@NonNull SambaMedia sambaMedia) {
-        return getSambaDownloadTracker().isDownloaded(sambaMedia);
+    public boolean isDownloaded(@NonNull String mediaId) {
+        return getSambaDownloadTracker().isDownloaded(mediaId);
     }
 
+    public boolean isDownloading(@NonNull String mediaId) {
+        return getSambaDownloadTracker().isDownloading(mediaId);
+    }
+
+    public void cancelAllDownloads() {
+        getSambaDownloadTracker().cancelAllDownloads();
+    }
 
     public Application getAppInstance() {
         return applicationInstance;

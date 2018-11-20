@@ -37,7 +37,7 @@
             android:id="@+id/mProgress"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:indeterminate="true"
+            style="?android:attr/progressBarStyleHorizontal"
             android:visibility="gone"
             />
 

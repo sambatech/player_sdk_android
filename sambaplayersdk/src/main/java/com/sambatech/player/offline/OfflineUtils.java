@@ -10,9 +10,13 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.drm.DrmInitData;
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.OfflineLicenseHelper;
+import com.google.android.exoplayer2.offline.DownloadHelper;
 import com.google.android.exoplayer2.offline.DownloadManager;
+import com.google.android.exoplayer2.offline.ProgressiveDownloadHelper;
 import com.google.android.exoplayer2.source.dash.DashUtil;
 import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
+import com.google.android.exoplayer2.source.dash.offline.DashDownloadHelper;
+import com.google.android.exoplayer2.source.hls.offline.HlsDownloadHelper;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
@@ -146,9 +150,9 @@ class OfflineUtils {
         return (double) (((bitrate / 1000000f) * duration) / 8);
     }
 
-    static byte[] buildDownloadData(String mediaId, String mediaTitle, Double totalDownload) {
+    static byte[] buildDownloadData(String mediaId, String mediaTitle, Double totalDownload, SambaMediaConfig sambaMedia) {
 
-        DownloadData downloadData = new DownloadData(mediaId, mediaTitle, totalDownload);
+        DownloadData downloadData = new DownloadData(mediaId, mediaTitle, totalDownload, sambaMedia);
 
         String json = new Gson().toJson(downloadData, DownloadData.class);
 
@@ -202,11 +206,9 @@ class OfflineUtils {
 
     }
 
-    static DownloadState buildDownloadState(DownloadManager.TaskState taskState, List<SambaMediaConfig> sambaMedias, DownloadState.State optionalState) {
+    static DownloadState buildDownloadState(DownloadManager.TaskState taskState, DownloadState.State optionalState) {
 
         DownloadData downloadData = getDownloadDataFromBytes(taskState.action.data);
-
-        SambaMediaConfig sambaMediaConfig = CollectionUtils.find(sambaMedias, item -> item.id.equals(downloadData.getMediaId()));
 
         DownloadState.State state;
 
@@ -233,18 +235,18 @@ class OfflineUtils {
             }
         }
 
-        return new DownloadState(sambaMediaConfig, taskState.downloadPercentage, downloadData, state);
+        return new DownloadState(taskState.downloadPercentage, downloadData, state);
     }
 
-    public @interface State {}
-    /** The task is waiting to be started. */
-    public static final int STATE_QUEUED = 0;
-    /** The task is currently started. */
-    public static final int STATE_STARTED = 1;
-    /** The task completed. */
-    public static final int STATE_COMPLETED = 2;
-    /** The task was canceled. */
-    public static final int STATE_CANCELED = 3;
-    /** The task failed. */
-    public static final int STATE_FAILED = 4;
+    static DownloadHelper getDownloadHelper(Uri uri, String extension, DataSource.Factory dataSourceFactory) {
+        switch (extension.toLowerCase()) {
+            case "dash":
+                return new DashDownloadHelper(uri, dataSourceFactory);
+            case "hls":
+                return new HlsDownloadHelper(uri, dataSourceFactory);
+            default:
+                return new ProgressiveDownloadHelper(uri);
+        }
+    }
+
 }

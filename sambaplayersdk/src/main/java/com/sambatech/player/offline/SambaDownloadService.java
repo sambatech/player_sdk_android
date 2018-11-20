@@ -125,21 +125,28 @@ public class SambaDownloadService extends DownloadService {
 
     private String buildNotificationProgressMessage(TaskState taskState) {
 
-        float downloadPercentage = taskState.downloadPercentage >= 0 ? taskState.downloadPercentage : 0;
-
-
-        Double downloadedMegaBytes = taskState.downloadedBytes > 0 ? ((taskState.downloadedBytes / 1024) / 1024) : (double) 0;
-
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append(String.format("%.1f%%", downloadPercentage));
+
+        DownloadData downloadData = null;
 
         if (taskState.action.data != null) {
-            DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
+            downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
+        }
+
+        if (taskState.action.isRemoveAction) {
+            if (downloadData != null && downloadData.getMediaTitle() != null && !downloadData.getMediaTitle().isEmpty()) {
+                stringBuilder.append(downloadData.getMediaTitle());
+            }
+        } else {
+            float downloadPercentage = taskState.downloadPercentage >= 0 ? taskState.downloadPercentage : 0;
+
+
+            Double downloadedMegaBytes = taskState.downloadedBytes > 0 ? ((taskState.downloadedBytes / 1024) / 1024) : (double) 0;
+
+            stringBuilder.append(String.format("%.1f%%", downloadPercentage));
 
             if (downloadData != null) {
-
-
                 if (downloadData.getTotalDownloadSizeInMB() != null && downloadData.getTotalDownloadSizeInMB() > 0) {
                     stringBuilder.append(String.format(" - %.1f MB de %.1f MB", downloadedMegaBytes, downloadData.getTotalDownloadSizeInMB()));
                 }
@@ -148,9 +155,7 @@ public class SambaDownloadService extends DownloadService {
                     stringBuilder.append("\n\n");
                     stringBuilder.append(downloadData.getMediaTitle());
                 }
-
             }
-
         }
 
         return stringBuilder.toString();
