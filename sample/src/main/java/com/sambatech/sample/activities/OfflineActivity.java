@@ -198,6 +198,9 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
             case R.id.cancelAll:
                 SambaDownloadManager.getInstance().cancelAllDownloads();
                 break;
+            case R.id.deleteAll:
+                SambaDownloadManager.getInstance().deleteAllDownloads();
+                break;
             case R.id.stopAll:
                 if (item.getTitle().equals(getString(R.string.pausar_todos_downloads))) {
                     SambaDownloadManager.getInstance().stopAllDownloads();
@@ -206,6 +209,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
                     SambaDownloadManager.getInstance().startStoppedDownloads();
                     item.setTitle(getString(R.string.pausar_todos_downloads));
                 }
+                break;
         }
 
         return super.onOptionsItemSelected(item);
@@ -254,7 +258,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this)
                     .setTitle("Pergunta")
-                    .setMessage("Deseja apagar o download de: \n\n" + mediaInfo.getTitle())
+                    .setMessage("Deseja apagar: \n\n" + mediaInfo.getTitle())
                     .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
                         SambaDownloadManager.getInstance().deleteDownload(mediaInfo.getId());
                     })

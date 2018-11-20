@@ -106,6 +106,10 @@ public class SambaDownloadManager {
         getSambaDownloadTracker().deleteDownload(mediaId);
     }
 
+    public void deleteAllDownloads() {
+        getSambaDownloadTracker().deleteAllDownloads();
+    }
+
     public void startStoppedDownloads() {
         getSambaDownloadTracker().startStoppedDownloads();
     }

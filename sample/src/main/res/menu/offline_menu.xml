@@ -7,9 +7,14 @@
         android:orderInCategory="100" />
 
     <item
+        android:id="@+id/deleteAll"
+        android:title="Apagar todos Downloads"
+        android:orderInCategory="101" />
+
+    <item
         android:id="@+id/stopAll"
         android:title="@string/pausar_todos_downloads"
-        android:orderInCategory="101" />
+        android:orderInCategory="102" />
 
 
 </menu>

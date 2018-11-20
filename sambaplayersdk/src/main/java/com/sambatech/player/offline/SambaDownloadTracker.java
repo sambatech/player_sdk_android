@@ -172,7 +172,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
 
     void deleteDownload(String mediaId) {
 
-        if (sambaMedias != null && sambaMedias.size() > 0) {
+        if (sambaMedias != null && !sambaMedias.isEmpty()) {
 
             SambaMediaConfig sambaMediaConfig = CollectionUtils.find(sambaMedias, item -> item.id.equals(mediaId));
 
@@ -184,6 +184,15 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
                 startServiceWithAction(removeAction);
             }
 
+        }
+    }
+
+
+    void deleteAllDownloads() {
+        if (sambaMedias != null && !sambaMedias.isEmpty()) {
+            for (SambaMediaConfig sambaMedia : sambaMedias) {
+                deleteDownload(sambaMedia.id);
+            }
         }
     }
 
