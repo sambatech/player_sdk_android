@@ -130,7 +130,7 @@ public class SambaDownloadService extends DownloadService {
 
 
                 if (downloadData.getTotalDownloadSizeInMB() != null && downloadData.getTotalDownloadSizeInMB() > 0) {
-                    stringBuilder.append(String.format(" - %.1f MB de %.1f MB", downloadPercentage, downloadData.getTotalDownloadSizeInMB()));
+                    stringBuilder.append(String.format(" - %.1f MB de %.1f MB", downloadedMegaBytes, downloadData.getTotalDownloadSizeInMB()));
                 }
 
                 if ( downloadData.getMediaTitle() != null && !downloadData.getMediaTitle().isEmpty()) {

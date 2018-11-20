@@ -282,7 +282,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
 
         Double totalDownloadSize = buildDownloadSize(finalTracks);
 
-        byte[] downloadData = buildDownloadData(sambaDownloadRequest.getSambaMedia().title, totalDownloadSize);
+        byte[] downloadData = OfflineUtils.buildDownloadData(sambaDownloadRequest.getSambaMedia().title, totalDownloadSize);
 
         DownloadAction downloadAction = sambaDownloadRequest.getDownloadHelper().getDownloadAction(downloadData, trackKeys);
 
@@ -307,15 +307,6 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         }
 
         return totalSize;
-    }
-
-    private byte[] buildDownloadData(String mediaTitle, Double totalDownload) {
-
-        DownloadData downloadData = new DownloadData(mediaTitle, totalDownload);
-
-        String json = new Gson().toJson(downloadData, DownloadData.class);
-
-        return Util.getUtf8Bytes(json);
     }
 
     private void startServiceWithAction(DownloadAction action) {

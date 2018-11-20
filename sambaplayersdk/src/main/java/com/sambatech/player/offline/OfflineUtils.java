@@ -140,6 +140,14 @@ class OfflineUtils {
         return (double) (((bitrate / 1000000f) * duration) / 8);
     }
 
+    static byte[] buildDownloadData(String mediaTitle, Double totalDownload) {
+
+        DownloadData downloadData = new DownloadData(mediaTitle, totalDownload);
+
+        String json = new Gson().toJson(downloadData, DownloadData.class);
+
+        return Util.getUtf8Bytes(json);
+    }
 
     static DownloadData getDownloadDataFromBytes(byte[] data) {
         String json = Util.fromUtf8Bytes(data);
