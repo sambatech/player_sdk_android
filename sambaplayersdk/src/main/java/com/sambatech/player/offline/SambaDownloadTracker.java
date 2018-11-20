@@ -33,6 +33,7 @@ import com.google.android.exoplayer2.offline.TrackKey;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.Util;
+import com.google.gson.Gson;
 import com.sambatech.player.SambaApi;
 import com.sambatech.player.event.SambaApiCallback;
 import com.sambatech.player.model.SambaMedia;
@@ -41,6 +42,7 @@ import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.offline.listeners.LicenceDrmCallback;
 import com.sambatech.player.offline.listeners.SambaDownloadListener;
 import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
+import com.sambatech.player.offline.model.DownloadData;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
 import com.sambatech.player.offline.model.SambaTrack;
 
@@ -189,7 +191,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
 
     }
 
-    private List<TrackKey> buildTrackkeys(SambaDownloadRequest sambaDownloadRequest) {
+    private List<SambaTrack> buildFinalTracks(SambaDownloadRequest sambaDownloadRequest) {
 
         List<SambaTrack> selectedTracks = sambaDownloadRequest.getSambaTracksForDownload();
         List<SambaTrack> audioTracks = sambaDownloadRequest.getSambaAudioTracks();
@@ -208,7 +210,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
             selectedTracks = new ArrayList<>();
         }
 
-        return new ArrayList<>(CollectionUtils.collect(selectedTracks, input -> input.getTrackKey()));
+        return selectedTracks;
     }
 
     // DownloadManager.Listener
@@ -274,18 +276,46 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
     }
 
     private void startDownload(SambaDownloadRequest sambaDownloadRequest) {
-        DownloadAction downloadAction = sambaDownloadRequest.getDownloadHelper().getDownloadAction(Util.getUtf8Bytes(sambaDownloadRequest.getSambaMedia().title), buildTrackkeys(sambaDownloadRequest));
+
+        List<SambaTrack> finalTracks =  buildFinalTracks(sambaDownloadRequest);
+        List<TrackKey> trackKeys = new ArrayList<>(CollectionUtils.collect(finalTracks, input -> input.getTrackKey()));
+
+        Double totalDownloadSize = buildDownloadSize(finalTracks);
+
+        byte[] downloadData = buildDownloadData(sambaDownloadRequest.getSambaMedia().title, totalDownloadSize);
+
+        DownloadAction downloadAction = sambaDownloadRequest.getDownloadHelper().getDownloadAction(downloadData, trackKeys);
 
         if (trackedDownloadStates.containsKey(downloadAction.uri)) {
-            // This content is already being downloaded. Do nothing.
             return;
         }
+
         trackedDownloadStates.put(downloadAction.uri, downloadAction);
         sambaMedias.add((SambaMediaConfig) sambaDownloadRequest.getSambaMedia());
         OfflineUtils.persistSambaMedias(sambaMedias);
 
         handleTrackedDownloadStatesChanged();
         startServiceWithAction(downloadAction);
+    }
+
+    private Double buildDownloadSize(List<SambaTrack> finalTracks) {
+
+        Double totalSize = 0D;
+
+        for (SambaTrack finalTrack : finalTracks) {
+            totalSize += finalTrack.getSizeInMB();
+        }
+
+        return totalSize;
+    }
+
+    private byte[] buildDownloadData(String mediaTitle, Double totalDownload) {
+
+        DownloadData downloadData = new DownloadData(mediaTitle, totalDownload);
+
+        String json = new Gson().toJson(downloadData, DownloadData.class);
+
+        return Util.getUtf8Bytes(json);
     }
 
     private void startServiceWithAction(DownloadAction action) {

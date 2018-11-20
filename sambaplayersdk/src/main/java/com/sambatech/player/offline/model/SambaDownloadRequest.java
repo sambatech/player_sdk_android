@@ -12,6 +12,7 @@ public class SambaDownloadRequest {
     private String mediaId;
     private String projectHash;
     private String drmToken;
+    private Double totalDownloadSize;
 
     private SambaMedia sambaMedia;
 
@@ -90,5 +91,13 @@ public class SambaDownloadRequest {
 
     public void setDownloadHelper(DownloadHelper downloadHelper) {
         this.downloadHelper = downloadHelper;
+    }
+
+    public Double getTotalDownloadSize() {
+        return totalDownloadSize;
+    }
+
+    public void setTotalDownloadSize(Double totalDownloadSize) {
+        this.totalDownloadSize = totalDownloadSize;
     }
 }

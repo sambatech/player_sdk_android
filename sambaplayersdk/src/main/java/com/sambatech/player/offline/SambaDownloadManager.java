@@ -160,7 +160,7 @@ public class SambaDownloadManager {
                 cache,
                 upstreamFactory,
                 CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR,
-                4 * 1024 * 1024
+                20 * 1024 * 1024
         );
     }
 

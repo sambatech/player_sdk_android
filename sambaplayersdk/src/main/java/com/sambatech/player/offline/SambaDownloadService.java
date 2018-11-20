@@ -27,7 +27,9 @@ import com.google.android.exoplayer2.scheduler.PlatformScheduler;
 import com.google.android.exoplayer2.ui.DownloadNotificationUtil;
 import com.google.android.exoplayer2.util.NotificationUtil;
 import com.google.android.exoplayer2.util.Util;
+import com.google.gson.Gson;
 import com.sambatech.player.R;
+import com.sambatech.player.offline.model.DownloadData;
 
 /**
  * A service for downloading media.
@@ -63,18 +65,6 @@ public class SambaDownloadService extends DownloadService {
 
         PackageManager manager = SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageManager();
 
-        float downloadPercentage =  taskStates[0].downloadPercentage >= 0 ?  taskStates[0].downloadPercentage : 0;
-        String mediaTitle = null;
-
-        if ( taskStates[0].action.data != null) {
-            mediaTitle = Util.fromUtf8Bytes(taskStates[0].action.data);
-            if (!mediaTitle.isEmpty()) {
-                mediaTitle = "\n\n" +  Util.fromUtf8Bytes(taskStates[0].action.data);
-            } else {
-                mediaTitle = "";
-            }
-        }
-
         Intent intent = manager.getLaunchIntentForPackage(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageName());
         PendingIntent pedingintent = PendingIntent.getActivity(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), 0, intent, 0);
 
@@ -83,7 +73,7 @@ public class SambaDownloadService extends DownloadService {
                 R.drawable.exo_controls_play,
                 CHANNEL_ID,
                 /* contentIntent= */ pedingintent,
-                /* message= */ String.format("%.1f%%", downloadPercentage ) + mediaTitle,
+                /* message= */ buildNotificationProgressMessage(taskStates[0]),
                 taskStates);
     }
 
@@ -119,5 +109,40 @@ public class SambaDownloadService extends DownloadService {
         int notificationId = FOREGROUND_NOTIFICATION_ID + 1 + taskState.taskId;
 
         NotificationUtil.setNotification(this, notificationId, notification);
+    }
+
+
+    private String buildNotificationProgressMessage(TaskState taskState) {
+
+        float downloadPercentage = taskState.downloadPercentage >= 0 ? taskState.downloadPercentage : 0;
+
+
+        Double downloadedMegaBytes = taskState.downloadedBytes > 0 ? ((taskState.downloadedBytes / 1024) / 1024) : (double) 0;
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        stringBuilder.append(String.format("%.1f%%", downloadPercentage));
+
+        if (taskState.action.data != null) {
+            DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
+
+            if (downloadData != null) {
+
+
+                if (downloadData.getTotalDownloadSizeInMB() != null && downloadData.getTotalDownloadSizeInMB() > 0) {
+                    stringBuilder.append(String.format(" - %.1f MB de %.1f MB", downloadPercentage, downloadData.getTotalDownloadSizeInMB()));
+                }
+
+                if ( downloadData.getMediaTitle() != null && !downloadData.getMediaTitle().isEmpty()) {
+                    stringBuilder.append("\n\n");
+                    stringBuilder.append(downloadData.getMediaTitle());
+                }
+
+            }
+
+        }
+
+        return stringBuilder.toString();
+
     }
 }

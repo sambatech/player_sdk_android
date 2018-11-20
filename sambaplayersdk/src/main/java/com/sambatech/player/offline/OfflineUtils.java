@@ -15,10 +15,12 @@ import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
+import com.google.android.exoplayer2.util.Util;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.offline.listeners.LicenceDrmCallback;
+import com.sambatech.player.offline.model.DownloadData;
 import com.sambatech.player.utils.SharedPrefsUtils;
 
 import java.lang.reflect.Type;
@@ -136,6 +138,12 @@ class OfflineUtils {
 
     static Double getSizeInMB(long bitrate, long duration){
         return (double) (((bitrate / 1000000f) * duration) / 8);
+    }
+
+
+    static DownloadData getDownloadDataFromBytes(byte[] data) {
+        String json = Util.fromUtf8Bytes(data);
+        return new Gson().fromJson(json, DownloadData.class);
     }
 
 }
