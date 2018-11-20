@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -22,7 +23,9 @@ import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.model.SambaMediaRequest;
 import com.sambatech.player.offline.SambaDownloadManager;
+import com.sambatech.player.offline.listeners.SambaDownloadListener;
 import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
+import com.sambatech.player.offline.model.DownloadState;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
 import com.sambatech.player.offline.model.SambaTrack;
 import com.sambatech.player.plugins.DrmRequest;
@@ -35,7 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class OfflineActivity extends AppCompatActivity implements OnMediaClickListener, DialogInterface.OnClickListener {
+public class OfflineActivity extends AppCompatActivity implements OnMediaClickListener, DialogInterface.OnClickListener, SambaDownloadListener {
 
 
     private RecyclerView recyclerView;
@@ -146,7 +149,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         mediaInfo1.setId("1171319f6347a0a9c19b0278c0956eb6");
         mediaInfo1.setEnvironment(SambaMediaRequest.Environment.STAGING);
         mediaInfo1.setControlsEnabled(true);
-        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyNzE2NDYzLCJpYXQiOjE1NDI2MzAwNjMsImFpZCI6ImRhbWFzaW8ifQ.dRirQDCc4JZsqMbO5izZsbNQaRq-_vCgG_bj_eu3ssE");
+        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyODAzODYzLCJpYXQiOjE1NDI3MTc0NjMsImFpZCI6ImRhbWFzaW8ifQ.MsHAcCyS-PSWoovDVS2K4OVC3Z6mK-wbxzZF5J7XW_w");
         mediaInfo1.setAutoPlay(true);
 
 
@@ -177,6 +180,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         recyclerView.setAdapter(adapter);
 
         SambaEventBus.subscribe(playerListener);
+        SambaDownloadManager.getInstance().addDownloadListener(this);
 
     }
 
@@ -235,6 +239,8 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
     protected void onDestroy() {
         super.onDestroy();
         SambaEventBus.unsubscribe(playerListener);
+        SambaDownloadManager.getInstance().removeDownloadListener(this);
+
     }
 
     private void buildDialog(SambaDownloadRequest sambaDownloadRequest) {
@@ -280,5 +286,10 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         actualDownloadRequest.setSambaTracksForDownload(selectedTracks);
         SambaDownloadManager.getInstance().performDownload(actualDownloadRequest);
 
+    }
+
+    @Override
+    public void onDownloadStateChanged(DownloadState downloadState) {
+        Log.i("Download teste", "#### State => " + downloadState.state);
     }
 }

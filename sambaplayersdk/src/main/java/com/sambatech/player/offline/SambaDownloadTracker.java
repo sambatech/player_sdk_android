@@ -43,10 +43,15 @@ import com.sambatech.player.offline.listeners.LicenceDrmCallback;
 import com.sambatech.player.offline.listeners.SambaDownloadListener;
 import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
 import com.sambatech.player.offline.model.DownloadData;
+import com.sambatech.player.offline.model.DownloadState;
+import com.sambatech.player.offline.model.ProgressMessageEvent;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
 import com.sambatech.player.offline.model.SambaTrack;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.io.IOException;
@@ -92,6 +97,8 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         actionFileWriteHandler = new Handler(actionFileWriteThread.getLooper());
 
         loadTrackedActions(deserializers.length > 0 ? deserializers : DownloadAction.getDefaultDeserializers());
+
+        EventBus.getDefault().register(this);
     }
 
     public void addListener(SambaDownloadListener listener) {
@@ -175,42 +182,11 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         if (isDownloaded(sambaDownloadRequest.getSambaMedia())) {
             Toast.makeText(context, "Media já baixada", Toast.LENGTH_SHORT).show();
         } else {
-            if (isValidRequest(sambaDownloadRequest)) {
+            if (OfflineUtils.isValidRequest(sambaDownloadRequest)) {
                 startDownload(sambaDownloadRequest);
             }
         }
 
-    }
-
-    private boolean isValidRequest(SambaDownloadRequest sambaDownloadRequest) {
-
-        return sambaDownloadRequest.getDownloadHelper() != null
-                && sambaDownloadRequest.getSambaMedia() != null
-                && sambaDownloadRequest.getSambaTracksForDownload() != null
-                && !sambaDownloadRequest.getSambaTracksForDownload().isEmpty();
-
-    }
-
-    private List<SambaTrack> buildFinalTracks(SambaDownloadRequest sambaDownloadRequest) {
-
-        List<SambaTrack> selectedTracks = sambaDownloadRequest.getSambaTracksForDownload();
-        List<SambaTrack> audioTracks = sambaDownloadRequest.getSambaAudioTracks();
-
-        if (selectedTracks != null && !selectedTracks.isEmpty()) {
-            if (audioTracks != null && !audioTracks.isEmpty()) {
-
-                for (SambaTrack audioTrack : audioTracks) {
-                    if (!selectedTracks.contains(audioTrack)) {
-                        selectedTracks.add(audioTrack);
-                    }
-                }
-            }
-
-        } else {
-            selectedTracks = new ArrayList<>();
-        }
-
-        return selectedTracks;
     }
 
     // DownloadManager.Listener
@@ -224,6 +200,9 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
     public void onTaskStateChanged(DownloadManager downloadManager, TaskState taskState) {
         DownloadAction action = taskState.action;
         Uri uri = action.uri;
+
+        DownloadState.State state = null;
+
         if ((action.isRemoveAction && taskState.state == TaskState.STATE_COMPLETED)
                 || (!action.isRemoveAction && taskState.state == TaskState.STATE_FAILED)) {
             // A download has been removed, or has failed. Stop tracking it.
@@ -237,13 +216,27 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
                 OfflineUtils.persistSambaMedias(sambaMedias);
             }
 
+            state = DownloadState.State.FAILED;
+
+        }
+
+        DownloadState downloadState = OfflineUtils.buildDownloadState(taskState, sambaMedias, state);
+        for (SambaDownloadListener listener : listeners) {
+            listener.onDownloadStateChanged(downloadState);
         }
 
 
-//        for (SambaDownloadListener listener : listeners) {
-//            listener.onDownloadStateChanged();
-//        }
     }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onProgressMessageReceived(ProgressMessageEvent progressMessageEvent) {
+
+        DownloadState downloadState = OfflineUtils.buildDownloadState(progressMessageEvent.getTaskState(), sambaMedias, null);
+        for (SambaDownloadListener listener : listeners) {
+            listener.onDownloadStateChanged(downloadState);
+        }
+    }
+
 
     @Override
     public void onIdle(DownloadManager downloadManager) {
@@ -277,12 +270,15 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
 
     private void startDownload(SambaDownloadRequest sambaDownloadRequest) {
 
-        List<SambaTrack> finalTracks =  buildFinalTracks(sambaDownloadRequest);
+        List<SambaTrack> finalTracks =  OfflineUtils.buildFinalTracks(sambaDownloadRequest);
         List<TrackKey> trackKeys = new ArrayList<>(CollectionUtils.collect(finalTracks, input -> input.getTrackKey()));
 
-        Double totalDownloadSize = buildDownloadSize(finalTracks);
+        Double totalDownloadSize = OfflineUtils.buildDownloadSize(finalTracks);
 
-        byte[] downloadData = OfflineUtils.buildDownloadData(sambaDownloadRequest.getSambaMedia().title, totalDownloadSize);
+
+        SambaMediaConfig sambaMediaConfig = (SambaMediaConfig) sambaDownloadRequest.getSambaMedia();
+
+        byte[] downloadData = OfflineUtils.buildDownloadData(sambaMediaConfig.id , sambaMediaConfig.title, totalDownloadSize);
 
         DownloadAction downloadAction = sambaDownloadRequest.getDownloadHelper().getDownloadAction(downloadData, trackKeys);
 
@@ -298,20 +294,13 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         startServiceWithAction(downloadAction);
     }
 
-    private Double buildDownloadSize(List<SambaTrack> finalTracks) {
-
-        Double totalSize = 0D;
-
-        for (SambaTrack finalTrack : finalTracks) {
-            totalSize += finalTrack.getSizeInMB();
-        }
-
-        return totalSize;
-    }
-
     private void startServiceWithAction(DownloadAction action) {
         DownloadService.startWithAction(context, SambaDownloadService.class, action, false);
     }
 
-
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        EventBus.getDefault().unregister(this);
+    }
 }

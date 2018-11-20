@@ -10,6 +10,7 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.drm.DrmInitData;
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.OfflineLicenseHelper;
+import com.google.android.exoplayer2.offline.DownloadManager;
 import com.google.android.exoplayer2.source.dash.DashUtil;
 import com.google.android.exoplayer2.source.dash.manifest.DashManifest;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -21,7 +22,12 @@ import com.google.gson.reflect.TypeToken;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.offline.listeners.LicenceDrmCallback;
 import com.sambatech.player.offline.model.DownloadData;
+import com.sambatech.player.offline.model.DownloadState;
+import com.sambatech.player.offline.model.SambaDownloadRequest;
+import com.sambatech.player.offline.model.SambaTrack;
 import com.sambatech.player.utils.SharedPrefsUtils;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -140,9 +146,9 @@ class OfflineUtils {
         return (double) (((bitrate / 1000000f) * duration) / 8);
     }
 
-    static byte[] buildDownloadData(String mediaTitle, Double totalDownload) {
+    static byte[] buildDownloadData(String mediaId, String mediaTitle, Double totalDownload) {
 
-        DownloadData downloadData = new DownloadData(mediaTitle, totalDownload);
+        DownloadData downloadData = new DownloadData(mediaId, mediaTitle, totalDownload);
 
         String json = new Gson().toJson(downloadData, DownloadData.class);
 
@@ -154,4 +160,91 @@ class OfflineUtils {
         return new Gson().fromJson(json, DownloadData.class);
     }
 
+    static Double buildDownloadSize(List<SambaTrack> finalTracks) {
+
+        Double totalSize = 0D;
+
+        for (SambaTrack finalTrack : finalTracks) {
+            totalSize += finalTrack.getSizeInMB();
+        }
+
+        return totalSize;
+    }
+
+    static List<SambaTrack> buildFinalTracks(SambaDownloadRequest sambaDownloadRequest) {
+
+        List<SambaTrack> selectedTracks = sambaDownloadRequest.getSambaTracksForDownload();
+        List<SambaTrack> audioTracks = sambaDownloadRequest.getSambaAudioTracks();
+
+        if (selectedTracks != null && !selectedTracks.isEmpty()) {
+            if (audioTracks != null && !audioTracks.isEmpty()) {
+
+                for (SambaTrack audioTrack : audioTracks) {
+                    if (!selectedTracks.contains(audioTrack)) {
+                        selectedTracks.add(audioTrack);
+                    }
+                }
+            }
+
+        } else {
+            selectedTracks = new ArrayList<>();
+        }
+
+        return selectedTracks;
+    }
+
+    static boolean isValidRequest(SambaDownloadRequest sambaDownloadRequest) {
+
+        return sambaDownloadRequest.getDownloadHelper() != null
+                && sambaDownloadRequest.getSambaMedia() != null
+                && sambaDownloadRequest.getSambaTracksForDownload() != null
+                && !sambaDownloadRequest.getSambaTracksForDownload().isEmpty();
+
+    }
+
+    static DownloadState buildDownloadState(DownloadManager.TaskState taskState, List<SambaMediaConfig> sambaMedias, DownloadState.State optionalState) {
+
+        DownloadData downloadData = getDownloadDataFromBytes(taskState.action.data);
+
+        SambaMediaConfig sambaMediaConfig = CollectionUtils.find(sambaMedias, item -> item.id.equals(downloadData.getMediaId()));
+
+        DownloadState.State state;
+
+        if (optionalState != null) {
+            state = optionalState;
+        } else {
+            switch (taskState.state) {
+                case DownloadManager.TaskState.STATE_QUEUED:
+                    state = DownloadState.State.WAITING;
+                    break;
+                case DownloadManager.TaskState.STATE_STARTED:
+                    state = DownloadState.State.IN_PROGRESS;
+                    break;
+                case DownloadManager.TaskState.STATE_CANCELED:
+                    state = DownloadState.State.CANCELED;
+                    break;
+                case DownloadManager.TaskState.STATE_COMPLETED:
+                    state = DownloadState.State.COMPLETED;
+                    break;
+                case DownloadManager.TaskState.STATE_FAILED:
+                default:
+                    state =  DownloadState.State.FAILED;
+                    break;
+            }
+        }
+
+        return new DownloadState(sambaMediaConfig, taskState.downloadPercentage, downloadData, state);
+    }
+
+    public @interface State {}
+    /** The task is waiting to be started. */
+    public static final int STATE_QUEUED = 0;
+    /** The task is currently started. */
+    public static final int STATE_STARTED = 1;
+    /** The task completed. */
+    public static final int STATE_COMPLETED = 2;
+    /** The task was canceled. */
+    public static final int STATE_CANCELED = 3;
+    /** The task failed. */
+    public static final int STATE_FAILED = 4;
 }

@@ -2,11 +2,13 @@ package com.sambatech.player.offline.model;
 
 public class DownloadData {
 
+    private String mediaId;
     private String mediaTitle;
     private Double totalDownloadSizeInMB;
 
 
-    public DownloadData(String mediaTitle, Double totalDownloadSizeInMB) {
+    public DownloadData(String mediaId, String mediaTitle, Double totalDownloadSizeInMB) {
+        this.mediaId = mediaId;
         this.mediaTitle = mediaTitle;
         this.totalDownloadSizeInMB = totalDownloadSizeInMB;
     }
@@ -25,5 +27,13 @@ public class DownloadData {
 
     public void setTotalDownloadSizeInMB(Double totalDownloadSizeInMB) {
         this.totalDownloadSizeInMB = totalDownloadSizeInMB;
+    }
+
+    public String getMediaId() {
+        return mediaId;
+    }
+
+    public void setMediaId(String mediaId) {
+        this.mediaId = mediaId;
     }
 }

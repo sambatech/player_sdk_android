@@ -30,6 +30,9 @@ import com.google.android.exoplayer2.util.Util;
 import com.google.gson.Gson;
 import com.sambatech.player.R;
 import com.sambatech.player.offline.model.DownloadData;
+import com.sambatech.player.offline.model.ProgressMessageEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * A service for downloading media.
@@ -65,6 +68,11 @@ public class SambaDownloadService extends DownloadService {
 
         PackageManager manager = SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageManager();
 
+        if (taskStates[0].state == TaskState.STATE_STARTED) {
+            ProgressMessageEvent progressMessageEvent = new ProgressMessageEvent(taskStates[0]);
+            EventBus.getDefault().post(progressMessageEvent);
+        }
+
         Intent intent = manager.getLaunchIntentForPackage(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageName());
         PendingIntent pedingintent = PendingIntent.getActivity(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), 0, intent, 0);
 
@@ -88,6 +96,9 @@ public class SambaDownloadService extends DownloadService {
         Intent intent = manager.getLaunchIntentForPackage(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageName());
         PendingIntent pedingintent = PendingIntent.getActivity(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), 0, intent, 0);
 
+        DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
+        String mediaTitle = downloadData.getMediaTitle() != null ? downloadData.getMediaTitle() : "";
+
         Notification notification = null;
         if (taskState.state == TaskState.STATE_COMPLETED) {
             notification =
@@ -96,7 +107,7 @@ public class SambaDownloadService extends DownloadService {
                             R.drawable.exo_controls_play,
                             CHANNEL_ID,
                             /* contentIntent= */ pedingintent,
-                            Util.fromUtf8Bytes(taskState.action.data));
+                            mediaTitle);
         } else if (taskState.state == TaskState.STATE_FAILED) {
             notification =
                     DownloadNotificationUtil.buildDownloadFailedNotification(
@@ -104,7 +115,7 @@ public class SambaDownloadService extends DownloadService {
                             R.drawable.exo_controls_play,
                             CHANNEL_ID,
                             /* contentIntent= */ pedingintent,
-                            Util.fromUtf8Bytes(taskState.action.data));
+                            mediaTitle);
         }
         int notificationId = FOREGROUND_NOTIFICATION_ID + 1 + taskState.taskId;
 
@@ -133,7 +144,7 @@ public class SambaDownloadService extends DownloadService {
                     stringBuilder.append(String.format(" - %.1f MB de %.1f MB", downloadedMegaBytes, downloadData.getTotalDownloadSizeInMB()));
                 }
 
-                if ( downloadData.getMediaTitle() != null && !downloadData.getMediaTitle().isEmpty()) {
+                if (downloadData.getMediaTitle() != null && !downloadData.getMediaTitle().isEmpty()) {
                     stringBuilder.append("\n\n");
                     stringBuilder.append(downloadData.getMediaTitle());
                 }
