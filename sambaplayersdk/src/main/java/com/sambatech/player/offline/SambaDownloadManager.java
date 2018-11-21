@@ -192,7 +192,7 @@ public class SambaDownloadManager {
         return applicationInstance.getSharedPreferences(SAMBA_PREF, Context.MODE_PRIVATE);
     }
 
-    String getUserAgent() {
+    public String getUserAgent() {
         return userAgent;
     }
 
@@ -208,6 +208,10 @@ public class SambaDownloadManager {
     @Nullable
     public List<SambaMedia> getDownloadedMedias() {
         return getSambaDownloadTracker().getDownloadedMedias();
+    }
+
+    public void updateDownloadedMedia(SambaMedia sambaMedia) {
+         getSambaDownloadTracker().updateDownloadedMedia(sambaMedia);
     }
 
 }

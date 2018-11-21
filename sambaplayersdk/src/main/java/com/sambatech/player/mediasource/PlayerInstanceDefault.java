@@ -23,6 +23,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.Util;
 import com.sambatech.player.model.SambaMediaConfig;
+import com.sambatech.player.offline.SambaDownloadManager;
 
 /**
  * Created by luizbyrro on 29/11/2017.
@@ -39,6 +40,7 @@ public class PlayerInstanceDefault {
     DataSource.Factory mediaDataSourceFactory;
 
     private DefaultDrmSessionManager drmSessionManager;
+    private FrameworkMediaDrm mediaDrm;
 
     public PlayerInstanceDefault(Context context, SambaMediaConfig media) {
 
@@ -58,7 +60,7 @@ public class PlayerInstanceDefault {
                     drmSessionManager = buildOnlineDrmSessionManager(media);
                 }
 
-            } catch (UnsupportedDrmException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -74,7 +76,7 @@ public class PlayerInstanceDefault {
         return new DefaultDrmSessionManager<>(
                 C.WIDEVINE_UUID,
                 FrameworkMediaDrm.newInstance(C.WIDEVINE_UUID),
-                new HttpMediaDrmCallback(media.drmRequest.getLicenseUrl(), new DefaultHttpDataSourceFactory("user-agent")),
+                new HttpMediaDrmCallback(media.drmRequest.getLicenseUrl(), new DefaultHttpDataSourceFactory(SambaDownloadManager.getInstance().getUserAgent())),
                 null
         );
     }
@@ -85,18 +87,20 @@ public class PlayerInstanceDefault {
 
         String offlineAssetKeyIdStr = media.drmRequest.getDrmOfflinePayload();
 
+        mediaDrm = FrameworkMediaDrm.newInstance(C.WIDEVINE_UUID);
+
         if (offlineAssetKeyIdStr != null && !offlineAssetKeyIdStr.isEmpty()) {
             drmSessionManager = new DefaultDrmSessionManager<>(
                     C.WIDEVINE_UUID,
-                    FrameworkMediaDrm.newInstance(C.WIDEVINE_UUID),
+                    mediaDrm,
                     new HttpMediaDrmCallback(media.drmRequest.getLicenseUrl(),
-                            new DefaultHttpDataSourceFactory("user-agent")),
+                            new DefaultHttpDataSourceFactory(SambaDownloadManager.getInstance().getUserAgent())),
                     null
             );
 
             byte[] offlineAssetKeyId = Base64.decode(offlineAssetKeyIdStr, Base64.DEFAULT);
 
-            drmSessionManager.setMode(DefaultDrmSessionManager.MODE_PLAYBACK, offlineAssetKeyId);
+            drmSessionManager.setMode(DefaultDrmSessionManager.MODE_QUERY, offlineAssetKeyId);
 
         }
 
@@ -114,6 +118,11 @@ public class PlayerInstanceDefault {
         trackSelector = null;
         renderersFactory = null;
         mediaDataSourceFactory = null;
+        if (mediaDrm != null) {
+            mediaDrm.release();
+        }
+
         drmSessionManager = null;
+
     }
 }

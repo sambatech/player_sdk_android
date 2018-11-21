@@ -152,7 +152,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         mediaInfo1.setTitle("Media DRM 1");
         mediaInfo1.setProjectHash("f596f53018dc9150eee6661d891fb1d2");
         mediaInfo1.setId("1171319f6347a0a9c19b0278c0956eb6");
-        mediaInfo1.setEnvironment(SambaMediaRequest.Environment.STAGING);
+        mediaInfo1.setEnvironment(SambaMediaRequest.Environment.PROD);
         mediaInfo1.setControlsEnabled(true);
         mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyODg5MDIyLCJpYXQiOjE1NDI4MDI2MjIsImFpZCI6ImRhbWFzaW8ifQ.rFRK_sHGcWQPck8MZ_RJwMsbW2fCaCVmeWEWdoy_y7o");
         mediaInfo1.setAutoPlay(true);
@@ -241,12 +241,25 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
 
             if (mediaConfig.drmRequest != null) {
                 DrmRequest drmRequest = mediaConfig.drmRequest;
-
                 drmRequest.setToken(mediaInfo.getDrmToken());
             }
 
-            sambaPlayer.setMedia(sambaMedia);
-            sambaPlayer.play();
+            SambaApi api = new SambaApi(this, "");
+            api.prepareOfflineMedia(sambaMedia, new SambaApiCallback() {
+                @Override
+                public void onMediaResponse(SambaMedia media) {
+
+                    sambaPlayer.setMedia(media);
+                    sambaPlayer.play();
+
+                }
+
+                @Override
+                public void onMediaResponseError(Exception e, SambaMediaRequest request) {
+                    super.onMediaResponseError(e, request);
+                }
+            });
+
 
         } else {
             SambaApi api = new SambaApi(this, "");

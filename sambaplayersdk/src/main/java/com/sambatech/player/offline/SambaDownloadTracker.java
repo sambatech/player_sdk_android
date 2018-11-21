@@ -420,7 +420,22 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
         return null;
     }
 
-    public List<SambaMedia> getDownloadedMedias() {
+    List<SambaMedia> getDownloadedMedias() {
         return new ArrayList<>(CollectionUtils.collect(sambaMedias, (Transformer<SambaMediaConfig, SambaMedia>) input -> input));
+    }
+
+    void updateDownloadedMedia(SambaMedia sambaMedia) {
+        if (sambaMedias != null && !sambaMedias.isEmpty()) {
+
+            SambaMediaConfig newSambaMediaConfig = (SambaMediaConfig) sambaMedia;
+
+            SambaMediaConfig oldSambaMediaConfig = CollectionUtils.find(sambaMedias, item -> item.id.equals(newSambaMediaConfig.id));
+
+            if (oldSambaMediaConfig != null) {
+                int position = sambaMedias.indexOf(oldSambaMediaConfig);
+                sambaMedias.set(position, newSambaMediaConfig);
+                OfflineUtils.persistSambaMedias(sambaMedias);
+            }
+        }
     }
 }
