@@ -5,9 +5,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.android.exoplayer2.offline.DownloadManager;
-import com.google.android.exoplayer2.offline.DownloadService;
 import com.google.android.exoplayer2.offline.DownloaderConstructorHelper;
 import com.google.android.exoplayer2.offline.StreamKey;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -33,10 +33,6 @@ public class SambaDownloadManager {
     private static final String DOWNLOAD_ACTION_FILE = "actions";
     private static final String DOWNLOAD_TRACKER_ACTION_FILE = "tracked_actions";
     private static final String DOWNLOAD_CONTENT_DIRECTORY = "downloads";
-    private static final int MAX_SIMULTANEOUS_DOWNLOADS = 2;
-
-    public static final String KEY_OFFLINE_OFFSET_ID = "key_offline_offset_id";
-    public static final String EMPTY = "";
 
     private static final String SAMBA_PREF = "samba_pref";
 
@@ -203,4 +199,15 @@ public class SambaDownloadManager {
     public List<StreamKey> getOfflineStreamKeys(Uri uri) {
         return getSambaDownloadTracker().getOfflineStreamKeys(uri);
     }
+
+    @Nullable
+    public SambaMedia getDownloadedMedia(@NonNull String mediaId) {
+        return getSambaDownloadTracker().getDownloadedMedia(mediaId);
+    }
+
+    @Nullable
+    public List<SambaMedia> getDownloadedMedias() {
+        return getSambaDownloadTracker().getDownloadedMedias();
+    }
+
 }

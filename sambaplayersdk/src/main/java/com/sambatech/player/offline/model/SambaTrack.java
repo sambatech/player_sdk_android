@@ -21,6 +21,11 @@ public class SambaTrack {
         this.height = height;
     }
 
+    public SambaTrack(String title, Double sizeInMB) {
+        this.title = title;
+        this.sizeInMB = sizeInMB;
+    }
+
     public String getTitle() {
         return title;
     }

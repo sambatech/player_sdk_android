@@ -33,6 +33,8 @@ public class SambaMediaConfig extends SambaMedia {
 	public boolean blockIfRooted;
 	public int retriesTotal = 3;
 	public int defaultOutputIndex = 0;
+	public boolean isOffline;
+	public long bitrate;
 
 	public SambaMediaConfig() {}
 
@@ -60,6 +62,8 @@ public class SambaMediaConfig extends SambaMedia {
 			//blockIfRooted = m.blockIfRooted;
 			retriesTotal = m.retriesTotal;
 			downloadUrl = m.downloadUrl;
+			isOffline = m.isOffline;
+			bitrate = m.bitrate;
 		}
 	}
 

@@ -2,10 +2,12 @@ package com.sambatech.player.mediasource;
 
 import android.net.Uri;
 
-import com.google.android.exoplayer2.source.TrackGroup;
+import com.google.android.exoplayer2.offline.FilteringManifestParser;
 import com.google.android.exoplayer2.source.dash.DashChunkSource;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
+import com.google.android.exoplayer2.source.dash.manifest.DashManifestParser;
+import com.sambatech.player.offline.SambaDownloadManager;
 
 /**
  * Created by luizbyrro on 28/11/2017.
@@ -24,11 +26,11 @@ public class PlayerMediaSourceDash extends PlayerMediaSource implements PlayerMe
     @Override
     public void setUrl(String url) {
         super.setUrl(url);
-        setMediaSource(new DashMediaSource.Factory(dashChunkSourceFactory,
-                playerInstanceDefault.mediaDataSourceFactory)
-                .createMediaSource(Uri.parse(url),
-                        playerInstanceDefault.mainHandler,
-                        null));
+        Uri uri = Uri.parse(url);
+        setMediaSource(new DashMediaSource.Factory(SambaDownloadManager.getInstance().buildDataSourceFactory())
+                        .setManifestParser(
+                                new FilteringManifestParser<>(new DashManifestParser(), SambaDownloadManager.getInstance().getOfflineStreamKeys(uri)))
+                        .createMediaSource(uri));
     }
 
     @Override

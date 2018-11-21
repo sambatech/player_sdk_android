@@ -868,15 +868,16 @@ public class SambaPlayer extends FrameLayout {
         if (media.url.toLowerCase().endsWith(".mp3"))
             media.type = "progressive";
 
+        String url = media.isOffline ? media.downloadUrl : media.url;
         switch (media.type.toLowerCase()) {
             case "hls":
-                playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, media.url);
+                playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, url);
                 break;
             case "dash":
-                playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, media.url);
+                playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, url);
                 break;
             default:
-                playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, media.url);
+                playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, url);
                 break;
         }
 

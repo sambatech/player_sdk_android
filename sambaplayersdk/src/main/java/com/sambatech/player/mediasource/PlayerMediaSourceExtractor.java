@@ -2,9 +2,8 @@ package com.sambatech.player.mediasource;
 
 import android.net.Uri;
 
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.extractor.ExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.sambatech.player.offline.SambaDownloadManager;
 
 /**
  * Created by luizbyrro on 28/11/2017.
@@ -20,7 +19,8 @@ public class PlayerMediaSourceExtractor extends PlayerMediaSource implements Pla
     @Override
     public void setUrl(String url) {
         super.setUrl(url);
-        setMediaSource(new ExtractorMediaSource.Factory(this.playerInstanceDefault.mediaDataSourceFactory).createMediaSource(Uri.parse(url), this.playerInstanceDefault.mainHandler, null));
+        Uri uri = Uri.parse(url);
+        setMediaSource(new ExtractorMediaSource.Factory(SambaDownloadManager.getInstance().buildDataSourceFactory()).createMediaSource(uri));
     }
 
     @Override

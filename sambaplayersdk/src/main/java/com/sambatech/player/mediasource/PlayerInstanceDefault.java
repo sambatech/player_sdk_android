@@ -2,12 +2,14 @@ package com.sambatech.player.mediasource;
 
 import android.content.Context;
 import android.os.Handler;
+import android.util.Base64;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
+import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.FrameworkMediaDrm;
 import com.google.android.exoplayer2.drm.HttpMediaDrmCallback;
 import com.google.android.exoplayer2.drm.UnsupportedDrmException;
@@ -36,7 +38,6 @@ public class PlayerInstanceDefault {
     Context context;
     DataSource.Factory mediaDataSourceFactory;
 
-    private HttpMediaDrmCallback drmCallback;
     private DefaultDrmSessionManager drmSessionManager;
 
     public PlayerInstanceDefault(Context context, SambaMediaConfig media) {
@@ -46,29 +47,64 @@ public class PlayerInstanceDefault {
         this.context = context;
         this.mainHandler = new Handler();
         this.bandwidthMeter = new DefaultBandwidthMeter();
-        this.adaptiveTrackSelectionFactory =  new AdaptiveTrackSelection.Factory(bandwidthMeter);
+        this.adaptiveTrackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
         this.trackSelector = new DefaultTrackSelector(adaptiveTrackSelectionFactory);
 
         if (isDRM) {
-            drmCallback = new HttpMediaDrmCallback(media.drmRequest.getLicenseUrl(), new DefaultHttpDataSourceFactory("user-agent"));
-
             try {
-                drmSessionManager = new DefaultDrmSessionManager(C.WIDEVINE_UUID,
-                        FrameworkMediaDrm.newInstance(C.WIDEVINE_UUID), drmCallback, null, mainHandler, null);
+                if (media.isOffline) {
+                    drmSessionManager = buildOfflineDrmSessionManager(media);
+                } else {
+                    drmSessionManager = buildOnlineDrmSessionManager(media);
+                }
+
             } catch (UnsupportedDrmException e) {
                 e.printStackTrace();
             }
-            this.renderersFactory = new DefaultRenderersFactory(this.context, drmSessionManager);
-        } else {
-            this.renderersFactory = new DefaultRenderersFactory(this.context);
         }
+
+        this.renderersFactory = new DefaultRenderersFactory(this.context);
 
 //        this.mediaDataSourceFactory = new SambaDataSourceFactory(this.context, Util.getUserAgent(this.context, "mediaPlayerSample"), (TransferListener<? super DataSource>) bandwidthMeter);
         this.mediaDataSourceFactory = new DefaultDataSourceFactory(this.context, Util.getUserAgent(this.context, "mediaPlayerSample"), (TransferListener) bandwidthMeter);
     }
 
+    private DefaultDrmSessionManager buildOnlineDrmSessionManager(SambaMediaConfig media) throws UnsupportedDrmException {
+
+        return new DefaultDrmSessionManager<>(
+                C.WIDEVINE_UUID,
+                FrameworkMediaDrm.newInstance(C.WIDEVINE_UUID),
+                new HttpMediaDrmCallback(media.drmRequest.getLicenseUrl(), new DefaultHttpDataSourceFactory("user-agent")),
+                null
+        );
+    }
+
+    private DefaultDrmSessionManager buildOfflineDrmSessionManager(SambaMediaConfig media) throws UnsupportedDrmException {
+
+        DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = null;
+
+        String offlineAssetKeyIdStr = media.drmRequest.getDrmOfflinePayload();
+
+        if (offlineAssetKeyIdStr != null && !offlineAssetKeyIdStr.isEmpty()) {
+            drmSessionManager = new DefaultDrmSessionManager<>(
+                    C.WIDEVINE_UUID,
+                    FrameworkMediaDrm.newInstance(C.WIDEVINE_UUID),
+                    new HttpMediaDrmCallback(media.drmRequest.getLicenseUrl(),
+                            new DefaultHttpDataSourceFactory("user-agent")),
+                    null
+            );
+
+            byte[] offlineAssetKeyId = Base64.decode(offlineAssetKeyIdStr, Base64.DEFAULT);
+
+            drmSessionManager.setMode(DefaultDrmSessionManager.MODE_PLAYBACK, offlineAssetKeyId);
+
+        }
+
+        return drmSessionManager;
+    }
+
     public SimpleExoPlayer createPlayerInstance() {
-        return ExoPlayerFactory.newSimpleInstance(renderersFactory, trackSelector);
+        return ExoPlayerFactory.newSimpleInstance(this.context, renderersFactory, trackSelector, drmSessionManager);
     }
 
     public void destroy() {
@@ -78,7 +114,6 @@ public class PlayerInstanceDefault {
         trackSelector = null;
         renderersFactory = null;
         mediaDataSourceFactory = null;
-        drmCallback = null;
         drmSessionManager = null;
     }
 }

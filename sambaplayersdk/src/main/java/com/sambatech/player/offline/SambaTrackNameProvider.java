@@ -2,12 +2,14 @@ package com.sambatech.player.offline;
 
 import android.content.res.Resources;
 import android.text.TextUtils;
+
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.ui.TrackNameProvider;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Util;
+
 import java.util.Locale;
 
 public class SambaTrackNameProvider implements TrackNameProvider {

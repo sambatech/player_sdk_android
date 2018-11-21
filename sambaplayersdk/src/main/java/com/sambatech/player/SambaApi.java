@@ -472,6 +472,7 @@ public class SambaApi {
 
 					//Duration
 					media.duration = output.getJSONObject("fileInfo").getLong("duration")/1000f;
+					media.bitrate = output.getJSONObject("fileInfo").getLong("bitrate");
 
 					if (media.isAudioOnly) {
 						if (!isStreaming || !cOutput.url.contains(".mp3"))
@@ -506,11 +507,13 @@ public class SambaApi {
 				sortOutputs(media.outputs);
 
 
-			if (!media.url.contains(SVBPS_SAMBAVIDEOS)) {
-				media.downloadUrl = buildDownloadUrl(media.url);
-			} else {
-				media.downloadUrl = media.url;
-			}
+//			if (!media.url.contains(SVBPS_SAMBAVIDEOS)) {
+//				media.downloadUrl = buildDownloadUrl(media.url);
+//			} else {
+//				media.downloadUrl = media.url;
+//			}
+
+			media.downloadUrl = media.url;
 		}
 
 		/**

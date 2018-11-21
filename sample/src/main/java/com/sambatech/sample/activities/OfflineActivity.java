@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 
 import com.sambatech.player.SambaApi;
@@ -44,6 +45,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
 
 
     private RecyclerView recyclerView;
+    private FrameLayout progressContainer;
     private SambaPlayer sambaPlayer;
     private MediasOfflineAdapter adapter;
     private ListView tracksDialogList;
@@ -138,6 +140,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         setContentView(R.layout.activity_offline);
 
         recyclerView = findViewById(R.id.mRecyclerView);
+        progressContainer = findViewById(R.id.progressContainer);
         sambaPlayer = findViewById(R.id.player);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -151,7 +154,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         mediaInfo1.setId("1171319f6347a0a9c19b0278c0956eb6");
         mediaInfo1.setEnvironment(SambaMediaRequest.Environment.STAGING);
         mediaInfo1.setControlsEnabled(true);
-        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyODAzODYzLCJpYXQiOjE1NDI3MTc0NjMsImFpZCI6ImRhbWFzaW8ifQ.MsHAcCyS-PSWoovDVS2K4OVC3Z6mK-wbxzZF5J7XW_w");
+        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQyODg5MDIyLCJpYXQiOjE1NDI4MDI2MjIsImFpZCI6ImRhbWFzaW8ifQ.rFRK_sHGcWQPck8MZ_RJwMsbW2fCaCVmeWEWdoy_y7o");
         mediaInfo1.setAutoPlay(true);
 
 
@@ -172,10 +175,22 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         mediaInfo3.setControlsEnabled(true);
         mediaInfo3.setAutoPlay(true);
 
+
+        MediaInfo mediaInfo4 = new MediaInfo();
+
+        mediaInfo4.setTitle("Teste Audio");
+        mediaInfo4.setProjectHash("4f25046e52b1b4643efd8a328b78fbf3");
+        mediaInfo4.setId("bc6e1ec855f8f1142232f4282bfe5ed9");
+        mediaInfo4.setEnvironment(SambaMediaRequest.Environment.PROD);
+        mediaInfo4.setControlsEnabled(true);
+        mediaInfo4.setAutoPlay(true);
+        mediaInfo4.setQualifier("AUDIO");
+
         mediaInfos = Arrays.asList(
                 mediaInfo1,
                 mediaInfo2,
-                mediaInfo3
+                mediaInfo3,
+                mediaInfo4
         );
 
         adapter = new MediasOfflineAdapter(mediaInfos, this);
@@ -218,23 +233,40 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
     @Override
     public void onMediaClicked(final MediaInfo mediaInfo, View ciew) {
 
-        SambaApi api = new SambaApi(this, "");
-        api.requestMedia(new SambaMediaRequest(mediaInfo.getProjectHash(), mediaInfo.getId()), new SambaApiCallback() {
-            @Override
-            public void onMediaResponse(SambaMedia media) {
 
-                SambaMediaConfig mediaConfig = (SambaMediaConfig) media;
+        if (SambaDownloadManager.getInstance().isDownloaded(mediaInfo.getId())) {
 
-                if (mediaConfig.drmRequest != null) {
-                    DrmRequest drmRequest = mediaConfig.drmRequest;
+            SambaMedia sambaMedia = SambaDownloadManager.getInstance().getDownloadedMedia(mediaInfo.getId());
+            SambaMediaConfig mediaConfig = (SambaMediaConfig) sambaMedia;
 
-                    drmRequest.setToken(mediaInfo.getDrmToken());
-                }
+            if (mediaConfig.drmRequest != null) {
+                DrmRequest drmRequest = mediaConfig.drmRequest;
 
-                sambaPlayer.setMedia(media);
-                sambaPlayer.play();
+                drmRequest.setToken(mediaInfo.getDrmToken());
             }
-        });
+
+            sambaPlayer.setMedia(sambaMedia);
+            sambaPlayer.play();
+
+        } else {
+            SambaApi api = new SambaApi(this, "");
+            api.requestMedia(new SambaMediaRequest(mediaInfo.getProjectHash(), mediaInfo.getId()), new SambaApiCallback() {
+                @Override
+                public void onMediaResponse(SambaMedia media) {
+
+                    SambaMediaConfig mediaConfig = (SambaMediaConfig) media;
+
+                    if (mediaConfig.drmRequest != null) {
+                        DrmRequest drmRequest = mediaConfig.drmRequest;
+
+                        drmRequest.setToken(mediaInfo.getDrmToken());
+                    }
+
+                    sambaPlayer.setMedia(media);
+                    sambaPlayer.play();
+                }
+            });
+        }
 
     }
 
@@ -273,15 +305,25 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
                 sambaDownloadRequest.setDrmToken(mediaInfo.getDrmToken());
             }
 
+            progressContainer.setVisibility(View.VISIBLE);
+
             SambaDownloadManager.getInstance().prepareDownload(sambaDownloadRequest, new SambaDownloadRequestListener() {
                 @Override
                 public void onDownloadRequestPrepared(SambaDownloadRequest sambaDownloadRequest) {
+                    progressContainer.setVisibility(View.GONE);
                     buildDialog(sambaDownloadRequest);
                 }
 
                 @Override
                 public void onDownloadRequestFailed(Error error, String msg) {
+                    progressContainer.setVisibility(View.GONE);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(OfflineActivity.this)
+                            .setTitle("Aviso")
+                            .setMessage("Erro ao requisitar o Download.")
+                            .setPositiveButton(android.R.string.ok,null);
 
+
+                    builder.create().show();
                 }
             });
         }
