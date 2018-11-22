@@ -18,9 +18,9 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.offline.SambaDownloadManager;
 
 import java.util.ArrayList;
 
@@ -100,7 +100,7 @@ public class PlayerMediaSource {
         for (SambaMedia.Caption caption : captions) {
             if (caption.url != null && caption.label != null) {
                 Format subs = Format.createTextSampleFormat(String.valueOf(captionID), MimeTypes.APPLICATION_SUBRIP, SELECTION_FLAG_AUTOSELECT, caption.label);
-                MediaSource subSource = new SingleSampleMediaSource.Factory(new DefaultHttpDataSourceFactory("userAgent")).createMediaSource(Uri.parse(caption.url), subs, C.TIME_UNSET);
+                MediaSource subSource = new SingleSampleMediaSource.Factory(SambaDownloadManager.getInstance().buildDataSourceFactory()).createMediaSource(Uri.parse(caption.url), subs, C.TIME_UNSET);
                 mediaSource = new MergingMediaSource(mediaSource, subSource);
                 captionID++;
             }

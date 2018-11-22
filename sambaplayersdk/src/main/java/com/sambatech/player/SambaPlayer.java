@@ -881,15 +881,13 @@ public class SambaPlayer extends FrameLayout {
                 break;
         }
 
-        //playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, "https://storage.googleapis.com/wvmedia/clear/h264/tears/tears.mpd");
-        //playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, "https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv");
-
         player.addListener(playerEventListener);
 
         player.setPlayWhenReady(true);
-        if (media.captions != null && media.captions.size() > 0) {
+        if ((media.captions != null && !media.captions.isEmpty()) && (!media.isOffline || media.isSubtitlesOffline)) {
             playerMediaSourceInterface.addSubtitles(media.captions);
         }
+
         if (media.adUrl != null) {
             playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
         }

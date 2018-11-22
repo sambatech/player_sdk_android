@@ -18,8 +18,10 @@ public class SambaDownloadRequest {
 
     private List<SambaTrack> sambaVideoTracks;
     private List<SambaTrack> sambaAudioTracks;
+    private List<SambaSubtitle> sambaSubtitles;
 
     private List<SambaTrack> sambaTracksForDownload;
+    private List<SambaSubtitle> sambaSubtitlesForDownload;
 
     private DownloadHelper downloadHelper;
 
@@ -99,5 +101,25 @@ public class SambaDownloadRequest {
 
     public void setTotalDownloadSize(Double totalDownloadSize) {
         this.totalDownloadSize = totalDownloadSize;
+    }
+
+    public List<SambaSubtitle> getSambaSubtitles() {
+        return sambaSubtitles;
+    }
+
+    public void setSambaSubtitles(List<SambaSubtitle> sambaSubtitles) {
+        this.sambaSubtitles = sambaSubtitles;
+    }
+
+    public List<SambaSubtitle> getSambaSubtitlesForDownload() {
+        return sambaSubtitlesForDownload;
+    }
+
+    public void setSambaSubtitlesForDownload(List<SambaSubtitle> sambaSubtitlesForDownload) {
+        this.sambaSubtitlesForDownload = sambaSubtitlesForDownload;
+    }
+
+    public void enableAllSubtitlesForDownload() {
+        this.sambaSubtitlesForDownload = sambaSubtitles;
     }
 }

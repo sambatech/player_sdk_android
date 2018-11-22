@@ -10,9 +10,11 @@ import com.google.android.exoplayer2.offline.TrackKey;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.upstream.DataSource;
+import com.sambatech.player.model.SambaMedia;
 import com.sambatech.player.model.SambaMediaConfig;
 import com.sambatech.player.offline.listeners.SambaDownloadRequestListener;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
+import com.sambatech.player.offline.model.SambaSubtitle;
 import com.sambatech.player.offline.model.SambaTrack;
 
 import java.io.IOException;
@@ -33,6 +35,7 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
     private final SambaDownloadRequestListener requestListener;
     private final List<SambaTrack> sambaVideoTracks;
     private final List<SambaTrack> sambaAudioTracks;
+    private final List<SambaSubtitle> sambaSubtitles;
     private final SambaMediaConfig sambaMediaConfig;
 
     public StartDownloadHelper(
@@ -51,6 +54,7 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
         trackKeys = new ArrayList<>();
         this.sambaVideoTracks = new ArrayList<>();
         this.sambaAudioTracks = new ArrayList<>();
+        this.sambaSubtitles = new ArrayList<>();
     }
 
     public void start() {
@@ -101,8 +105,17 @@ public final class StartDownloadHelper implements DownloadHelper.Callback {
             }
         }
 
+        if (sambaMediaConfig.captions != null && !sambaMediaConfig.captions.isEmpty()) {
+            for (SambaMedia.Caption caption : sambaMediaConfig.captions) {
+                if (caption.url != null && !caption.url.isEmpty() && caption.label != null) {
+                    sambaSubtitles.add(new SambaSubtitle(caption.label, caption));
+                }
+            }
+        }
+
         sambaDownloadRequest.setSambaVideoTracks(sambaVideoTracks);
         sambaDownloadRequest.setSambaAudioTracks(sambaAudioTracks);
+        sambaDownloadRequest.setSambaSubtitles(sambaSubtitles);
         sambaDownloadRequest.setDownloadHelper(downloadHelper);
 
         requestListener.onDownloadRequestPrepared(sambaDownloadRequest);

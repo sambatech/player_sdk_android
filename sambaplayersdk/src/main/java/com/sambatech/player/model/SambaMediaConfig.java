@@ -34,6 +34,7 @@ public class SambaMediaConfig extends SambaMedia {
 	public int retriesTotal = 3;
 	public int defaultOutputIndex = 0;
 	public boolean isOffline;
+	public boolean isSubtitlesOffline;
 	public long bitrate;
 
 	public SambaMediaConfig() {}
@@ -63,6 +64,7 @@ public class SambaMediaConfig extends SambaMedia {
 			retriesTotal = m.retriesTotal;
 			downloadUrl = m.downloadUrl;
 			isOffline = m.isOffline;
+			isSubtitlesOffline = m.isSubtitlesOffline;
 			bitrate = m.bitrate;
 		}
 	}

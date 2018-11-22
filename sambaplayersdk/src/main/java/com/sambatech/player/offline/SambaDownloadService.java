@@ -81,7 +81,7 @@ public class SambaDownloadService extends DownloadService {
                 R.drawable.exo_controls_play,
                 CHANNEL_ID,
                 /* contentIntent= */ pedingintent,
-                /* message= */ buildNotificationProgressMessage(taskStates[0]),
+                /* message= */ OfflineUtils.buildNotificationProgressMessage(taskStates[0]),
                 taskStates);
     }
 
@@ -97,7 +97,13 @@ public class SambaDownloadService extends DownloadService {
         PendingIntent pedingintent = PendingIntent.getActivity(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), 0, intent, 0);
 
         DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
-        String mediaTitle = downloadData.getMediaTitle() != null ? downloadData.getMediaTitle() : "";
+        String message = "";
+        if (downloadData != null) {
+            message = downloadData.getMediaTitle() != null ? downloadData.getMediaTitle() : "";
+            if (downloadData.getSambaSubtitle() != null) {
+                message += downloadData.getSambaSubtitle().getTitle() != null ? ("\n\nLegenda: " + downloadData.getSambaSubtitle().getTitle()) : "";
+            }
+        }
 
         Notification notification = null;
         if (taskState.state == TaskState.STATE_COMPLETED) {
@@ -107,7 +113,7 @@ public class SambaDownloadService extends DownloadService {
                             R.drawable.exo_controls_play,
                             CHANNEL_ID,
                             /* contentIntent= */ pedingintent,
-                            mediaTitle);
+                            message);
         } else if (taskState.state == TaskState.STATE_FAILED) {
             notification =
                     DownloadNotificationUtil.buildDownloadFailedNotification(
@@ -115,50 +121,11 @@ public class SambaDownloadService extends DownloadService {
                             R.drawable.exo_controls_play,
                             CHANNEL_ID,
                             /* contentIntent= */ pedingintent,
-                            mediaTitle);
+                            message);
         }
         int notificationId = FOREGROUND_NOTIFICATION_ID + 1 + taskState.taskId;
 
         NotificationUtil.setNotification(this, notificationId, notification);
     }
 
-
-    private String buildNotificationProgressMessage(TaskState taskState) {
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-
-        DownloadData downloadData = null;
-
-        if (taskState.action.data != null) {
-            downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
-        }
-
-        if (taskState.action.isRemoveAction) {
-            if (downloadData != null && downloadData.getMediaTitle() != null && !downloadData.getMediaTitle().isEmpty()) {
-                stringBuilder.append(downloadData.getMediaTitle());
-            }
-        } else {
-            float downloadPercentage = taskState.downloadPercentage >= 0 ? taskState.downloadPercentage : 0;
-
-
-            Double downloadedMegaBytes = taskState.downloadedBytes > 0 ? ((taskState.downloadedBytes / 1024) / 1024) : (double) 0;
-
-            stringBuilder.append(String.format("%.1f%%", downloadPercentage));
-
-            if (downloadData != null) {
-                if (downloadData.getTotalDownloadSizeInMB() != null && downloadData.getTotalDownloadSizeInMB() > 0) {
-                    stringBuilder.append(String.format(" - %.1f MB de %.1f MB", downloadedMegaBytes, downloadData.getTotalDownloadSizeInMB()));
-                }
-
-                if (downloadData.getMediaTitle() != null && !downloadData.getMediaTitle().isEmpty()) {
-                    stringBuilder.append("\n\n");
-                    stringBuilder.append(downloadData.getMediaTitle());
-                }
-            }
-        }
-
-        return stringBuilder.toString();
-
-    }
 }

@@ -8,6 +8,7 @@ public class DownloadData {
     private String mediaTitle;
     private Double totalDownloadSizeInMB;
     private SambaMediaConfig sambaMedia;
+    private SambaSubtitle sambaSubtitle;
 
 
     public DownloadData(String mediaId, String mediaTitle, Double totalDownloadSizeInMB, SambaMediaConfig sambaMedia) {
@@ -47,5 +48,13 @@ public class DownloadData {
 
     public void setSambaMedia(SambaMediaConfig sambaMedia) {
         this.sambaMedia = sambaMedia;
+    }
+
+    public SambaSubtitle getSambaSubtitle() {
+        return sambaSubtitle;
+    }
+
+    public void setSambaSubtitle(SambaSubtitle sambaSubtitle) {
+        this.sambaSubtitle = sambaSubtitle;
     }
 }

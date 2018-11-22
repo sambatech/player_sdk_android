@@ -10,6 +10,7 @@ import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.drm.DrmInitData;
 import com.google.android.exoplayer2.drm.FrameworkMediaCrypto;
 import com.google.android.exoplayer2.drm.OfflineLicenseHelper;
+import com.google.android.exoplayer2.offline.DownloadAction;
 import com.google.android.exoplayer2.offline.DownloadHelper;
 import com.google.android.exoplayer2.offline.DownloadManager;
 import com.google.android.exoplayer2.offline.ProgressiveDownloadHelper;
@@ -28,10 +29,9 @@ import com.sambatech.player.offline.listeners.LicenceDrmCallback;
 import com.sambatech.player.offline.model.DownloadData;
 import com.sambatech.player.offline.model.DownloadState;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
+import com.sambatech.player.offline.model.SambaSubtitle;
 import com.sambatech.player.offline.model.SambaTrack;
 import com.sambatech.player.utils.SharedPrefsUtils;
-
-import org.apache.commons.collections4.CollectionUtils;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -150,9 +150,10 @@ class OfflineUtils {
         return (double) (((bitrate / 1000000f) * duration) / 8);
     }
 
-    static byte[] buildDownloadData(String mediaId, String mediaTitle, Double totalDownload, SambaMediaConfig sambaMedia) {
+    static byte[] buildDownloadData(String mediaId, String mediaTitle, Double totalDownload, SambaMediaConfig sambaMedia, SambaSubtitle sambaSubtitle) {
 
         DownloadData downloadData = new DownloadData(mediaId, mediaTitle, totalDownload, sambaMedia);
+        downloadData.setSambaSubtitle(sambaSubtitle);
 
         String json = new Gson().toJson(downloadData, DownloadData.class);
 
@@ -247,6 +248,75 @@ class OfflineUtils {
             default:
                 return new ProgressiveDownloadHelper(uri);
         }
+    }
+
+    static List<DownloadAction> buildCaptionsDownloadActions(List<SambaSubtitle> subtitles, SambaMediaConfig sambaMediaConfig, DataSource.Factory dataSourceFactory) {
+
+        List<DownloadAction> downloadActions = new ArrayList<>();
+
+        for (SambaSubtitle subtitle : subtitles) {
+            if (subtitle.getCaption().url != null && !subtitle.getCaption().url.isEmpty() && subtitle.getCaption().label != null) {
+                byte[] downloadData = OfflineUtils.buildDownloadData(sambaMediaConfig.id, sambaMediaConfig.title, 0D, (SambaMediaConfig) sambaMediaConfig, subtitle);
+                DownloadAction downloadAction = OfflineUtils.getDownloadHelper(Uri.parse(subtitle.getCaption().url), "progressive", dataSourceFactory).getDownloadAction(downloadData, new ArrayList<>());
+                downloadActions.add(downloadAction);
+            }
+        }
+
+
+        return downloadActions;
+    }
+
+    static String buildNotificationProgressMessage(DownloadManager.TaskState taskState) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+
+        DownloadData downloadData = null;
+
+        if (taskState.action.data != null) {
+            downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
+        }
+
+        if (taskState.action.isRemoveAction) {
+
+            if (downloadData != null) {
+                if (downloadData.getMediaTitle() != null && !downloadData.getMediaTitle().isEmpty()) {
+                    stringBuilder.append(downloadData.getMediaTitle());
+                }
+
+                if (downloadData.getSambaSubtitle() != null) {
+                    stringBuilder.append("\n\nLegenda: " + downloadData.getSambaSubtitle().getTitle());
+                }
+            }
+
+        } else {
+            if (downloadData != null && downloadData.getSambaSubtitle() != null) {
+                if (downloadData.getMediaTitle() != null && !downloadData.getMediaTitle().isEmpty()) {
+                    stringBuilder.append(downloadData.getMediaTitle());
+                }
+                stringBuilder.append("\n\nLegenda: " + downloadData.getSambaSubtitle().getTitle());
+            } else {
+                float downloadPercentage = taskState.downloadPercentage >= 0 ? taskState.downloadPercentage : 0;
+
+                Double downloadedMegaBytes = taskState.downloadedBytes > 0 ? ((taskState.downloadedBytes / 1024) / 1024) : (double) 0;
+
+                stringBuilder.append(String.format("%.1f%%", downloadPercentage));
+
+                if (downloadData != null) {
+                    if (downloadData.getTotalDownloadSizeInMB() != null && downloadData.getTotalDownloadSizeInMB() > 0) {
+                        stringBuilder.append(String.format(" - %.1f MB de %.1f MB", downloadedMegaBytes, downloadData.getTotalDownloadSizeInMB()));
+                    }
+
+                    if (downloadData.getMediaTitle() != null && !downloadData.getMediaTitle().isEmpty()) {
+                        stringBuilder.append("\n\n");
+                        stringBuilder.append(downloadData.getMediaTitle());
+                    }
+                }
+            }
+        }
+
+        return stringBuilder.toString();
+
     }
 
 }

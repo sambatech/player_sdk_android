@@ -45,6 +45,7 @@ import com.sambatech.player.offline.model.DownloadData;
 import com.sambatech.player.offline.model.DownloadState;
 import com.sambatech.player.offline.model.ProgressMessageEvent;
 import com.sambatech.player.offline.model.SambaDownloadRequest;
+import com.sambatech.player.offline.model.SambaSubtitle;
 import com.sambatech.player.offline.model.SambaTrack;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -145,8 +146,16 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
             for (TaskState taskState : taskStates) {
                 DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
                 Uri uri = taskState.action.uri;
-                String extension = downloadData.getSambaMedia().type;
-                DownloadAction removeAction = OfflineUtils.getDownloadHelper(uri, extension, dataSourceFactory).getRemoveAction(taskState.action.data);
+
+                DownloadAction removeAction;
+
+                if (downloadData.getSambaSubtitle() != null) {
+                    removeAction = OfflineUtils.getDownloadHelper(uri, "progressive", dataSourceFactory).getRemoveAction(taskState.action.data);
+                } else {
+                    String extension = downloadData.getSambaMedia().type;
+                    removeAction = OfflineUtils.getDownloadHelper(uri, extension, dataSourceFactory).getRemoveAction(taskState.action.data);
+                }
+
                 startServiceWithAction(removeAction);
             }
 
@@ -162,8 +171,16 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
                 DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
                 if (downloadData.getMediaId().equals(mediaId)) {
                     Uri uri = taskState.action.uri;
-                    String extension = downloadData.getSambaMedia().type;
-                    DownloadAction removeAction = OfflineUtils.getDownloadHelper(uri, extension, dataSourceFactory).getRemoveAction(taskState.action.data);
+
+                    DownloadAction removeAction;
+
+                    if (downloadData.getSambaSubtitle() != null) {
+                        removeAction = OfflineUtils.getDownloadHelper(uri, "progressive", dataSourceFactory).getRemoveAction(taskState.action.data);
+                    } else {
+                        String extension = downloadData.getSambaMedia().type;
+                        removeAction = OfflineUtils.getDownloadHelper(uri, extension, dataSourceFactory).getRemoveAction(taskState.action.data);
+                    }
+
                     startServiceWithAction(removeAction);
                 }
             }
@@ -178,11 +195,24 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
             SambaMediaConfig sambaMediaConfig = CollectionUtils.find(sambaMedias, item -> item.id.equals(mediaId));
 
             if (sambaMediaConfig != null) {
-                byte[] downloadData = OfflineUtils.buildDownloadData(sambaMediaConfig.id, sambaMediaConfig.title, 0D, sambaMediaConfig);
+                byte[] downloadData = OfflineUtils.buildDownloadData(sambaMediaConfig.id, sambaMediaConfig.title, 0D, sambaMediaConfig, null);
                 Uri uri = Uri.parse(sambaMediaConfig.downloadUrl);
                 String extension = sambaMediaConfig.type;
                 DownloadAction removeAction = OfflineUtils.getDownloadHelper(uri, extension, dataSourceFactory).getRemoveAction(downloadData);
                 startServiceWithAction(removeAction);
+
+
+                if (sambaMediaConfig.captions != null && !sambaMediaConfig.captions.isEmpty()) {
+                    for (SambaMedia.Caption caption : sambaMediaConfig.captions) {
+                        if (caption.url != null && !caption.url.isEmpty() && caption.label != null) {
+                            byte[] subtitleDownloadData = OfflineUtils.buildDownloadData(sambaMediaConfig.id, sambaMediaConfig.title, 0D, sambaMediaConfig, new SambaSubtitle(caption.label, caption));
+                            Uri uriSub = Uri.parse(caption.url);
+                            DownloadAction subtitleRemoveAction = OfflineUtils.getDownloadHelper(uriSub, "progressive", dataSourceFactory).getRemoveAction(subtitleDownloadData);
+                            startServiceWithAction(subtitleRemoveAction);
+                        }
+                    }
+                }
+
             }
 
         }
@@ -311,7 +341,18 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
             DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
             SambaMediaConfig sambaMediaConfig = downloadData.getSambaMedia();
             sambaMediaConfig.isOffline = true;
-            sambaMedias.add(sambaMediaConfig);
+
+            sambaMediaConfig.isSubtitlesOffline = downloadData.getSambaSubtitle() != null;
+
+            SambaMediaConfig oldSambaMedia = CollectionUtils.find(sambaMedias, item -> item.id.equals(sambaMediaConfig.id));
+
+            if (oldSambaMedia != null) {
+                int position = sambaMedias.indexOf(oldSambaMedia);
+                sambaMedias.set(position, sambaMediaConfig);
+            } else {
+                sambaMedias.add(sambaMediaConfig);
+            }
+
             OfflineUtils.persistSambaMedias(sambaMedias);
         }
 
@@ -370,10 +411,9 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
 
         Double totalDownloadSize = OfflineUtils.buildDownloadSize(finalTracks);
 
-
         SambaMediaConfig sambaMediaConfig = (SambaMediaConfig) sambaDownloadRequest.getSambaMedia();
 
-        byte[] downloadData = OfflineUtils.buildDownloadData(sambaMediaConfig.id, sambaMediaConfig.title, totalDownloadSize, (SambaMediaConfig) sambaDownloadRequest.getSambaMedia());
+        byte[] downloadData = OfflineUtils.buildDownloadData(sambaMediaConfig.id, sambaMediaConfig.title, totalDownloadSize, (SambaMediaConfig) sambaDownloadRequest.getSambaMedia(), null);
 
         DownloadAction downloadAction = sambaDownloadRequest.getDownloadHelper().getDownloadAction(downloadData, trackKeys);
 
@@ -385,6 +425,20 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
 
         handleTrackedDownloadStatesChanged();
         startServiceWithAction(downloadAction);
+
+
+        if (sambaDownloadRequest.getSambaSubtitlesForDownload() != null && !sambaDownloadRequest.getSambaSubtitlesForDownload().isEmpty()) {
+            List<DownloadAction> captionsDownloadActions = OfflineUtils.buildCaptionsDownloadActions(sambaDownloadRequest.getSambaSubtitlesForDownload(), (SambaMediaConfig) sambaDownloadRequest.getSambaMedia(), dataSourceFactory);
+
+            for (DownloadAction captionsDownloadAction : captionsDownloadActions) {
+                trackedDownloadStates.put(captionsDownloadAction.uri, downloadAction);
+                handleTrackedDownloadStatesChanged();
+                startServiceWithAction(captionsDownloadAction);
+            }
+
+        }
+
+
     }
 
     private void startServiceWithAction(DownloadAction action) {
