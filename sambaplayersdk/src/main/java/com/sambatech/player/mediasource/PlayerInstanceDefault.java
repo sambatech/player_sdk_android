@@ -73,10 +73,12 @@ public class PlayerInstanceDefault {
 
     private DefaultDrmSessionManager buildOnlineDrmSessionManager(SambaMediaConfig media) throws UnsupportedDrmException {
 
+        String userAgent = SambaDownloadManager.getInstance().isConfigured() ? SambaDownloadManager.getInstance().getUserAgent() : Util.getUserAgent(context.getApplicationContext(), "SambaPlayer");
+
         return new DefaultDrmSessionManager<>(
                 C.WIDEVINE_UUID,
                 FrameworkMediaDrm.newInstance(C.WIDEVINE_UUID),
-                new HttpMediaDrmCallback(media.drmRequest.getLicenseUrl(), new DefaultHttpDataSourceFactory(SambaDownloadManager.getInstance().getUserAgent())),
+                new HttpMediaDrmCallback(media.drmRequest.getLicenseUrl(), new DefaultHttpDataSourceFactory(userAgent)),
                 null
         );
     }

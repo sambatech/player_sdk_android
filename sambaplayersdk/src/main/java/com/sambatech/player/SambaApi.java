@@ -570,7 +570,7 @@ public class SambaApi {
         @Override
         protected Pair<SambaMediaConfig, Exception> doInBackground(SambaMediaConfig... params) {
 
-            Pair<SambaMediaConfig, Exception> pairResponse = null;
+            Pair<SambaMediaConfig, Exception> pairResponse;
 
             try {
                 SambaMediaConfig sambaMediaConfig = params[0];

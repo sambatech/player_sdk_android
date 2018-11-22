@@ -65,16 +65,17 @@ public class SambaDownloadService extends DownloadService {
     @Override
     protected Notification getForegroundNotification(TaskState[] taskStates) {
 
-
-        PackageManager manager = SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageManager();
-
         if (taskStates[0].state == TaskState.STATE_STARTED) {
             ProgressMessageEvent progressMessageEvent = new ProgressMessageEvent(taskStates[0]);
             EventBus.getDefault().post(progressMessageEvent);
         }
 
-        Intent intent = manager.getLaunchIntentForPackage(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageName());
-        PendingIntent pedingintent = PendingIntent.getActivity(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), 0, intent, 0);
+        PendingIntent pedingintent;
+        if ((pedingintent = SambaDownloadManager.getInstance().getPendingIntentForDownloadNotifications()) == null) {
+            PackageManager manager = SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageManager();
+            Intent intent = manager.getLaunchIntentForPackage(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageName());
+            pedingintent = PendingIntent.getActivity(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), 0, intent, 0);
+        }
 
         return DownloadNotificationUtil.buildProgressNotification(
                 /* context= */ this,
@@ -91,10 +92,12 @@ public class SambaDownloadService extends DownloadService {
             return;
         }
 
-        PackageManager manager = SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageManager();
-
-        Intent intent = manager.getLaunchIntentForPackage(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageName());
-        PendingIntent pedingintent = PendingIntent.getActivity(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), 0, intent, 0);
+        PendingIntent pedingintent;
+        if ((pedingintent = SambaDownloadManager.getInstance().getPendingIntentForDownloadNotifications()) == null) {
+            PackageManager manager = SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageManager();
+            Intent intent = manager.getLaunchIntentForPackage(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext().getPackageName());
+            pedingintent = PendingIntent.getActivity(SambaDownloadManager.getInstance().getAppInstance().getApplicationContext(), 0, intent, 0);
+        }
 
         DownloadData downloadData = OfflineUtils.getDownloadDataFromBytes(taskState.action.data);
         String message = "";

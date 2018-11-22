@@ -3,6 +3,7 @@ package com.sambatech.player.mediasource;
 import android.net.Uri;
 
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.upstream.DataSource;
 import com.sambatech.player.offline.SambaDownloadManager;
 
 /**
@@ -20,7 +21,10 @@ public class PlayerMediaSourceExtractor extends PlayerMediaSource implements Pla
     public void setUrl(String url) {
         super.setUrl(url);
         Uri uri = Uri.parse(url);
-        setMediaSource(new ExtractorMediaSource.Factory(SambaDownloadManager.getInstance().buildDataSourceFactory()).createMediaSource(uri));
+
+        DataSource.Factory dataSourceFactory = SambaDownloadManager.getInstance().isConfigured() ? SambaDownloadManager.getInstance().buildDataSourceFactory() : this.playerInstanceDefault.mediaDataSourceFactory;
+
+        setMediaSource(new ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(uri));
     }
 
     @Override

@@ -1,18 +1,15 @@
 package com.sambatech.player.mediasource;
 
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
-import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.sambatech.player.model.SambaMedia;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by luizbyrro on 28/11/2017.
@@ -27,7 +24,7 @@ public interface PlayerMediaSourceInterface {
 
     void setVideoOutputTrack(Format format);
 
-    void addSubtitles(ArrayList<SambaMedia.Caption> captions);
+    void addSubtitles(List<SambaMedia.Caption> captions);
 
     TrackGroupArray getSubtitles();
 
