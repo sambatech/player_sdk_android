@@ -228,7 +228,7 @@ public class SambaDownloadTracker implements DownloadManager.Listener {
     }
 
     @SuppressWarnings("unchecked")
-    public List<StreamKey> getOfflineStreamKeys(Uri uri) {
+    List<StreamKey> getOfflineStreamKeys(Uri uri) {
         if (!trackedDownloadStates.containsKey(uri)) {
             return Collections.emptyList();
         }

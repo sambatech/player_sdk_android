@@ -54,12 +54,12 @@ class OfflineUtils {
             return;
         }
 
-        @SuppressLint("StaticFieldLeak") AsyncTask<Pair<SambaMediaConfig, LicenceDrmCallback>, String, Void> task = new AsyncTask<Pair<SambaMediaConfig, LicenceDrmCallback>, String, Void>() {
+        @SuppressLint("StaticFieldLeak") AsyncTask<SambaMediaConfig, String, Pair<byte[], Exception>> task = new AsyncTask<SambaMediaConfig, String, Pair<byte[], Exception>>() {
             @Override
-            protected Void doInBackground(Pair<SambaMediaConfig, LicenceDrmCallback>... datas) {
+            protected Pair<byte[], Exception> doInBackground(SambaMediaConfig... datas) {
 
-                SambaMediaConfig sambaMediaConfig = datas[0].first;
-                LicenceDrmCallback licenceDrmCallback = datas[0].second;
+                SambaMediaConfig sambaMediaConfig = datas[0];
+                Pair<byte[], Exception> pairResponse;
 
                 try {
 
@@ -76,24 +76,30 @@ class OfflineUtils {
                     DashManifest dashManifest = DashUtil.loadManifest(dataSource, uri); //movie url
                     DrmInitData drmInitData = DashUtil.loadDrmInitData(dataSource, dashManifest.getPeriod(0));
                     byte[] offlineAssetKeyId = offlineLicenseHelper.downloadLicense(drmInitData);
+                    pairResponse = new Pair<>(offlineAssetKeyId, null);
 
-                    licenceDrmCallback.onLicencePrepared(offlineAssetKeyId);
 
                 } catch (Exception e) {
-                    licenceDrmCallback.onLicenceError(new Error(e));
+                    pairResponse = new Pair<>(null, e);
                 }
 
-                return null;
+
+                return pairResponse;
             }
 
             @Override
-            protected void onPostExecute(Void s) {
-                super.onPostExecute(s);
+            protected void onPostExecute(Pair<byte[], Exception> pairResponse) {
+                if (pairResponse.second != null) {
+                    drmCallback.onLicenceError(new Error(pairResponse.second));
+                    return;
+                }
+
+                drmCallback.onLicencePrepared(pairResponse.first);
             }
         };
 
 
-        task.execute(new Pair<>(sambaMediaConfig, drmCallback));
+        task.execute(sambaMediaConfig);
 
     }
 
