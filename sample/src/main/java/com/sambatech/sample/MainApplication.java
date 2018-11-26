@@ -1,12 +1,12 @@
 package com.sambatech.sample;
 
-import android.app.Application;
 import android.content.Context;
+import android.support.multidex.MultiDexApplication;
 
-import com.sambatech.player.cast.SambaCast;
+import com.sambatech.player.offline.SambaDownloadManager;
 import com.sambatech.sample.utils.Helpers;
 
-public class MainApplication extends Application {
+public class MainApplication extends MultiDexApplication {
     private static MainApplication _instance;
 	private static String _externalIp = "";
 
@@ -17,6 +17,8 @@ public class MainApplication extends Application {
         _instance = this;
 
 	    loadExternalIp();
+
+		SambaDownloadManager.getInstance().init(this);
     }
 
     public static Context getAppContext() {

@@ -97,6 +97,11 @@ import java.util.Map;
     return uid instanceof Integer ? idsToIndex.get((int) uid, C.INDEX_UNSET) : C.INDEX_UNSET;
   }
 
+  @Override
+  public Object getUidOfPeriod(int periodIndex) {
+    return null;
+  }
+
   // equals and hashCode implementations.
 
   @Override

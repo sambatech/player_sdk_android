@@ -24,6 +24,9 @@
     <string name="prod">Prod</string>
     <string name="staging">Staging</string>
     <string name="dev">QA</string>
+    <string name="offline">Offline</string>
+    <string name="pausar_todos_downloads">Pausar todos Downloads</string>
+    <string name="reiniciar_todos_downloads">Reiniciar todos Downloads</string>
 
     <string-array name="policies">
         <item>Aluguel 48h (p5)</item>

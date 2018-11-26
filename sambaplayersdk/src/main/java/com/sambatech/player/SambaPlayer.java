@@ -868,27 +868,26 @@ public class SambaPlayer extends FrameLayout {
         if (media.url.toLowerCase().endsWith(".mp3"))
             media.type = "progressive";
 
+        String url = media.isOffline ? media.downloadUrl : media.url;
         switch (media.type.toLowerCase()) {
             case "hls":
-                playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, media.url);
+                playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, url);
                 break;
             case "dash":
-                playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, media.url);
+                playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, url);
                 break;
             default:
-                playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, media.url);
+                playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, url);
                 break;
         }
-
-        //playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, "https://storage.googleapis.com/wvmedia/clear/h264/tears/tears.mpd");
-        //playerMediaSourceInterface = new PlayerMediaSourceExtractor(playerInstanceDefault, "https://storage.googleapis.com/exoplayer-test-media-1/mkv/android-screens-lavf-56.36.100-aac-avc-main-1280x720.mkv");
 
         player.addListener(playerEventListener);
 
         player.setPlayWhenReady(true);
-        if (media.captions != null && media.captions.size() > 0) {
+        if ((media.captions != null && !media.captions.isEmpty()) && (!media.isOffline || media.isSubtitlesOffline)) {
             playerMediaSourceInterface.addSubtitles(media.captions);
         }
+
         if (media.adUrl != null) {
             playerMediaSourceInterface.addAds(media.adUrl, simplePlayerView.getPlayerView().getOverlayFrameLayout());
         }

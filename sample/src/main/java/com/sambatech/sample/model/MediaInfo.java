@@ -1,6 +1,7 @@
 package com.sambatech.sample.model;
 
 import com.sambatech.player.model.SambaMediaRequest;
+import com.sambatech.player.offline.model.DownloadState;
 
 /**
  * @author Leandro Zanol - 16/10/17
@@ -26,6 +27,16 @@ public final class MediaInfo {
 	private String liveChannelId;
 	private boolean audioLive;
 	private boolean controlsEnabled;
+	private String drmToken;
+	private DownloadState downloadState;
+
+	public String getDrmToken() {
+		return drmToken;
+	}
+
+	public void setDrmToken(String drmToken) {
+		this.drmToken = drmToken;
+	}
 
 	public String getProjectHash() {
 		return projectHash;
@@ -161,5 +172,13 @@ public final class MediaInfo {
 
 	public boolean isControlsEnabled() {
 		return controlsEnabled;
+	}
+
+	public DownloadState getDownloadState() {
+		return downloadState;
+	}
+
+	public void setDownloadState(DownloadState downloadState) {
+		this.downloadState = downloadState;
 	}
 }

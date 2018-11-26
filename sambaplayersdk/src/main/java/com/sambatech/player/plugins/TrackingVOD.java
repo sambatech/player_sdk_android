@@ -1,5 +1,6 @@
 package com.sambatech.player.plugins;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -11,8 +12,7 @@ import com.sambatech.player.event.SambaEvent;
 import com.sambatech.player.event.SambaEventBus;
 import com.sambatech.player.event.SambaPlayerListener;
 import com.sambatech.player.model.SambaMediaConfig;
-import com.sambatech.player.plugins.Plugin;
-import com.sambatech.player.plugins.PluginManager;
+import com.sambatech.player.utils.Helpers;
 
 import java.io.IOException;
 import java.net.URL;
@@ -34,6 +34,7 @@ class TrackingVOD implements Tracking {
 
     private SambaMediaConfig media;
     private Sttm sttm;
+    private Context context;
 
     private SambaPlayerListener playerListener = new SambaPlayerListener() {
         @Override
@@ -61,6 +62,7 @@ class TrackingVOD implements Tracking {
     public void onLoad(@NonNull SambaPlayer player) {
         Log.i("track", "load");
         media = (SambaMediaConfig) player.getMedia();
+        context = player.getContext().getApplicationContext();
 
         if (media.projectHash != null && media.id != null)
             SambaEventBus.subscribe(playerListener);
@@ -83,7 +85,7 @@ class TrackingVOD implements Tracking {
 
     private void init() {
         if (media.sttmUrl != null && sttm == null)
-            sttm = new Sttm();
+            sttm = new Sttm(context);
     }
 
     private class UrlTracker extends AsyncTask<String, Void, Void> {
@@ -111,12 +113,14 @@ class TrackingVOD implements Tracking {
 
     private class Sttm extends TimerTask {
 
+        private final Context context;
         private List<String> targets = new ArrayList<>();
         private Timer sttmTimer;
         private TreeSet<String> progresses = new TreeSet<>();
         private HashSet<Integer> trackedRetentions = new HashSet<>();
 
-        Sttm() {
+        Sttm(Context context) {
+            this.context = context;
             sttmTimer = new Timer();
             sttmTimer.scheduleAtFixedRate(this, 0, 5000);
         }
@@ -126,11 +130,12 @@ class TrackingVOD implements Tracking {
             if (targets.size() == 0)
                 return;
 
-            // TODO: add version to STTM (BuildConfig.VERSION_NAME)
-            new UrlTracker().execute(String.format("%s?sttmm=%s&sttmk=%s&sttms=%s&sttmu=123&sttmw=%s",
-                    media.sttmUrl, TextUtils.join(",", targets), media.sttmKey, media.sessionId,
-                    String.format("pid:%s/cat:%s/mid:%s", media.projectId, media.categoryId, media.id)));
-
+            if (Helpers.isNetworkAvailable(context)) {
+                // TODO: add version to STTM (BuildConfig.VERSION_NAME)
+                new UrlTracker().execute(String.format("%s?sttmm=%s&sttmk=%s&sttms=%s&sttmu=123&sttmw=%s",
+                        media.sttmUrl, TextUtils.join(",", targets), media.sttmKey, media.sessionId,
+                        String.format("pid:%s/cat:%s/mid:%s", media.projectId, media.categoryId, media.id)));
+            }
 
             targets.clear();
         }

@@ -2,14 +2,11 @@ package com.sambatech.player.mediasource;
 
 import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.util.Log;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.ext.ima.ImaAdsLoader;
-import com.google.android.exoplayer2.ext.ima.ImaAdsMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MergingMediaSource;
 import com.google.android.exoplayer2.source.SingleSampleMediaSource;
@@ -17,15 +14,17 @@ import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.ads.AdsLoader;
 import com.google.android.exoplayer2.source.ads.AdsMediaSource;
-import com.google.android.exoplayer2.trackselection.FixedTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.sambatech.player.model.SambaMedia;
+import com.sambatech.player.offline.SambaDownloadManager;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static com.google.android.exoplayer2.C.SELECTION_FLAG_AUTOSELECT;
 
@@ -84,22 +83,27 @@ public class PlayerMediaSource {
     }
 
     public void setVideoOutputTrack(Format format) {
-        if (format == null) {
-            playerInstanceDefault.trackSelector.clearSelectionOverride(VIDEO_RENDERER_INDEX, getTrackGroupArray(VIDEO_RENDERER_INDEX));
-            return;
-        }
         int index = getVideoOutputsTracks().indexOf(format);
-        MappingTrackSelector.SelectionOverride override = new MappingTrackSelector.SelectionOverride(new FixedTrackSelection.Factory(), VIDEO_TRACK_GROUP_INDEX, index);
-        playerInstanceDefault.trackSelector.setSelectionOverride(VIDEO_RENDERER_INDEX, getTrackGroupArray(VIDEO_RENDERER_INDEX), override);
+
+        DefaultTrackSelector.SelectionOverride override = new DefaultTrackSelector.SelectionOverride(VIDEO_RENDERER_INDEX, index);
+
+        DefaultTrackSelector.ParametersBuilder parametersBuilder = playerInstanceDefault.trackSelector.buildUponParameters();
+        if (format != null) {
+            parametersBuilder.setSelectionOverride(VIDEO_RENDERER_INDEX, getTrackGroupArray(VIDEO_RENDERER_INDEX), override);
+        } else {
+            parametersBuilder.clearSelectionOverrides(index);
+        }
+        playerInstanceDefault.trackSelector.setParameters(parametersBuilder);
     }
 
-    public void addSubtitles(ArrayList<SambaMedia.Caption> captions) {
+    public void addSubtitles(List<SambaMedia.Caption> captions) {
         if (captions == null || mediaSource == null) return;
         int captionID = 0;
         for (SambaMedia.Caption caption : captions) {
             if (caption.url != null && caption.label != null) {
                 Format subs = Format.createTextSampleFormat(String.valueOf(captionID), MimeTypes.APPLICATION_SUBRIP, SELECTION_FLAG_AUTOSELECT, caption.label);
-                MediaSource subSource = new SingleSampleMediaSource.Factory(new DefaultHttpDataSourceFactory("userAgent")).createMediaSource(Uri.parse(caption.url), subs, C.TIME_UNSET);
+                DataSource.Factory datasourceFactory = SambaDownloadManager.getInstance().isConfigured() ? SambaDownloadManager.getInstance().buildDataSourceFactory(): new DefaultHttpDataSourceFactory("userAgent") ;
+                MediaSource subSource = new SingleSampleMediaSource.Factory(datasourceFactory).createMediaSource(Uri.parse(caption.url), subs, C.TIME_UNSET);
                 mediaSource = new MergingMediaSource(mediaSource, subSource);
                 captionID++;
             }
@@ -111,13 +115,17 @@ public class PlayerMediaSource {
     }
 
     public void setSubtitle(TrackGroup trackGroup) {
-        if (trackGroup == null) {
-            playerInstanceDefault.trackSelector.clearSelectionOverride(CAPTION_RENDERER_INDEX, getTrackGroupArray(CAPTION_RENDERER_INDEX));
-            return;
-        }
+
+        DefaultTrackSelector.ParametersBuilder parametersBuilder = playerInstanceDefault.trackSelector.buildUponParameters();
+
         int index = getTrackGroupArray(CAPTION_RENDERER_INDEX).indexOf(trackGroup);
-        MappingTrackSelector.SelectionOverride override = new MappingTrackSelector.SelectionOverride(new FixedTrackSelection.Factory(), index, CAPTION_FORMAT_INDEX);
-        playerInstanceDefault.trackSelector.setSelectionOverride(CAPTION_RENDERER_INDEX, getTrackGroupArray(CAPTION_RENDERER_INDEX), override);
+
+        DefaultTrackSelector.SelectionOverride override = new DefaultTrackSelector.SelectionOverride(index, CAPTION_FORMAT_INDEX);
+
+        parametersBuilder.setSelectionOverride(CAPTION_RENDERER_INDEX, getTrackGroupArray(CAPTION_RENDERER_INDEX), override);
+
+        playerInstanceDefault.trackSelector.setParameters(parametersBuilder);
+
     }
 
     public void addAds(String url, FrameLayout frameLayout) {
