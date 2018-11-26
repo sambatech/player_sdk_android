@@ -16,10 +16,12 @@
 package com.sambatech.player.cast;
 
 import android.content.Context;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import com.google.android.exoplayer2.C;
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Timeline;
@@ -199,7 +201,7 @@ public final class CastPlayer implements Player {
     CastSession session = sessionManager.getCurrentCastSession();
     remoteMediaClient = session != null ? session.getRemoteMediaClient() : null;
 
-    playbackState = STATE_IDLE;
+    playbackState = STATE_READY;
     repeatMode = REPEAT_MODE_OFF;
     currentTimeline = CastTimeline.EMPTY_CAST_TIMELINE;
     currentTrackGroups = TrackGroupArray.EMPTY;
@@ -367,6 +369,29 @@ public final class CastPlayer implements Player {
   // Player implementation.
 
 
+  @Nullable
+  @Override
+  public AudioComponent getAudioComponent() {
+    return null;
+  }
+
+  @Nullable
+  @Override
+  public VideoComponent getVideoComponent() {
+    return null;
+  }
+
+  @Nullable
+  @Override
+  public TextComponent getTextComponent() {
+    return null;
+  }
+
+  @Override
+  public Looper getApplicationLooper() {
+    return Looper.getMainLooper();
+  }
+
   @Override
   public void addListener(EventListener listener) {
     listeners.add(listener);
@@ -380,6 +405,12 @@ public final class CastPlayer implements Player {
   @Override
   public int getPlaybackState() {
     return playbackState;
+  }
+
+  @Nullable
+  @Override
+  public ExoPlaybackException getPlaybackError() {
+    return null;
   }
 
   @Override
@@ -440,6 +471,26 @@ public final class CastPlayer implements Player {
   }
 
   @Override
+  public boolean hasPrevious() {
+    return false;
+  }
+
+  @Override
+  public void previous() {
+
+  }
+
+  @Override
+  public boolean hasNext() {
+    return false;
+  }
+
+  @Override
+  public void next() {
+
+  }
+
+  @Override
   public void setPlaybackParameters(@Nullable PlaybackParameters playbackParameters) {
     // Unsupported by the RemoteMediaClient API. Do nothing.
   }
@@ -453,6 +504,11 @@ public final class CastPlayer implements Player {
   public void stop() {
     playbackState = STATE_IDLE;
     sambaCast.stopCasting();
+  }
+
+  @Override
+  public void stop(boolean reset) {
+
   }
 
   @Override
@@ -545,6 +601,12 @@ public final class CastPlayer implements Player {
         : currentTimeline.getPreviousWindowIndex(getCurrentWindowIndex(), repeatMode, false);
   }
 
+  @Nullable
+  @Override
+  public Object getCurrentTag() {
+    return null;
+  }
+
   // TODO: Fill the cast timeline information with ProgressListener's duration updates.
   // See [Internal: b/65152553].
   @Override
@@ -565,6 +627,11 @@ public final class CastPlayer implements Player {
   @Override
   public int getBufferedPercentage() {
     return 100;
+  }
+
+  @Override
+  public long getTotalBufferedDuration() {
+    return 0;
   }
 
   @Override
@@ -593,6 +660,11 @@ public final class CastPlayer implements Player {
   }
 
   @Override
+  public long getContentDuration() {
+    return 0;
+  }
+
+  @Override
   public boolean isLoading() {
     return false;
   }
@@ -600,6 +672,11 @@ public final class CastPlayer implements Player {
   @Override
   public long getContentPosition() {
     return getCurrentPosition();
+  }
+
+  @Override
+  public long getContentBufferedPosition() {
+    return 0;
   }
 
   // Internal methods.
@@ -638,7 +715,7 @@ public final class CastPlayer implements Player {
     if (updateTimeline()) {
       waitingForInitialTimeline = false;
       for (EventListener listener : listeners) {
-        listener.onTimelineChanged(currentTimeline, null);
+        listener.onTimelineChanged(currentTimeline, null, TIMELINE_CHANGE_REASON_DYNAMIC);
       }
     }
   }

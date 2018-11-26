@@ -3,14 +3,20 @@ apply plugin: 'org.sonarqube'
 
 android {
     compileSdkVersion 27
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 27
         versionCode 41
-        versionName "v0.12.8-beta"
+        versionName "v0.13.0-beta"
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -45,10 +51,18 @@ dependencies {
     compile 'com.android.support:appcompat-v7:27.1.1'
     compile 'com.android.support:mediarouter-v7:27.1.1'
     compile 'org.bitbucket.b_c:jose4j:0.6.3'
-    compile 'com.google.android.exoplayer:exoplayer:2.6.1'
-    compile 'com.google.android.exoplayer:extension-ima:2.6.1'
+    compile 'com.google.android.exoplayer:exoplayer:2.9.1'
+    compile 'com.google.android.exoplayer:extension-ima:2.9.1'
+    compile 'com.google.android.exoplayer:exoplayer-core:2.9.1'
+    compile 'com.google.android.exoplayer:exoplayer-dash:2.9.1'
+    compile 'com.google.android.exoplayer:exoplayer-hls:2.9.1'
+    compile 'com.google.android.exoplayer:exoplayer-ui:2.9.1'
     compile 'com.android.support:design:27.1.1'
     implementation 'com.github.bumptech.glide:glide:4.7.1'
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'org.greenrobot:eventbus:3.1.1'
+    implementation 'org.apache.commons:commons-collections4:4.0'
+
 }
 
 
