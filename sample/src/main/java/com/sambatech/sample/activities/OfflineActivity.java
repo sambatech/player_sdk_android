@@ -154,8 +154,18 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
         mediaInfo1.setId("1171319f6347a0a9c19b0278c0956eb6");
         mediaInfo1.setEnvironment(SambaMediaRequest.Environment.PROD);
         mediaInfo1.setControlsEnabled(true);
-        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQzMDY3NjA3LCJpYXQiOjE1NDI5ODEyMDcsImFpZCI6ImRhbWFzaW8ifQ.2XaZp8D4J0o7vbkzj4vcJaj37fOwr89SpeGRjhpZO-g");
+        mediaInfo1.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQzMzE4NDQ1LCJpYXQiOjE1NDMyMzI0NDUsImFpZCI6ImRhbWFzaW8ifQ.CG5IrKNwTuf1TmsYbksICtWXu8ZUuylaFvnbmGJmuZI");
         mediaInfo1.setAutoPlay(true);
+
+
+        MediaInfo mediaInfo5 = new MediaInfo();
+        mediaInfo5.setTitle("Media DRM 2");
+        mediaInfo5.setProjectHash("f596f53018dc9150eee6661d891fb1d2");
+        mediaInfo5.setId("0fefcc50c47fdfe61f52b14c8ad62343");
+        mediaInfo5.setEnvironment(SambaMediaRequest.Environment.PROD);
+        mediaInfo5.setControlsEnabled(true);
+        mediaInfo5.setDrmToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImY5NTRiMTIzLTI1YzctNDdmYy05MmRjLThkODY1OWVkNmYwMCJ9.eyJzdWIiOiJkYW1hc2lvLXVzZXIiLCJpc3MiOiJkaWVnby5kdWFydGVAc2FtYmF0ZWNoLmNvbS5iciIsImp0aSI6IklIRzlKZk1aUFpIS29MeHNvMFhveS1BZG83bThzWkNmNW5OVWdWeFhWSTg9IiwiZXhwIjoxNTQzMzE4NDQ1LCJpYXQiOjE1NDMyMzI0NDUsImFpZCI6ImRhbWFzaW8ifQ.CG5IrKNwTuf1TmsYbksICtWXu8ZUuylaFvnbmGJmuZI");
+        mediaInfo5.setAutoPlay(true);
 
 
         MediaInfo mediaInfo2 = new MediaInfo();
@@ -188,6 +198,7 @@ public class OfflineActivity extends AppCompatActivity implements OnMediaClickLi
 
         mediaInfos = Arrays.asList(
                 mediaInfo1,
+                mediaInfo5,
                 mediaInfo2,
                 mediaInfo3,
                 mediaInfo4
