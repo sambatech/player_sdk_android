@@ -29,8 +29,8 @@ repositories {
 }
 ...
 dependencies {
-    compile 'com.sambatech.player:sdk-android:v0.13.0-beta'
-    //compile 'com.sambatech.player:sdk-android:0.+' // para utilizar a versão mais atual
+    implementation 'com.sambatech.player:sdk-android:0.13.0-beta'
+    // implementation 'com.sambatech.player:sdk-android:0.+' // para utilizar a versão mais atual
 }
 ```
 _Para verificar todas as versões disponíveis, favor consultar nossa página de [releases](https://github.com/sambatech/player_sdk_android/releases)._
