@@ -37,7 +37,7 @@
             android:value="com.sambatech.player.cast.CastOptionsProvider"/>
 
         <!-- Peer5 -->
-        <meta-data android:value="qflr83g17rvhppsq01ka" android:name="com.peer5.ApiKey"/>
+        <meta-data android:value="@string/peer5ClientId" android:name="com.peer5.ApiKey"/>
 
     </application>
 
