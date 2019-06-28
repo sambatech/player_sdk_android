@@ -13,7 +13,7 @@
     <string name="base_url_dev">player.sambatech.com.br/v3_dev/</string>
     <string name="base_url_staging">player.sambatech.com.br/v3_staging/</string>
     <string name="base_url_prod">player.sambatech.com.br/v3/</string>
-
+    <string name="peer5ClientId">qflr83g17rvhppsq01ka</string>
 
     <string name="select_an_action">Select an action&#8230;</string>
     <string name="overflow">Overflow</string>

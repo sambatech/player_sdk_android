@@ -871,7 +871,11 @@ public class SambaPlayer extends FrameLayout {
         String url = media.isOffline ? media.downloadUrl : media.url;
         switch (media.type.toLowerCase()) {
             case "hls":
-                playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, url);
+                if(media.clientId == 3170) {
+                    playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, url, true);
+                } else {
+                    playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, url, false);
+                }
                 break;
             case "dash":
                 playerMediaSourceInterface = new PlayerMediaSourceDash(playerInstanceDefault, url);

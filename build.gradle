@@ -22,19 +22,22 @@ buildscript {
         maven {
             url "https://plugins.gradle.org/m2/"
         }
-
         google()
 
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.4.1'
         classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
     }
 }
 
+
 allprojects {
     repositories {
+        maven {
+            url "https://sdk.peer5.com/android"
+        }
 
         google()
 
