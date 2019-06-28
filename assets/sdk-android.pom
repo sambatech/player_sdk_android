@@ -107,9 +107,14 @@
         <version>3.1.1</version>
     </dependency>
     <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-collections4</artifactId>
-            <version>4.0</version>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-collections4</artifactId>
+        <version>4.0</version>
+    </dependency>
+    <dependency>
+        <groupId>com.peer5.android</groupId>
+        <artifactId>sdk</artifactId>
+        <version>42.8.0</version>
     </dependency>
   </dependencies>
 </project>
