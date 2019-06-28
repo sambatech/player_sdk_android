@@ -20,12 +20,12 @@ public class PlayerMediaSourceHLS extends PlayerMediaSource implements PlayerMed
     public void setUrl(String url) {
         super.setUrl(url);
         Uri uri = Uri.parse(url);
-
         MediaSource mediaSource;
-        String peer5Url = Peer5Sdk.getPeer5StreamUrl(url);
-        Uri peer5Uri = Uri.parse(peer5Url);
 
         if(this.getEnablePeer5()) {
+            String peer5Url = Peer5Sdk.getPeer5StreamUrl(url);
+            Uri peer5Uri = Uri.parse(peer5Url);
+
             uri = peer5Uri;
         }
 
