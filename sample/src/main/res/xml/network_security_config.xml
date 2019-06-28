@@ -3,6 +3,7 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">fast.player.liquidplatform.com</domain>
         <domain includeSubdomains="true">sambatech.com</domain>
+        <domain includeSubdomains="true">sambatech.com.br</domain>
         <domain includeSubdomains="true">akamaized.net</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
     </domain-config>
