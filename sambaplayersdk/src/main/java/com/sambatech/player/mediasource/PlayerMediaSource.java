@@ -41,6 +41,7 @@ public class PlayerMediaSource {
 
     protected PlayerInstanceDefault playerInstanceDefault;
     protected String url;
+    protected Boolean enablePeer5;
     protected MediaSource mediaSource;
     protected AdsLoader adsLoader;
 
@@ -54,6 +55,14 @@ public class PlayerMediaSource {
 
     public String getUrl() {
         return url;
+    }
+
+    protected void setEnablePeer5(Boolean enablePeer5) {
+        this.enablePeer5 = enablePeer5;
+    }
+
+    public Boolean getEnablePeer5() {
+        return enablePeer5;
     }
 
     protected void setMediaSource(MediaSource mediaSource) {
