@@ -30,6 +30,12 @@ android {
     }
 }
 
+repositories {
+    maven {
+        url 'https://dl.bintray.com/sambatech/maven'
+    }
+}
+
 dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
@@ -37,10 +43,10 @@ dependencies {
     //compile fileTree(dir: 'libs', include: ['*.jar'])
 
     // DEV
-    //compile project(':sambaplayersdk')
+    compile project(':sambaplayersdk')
 
     // PROD
-    compile 'com.sambatech.player:sdk-android:0.14.0-dev'
+    //compile 'com.sambatech.player:sdk-android:0.14.0-dev'
 
     implementation 'org.bitbucket.b_c:jose4j:0.6.3'
     implementation 'com.mcxiaoke.volley:library:1.0.19'
