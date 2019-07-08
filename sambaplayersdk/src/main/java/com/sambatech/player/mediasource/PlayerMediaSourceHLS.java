@@ -22,8 +22,9 @@ public class PlayerMediaSourceHLS extends PlayerMediaSource implements PlayerMed
         super.setUrl(url);
         Uri uri = Uri.parse(url);
         MediaSource mediaSource;
+        boolean hasDrm = url.contains("/vodd-sd/");
 
-        if(this.getEnablePeer5()) {
+        if(this.getEnablePeer5() && !hasDrm) {
             String peer5Url = Peer5Sdk.getPeer5StreamUrl(url);
             Uri peer5Uri = Uri.parse(peer5Url);
 
