@@ -12,6 +12,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.bitmovin.analytics.BitmovinAnalyticsConfig;
+import com.bitmovin.analytics.enums.CDNProvider;
+import com.bitmovin.analytics.exoplayer.ExoPlayerCollector;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Format;
@@ -502,9 +505,28 @@ public class SambaPlayer extends FrameLayout {
 
     CastPlayer castPlayer;
 
+    private String userId;
+    private ExoPlayerCollector _bitmovinAnalytics = null;
+
     public SambaPlayer(Context context, AttributeSet attrs) {
         super(context, attrs);
         applyAttributes(getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.SambaPlayer, 0, 0));
+    }
+
+    /**
+     * Retrieves the current user identifier
+     * @return the current user identifier
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * Defines/overwrites current user identifier.
+     * @param userId the user identifier
+     */
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     /**
@@ -858,7 +880,10 @@ public class SambaPlayer extends FrameLayout {
 
         playerInstanceDefault = new PlayerInstanceDefault(getContext(), media);
         simplePlayerView = new SambaSimplePlayerView(getContext(), this);
+
         player = playerInstanceDefault.createPlayerInstance();
+        this.initBitmovingAnalytics();
+
         simplePlayerView.setPlayer(player);
         simplePlayerView.setVideoTitle(media.title);
         simplePlayerView.configureSubTitle(media.captionsConfig);
@@ -953,6 +978,30 @@ public class SambaPlayer extends FrameLayout {
 
     }
 
+    private void initBitmovingAnalytics() {
+        if (player != null && this.media != null) {
+
+            //this.setUserId("teste-sambatech-bitmovin");
+
+            BitmovinAnalyticsConfig bitmovinAnalyticsConfig = new BitmovinAnalyticsConfig(getContext().getString(R.string.bitmovin_key));
+            bitmovinAnalyticsConfig.setVideoId(this.media.id);
+            bitmovinAnalyticsConfig.setTitle(this.media.title);
+            bitmovinAnalyticsConfig.setCustomUserId(this.getUserId());
+            bitmovinAnalyticsConfig.setIsLive(this.media.isLive);
+            bitmovinAnalyticsConfig.setCdnProvider(CDNProvider.AKAMAI);
+            bitmovinAnalyticsConfig.setCustomData1(String.valueOf(this.media.clientId));
+            bitmovinAnalyticsConfig.setCustomData2(String.valueOf(this.media.projectId));
+            bitmovinAnalyticsConfig.setCustomData3(String.valueOf(this.media.categoryId));
+            bitmovinAnalyticsConfig.setCustomData5(this.media.request.environment.toString());
+
+            this._bitmovinAnalytics = new ExoPlayerCollector(bitmovinAnalyticsConfig, getContext());
+            this._bitmovinAnalytics.attachPlayer(player);
+        }
+    }
+
+    private void endBitmovingAnalytics() {
+        this._bitmovinAnalytics.detachPlayer();
+    }
 
     private void createOrientationEventListener() {
         orientationEventListener = new OrientationEventListener(getContext()) {
@@ -1023,6 +1072,7 @@ public class SambaPlayer extends FrameLayout {
         }
 
         if (player != null) {
+            this.endBitmovingAnalytics();
             player.removeListener(playerEventListener);
             player.release();
             player = null;
