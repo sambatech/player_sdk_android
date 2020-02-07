@@ -44,6 +44,7 @@ public class PlayerMediaSource {
     protected Boolean enablePeer5;
     protected MediaSource mediaSource;
     protected AdsLoader adsLoader;
+    protected Boolean isLive;
 
     protected PlayerMediaSource(@NonNull PlayerInstanceDefault playerInstanceDefault) {
         this.playerInstanceDefault = playerInstanceDefault;
@@ -71,6 +72,14 @@ public class PlayerMediaSource {
 
     public MediaSource getMediaSource() {
         return mediaSource;
+    }
+
+    public Boolean getIsLive() {
+        return this.isLive;
+    }
+
+    public void setIsLive(Boolean isLive) {
+        this.isLive = isLive;
     }
 
     private MappingTrackSelector.MappedTrackInfo getMappedTrackInfo() {
