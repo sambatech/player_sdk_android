@@ -10,10 +10,10 @@ import com.peer5.sdk.Peer5Sdk;
 
 public class PlayerMediaSourceHLS extends PlayerMediaSource implements PlayerMediaSourceInterface {
 
-    public PlayerMediaSourceHLS(PlayerInstanceDefault playerInstanceDefault, String url,
-                                Boolean enablePeer5) {
+    public PlayerMediaSourceHLS(PlayerInstanceDefault playerInstanceDefault, String url, Boolean enablePeer5, boolean isLive) {
         super(playerInstanceDefault);
         this.setEnablePeer5(enablePeer5);
+        this.setIsLive(isLive);
         this.setUrl(url);
     }
 
@@ -31,7 +31,7 @@ public class PlayerMediaSourceHLS extends PlayerMediaSource implements PlayerMed
             uri = peer5Uri;
         }
 
-        if (SambaDownloadManager.getInstance().isConfigured()) {
+        if (!this.getIsLive() && SambaDownloadManager.getInstance().isConfigured()) {
             mediaSource = new HlsMediaSource.Factory(SambaDownloadManager.getInstance()
                     .buildDataSourceFactory())
                     .setPlaylistParserFactory(
