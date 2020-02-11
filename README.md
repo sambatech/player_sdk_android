@@ -5,6 +5,7 @@
 - Suporte ao Samba Player Analytics
 - Suporte a advertising DFP
 - Player nativo do Android
+- Download de videos para assistir offline
 
 # SambaPlayer SDK (Android)
 
@@ -62,3 +63,13 @@ api.requestMedia(new SambaMediaRequest("34f07cf52fd85ccfc41a39bcf499e83b", "0632
 Para maiores informações, favor consultar nossa página [Wiki](https://github.com/sambatech/player_sdk_android/wiki).
 
 Para informações sobre o JavaDoc favor consultar a nossa página no [SambaDev](http://dev.sambatech.com/documentation/androidsdk/index.html)
+
+## Deploy
+
+1) Atualizar `versionName` no arquivo `sambaplayersdk/build.gradle` subindo a versão.
+
+2) Após o merge em master, gerar uma release com a nova versão
+
+3) Reexecutar o workflow de deploy para publicar no Bintray
+
+**OBS:** É necessário reexecutar o workflow porque a geração da release e publicação no GitHub não está automatizada circleci.
