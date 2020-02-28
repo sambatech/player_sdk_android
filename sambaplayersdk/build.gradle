@@ -72,7 +72,3 @@ allprojects {
         }
     }
 }
-
-//repositories {
-//    mavenCentral()
-//}
