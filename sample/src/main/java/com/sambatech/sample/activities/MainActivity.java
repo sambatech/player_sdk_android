@@ -313,6 +313,16 @@ public class MainActivity extends AppCompatActivity {
 		mediaInfo13.setControlsEnabled(true);
 		mediaInfo13.setAutoPlay(true);
 
+		MediaInfo mediaInfo14 = new MediaInfo();
+
+		mediaInfo14.setTitle("Live Rede Minas");
+		mediaInfo14.setProjectHash("13cd624949054179d0b60c84523d23b1");
+		mediaInfo14.setId("ec4b5a296d97fa99bf990662f5b4f8e1");
+		mediaInfo14.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo14.setLiveChannelId("ec4b5a296d97fa99bf990662f5b4f8e1");
+		mediaInfo14.setControlsEnabled(true);
+		mediaInfo14.setAutoPlay(true);
+
 		mediaInfoList.add(mediaInfo);
         mediaInfoList.add(mediaInfo2);
         mediaInfoList.add(mediaInfo3);
@@ -325,6 +335,7 @@ public class MainActivity extends AppCompatActivity {
 		mediaInfoList.add(mediaInfo10);
 		mediaInfoList.add(mediaInfo11);
 		mediaInfoList.add(mediaInfo13);
+		mediaInfoList.add(mediaInfo14);
 
 		showMediaList(mediaInfoList);
 	}
