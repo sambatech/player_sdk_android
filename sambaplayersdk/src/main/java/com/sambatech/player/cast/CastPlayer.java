@@ -158,7 +158,7 @@ public final class CastPlayer implements Player {
           lastReportedPositionMs = (long) (jsonObject.getDouble("progress") * 1000);
           lastReportedDurationMs = (long) (jsonObject.getDouble("duration") * 1000);
           updateInternalState();
-          SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PROGRESS, (float)lastReportedPositionMs ,(float) lastReportedDurationMs));
+          SambaEventBus.post(new SambaEvent(SambaPlayerListener.EventType.PROGRESS, (float)lastReportedPositionMs, (float) lastReportedDurationMs));
 
          // eventListener.onPlayerStateChanged(true, Player.STATE_READY );
 
