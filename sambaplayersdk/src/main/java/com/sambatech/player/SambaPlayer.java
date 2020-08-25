@@ -897,9 +897,9 @@ public class SambaPlayer extends FrameLayout {
         switch (media.type.toLowerCase()) {
             case "hls":
                 if(media.clientId == 3170) {
-                    playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, url, true);
+                    playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, url, true, media.isLive);
                 } else {
-                    playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, url, false);
+                    playerMediaSourceInterface = new PlayerMediaSourceHLS(playerInstanceDefault, url, false, media.isLive);
                 }
                 break;
             case "dash":

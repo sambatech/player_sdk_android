@@ -303,6 +303,16 @@ public class MainActivity extends AppCompatActivity {
 		mediaInfo11.setControlsEnabled(true);
 		mediaInfo11.setAutoPlay(true);
 
+		MediaInfo mediaInfo13 = new MediaInfo();
+
+		mediaInfo13.setTitle("Live NTI");
+		mediaInfo13.setProjectHash("7308d46a10eb5bef20e29516ca918f65");
+		mediaInfo13.setId("4b0b02faa183575a0fc9cac5108fae8d");
+		mediaInfo13.setEnvironment(SambaMediaRequest.Environment.PROD);
+		mediaInfo13.setLiveChannelId("2a5e02638bd35f735f1319c90772c103");
+		mediaInfo13.setControlsEnabled(true);
+		mediaInfo13.setAutoPlay(true);
+
 		mediaInfoList.add(mediaInfo);
         mediaInfoList.add(mediaInfo2);
         mediaInfoList.add(mediaInfo3);
@@ -314,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
 		mediaInfoList.add(mediaInfo9);
 		mediaInfoList.add(mediaInfo10);
 		mediaInfoList.add(mediaInfo11);
+		mediaInfoList.add(mediaInfo13);
 
 		showMediaList(mediaInfoList);
 	}
