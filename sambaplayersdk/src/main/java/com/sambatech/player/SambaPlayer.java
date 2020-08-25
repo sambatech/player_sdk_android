@@ -1,4 +1,4 @@
-teste-sambatech-bitmovinpackage com.sambatech.player;
+package com.sambatech.player;
 
 import android.app.Activity;
 import android.content.Context;
@@ -980,7 +980,7 @@ public class SambaPlayer extends FrameLayout {
 
     private void initBitmovingAnalytics() {
         if (player != null && this.media != null) {
-            BitmovinAnalyticsConfig bitmovinAnalyticsConfig = new BitmovinAnalyticsConfig(getContext().getString(R.string.bitmovin_key));
+            BitmovinAnalyticsConfig bitmovinAnalyticsConfig = new BitmovinAnalyticsConfig(BuildConfig.BITMOVIN_KEY);
             bitmovinAnalyticsConfig.setVideoId(this.media.id);
             bitmovinAnalyticsConfig.setTitle(this.media.title);
             bitmovinAnalyticsConfig.setCustomUserId(this.getUserId());

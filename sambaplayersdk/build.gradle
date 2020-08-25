@@ -18,9 +18,14 @@ android {
     }
 
     buildTypes {
+        debug {
+            buildConfigField "String", "BITMOVIN_KEY", bitmovinKey
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "BITMOVIN_KEY", bitmovinKey
         }
     }
 
