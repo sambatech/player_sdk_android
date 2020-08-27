@@ -972,14 +972,11 @@ public class SambaPlayer extends FrameLayout {
             } else {
                 SambaCast.cleanCacheDatas(getContext());
             }
-
         }
-
-
     }
 
     private void initBitmovingAnalytics() {
-        if (player != null && this.media != null) {
+        if (this.player != null && !this.media.id.isEmpty()) {
             BitmovinAnalyticsConfig bitmovinAnalyticsConfig = new BitmovinAnalyticsConfig(BuildConfig.BITMOVIN_KEY);
             bitmovinAnalyticsConfig.setVideoId(this.media.id);
             bitmovinAnalyticsConfig.setTitle(this.media.title);
