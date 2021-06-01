@@ -2,12 +2,12 @@ apply plugin: 'com.android.library'
 apply plugin: 'org.sonarqube'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion 17
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 42
         versionName "v0.14.7-beta"
     }
@@ -77,3 +77,11 @@ allprojects {
         }
     }
 }
+
+ext {
+    PUBLISH_GROUP_ID = 'io.github.sambatech'
+    PUBLISH_ARTIFACT_ID = 'player_sdk_android'
+    PUBLISH_VERSION = '0.14.7'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-mavencentral.gradle"
