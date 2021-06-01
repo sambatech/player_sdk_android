@@ -9,7 +9,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 29
         versionCode 42
-        versionName "v0.14.7-beta"
+        versionName "v0.14.8-beta"
     }
 
     compileOptions {
@@ -81,7 +81,7 @@ allprojects {
 ext {
     PUBLISH_GROUP_ID = 'io.github.sambatech'
     PUBLISH_ARTIFACT_ID = 'player_sdk_android'
-    PUBLISH_VERSION = '0.14.7'
+    PUBLISH_VERSION = '0.14.8' // needs to increase on every publish
 }
 
 apply from: "${rootProject.projectDir}/scripts/publish-mavencentral.gradle"

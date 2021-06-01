@@ -75,7 +75,7 @@ publishing {
                 scm {
                     connection = 'scm:git:github.com/sambatech/player_sdk_android.git'
                     developerConnection = 'scm:git:ssh://github.com/sambatech/player_sdk_android.git'
-                    url = 'https://github.com/sambatech/player_sdk_android/tree/main'
+                    url = 'https://github.com/sambatech/player_sdk_android'
                 }
                 withXml {
                     def dependenciesNode = asNode().appendNode('dependencies')
