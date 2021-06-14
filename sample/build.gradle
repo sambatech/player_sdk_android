@@ -44,7 +44,7 @@ dependencies {
     // compile project(':sambaplayersdk')
 
     // PROD
-    compile 'io.github.sambatech:player_sdk_android:0.14.9'
+    compile 'io.github.sambatech:player_sdk_android:0.15.0'
 
     implementation 'org.bitbucket.b_c:jose4j:0.6.3'
     implementation 'com.mcxiaoke.volley:library:1.0.19'

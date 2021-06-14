@@ -30,7 +30,7 @@ repositories {
 }
 ...
 dependencies {
-    compile 'io.github.sambatech:player_sdk_android:0.14.9'
+    compile 'io.github.sambatech:player_sdk_android:0.15.0'
 }
 ```
 _Para verificar todas as versões disponíveis, favor consultar nossa página de [releases](https://github.com/sambatech/player_sdk_android/releases)._
