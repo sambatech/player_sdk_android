@@ -30,7 +30,7 @@ repositories {
 }
 ...
 dependencies {
-    compile 'io.github.sambatech:player_sdk_android:0.14.8'
+    compile 'io.github.sambatech:player_sdk_android:0.15.0'
 }
 ```
 _Para verificar todas as versões disponíveis, favor consultar nossa página de [releases](https://github.com/sambatech/player_sdk_android/releases)._
@@ -71,6 +71,6 @@ Para informações sobre o JavaDoc favor consultar a nossa página no [SambaDev]
 
 3) Após o merge em master,executar gradlew assembleRelease para gerar uma release com a nova versão.
 
-4) Executar comando sambaplayersdk:publishReleasePublicationToSonatypeRepository para publicar no sonatype.
+4) Executar comando gradlew sambaplayersdk:publishReleasePublicationToSonatypeRepository para publicar no sonatype.
 
 5) Se logar em  https://s01.oss.sonatype.org/ e em Staging Repositores realizar fechamento e release

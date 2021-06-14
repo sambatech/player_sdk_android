@@ -44,7 +44,7 @@ dependencies {
     // compile project(':sambaplayersdk')
 
     // PROD
-    compile 'io.github.sambatech:player_sdk_android:0.14.8'
+    compile 'io.github.sambatech:player_sdk_android:0.15.0'
 
     implementation 'org.bitbucket.b_c:jose4j:0.6.3'
     implementation 'com.mcxiaoke.volley:library:1.0.19'
@@ -54,13 +54,4 @@ dependencies {
     implementation 'com.squareup.okhttp:logging-interceptor:2.6.0'
     implementation 'com.jakewharton:butterknife:8.8.1'
     implementation 'com.android.support:multidex:1.0.3'
-    implementation 'com.bitmovin.analytics:collector-exoplayer:1.11.3'
-}
-
-allprojects {
-    repositories {
-        maven {
-            url  'http://bitmovin.bintray.com/maven'
-        }
-    }
 }
