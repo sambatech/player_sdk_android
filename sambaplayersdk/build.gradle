@@ -9,7 +9,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 29
         versionCode 42
-        versionName "v0.14.8-beta"
+        versionName "v0.14.9-beta"
     }
 
     compileOptions {
@@ -18,14 +18,9 @@ android {
     }
 
     buildTypes {
-        debug {
-            buildConfigField "String", "BITMOVIN_KEY", bitmovinKey
-        }
-
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "BITMOVIN_KEY", bitmovinKey
         }
     }
 
@@ -67,7 +62,6 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'org.greenrobot:eventbus:3.1.1'
     implementation 'org.apache.commons:commons-collections4:4.0'
-    implementation 'com.bitmovin.analytics:collector-exoplayer:1.11.3'
 }
 
 allprojects {
@@ -81,7 +75,6 @@ allprojects {
 ext {
     PUBLISH_GROUP_ID = 'io.github.sambatech'
     PUBLISH_ARTIFACT_ID = 'player_sdk_android'
-    PUBLISH_VERSION = '0.14.8' // needs to increase on every publish
+    PUBLISH_VERSION = '0.14.9' // needs to increase on every publish
 }
-
 apply from: "${rootProject.projectDir}/scripts/publish-mavencentral.gradle"

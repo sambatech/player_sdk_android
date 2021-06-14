@@ -39,7 +39,6 @@
         <!-- Peer5 -->
         <meta-data android:value="@string/peer5ClientId" android:name="com.peer5.ApiKey"/>
 
-        <meta-data android:name="BITMOVIN_ANALYTICS_LICENSE_KEY" android:value="d4b4a5aa-efc6-4672-91de-af9fe1dbdb9f" />
 
     </application>
 
