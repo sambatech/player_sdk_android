@@ -202,9 +202,9 @@ public class MainActivity extends AppCompatActivity {
 		MediaInfo mediaInfo = new MediaInfo();
 
 
-		mediaInfo.setTitle("Media Playplus");
-		mediaInfo.setProjectHash("fad2b4a201ef2305d06cb817da1bd262");
-		mediaInfo.setId("ca60065f62e83445a4c5ae91abd3eacf");
+		mediaInfo.setTitle("Media teste");
+		mediaInfo.setProjectHash("877dc98277eed30c876606b282b8fe8b");
+		mediaInfo.setId("3261b0c4eaaf32dd9958517d0a9bb9a7");
 		mediaInfo.setEnvironment(SambaMediaRequest.Environment.PROD);
 		mediaInfo.setControlsEnabled(true);
 		mediaInfo.setAutoPlay(true);

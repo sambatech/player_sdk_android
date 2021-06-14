@@ -26,12 +26,11 @@ Instalação do Java, Android SDK
 1) Adicionar o repositório Maven e a dependência (build.gradle):
 ```java
 repositories {
-    jcenter()
+     mavenCentral()
 }
 ...
 dependencies {
-    compile 'com.sambatech.player:sdk-android:v0.13.0-beta'
-    //compile 'com.sambatech.player:sdk-android:0.+' // para utilizar a versão mais atual
+    compile 'io.github.sambatech:player_sdk_android:0.14.8'
 }
 ```
 _Para verificar todas as versões disponíveis, favor consultar nossa página de [releases](https://github.com/sambatech/player_sdk_android/releases)._
@@ -66,43 +65,12 @@ Para informações sobre o JavaDoc favor consultar a nossa página no [SambaDev]
 
 ## Deploy
 
-1) Atualizar `versionName` no arquivo `sambaplayersdk/build.gradle` subindo a versão.
+1) Atualizar `PUBLISH_VERSION` no arquivo `sambaplayersdk/build.gradle` subindo a versão.
 
-2) Após o merge em master, gerar uma release com a nova versão
+2) Colocar as credenciais e chaves gpg no local.properties (para saber mais do processo, acessar issue no repositório squadSambavideos )
 
-3) Reexecutar o workflow de deploy para publicar no Bintray
+3) Após o merge em master,executar gradlew assembleRelease para gerar uma release com a nova versão.
 
-**OBS:** É necessário reexecutar o workflow porque a geração da release e publicação no GitHub não está automatizada circleci.
+4) Executar comando sambaplayersdk:publishReleasePublicationToSonatypeRepository para publicar no sonatype.
 
-#### Atenção :warning:
-
-O JFrog Bintray permite a inclusão de novas releases dentro de uma versão somente no período de 1 ano. Após este prazo, é necessário criar uma nova versão e atualizar no arquivo `assets/publish.sh`.
-
-Exemplo: Ao tentar publicar na versão **beta3** o seguinte erro é apresentado:
-
-```bash
-Info] Verifying repository maven exists...
-[Info] Verifying package sdk-android exists...
-[Info] Collecting files for upload...
-[Info] [Thread 1] Uploading artifact: sdk-android-0.14.5-beta.pom
-[Info] [Thread 0] Uploading artifact: sdk-android-0.14.5-beta.aar
-[Error] [Thread 1] Bintray response: 403 Forbidden
-Forbidden!
-[Error] [Thread 0] Bintray response: 403 Forbidden
-Forbidden!
-[Error] Failed uploading 2 artifacts.
-{
-  "status": "failure",
-  "totals": {
-    "success": 0,
-    "failure": 2
-  }
-}
-
-```
-
-Assim, na interface do JFrog Bintray é necessário criar uma nova versão.
-
-**Versão atual:** beta4
-**Data de criação:** 11/02/2020
-**Data de expiração:** 11/02/2021
+5) Se logar em  https://s01.oss.sonatype.org/ e em Staging Repositores realizar fechamento e release
