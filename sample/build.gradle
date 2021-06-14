@@ -55,11 +55,3 @@ dependencies {
     implementation 'com.jakewharton:butterknife:8.8.1'
     implementation 'com.android.support:multidex:1.0.3'
 }
-
-allprojects {
-    repositories {
-        maven {
-            url  'http://bitmovin.bintray.com/maven'
-        }
-    }
-}

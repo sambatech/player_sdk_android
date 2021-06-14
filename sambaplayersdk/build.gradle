@@ -64,14 +64,6 @@ dependencies {
     implementation 'org.apache.commons:commons-collections4:4.0'
 }
 
-allprojects {
-    repositories {
-        maven {
-            url  'http://bitmovin.bintray.com/maven'
-        }
-    }
-}
-
 ext {
     PUBLISH_GROUP_ID = 'io.github.sambatech'
     PUBLISH_ARTIFACT_ID = 'player_sdk_android'
