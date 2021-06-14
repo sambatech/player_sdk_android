@@ -14,35 +14,36 @@
  limitations under the License.
  */
 
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
     repositories {
 
         maven { url "https://plugins.gradle.org/m2/" }
-        maven {
-            url 'https://dl.bintray.com/sambatech/maven'
-        }
 
-        google()
+        mavenCentral()
 
         jcenter()
+
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.1'
+        classpath 'com.android.tools.build:gradle:4.0.0'
         classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.5'
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.0"
     }
 }
-
 
 allprojects {
     repositories {
-        maven {
-            url 'https://dl.bintray.com/sambatech/maven'
-        }
 
         google()
+
+        mavenCentral()
 
         jcenter()
     }
 }
+
+apply plugin: 'io.codearte.nexus-staging'
